@@ -1,0 +1,7 @@
+export enum ArticleCategory {
+  CONTENT = 'CONTENT',
+  UPCOMING = 'UPCOMING',
+  ORIGINAL = 'ORIGINAL',
+  INTERVIEW = 'INTERVIEW',
+  REVIEW = 'REVIEW',
+}
