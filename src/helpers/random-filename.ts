@@ -16,8 +16,12 @@ export const randomJpeg = (): string => {
   return `${timestamp}-${ids[1]}-${ids[2]}-${ids[3]}.jpg`;
 };
 
-export const randomName = (prefix: string): string => {
+export const randomName = (prefix: string, type = 'image/jpg'): string => {
   const ids = v4().split('-');
+  const [key, val] = type.split('/');
+  if (key === 'image' || key === 'video') {
+    return `${prefix}-${ids[1]}-${ids[2]}-${ids[3]}.${val}`;
+  }
 
-  return `${prefix}-${ids[1]}-${ids[2]}-${ids[3]}.jpg`;
+  return `${prefix}-${ids[1]}-${ids[2]}-${ids[3]}`;
 };

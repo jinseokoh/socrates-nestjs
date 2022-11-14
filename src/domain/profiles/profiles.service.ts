@@ -17,20 +17,24 @@ export class ProfilesService {
   }
 
   async findById(id: number, relations: string[] = []): Promise<Profile> {
-    return relations.length > 0
-      ? await this.repository.findOneOrFail({
-          where: { id },
-          relations,
-        })
-      : await this.repository.findOneOrFail({
-          where: { id },
-        });
+    try {
+      return relations.length > 0
+        ? await this.repository.findOneOrFail({
+            where: { id },
+            relations,
+          })
+        : await this.repository.findOneOrFail({
+            where: { id },
+          });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
   }
 
   async update(id: number, dto: UpdateProfileDto): Promise<Profile> {
     const profile = await this.repository.preload({ id, ...dto });
     if (!profile) {
-      throw new NotFoundException(`profile #${id} not found`);
+      throw new NotFoundException(`entity not found`);
     }
     return await this.repository.save(profile);
   }

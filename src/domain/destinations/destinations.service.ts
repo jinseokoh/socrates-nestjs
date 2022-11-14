@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
   paginate,
+  PaginateConfig,
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
@@ -25,7 +26,7 @@ export class DestinationsService {
   async create(dto: CreateDestinationDto): Promise<Destination> {
     const count = await this.count(dto.userId, dto.title);
     if (count > 0) {
-      throw new BadRequestException('title already exists');
+      throw new BadRequestException('duplicate title exists');
       return;
     }
 
@@ -45,14 +46,18 @@ export class DestinationsService {
   }
 
   async findById(id: number, relations: string[] = []): Promise<Destination> {
-    return relations.length > 0
-      ? await this.repository.findOneOrFail({
-          where: { id },
-          relations,
-        })
-      : await this.repository.findOneOrFail({
-          where: { id },
-        });
+    try {
+      return relations.length > 0
+        ? await this.repository.findOneOrFail({
+            where: { id },
+            relations,
+          })
+        : await this.repository.findOneOrFail({
+            where: { id },
+          });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
   }
 
   async findByUniqueKey(params: FindOneOptions): Promise<Destination> {
@@ -71,7 +76,7 @@ export class DestinationsService {
   async update(id: number, dto: UpdateDestinationDto): Promise<Destination> {
     const destination = await this.repository.preload({ id, ...dto });
     if (!destination) {
-      throw new NotFoundException(`destination #${id} not found`);
+      throw new NotFoundException(`entity not found`);
     }
     return await this.repository.save(destination);
   }
@@ -79,5 +84,45 @@ export class DestinationsService {
   async remove(id: number): Promise<Destination> {
     const destination = await this.findById(id);
     return await this.repository.remove(destination);
+  }
+
+  // 내가 작성한 소장품
+  async getMyDestinations(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Destination>> {
+    const queryBuilder = this.repository
+      .createQueryBuilder('destination')
+      .where('destination.userId = :userId', { userId });
+
+    const config: PaginateConfig<Destination> = {
+      sortableColumns: ['id'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {
+        isDefault: [FilterOperator.EQ],
+      },
+    };
+
+    return paginate(query, queryBuilder, config);
+  }
+
+  // 내가 작성한 소장품
+  async makeDefault(userId: number, destinationId: number): Promise<any> {
+    console.log(userId, destinationId, '<-- userid, destinid,');
+
+    await this.repository
+      .createQueryBuilder()
+      .update(Destination)
+      .where('userId = :userId', { userId })
+      .set({ isDefault: false })
+      .execute();
+
+    return await this.repository
+      .createQueryBuilder()
+      .update(Destination)
+      .where('id = :destinationId', { destinationId })
+      .set({ isDefault: true })
+      .execute();
   }
 }

@@ -19,12 +19,10 @@ import { ArticleComment } from 'src/domain/article-comments/article-comment.enti
 import { ArticleCommentsService } from 'src/domain/article-comments/article-comments.service';
 import { CreateArticleCommentDto } from 'src/domain/article-comments/dto/create-article-comment.dto';
 import { UpdateArticleCommentDto } from 'src/domain/article-comments/dto/update-article-comment.dto';
-import { ArticlesService } from 'src/domain/articles/articles.service';
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('articles')
 export class ArticleCommentsController {
   constructor(
-    private readonly articlesService: ArticlesService,
     private readonly articleCommentsService: ArticleCommentsService,
   ) {}
 
@@ -37,16 +35,16 @@ export class ArticleCommentsController {
     @Param('commentId') commentId: number | null,
     @Body() dto: CreateArticleCommentDto,
   ): Promise<any> {
-    await this.articlesService.findById(articleId);
+    let parentId = null;
     if (commentId) {
-      await this.articleCommentsService.findById(commentId);
+      const comment = await this.articleCommentsService.findById(commentId);
+      parentId = comment.parentId ? comment.parentId : commentId;
     }
-
     return await this.articleCommentsService.create({
       ...dto,
       userId,
       articleId,
-      parentId: commentId ? commentId : null,
+      parentId,
     });
   }
 
@@ -57,7 +55,6 @@ export class ArticleCommentsController {
     @Param('articleId') articleId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<ArticleComment>> {
-    await this.articlesService.findById(articleId);
     return await this.articleCommentsService.findAll(articleId, query);
   }
 
@@ -67,6 +64,7 @@ export class ArticleCommentsController {
     @Param('commentId') id: number,
   ): Promise<ArticleComment> {
     return await this.articleCommentsService.findById(id, [
+      'article',
       'parent',
       'parent.user',
     ]);

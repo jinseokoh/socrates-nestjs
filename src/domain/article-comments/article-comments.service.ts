@@ -21,14 +21,16 @@ export class ArticleCommentsService {
     @InjectRepository(ArticleComment)
     private readonly repository: Repository<ArticleComment>,
     @InjectRepository(Article)
-    private readonly articleRepository: Repository<Article>,
+    private readonly articlesRepository: Repository<Article>,
   ) {}
 
   async create(dto: CreateArticleCommentDto): Promise<ArticleComment> {
-    const comment = await this.repository.create(dto);
+    const article = await this.articlesRepository.findOneOrFail({
+      id: dto.articleId,
+    });
+    const comment = this.repository.create(dto);
     const result = await this.repository.save(comment);
-    const article = await this.articleRepository.findOne({ id: dto.articleId });
-    const message = `[v2] 사용자가 ${article.title} 아티클 (#${article.id}) 에 댓글을 남겼습니다.`;
+    const message = `[local-test] 사용자가 ${article.title} 아티클 (#${article.id}) 에 댓글을 남겼습니다.`;
     this.slack.send(message);
 
     return result;
@@ -86,7 +88,7 @@ export class ArticleCommentsService {
   ): Promise<ArticleComment> {
     const comment = await this.repository.preload({ id, ...dto });
     if (!comment) {
-      throw new NotFoundException(`comment #${id} not found`);
+      throw new NotFoundException(`entity not found`);
     }
     return await this.repository.save(comment);
   }

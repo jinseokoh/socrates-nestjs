@@ -46,13 +46,23 @@ export class UserAuctionsController {
     return this.usersService.getWonAuctions(id, query);
   }
 
-  @ApiOperation({ description: '좋아요 auctions 리스트' })
+  @ApiOperation({ description: '결제완료 auctions 리스트' })
   @PaginateQueryOptions()
-  @Get(':id/liked_auctions')
-  async getLikedAuctions(
+  @Get(':id/paid_auctions')
+  async getPaidAuctions(
     @Param('id') id: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Auction>> {
-    return this.usersService.getLikedAuctions(id, query);
+    return this.usersService.getPaidAuctions(id, query);
+  }
+
+  @ApiOperation({ description: '북마크 auctions 리스트' })
+  @PaginateQueryOptions()
+  @Get(':id/bookmark_auctions')
+  async getBookmarkAuctions(
+    @Param('id') id: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Auction>> {
+    return this.usersService.getBookmarkAuctions(id, query);
   }
 }

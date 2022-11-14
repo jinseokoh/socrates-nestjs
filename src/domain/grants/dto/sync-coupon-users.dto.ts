@@ -10,5 +10,5 @@ export class SyncCouponUsersDto {
   @Type(() => Number)
   @IsArray()
   @IsNotEmpty()
-  ids: number[];
+  userIds: number[];
 }

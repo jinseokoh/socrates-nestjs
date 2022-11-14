@@ -5,12 +5,12 @@ import { ArticleComment } from 'src/domain/article-comments/article-comment.enti
 import { ArticleCommentsController } from 'src/domain/article-comments/article-comments.controller';
 import { ArticleCommentsService } from 'src/domain/article-comments/article-comments.service';
 import { Article } from 'src/domain/articles/article.entity';
-import { ArticlesModule } from 'src/domain/articles/articles.module';
+import { FcmModule } from 'src/services/fcm/fcm.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ArticleComment, Article]),
-    ArticlesModule,
     SlackModule,
+    FcmModule,
   ],
   providers: [ArticleCommentsService],
   controllers: [ArticleCommentsController],

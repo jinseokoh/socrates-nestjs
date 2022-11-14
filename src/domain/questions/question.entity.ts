@@ -1,4 +1,5 @@
 import { Exclude } from 'class-transformer';
+import { Artwork } from 'src/domain/artworks/artwork.entity';
 import { User } from 'src/domain/users/user.entity';
 import {
   BaseEntity,
@@ -6,7 +7,9 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -15,19 +18,13 @@ export class Question extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
-  @Column({ length: 128, nullable: true })
-  title: string;
+  @Column({ length: 16, nullable: true }) // this can be switched to enum of {ARTIST|RESELLER}
+  sellerType: string | null;
 
-  @Column({ length: 128, nullable: true })
-  name: string;
+  @Column({ length: 255, nullable: true })
+  question: string | null;
 
-  @Column({ type: 'text', nullable: true })
-  body: string | null;
-
-  @Column('json', { nullable: true })
-  images: string[] | null;
-
-  @Column({ type: 'text', nullable: true })
+  @Column({ length: 255, nullable: true })
   answer: string | null;
 
   @CreateDateColumn()
@@ -38,6 +35,17 @@ export class Question extends BaseEntity {
 
   @DeleteDateColumn()
   deletedAt: Date | null;
+
+  //**--------------------------------------------------------------------------*/
+  //** 1-to-1 belongsTo
+
+  @Exclude()
+  @Column({ type: 'int', unsigned: true })
+  artworkId: number; // to make it available to Repository.
+
+  @OneToOne(() => Artwork, (artwork) => artwork.question)
+  @JoinColumn()
+  artwork: Artwork;
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo

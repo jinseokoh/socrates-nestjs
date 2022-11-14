@@ -22,7 +22,7 @@ export class SizeLimitInterceptor implements NestInterceptor {
     const size = request.socket.bytesRead;
 
     if (size > this.sizeLimit) {
-      throw new HttpException('Request Entity Too Large Error', 413);
+      throw new HttpException('request entity too large', 413);
     }
 
     return next.handle();

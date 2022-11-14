@@ -25,6 +25,9 @@ export class Destination extends BaseEntity {
   @Column({ length: 32, nullable: true })
   phone: string | null;
 
+  @Column({ length: 32, nullable: true })
+  phone2: string | null;
+
   @Column({ length: 16, nullable: true })
   postalCode: string | null;
 
@@ -40,8 +43,14 @@ export class Destination extends BaseEntity {
   @Column({ length: 32, nullable: true })
   state: string | null;
 
-  @Column({ length: 64, nullable: true })
-  country: string | null;
+  @Column({ length: 2, default: 'kr' })
+  country: string;
+
+  @Column({ length: 128, nullable: true })
+  requestMessage: string | null;
+
+  @Column({ default: false })
+  isDefault: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -62,8 +71,10 @@ export class Destination extends BaseEntity {
 
   @Exclude()
   @Column({ type: 'int', unsigned: true })
-  userId: number; // to make it available to Repository.
-  @ManyToOne(() => User, (user) => user.destinations)
+  userId: number | null; // to make it available to Repository.
+  @ManyToOne(() => User, (user) => user.destinations, {
+    // onDelete: 'SET NULL',
+  })
   user: User;
 
   //??--------------------------------------------------------------------------*/

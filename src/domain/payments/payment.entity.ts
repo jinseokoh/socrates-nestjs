@@ -24,16 +24,16 @@ export class Payment extends BaseEntity {
   id: number;
 
   @Column({ type: 'int', unsigned: true, nullable: true, default: 0 })
-  priceSubTotal: number;
+  priceSubtotal: number;
 
   @Column({ type: 'int', unsigned: true, nullable: true, default: 0 })
-  deliverySubTotal: number;
+  shippingSubtotal: number;
 
   @Column({ type: 'int', unsigned: true, nullable: true, default: 0 })
-  total: number;
+  shippingDiscount: number;
 
   @Column({ type: 'int', unsigned: true, nullable: true, default: 0 })
-  discount: number;
+  couponDiscount: number;
 
   @Column({ type: 'int', unsigned: true, nullable: true, default: 0 })
   grandTotal: number;
@@ -44,25 +44,19 @@ export class Payment extends BaseEntity {
   @Column({ type: 'enum', enum: PaymentMethod, nullable: true })
   paymentMethod: PaymentMethod | null;
 
-  @Column({ type: 'enum', enum: PaymentStatus, nullable: true })
-  paymentStatus: PaymentStatus | null;
+  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.unknown })
+  paymentStatus: PaymentStatus;
 
   @Column({ length: 255, nullable: true })
   paymentInfo: string | null;
 
-  @Column({ length: 255, nullable: true })
-  requestMessage: string | null;
-
-  @Column({ length: 255, nullable: true })
-  trackingNumber: string | null;
-
   @Column('json', { nullable: true })
   payload: object | null;
 
-  @Column({ type: 'datetime', precision: 6, nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   paidAt: Date | null;
 
-  @Column({ type: 'datetime', precision: 6, nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   canceledAt: Date | null;
 
   @CreateDateColumn()

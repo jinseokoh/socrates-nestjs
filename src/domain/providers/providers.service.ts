@@ -35,14 +35,18 @@ export class ProvidersService {
   }
 
   async findById(id: number, relations: string[] = []): Promise<Provider> {
-    return relations.length > 0
-      ? await this.repository.findOneOrFail({
-          where: { id },
-          relations,
-        })
-      : await this.repository.findOneOrFail({
-          where: { id },
-        });
+    try {
+      return relations.length > 0
+        ? await this.repository.findOneOrFail({
+            where: { id },
+            relations,
+          })
+        : await this.repository.findOneOrFail({
+            where: { id },
+          });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
   }
 
   async findByUniqueKey(params: FindOneOptions): Promise<Provider> {
@@ -52,7 +56,7 @@ export class ProvidersService {
   async update(id: number, dto: UpdateProviderDto): Promise<Provider> {
     const provider = await this.repository.preload({ id, ...dto });
     if (!provider) {
-      throw new NotFoundException(`provider #${id} not found`);
+      throw new NotFoundException(`entity not found`);
     }
     return await this.repository.save(provider);
   }

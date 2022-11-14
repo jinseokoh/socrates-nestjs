@@ -20,7 +20,7 @@ export class Grant extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
-  @Column({ type: 'datetime', precision: 6, nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   couponUsedAt: Date | null;
 
   @CreateDateColumn()

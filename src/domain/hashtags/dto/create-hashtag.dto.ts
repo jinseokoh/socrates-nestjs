@@ -1,11 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateHashtagDto {
-  @ApiProperty({ description: '이름 🔍' })
+  @ApiProperty({ description: 'key' })
   @IsString()
-  name: string;
+  key: string;
 
-  @ApiProperty({ description: 'slug' })
+  @ApiProperty({ description: 'title' })
   @IsString()
-  slug: string;
+  title: string;
+
+  @ApiProperty({ description: 'parentId' })
+  @IsNumber()
+  @IsOptional()
+  parentId: number | null;
 }

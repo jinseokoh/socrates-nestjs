@@ -4,7 +4,6 @@ import {
   IsBoolean,
   IsEmail,
   IsEnum,
-  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -34,6 +33,20 @@ export class CreateUserDto {
   @IsOptional()
   realname?: string | null;
 
+  @ApiProperty({ description: '성별', required: false })
+  @IsString()
+  @IsOptional()
+  gender?: string | null;
+
+  @ApiProperty({
+    description: 'date of birth',
+    required: false,
+    default: false,
+  })
+  @Type(() => Date)
+  @IsOptional()
+  dob?: string | null;
+
   @ApiProperty({ description: '아바타', required: false })
   @IsString()
   @IsOptional()
@@ -58,24 +71,46 @@ export class CreateUserDto {
   @IsOptional()
   role?: Role | null;
 
-  @ApiProperty({
-    description: '구매횟수',
-    required: false,
-    default: 0,
-  })
-  @IsNumber()
-  @IsOptional()
-  score?: number | null;
-
   @ApiProperty({ description: '로케일정보', required: false, default: 'ko' })
   @IsString()
   @IsOptional()
   locale?: string | null;
 
-  @ApiProperty({ description: '활성화 여부', required: false, default: false })
+  @ApiProperty({
+    description: '이메일확인 여부',
+    required: false,
+    default: false,
+  })
   @IsBoolean()
   @IsOptional()
   isActive?: boolean | null;
+
+  @ApiProperty({
+    description: '프로필 공개여부',
+    required: false,
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isAnonymous?: boolean | null;
+
+  @ApiProperty({
+    description: '사용정지 여부',
+    required: false,
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isBanned?: boolean | null;
+
+  @ApiProperty({
+    description: '히스토리 공개여부',
+    required: false,
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isPrivate?: boolean | null;
 
   @ApiProperty({
     description: '마지막 닉네임 변경일',

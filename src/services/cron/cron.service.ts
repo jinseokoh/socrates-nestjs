@@ -6,7 +6,7 @@ import {
   RABBITMQ_CLIENT,
   REDIS_PUBSUB_CLIENT,
 } from 'src/common/constants/index';
-import { AuctionStatus } from 'src/common/enums';
+import { Status } from 'src/common/enums';
 import { AuctionItem } from 'src/common/types/auction-item.type';
 import { AuctionsService } from 'src/domain/auctions/auctions.service';
 import { OrdersService } from 'src/domain/orders/orders.service';
@@ -38,11 +38,11 @@ export class CronService {
   async handleEveryMinute() {
     this.logger.debug('cron every minute');
     const now = moment().seconds(0).milliseconds(0); // to remove jitter
-    const preparingItems = await this.auctionsService.getAuctionItemsOf(
-      AuctionStatus.PREPARING,
+    const preparingItems = await this.auctionsService.getAuctionsIn(
+      Status.PREPARING,
     );
-    const ongoingItems = await this.auctionsService.getAuctionItemsOf(
-      AuctionStatus.ONGOING,
+    const ongoingItems = await this.auctionsService.getAuctionsIn(
+      Status.ONGOING,
     );
 
     //** 경매시작시) 관심 고객들에게 경매시작 알림
@@ -50,7 +50,7 @@ export class CronService {
       .filter((item) => now >= moment(item.startTime))
       .map(async (item) => {
         await this.auctionsService.update(item.id, {
-          status: AuctionStatus.ONGOING,
+          status: Status.ONGOING,
         });
         //** dispatch AuctionBegan
         this.rabbitClient.emit('AuctionBegan', {
@@ -66,7 +66,7 @@ export class CronService {
       .map(async (item) => {
         // all expired items will be set to ENDED
         await this.auctionsService.update(item.id, {
-          status: AuctionStatus.ENDED,
+          status: Status.ENDED,
         });
 
         try {

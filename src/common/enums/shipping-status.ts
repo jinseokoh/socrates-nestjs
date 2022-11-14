@@ -1,0 +1,6 @@
+export enum ShippingStatus {
+  PACKAGING = 'PACKAGING',
+  NUMBER_ISSUED = 'NUMBER_ISSUED',
+  IN_TRANSIT = 'IN_TRANSIT',
+  DELIVERED = 'DELIVERED',
+}

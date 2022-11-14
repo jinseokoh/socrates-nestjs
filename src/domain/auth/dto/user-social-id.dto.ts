@@ -7,18 +7,18 @@ import {
   MaxLength,
 } from 'class-validator';
 export class UserSocialIdDto {
-  @ApiProperty({ description: '이메일' })
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({ description: '소셜인증업체명' })
+  @ApiProperty({ description: '소셜인증 업체명' })
   @IsNotEmpty()
   @IsString()
   @MaxLength(16)
   providerName: string;
 
-  @ApiProperty({ description: '소셜인증아이디' })
+  @ApiProperty({ description: '이메일' })
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ description: '소셜 아이디' })
   @IsNotEmpty()
   @IsString()
   providerId: string;

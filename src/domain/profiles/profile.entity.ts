@@ -18,24 +18,6 @@ export class Profile extends BaseEntity {
   @Column({ length: 255, nullable: true })
   bio: string | null;
 
-  @Column({ length: 16, nullable: true })
-  postalCode: string | null;
-
-  @Column({ length: 128, nullable: true })
-  address: string | null;
-
-  @Column({ length: 128, nullable: true })
-  addressDetail: string | null;
-
-  @Column({ length: 32, nullable: true })
-  city: string | null;
-
-  @Column({ length: 32, nullable: true })
-  state: string | null;
-
-  @Column({ length: 64, nullable: true })
-  country: string | null;
-
   @Column({ default: true })
   notifyPush: boolean;
 
@@ -48,7 +30,10 @@ export class Profile extends BaseEntity {
   @Column({ default: true })
   notifyEvent: boolean;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  payCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
   viewCount: number;
 
   @CreateDateColumn()

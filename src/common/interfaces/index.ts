@@ -61,3 +61,7 @@ export interface IKeyVal {
   key: string;
   val: string;
 }
+export interface IPackCompositeIds {
+  artistId: number;
+  artworkIds: number[];
+}

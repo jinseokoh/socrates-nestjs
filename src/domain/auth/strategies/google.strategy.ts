@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 config(); //!! see if this is required.
 
+// @deprecated
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor() {

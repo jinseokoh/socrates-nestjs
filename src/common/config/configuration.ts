@@ -7,14 +7,14 @@ export const configuration = () => ({
   database: {
     engine: process.env.DB_ENGINE ?? 'mysql',
     host: process.env.DB_HOST ?? 'localhost',
-    port: Number(process.env.DB_PORT) ?? 3306,
-    dbname: process.env.DB_NAME ?? 'meso',
+    port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
+    dbname: process.env.DB_NAME ?? 'mesa',
     username: process.env.DB_USERNAME ?? 'root',
     password: process.env.DB_PASSWORD ?? 'secret',
   },
   redis: {
     host: process.env.REDIS_HOST ?? 'localhost',
-    port: Number(process.env.REDIS_PORT) ?? 6379,
+    port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : 6379,
   },
   jwt: {
     authSecret: process.env.AUTH_TOKEN_SECRET,

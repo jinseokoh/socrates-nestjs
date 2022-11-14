@@ -1,4 +1,4 @@
 export enum OrderType {
   AUCTION = 'AUCTION',
-  PRODUCT = 'PRODUCT',
+  BUYITNOW = 'BUYITNOW',
 }

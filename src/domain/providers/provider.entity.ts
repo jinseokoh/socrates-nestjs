@@ -38,8 +38,9 @@ export class Provider extends BaseEntity {
   @Exclude()
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
-
-  @ManyToOne(() => User, (user) => user.providers)
+  @ManyToOne(() => User, (user) => user.providers, {
+    // onDelete: 'SET NULL',
+  })
   user: User;
 
   //??--------------------------------------------------------------------------*/

@@ -13,7 +13,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-@Entity() //? 아티클에 달리는 댓글 (현재 댓글의 댓글 기능은 없음.)
+@Entity() //? 아티클 댓글
 export class ArticleComment extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
@@ -56,7 +56,6 @@ export class ArticleComment extends BaseEntity {
   @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
   parentId: number | null;
-
   @OneToMany(() => ArticleComment, (articleComment) => articleComment.parent)
   children: ArticleComment[];
 

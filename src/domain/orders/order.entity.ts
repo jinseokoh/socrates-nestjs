@@ -1,5 +1,8 @@
 import { Exclude } from 'class-transformer';
+import { Courier } from 'src/common/enums/courier';
+import { OrderStatus } from 'src/common/enums/order-status';
 import { OrderType } from 'src/common/enums/order-type';
+import { ShippingStatus } from 'src/common/enums/shipping-status';
 import { Auction } from 'src/domain/auctions/auction.entity';
 import { Payment } from 'src/domain/payments/payment.entity';
 import { User } from 'src/domain/users/user.entity';
@@ -28,20 +31,39 @@ export class Order extends BaseEntity {
   @Column({ type: 'enum', enum: OrderType, default: OrderType.AUCTION })
   orderType: OrderType;
 
-  @Column({ length: 128, nullable: true })
-  sku: string | null;
+  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.WAITING })
+  orderStatus: OrderStatus;
 
   @Column({ type: 'int', unsigned: true, nullable: true, default: 0 })
   price: number;
 
   @Column({ type: 'int', unsigned: true, nullable: true, default: 0 })
-  deliveryFee: number;
+  shipping: number;
 
   @Column({ type: 'int', unsigned: true, nullable: true, default: 1 })
-  quantity: number;
+  quantity: number; // this is a reserved property when dealing with general products
 
-  @Column({ type: 'bool', default: false })
-  isPaid: boolean;
+  @Column({ type: 'enum', enum: Courier, default: Courier.KDEXP })
+  courier: Courier;
+
+  @Column({ length: 32, nullable: true })
+  trackingNumber: string | null;
+
+  @Column({ length: 64, nullable: true })
+  shippingComment: string | null;
+
+  @Column({ default: false })
+  isCombined: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: ShippingStatus,
+    default: ShippingStatus.PACKAGING,
+  })
+  shippingStatus: ShippingStatus;
+
+  @Column({ length: 255, nullable: true })
+  note: string | null;
 
   @CreateDateColumn()
   createdAt: Date;

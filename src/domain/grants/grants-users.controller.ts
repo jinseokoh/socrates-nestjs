@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -12,6 +13,7 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
+import { NumberData } from 'src/common/types/number-data.type';
 import { CouponsService } from 'src/domain/coupons/coupons.service';
 import { Grant } from 'src/domain/grants/grant.entity';
 import { GrantsService } from 'src/domain/grants/grants.service';
@@ -38,42 +40,44 @@ export class GrantsUsersController {
     return await this.grantsService.grant(userId, couponId);
   }
 
-  @ApiOperation({ description: '쿠폰 리스트 (유효한 쿠폰만) w/ Pagination' })
+  //?-------------------------------------------------------------------------//
+  //? READ
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '사용할 수 있는 쿠폰 리스트 w/ Pagination' })
   @Get(':userId/coupons')
   async list(
     @CurrentUserId() id: number,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Grant>> {
     if (id !== userId) {
       throw new BadRequestException(`doh! mind your id`);
     }
-    return await this.grantsService.findAllValidCoupons(userId, query);
+    return await this.grantsService.findValidCoupons(userId, query);
   }
 
   @ApiOperation({ description: '쿠폰 유효성 체크' })
   @Get(':userId/coupons/:couponId')
   async check(
-    @CurrentUserId() id: number,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Param('userId') userId: number,
     @Param('couponId') couponId: number,
   ): Promise<any> {
-    if (id !== userId) {
-      throw new BadRequestException(`doh! mind your id`);
-    }
-    const coupon = await this.couponsService.findById(couponId);
-    if (coupon.expiredAt) {
-      const now = new Date().getTime();
-      const expiredAt = coupon.expiredAt.getTime();
-      if (now >= expiredAt) {
-        throw new BadRequestException(`already expired`);
+    try {
+      const coupon = await this.couponsService.findById(couponId);
+      if (coupon.expiredAt) {
+        const now = new Date().getTime();
+        const expiredAt = coupon.expiredAt.getTime();
+        if (now >= expiredAt) {
+          throw new BadRequestException(`coupon expired`);
+        }
       }
+    } catch (e) {
+      throw new NotFoundException('entity not found');
     }
-    const grant = await this.grantsService.find(userId, couponId);
+    const grant = await this.grantsService.findOrFail(userId, couponId);
     if (grant.couponUsedAt) {
-      throw new BadRequestException(`already used`);
+      throw new BadRequestException(`coupon already used`);
     }
 
     return { data: true };
@@ -94,18 +98,21 @@ export class GrantsUsersController {
     return await this.grantsService.use(userId, couponId);
   }
 
+  //?-------------------------------------------------------------------------//
+  //? DELETE
+  //?-------------------------------------------------------------------------//
+
   @ApiOperation({ description: '쿠폰 박탈' })
   @Delete(':userId/coupons/:couponId')
-  async forfeit(
+  async detach(
     @CurrentUserId() id: number,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Param('userId') userId: number,
     @Param('couponId') couponId: number,
-  ): Promise<Grant> {
+  ): Promise<NumberData> {
     if (id !== userId) {
       throw new BadRequestException(`doh! mind your id`);
     }
-    await this.couponsService.findById(couponId);
-    return await this.grantsService.forfeit(userId, couponId);
+    const { affectedRows } = await this.grantsService.detach(couponId, userId);
+    return { data: affectedRows };
   }
 }

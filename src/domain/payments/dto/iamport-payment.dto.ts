@@ -5,7 +5,7 @@ export class IamportPaymentDto {
   @IsString()
   imp_uid: string;
 
-  @ApiProperty({ description: '회사결제번호; `payment_${id}` Payment Id' })
+  @ApiProperty({ description: 'FA결제번호; `payment_${id}` Payment Id' })
   @IsString()
   merchant_uid: string;
 }
@@ -14,7 +14,7 @@ export class IamportWebhookDto {
   @IsString()
   imp_uid: string;
 
-  @ApiProperty({ description: '회사결제번호; `payment_${id}` Payment Id' })
+  @ApiProperty({ description: 'FA결제번호; `payment_${id}` Payment Id' })
   @IsString()
   merchant_uid: string;
 

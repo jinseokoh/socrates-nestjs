@@ -20,7 +20,7 @@ export class FollowsService {
     @InjectRepository(Follow)
     private readonly repository: Repository<Follow>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   async find(myUserId: number, otherUserId: number) {
@@ -85,7 +85,7 @@ export class FollowsService {
     myUserId: number,
     query: PaginateQuery,
   ): Promise<Paginated<User>> {
-    const queryBuilder = this.userRepository
+    const queryBuilder = this.usersRepository
       .createQueryBuilder('user')
       .innerJoinAndSelect('follow', 'f', 'user.id = f.FollowerId')
       .where('f.FollowingId = :id', { id: myUserId });
@@ -104,7 +104,7 @@ export class FollowsService {
     myUserId: number,
     query: PaginateQuery,
   ): Promise<Paginated<User>> {
-    const queryBuilder = this.userRepository
+    const queryBuilder = this.usersRepository
       .createQueryBuilder('user')
       .innerJoinAndSelect('follow', 'f', 'user.id = f.FollowingId')
       .where('f.FollowerId = :id', { id: myUserId });
@@ -122,7 +122,7 @@ export class FollowsService {
   async unfollow(myUserId: number, otherUserId: number): Promise<Follow> {
     const follow = await this.find(myUserId, otherUserId);
     if (!follow) {
-      throw new NotFoundException(`relationship does not exist`);
+      throw new NotFoundException(`relationship not found`);
     }
 
     return await this.repository.remove(follow);

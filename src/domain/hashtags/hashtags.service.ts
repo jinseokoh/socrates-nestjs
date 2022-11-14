@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
   paginate,
+  PaginateConfig,
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
@@ -22,36 +23,55 @@ export class HashtagsService {
   ) {}
 
   async create(dto: CreateHashtagDto): Promise<Hashtag> {
-    const hashtag = this.repository.create(dto);
+    const item = await this.repository.findOne({
+      order: { id: 'DESC' },
+    });
+    const key = (item?.id ?? 0) + 1;
+    const hashtag = this.repository.create({
+      ...dto,
+      title: `${dto.title}-${key}`,
+      key: `${dto.key}-${key}`,
+    });
     return await this.repository.save(hashtag);
   }
 
   async findAll(query: PaginateQuery): Promise<Paginated<Hashtag>> {
-    return paginate(query, this.repository, {
-      sortableColumns: ['id', 'name'],
-      searchableColumns: ['name', 'slug'],
-      defaultSortBy: [['id', 'DESC']],
+    const queryBuilder = this.repository
+      .createQueryBuilder('hashtag')
+      .leftJoinAndSelect('hashtag.children', 'children')
+      .andWhere('hashtag.parentId IS NULL');
+
+    const config: PaginateConfig<Hashtag> = {
+      sortableColumns: ['id'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'ASC']],
       filterableColumns: {
-        slug: [FilterOperator.EQ],
+        key: [FilterOperator.EQ],
       },
-    });
+    };
+
+    return await paginate<Hashtag>(query, queryBuilder, config);
   }
 
   async findById(id: number, relations: string[] = []): Promise<Hashtag> {
-    return relations.length > 0
-      ? await this.repository.findOneOrFail({
-          where: { id },
-          relations,
-        })
-      : await this.repository.findOneOrFail({
-          where: { id },
-        });
+    try {
+      return relations.length > 0
+        ? await this.repository.findOneOrFail({
+            where: { id },
+            relations,
+          })
+        : await this.repository.findOneOrFail({
+            where: { id },
+          });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
   }
 
   async update(id: number, dto: UpdateHashtagDto): Promise<Hashtag> {
     const hashtag = await this.repository.preload({ id, ...dto });
     if (!hashtag) {
-      throw new NotFoundException(`hashtag #${id} not found`);
+      throw new NotFoundException(`entity not found`);
     }
     return await this.repository.save(hashtag);
   }

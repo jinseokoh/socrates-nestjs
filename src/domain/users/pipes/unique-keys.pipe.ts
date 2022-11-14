@@ -16,7 +16,7 @@ export class UniqueKeysPipe implements PipeTransform {
         where: { username: value.username },
       });
       if (user != null) {
-        throw new BadRequestException(`username already exists`);
+        throw new BadRequestException(`username already taken`);
       }
     }
 
@@ -25,7 +25,7 @@ export class UniqueKeysPipe implements PipeTransform {
         where: { email: value.email },
       });
       if (user != null) {
-        throw new BadRequestException(`email already exists`);
+        throw new BadRequestException(`email already taken`);
       }
     }
 
@@ -34,7 +34,7 @@ export class UniqueKeysPipe implements PipeTransform {
         where: { phone: value.phone },
       });
       if (user != null) {
-        throw new BadRequestException(`phone already exists`);
+        throw new BadRequestException(`phone number already taken`);
       }
     }
 

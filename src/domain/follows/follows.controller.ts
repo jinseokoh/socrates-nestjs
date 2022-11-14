@@ -13,15 +13,11 @@ import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { Follow } from 'src/domain/follows/follow.entity';
 import { FollowsService } from 'src/domain/follows/follows.service';
-import { UsersService } from 'src/domain/users/users.service';
 import { User } from '../users/user.entity';
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 export class FollowsController {
-  constructor(
-    private readonly followsService: FollowsService,
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly followsService: FollowsService) {}
 
   @Post(':myUserId/follows/:otherUserId')
   @ApiOperation({ description: '팔로' })
@@ -32,9 +28,8 @@ export class FollowsController {
     @Param('otherUserId') otherUserId: number,
   ): Promise<Follow> {
     if (id === otherUserId) {
-      throw new BadRequestException(`you can't follow yourself`);
+      throw new BadRequestException(`invalid following target`);
     }
-    await this.usersService.findById(otherUserId);
     return await this.followsService.follow(id, otherUserId);
   }
 
@@ -65,9 +60,8 @@ export class FollowsController {
     @Param('otherUserId') otherUserId: number,
   ): Promise<Follow> {
     if (id === otherUserId) {
-      throw new BadRequestException(`you can't unfollow yourself`);
+      throw new BadRequestException(`invalid following target`);
     }
-    await this.usersService.findById(otherUserId);
     return await this.followsService.unfollow(id, otherUserId);
   }
 }

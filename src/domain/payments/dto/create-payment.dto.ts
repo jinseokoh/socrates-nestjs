@@ -22,7 +22,7 @@ export class CreatePaymentDto {
   })
   @IsNumber()
   @IsOptional()
-  priceSubTotal?: number | null;
+  priceSubtotal?: number | null;
 
   @ApiProperty({
     description: '상품아이템 배달비 합계 (B)',
@@ -31,25 +31,25 @@ export class CreatePaymentDto {
   })
   @IsNumber()
   @IsOptional()
-  deliverySubTotal?: number | null;
+  shippingSubtotal?: number | null;
 
   @ApiProperty({
-    description: '주문 소계 (A + B)',
+    description: '배달비 디스카운트',
     default: 0,
     required: false,
   })
   @IsNumber()
   @IsOptional()
-  total?: number | null;
+  shippingDiscount?: number | null;
 
   @ApiProperty({
-    description: '주문 디스카운트',
+    description: '쿠폰 디스카운트',
     default: 0,
     required: false,
   })
   @IsNumber()
   @IsOptional()
-  discount?: number | null;
+  couponDiscount?: number | null;
 
   @ApiProperty({
     description: '주문 최종결제금',
@@ -90,22 +90,6 @@ export class CreatePaymentDto {
   @IsString()
   @IsOptional()
   paymentInfo?: string | null;
-
-  @ApiProperty({
-    description: '배송시요청사항',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  requestMessage?: string | null;
-
-  @ApiProperty({
-    description: '택배번호',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  trackingNumber?: string | null;
 
   @ApiProperty({ description: 'raw payload', required: false })
   @Type(() => JSON.parse)

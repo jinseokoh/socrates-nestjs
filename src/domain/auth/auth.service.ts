@@ -10,7 +10,6 @@ import { JwtService } from '@nestjs/jwt';
 import { SES } from 'aws-sdk';
 import * as bcrypt from 'bcrypt';
 import * as random from 'randomstring';
-import { StringData } from './../../common/types/string-data.type';
 
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
@@ -23,15 +22,15 @@ import { ProvidersService } from 'src/domain/providers/providers.service';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { User } from 'src/domain/users/user.entity';
 import { UsersService } from 'src/domain/users/users.service';
-import { NamingService } from 'src/services/naming/naming.service';
+import { makeUsername } from 'src/helpers/random-username';
+
 @Injectable()
 export class AuthService {
-  private readonly env;
+  private readonly env: any;
   constructor(
     private readonly usersService: UsersService,
     private readonly providersService: ProvidersService,
     private readonly jwtService: JwtService,
-    private readonly namingService: NamingService,
     @Inject(AWS_SES_CONNECTION)
     private readonly ses: SES,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -40,14 +39,236 @@ export class AuthService {
     this.env = this.configService.get('nodeEnv');
   }
 
-  async getTokens(user: User): Promise<Tokens> {
+  //?-------------------------------------------------------------------------//
+  //? Passport local stragegy
+  //?-------------------------------------------------------------------------//
+
+  // being used in auth/strategies/local.strategy
+  async validateUser(dto: UserCredentialsDto): Promise<User> {
+    const user = await this.usersService.findByUniqueKey({
+      where: { email: dto.email },
+    });
+    if (!user) {
+      throw new ForbiddenException('access denied');
+    }
+    if (!user.password) {
+      throw new ForbiddenException(`user has no password`);
+    }
+    const passwordMatches = await bcrypt.compare(dto.password, user.password);
+    if (!passwordMatches) {
+      throw new ForbiddenException('invalid credentials');
+    }
+
+    return user;
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Public) 가입, 이메일인증, 비번재설정
+  //?-------------------------------------------------------------------------//
+
+  // 이메일 가입 w/ Credentials
+  async register(dto: UserCredentialsDto) {
+    const user = await this.usersService.create(<CreateUserDto>dto);
+    const tokens = await this._getTokens(user);
+    const username = makeUsername(user.id);
+
+    await this._updateUserName(user.id, username);
+    await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
+
+    return tokens;
+  }
+
+  // 새이메일 확인 후 OTP 전송
+  async takeNewEmailAndSendOtp(email: string): Promise<void> {
+    const user = await this.usersService.findByUniqueKey({ where: { email } });
+    if (user) {
+      throw new BadRequestException('email already taken');
+    }
+    const key = `${this.env}:user:${email}:email`;
+    const secret = await this._setOtpWithKey(key);
+    this._sendCodeEmail(email, secret);
+  }
+
+  // 기이메일 확인 후 OTP 전송
+  async takeExistingEmailAndSendOtp(email: string): Promise<void> {
+    const user = await this.usersService.findByUniqueKey({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('email not found');
+    }
+    const key = `${this.env}:user:${email}:email`;
+    const secret = await this._setOtpWithKey(key);
+    this._sendCodeEmail(email, secret);
+  }
+
+  // 이메일 OTP 확인
+  async validateOtp(email: string, code: string): Promise<void> {
+    const key = `${this.env}:user:${email}:email`;
+    const value = await this.cacheManager.get(key);
+    if (!value) {
+      throw new BadRequestException('otp expired');
+    } else if (value !== code) {
+      throw new BadRequestException('otp mismatched');
+    }
+  }
+
+  // OTP 확인하여 이메일 확인
+  async verify(id: number, code: string) {
+    const key = `${this.env}:user:${id}:email`;
+    const value = await this.cacheManager.get(key);
+    if (!value) {
+      throw new BadRequestException('otp expired');
+    }
+    if (code !== value) {
+      throw new BadRequestException('otp mismatched');
+    }
+    await this._updateIsActive(id, true);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Public) 소셜 로그인
+  //?-------------------------------------------------------------------------//
+
+  // Firebase Auth 소셜인증
+  async socialize(dto: UserSocialIdDto) {
+    const { email, providerName, providerId, name, phone, photo, gender, dob } =
+      dto;
+
+    const provider = await this.providersService.findByUniqueKey({
+      where: {
+        providerName,
+        providerId,
+      },
+      relations: ['user'],
+    });
+
+    // in case user w/ firebase-id found
+    if (provider != null) {
+      const tokens = await this._getTokens(provider.user);
+      await this._updateUserRefreshTokenHash(
+        provider.user.id,
+        tokens.refreshToken,
+      );
+      return tokens;
+    }
+
+    const registeredUser = await this.usersService.findByUniqueKey({
+      where: {
+        email,
+      },
+    });
+    // in case user w/ firebase-email found
+    if (registeredUser != null) {
+      await this.providersService.create({ ...dto, userId: registeredUser.id });
+      const tokens = await this._getTokens(registeredUser);
+      await this._updateUserRefreshTokenHash(
+        registeredUser.id,
+        tokens.refreshToken,
+      );
+      await this._updateIsActive(registeredUser.id, true);
+      return tokens;
+    }
+    // in case user w/ firebase-email not found
+    const user = await this.usersService.create({ ...dto, isActive: true });
+    await this.providersService.create({ ...dto, userId: user.id });
+    const tokens = await this._getTokens(user);
+    const username = makeUsername(user.id);
+
+    await this._updateUserName(user.id, username);
+    await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
+    return tokens;
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Public) 로그인
+  //?-------------------------------------------------------------------------//
+
+  // 로그인 w/ Credentials
+  async login(dto: UserCredentialsDto): Promise<Tokens> {
+    const user = await this.validateUser(dto);
+    const tokens = await this._getTokens(user);
+    await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
+
+    return tokens;
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Private) 로그아웃
+  //?-------------------------------------------------------------------------//
+
+  async logout(id: number) {
+    return this._updateUserRefreshTokenHash(id, null);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Public) 토큰 refresh
+  //?-------------------------------------------------------------------------//
+
+  async refreshToken(id: number, token: string | null) {
+    const user = await this.usersService.findById(id);
+    if (!user) {
+      throw new ForbiddenException('access denied');
+    }
+    if (!user.refreshTokenHash) {
+      throw new ForbiddenException('authentication required');
+    }
+    const refreshTokenMatches = await bcrypt.compare(
+      token,
+      user.refreshTokenHash,
+    );
+    if (!refreshTokenMatches) {
+      throw new ForbiddenException('invalid refresh token');
+    }
+    const tokens = await this._getTokens(user);
+    await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
+
+    return tokens;
+  }
+
+  // ✅ 이메일 확인코드 확인 후 비밀번호 갱신
+  async resetPassword(dto: ResetPasswordDto): Promise<User> {
+    const user = await this.usersService.findByUniqueKey({
+      where: { email: dto.email },
+    });
+    if (!user) {
+      throw new NotFoundException('email not found');
+    }
+
+    // const key = `${this.env}:user:${user.id}:otp`;
+    // const value = await this.cacheManager.get(key);
+    // if (!value) {
+    //   throw new BadRequestException('otp expired');
+    // } else if (value !== dto.code) {
+    //   throw new BadRequestException('otp mismatched');
+    // }
+
+    return await this.usersService.update(user.id, { password: dto.password });
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Privates
+  //?-------------------------------------------------------------------------//
+
+  async _updateIsActive(id: number, isActive: boolean) {
+    await this.usersService.update(id, { isActive });
+  }
+
+  async _updateUserName(id: number, username: string | null) {
+    await this.usersService.update(id, { username });
+  }
+
+  async _updateUserRefreshTokenHash(id: number, token: string | null) {
+    const refreshTokenHash = token ? await bcrypt.hash(token, 10) : null;
+    await this.usersService.update(id, { refreshTokenHash });
+  }
+
+  async _getTokens(user: User): Promise<Tokens> {
     const payload = {
       name: user.email,
       sub: user.id,
     };
     const accessTokenOptions = {
       secret: process.env.AUTH_TOKEN_SECRET ?? 'AUTH-TOKEN-SECRET',
-      expiresIn: '1d', //! change it to '15m' in production
+      expiresIn: '1d', // todo. change it to '15m' in production
     };
     const refreshTokenOptions = {
       secret: process.env.REFRESH_TOKEN_SECRET ?? 'REFRESH-TOKEN-SECRET',
@@ -64,197 +285,37 @@ export class AuthService {
     };
   }
 
-  async validateUser(dto: UserCredentialsDto): Promise<User> {
-    const user = await this.usersService.findByUniqueKey({
-      where: { email: dto.email },
-    });
-    if (!user) {
-      throw new ForbiddenException('Access Denied');
-    }
-    if (!user.password) {
-      throw new ForbiddenException(`This user hasn't set a password.`);
-    }
-    const passwordMatches = bcrypt.compare(dto.password, user.password);
-    if (!passwordMatches) {
-      throw new ForbiddenException('Invalid Credentials');
-    }
-
-    return user;
-  }
-
-  async register(dto: UserCredentialsDto) {
-    for (let i = 1; i <= 50000; i++) {
-      const name = this.namingService.getName(i);
-      console.log(i, name);
-    }
-
-    // const user = await this.usersService.create(<CreateUserDto>dto);
-    // const tokens = await this.getTokens(user);
-    // const username = this.namingService.getName(user.id);
-    // this.sendCodeEmail('chuckau@naver.com', '123456');
-    // await this._updateUserName(user.id, username);
-    // await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
-
-    // return tokens;
-  }
-
-  async socialize(dto: UserSocialIdDto) {
-    const { email, providerName, providerId, name, phone, photo, gender, dob } =
-      dto;
-
-    const provider = await this.providersService.findByUniqueKey({
-      where: {
-        providerName,
-        providerId,
-      },
-      relations: ['user'],
-    });
-
-    if (provider != null) {
-      const tokens = await this.getTokens(provider.user);
-      await this._updateUserRefreshTokenHash(
-        provider.user.id,
-        tokens.refreshToken,
-      );
-      return tokens;
-    }
-
-    const registeredUser = await this.usersService.findByUniqueKey({
-      where: {
-        email,
-      },
-    });
-
-    if (registeredUser != null) {
-      await this.providersService.create({ ...dto, userId: registeredUser.id });
-      const tokens = await this.getTokens(registeredUser);
-      await this._updateUserRefreshTokenHash(
-        registeredUser.id,
-        tokens.refreshToken,
-      );
-      return tokens;
-    }
-
-    const user = await this.usersService.create(<CreateUserDto>dto);
-    await this.providersService.create({ ...dto, userId: user.id });
-    const tokens = await this.getTokens(user);
-    await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
-    return tokens;
-  }
-
-  async login(dto: UserCredentialsDto): Promise<Tokens> {
-    const user = await this.validateUser(dto);
-    const tokens = await this.getTokens(user);
-    await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
-
-    return tokens;
-  }
-
-  async googleLogin(req): Promise<any> {
-    if (!req.user) {
-      return 'No user from google';
-    }
-
-    return {
-      message: 'User information from google',
-      user: req.user,
-    };
-  }
-
-  async logout(id: number) {
-    return this._updateUserRefreshTokenHash(id, null);
-  }
-
-  async refreshToken(id: number, token: string | null) {
-    const user = await this.usersService.findById(id);
-    if (!user) {
-      throw new ForbiddenException('Access Denied');
-    }
-    if (!user.refreshTokenHash) {
-      throw new ForbiddenException('Authentication required');
-    }
-    const refreshTokenMatches = await bcrypt.compare(
-      token,
-      user.refreshTokenHash,
-    );
-    if (!refreshTokenMatches) {
-      throw new ForbiddenException('Invalid Refresh Token');
-    }
-    const tokens = await this.getTokens(user);
-    await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
-
-    return tokens;
-  }
-
-  async forgotPassword(email: string): Promise<StringData> {
-    const user = await this.usersService.findByUniqueKey({ where: { email } });
-    if (!user) {
-      throw new NotFoundException('The email not found');
-    }
-    const key = `${this.env}:user:${user.id}:otp`;
-    const value = await this.cacheManager.get(key);
-    if (value) {
-      throw new BadRequestException('too many attempts');
-    }
+  async _setOtpWithKey(key: string) {
     const randomValue = random.generate({
       length: 5,
       charset: 'numeric',
     });
-    const result = await this.cacheManager.set(key, randomValue);
 
-    return { data: result };
+    await this.cacheManager.set(key, randomValue, { ttl: 60 * 10 });
+    return randomValue;
   }
 
-  async resetPassword(dto: ResetPasswordDto): Promise<User> {
-    const user = await this.usersService.findByUniqueKey({
-      where: { email: dto.email },
-    });
-    if (!user) {
-      throw new NotFoundException('The email not found');
-    }
-    const key = `${this.env}:user:${user.id}:otp`;
-    const value = await this.cacheManager.get(key);
-    if (!value) {
-      throw new BadRequestException('otp expired');
-    } else if (value !== dto.otp) {
-      throw new BadRequestException('invalid otp');
-    }
-
-    const password = await bcrypt.hash(dto.password, 10);
-    return await this.usersService.update(user.id, { password });
-  }
-
-  // privates
-  async _updateUserName(id: number, username: string | null) {
-    await this.usersService.update(id, {
-      username,
-    });
-  }
-
-  // privates
-  async _updateUserRefreshTokenHash(id: number, token: string | null) {
-    const refreshTokenHash = token ? await bcrypt.hash(token, 10) : null;
-    await this.usersService.update(id, {
-      refreshTokenHash,
-    });
-  }
-
-  async sendCodeEmail(email: string, code: string): Promise<any> {
+  // 이메일 발송 w/ 확인코드
+  async _sendCodeEmail(email: string, code: string): Promise<any> {
     const params = {
       Destination: {
         CcAddresses: [],
         ToAddresses: [email],
       },
-      Source: '플리옥션 <no-replay@fleaauction.world>',
+      Source: 'Flea Auction <no-reply@fleaauction.world>',
       Template: 'EmailCodeTemplate',
-      TemplateData: `{ "code": ${code} }`,
-      // ReplyToAddresses: ['chuck@fleaauction.co'],
+      TemplateData: `{ "code": "${code}" }`,
     };
-
-    return await this.ses.sendTemplatedEmail(params).promise();
+    try {
+      return await this.ses.sendTemplatedEmail(params).promise();
+    } catch (e) {
+      console.log(e);
+      throw new BadRequestException('aws-ses error');
+    }
   }
 
-  async sendEmail(email: string, message: string): Promise<any> {
+  // 이메일 발송 w/ no template
+  async _sendEmail(email: string, message: string): Promise<any> {
     const params = {
       Destination: {
         CcAddresses: [],
@@ -278,10 +339,29 @@ export class AuthService {
           Data: 'Test email',
         },
       },
-      Source: '플리옥션 <no-replay@fleaauction.world>',
+      Source: 'Flea Auction <no-reply@fleaauction.world>',
       // ReplyToAddresses: ['chuck@fleaauction.co'],
     };
 
     return await this.ses.sendEmail(params).promise();
+  }
+
+  //--------------------------------------------------------------------------//
+  // @deprecated
+  //--------------------------------------------------------------------------//
+
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.usersService.findByUniqueKey({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('email not found');
+    }
+    const key = `${this.env}:user:${user.id}:otp`;
+    const value = await this.cacheManager.get(key);
+    if (value) {
+      throw new BadRequestException('too many attempts');
+    }
+
+    const secret = await this._setOtpWithKey(key);
+    this._sendCodeEmail(email, secret);
   }
 }

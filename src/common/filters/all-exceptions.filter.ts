@@ -13,7 +13,7 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
       const status = 400;
       let message = exception.message;
       if (exception.message.match(/.*?(Unique constraint failed)/)) {
-        message = 'already taken.';
+        message = 'already taken';
       }
 
       response.status(status).json({

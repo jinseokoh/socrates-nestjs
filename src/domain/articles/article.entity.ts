@@ -1,6 +1,7 @@
 import { ArticleCategory } from 'src/common/enums';
 import { ArticleComment } from 'src/domain/article-comments/article-comment.entity';
 import { Auction } from 'src/domain/auctions/auction.entity';
+import { Banner } from 'src/domain/banners/banner.entity';
 import { Pack } from 'src/domain/packs/pack.entity';
 import {
   BaseEntity,
@@ -11,6 +12,7 @@ import {
   JoinTable,
   ManyToMany,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -34,18 +36,15 @@ export class Article extends BaseEntity {
   @Column({
     type: 'enum',
     enum: ArticleCategory,
-    default: ArticleCategory.CONTENT,
+    default: ArticleCategory.FLEA_AUCTION,
   })
   category: ArticleCategory;
 
-  @Column({ type: 'int', default: 0 })
-  commentCount: number; //* aggregation 후 state 변경 필요
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  commentCount: number;
 
   @Column({ default: true })
   isPublished: boolean;
-
-  @Column({ default: false })
-  isActive: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -55,6 +54,14 @@ export class Article extends BaseEntity {
 
   @DeleteDateColumn()
   deletedAt: Date | null;
+
+  //**--------------------------------------------------------------------------*/
+  //** 1-to-1 hasOne
+
+  @OneToOne(() => Banner, (banner) => banner.article, {
+    cascade: ['insert', 'update'],
+  })
+  banner?: Banner | null;
 
   //**--------------------------------------------------------------------------*/
   //** 1-to-many hasMany

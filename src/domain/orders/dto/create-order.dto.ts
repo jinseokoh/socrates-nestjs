@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Courier } from 'src/common/enums/courier';
+import { OrderStatus } from 'src/common/enums/order-status';
 import { OrderType } from 'src/common/enums/order-type';
+import { ShippingStatus } from 'src/common/enums/shipping-status';
 export class CreateOrderDto {
   @ApiProperty({ description: '상품아이템 제목', required: false })
   @IsString()
@@ -12,19 +15,13 @@ export class CreateOrderDto {
   @IsOptional()
   image?: string | null;
 
-  @ApiProperty({
-    description: '상품아이템 타입',
-    default: OrderType.AUCTION,
-    required: false,
-  })
+  @ApiProperty({ description: '상품아이템 타입', default: OrderType.AUCTION })
   @IsEnum(OrderType)
-  @IsOptional()
   orderType: OrderType;
 
-  @ApiProperty({ description: '상품아이템 SKU', required: false })
-  @IsString()
-  @IsOptional()
-  sku?: string | null;
+  @ApiProperty({ description: '상품아이템 타입', default: OrderStatus.WAITING })
+  @IsEnum(OrderStatus)
+  orderStatus: OrderStatus;
 
   @ApiProperty({ description: '상품아이템 가격', required: false })
   @IsNumber()
@@ -34,12 +31,25 @@ export class CreateOrderDto {
   @ApiProperty({ description: '상품아이템 배달비', required: false })
   @IsNumber()
   @IsOptional()
-  deliveryFee?: number | null;
+  shipping?: number | null;
 
-  @ApiProperty({ description: '상품아이템 수량', required: false })
-  @IsNumber()
+  @ApiProperty({ description: '택배업체', default: Courier.KDEXP })
+  @IsEnum(Courier)
+  courier: Courier;
+
+  @ApiProperty({ description: '송장번호', required: false })
+  @IsString()
   @IsOptional()
-  quantity: number;
+  trackingNumber?: string | null;
+
+  @ApiProperty({ description: '배송설명(특이사항)', required: false })
+  @IsString()
+  @IsOptional()
+  shippingComment?: string | null;
+
+  @ApiProperty({ description: '배송상태', default: ShippingStatus.PACKAGING })
+  @IsEnum(ShippingStatus)
+  shippingStatus: ShippingStatus;
 
   @ApiProperty({ description: '사용자 아이디', required: false })
   @IsNumber()

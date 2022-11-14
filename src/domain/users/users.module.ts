@@ -8,12 +8,14 @@ import { User } from 'src/domain/users/user.entity';
 import { UsersController } from 'src/domain/users/users.controller';
 import { UsersService } from 'src/domain/users/users.service';
 import { S3Module } from 'src/services/aws/s3.module';
+import { IamportModule } from 'src/services/iamport/iamport.module';
 import { NaverModule } from 'src/services/naver/naver.module';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Auction, Artist, Profile]),
+    TypeOrmModule.forFeature([User, Artist, Auction, Profile]),
     S3Module,
     NaverModule,
+    IamportModule,
   ],
   exports: [UsersService],
   providers: [UsersService],

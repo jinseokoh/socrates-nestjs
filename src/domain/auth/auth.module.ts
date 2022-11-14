@@ -1,11 +1,8 @@
 import { CacheModule, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config/dist/config.service';
 import { JwtModule } from '@nestjs/jwt';
-import * as redisStore from 'cache-manager-ioredis';
-import { SesModule } from './../../services/aws/ses.module';
-import { NamingModule } from './../../services/naming/naming.module';
-
 import { PassportModule } from '@nestjs/passport';
+import * as redisStore from 'cache-manager-ioredis';
 import { AuthController } from 'src/domain/auth/auth.controller';
 import { AuthService } from 'src/domain/auth/auth.service';
 import { FirebaseStrategy } from 'src/domain/auth/strategies/firebase.strategy';
@@ -13,13 +10,13 @@ import { JwtAuthStrategy } from 'src/domain/auth/strategies/jwt-auth.strategy';
 import { JwtRefreshStrategy } from 'src/domain/auth/strategies/jwt-refresh.strategy';
 import { ProvidersModule } from 'src/domain/providers/providers.module';
 import { UsersModule } from 'src/domain/users/users.module';
+import { SesModule } from 'src/services/aws/ses.module';
 @Module({
   imports: [
     UsersModule,
     ProvidersModule,
     PassportModule,
     SesModule,
-    NamingModule,
     JwtModule.register({}),
     CacheModule.registerAsync({
       isGlobal: true,

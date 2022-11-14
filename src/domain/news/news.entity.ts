@@ -1,4 +1,4 @@
-import { NewsCategory } from 'src/common/enums/news-category';
+import { NewsCategory } from 'src/common/enums/game-category';
 import {
   BaseEntity,
   Column,
@@ -18,8 +18,8 @@ export class News extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   body: string | null;
 
-  @Column('json', { nullable: true })
-  images: object[] | null;
+  @Column({ length: 255, nullable: true })
+  image: string | null;
 
   @Column({
     type: 'enum',

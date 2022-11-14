@@ -1,30 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateDestinationDto {
   @ApiProperty({ description: '주소지 제목', required: false })
   @IsString()
   @IsOptional()
   title?: string | null;
 
-  @ApiProperty({ description: '수취인 이름', required: false })
+  @ApiProperty({ description: '수취인 이름' })
   @IsString()
   @IsOptional()
-  name?: string | null;
+  name: string;
+
+  @ApiProperty({ description: '수취인 전화번호' })
+  @IsString()
+  @IsOptional()
+  phone: string;
 
   @ApiProperty({ description: '수취인 전화번호', required: false })
   @IsString()
   @IsOptional()
-  phone?: string | null;
+  phone2?: string | null;
 
   @ApiProperty({ description: '우편번호' })
   @IsString()
   @IsOptional()
-  postalCode?: string | null;
+  postalCode: string;
 
   @ApiProperty({ description: '주소' })
   @IsString()
   @IsOptional()
-  address?: string | null;
+  address: string;
 
   @ApiProperty({ description: '상세주소' })
   @IsString()
@@ -45,6 +50,16 @@ export class CreateDestinationDto {
   @IsString()
   @IsOptional()
   country?: string | null;
+
+  @ApiProperty({ description: '배송시 요청사항', required: false })
+  @IsString()
+  @IsOptional()
+  requestMessage?: string | null;
+
+  @ApiProperty({ description: 'default 여부', required: false, default: false })
+  @IsBoolean()
+  @IsOptional()
+  isDefault?: boolean | null;
 
   @ApiProperty({ description: '사용자 아이디', required: false })
   @IsNumber()

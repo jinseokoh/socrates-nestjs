@@ -1,27 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateQuestionDto {
-  @ApiProperty({ description: '작품명 🔍' })
+  @ApiProperty({ description: '문의하는 회원의 셀러타입' })
   @IsOptional()
   @IsString()
-  title: string | null;
+  sellerType: string | null;
 
-  @ApiProperty({ description: '작가명 🔍' })
+  @ApiProperty({ description: '질문' })
   @IsOptional()
   @IsString()
-  name: string | null;
-
-  @ApiProperty({ description: '본문 🔍' })
-  @IsNotEmpty()
-  @IsString()
-  body?: string | null;
+  question?: string | null;
 
   @ApiProperty({ description: '답변' })
   @IsOptional()
@@ -33,8 +22,8 @@ export class CreateQuestionDto {
   @IsOptional()
   userId: number | null;
 
-  @ApiProperty({ description: '이미지들 (String[])', required: false })
-  @IsArray()
+  @ApiProperty({ description: '작품 아이디' })
+  @IsNumber()
   @IsOptional()
-  images?: string[] | null;
+  artworkId: number | null;
 }
