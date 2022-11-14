@@ -13,15 +13,15 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { Bid } from 'src/domain/bids/bid.entity';
-import { BidsService } from 'src/domain/bids/bids.service';
-import { CreateBidDto } from 'src/domain/bids/dto/create-bid.dto';
-import { UpdateBidDto } from 'src/domain/bids/dto/update-bid.dto';
+import { Game } from 'src/domain/bids/bid.entity';
+import { GamesService } from 'src/domain/bids/bids.service';
+import { CreateGameDto } from 'src/domain/bids/dto/create-bid.dto';
+import { UpdateGameDto } from 'src/domain/bids/dto/update-bid.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller()
-export class BidsController {
-  constructor(private readonly bidsService: BidsService) {}
+export class GamesController {
+  constructor(private readonly bidsService: GamesService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
@@ -33,8 +33,8 @@ export class BidsController {
     @CurrentUserId() userId: number,
     @Param('auctionId') auctionId: number,
     @Body()
-    dto: CreateBidDto,
-  ): Promise<Bid> {
+    dto: CreateGameDto,
+  ): Promise<Game> {
     return await this.bidsService.create({ ...dto, userId, auctionId });
   }
 
@@ -45,23 +45,25 @@ export class BidsController {
   @ApiOperation({ description: '모든 입찰 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get('bids')
-  async getAllBids(@Paginate() query: PaginateQuery): Promise<Paginated<Bid>> {
+  async getAllGames(
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Game>> {
     return await this.bidsService.findAll(query);
   }
 
   @ApiOperation({ description: '특정 경매상품 입찰 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get('auctions/:auctionId/bids')
-  async getBidsWithAuctionId(
+  async getGamesWithAuctionId(
     @Param('auctionId') auctionId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Bid>> {
+  ): Promise<Paginated<Game>> {
     return await this.bidsService.findAllWithAuctionId(auctionId, query);
   }
 
   @ApiOperation({ description: '입찰 상세보기' })
   @Get('bids/:bidId')
-  async getBidById(@Param('bidId') id: number): Promise<Bid> {
+  async getGameById(@Param('bidId') id: number): Promise<Game> {
     return this.bidsService.findById(id, ['auction', 'user']);
   }
 
@@ -73,8 +75,8 @@ export class BidsController {
   @Patch('bids/:bidId')
   async update(
     @Param('bidId') id: number,
-    @Body() dto: UpdateBidDto,
-  ): Promise<Bid> {
+    @Body() dto: UpdateGameDto,
+  ): Promise<Game> {
     return await this.bidsService.update(id, dto);
   }
 
@@ -84,7 +86,7 @@ export class BidsController {
 
   @ApiOperation({ description: '관리자) 입찰 soft 삭제' })
   @Delete('bids/:bidId')
-  async remove(@Param('bidId') id: number): Promise<Bid> {
+  async remove(@Param('bidId') id: number): Promise<Game> {
     return await this.bidsService.softRemove(id);
   }
 }

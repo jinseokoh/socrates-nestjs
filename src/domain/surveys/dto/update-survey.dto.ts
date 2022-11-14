@@ -1,3 +1,3 @@
 import { PartialType } from '@nestjs/swagger';
-import { CreateArtworkDto } from 'src/domain/artworks/dto/create-artwork.dto';
-export class UpdateArtworkDto extends PartialType(CreateArtworkDto) {}
+import { CreatesurveyDto } from 'src/domain/surveys/dto/create-survey.dto';
+export class UpdatesurveyDto extends PartialType(CreatesurveyDto) {}

@@ -11,19 +11,19 @@ import {
 } from 'nestjs-paginate';
 import { InjectSlack } from 'nestjs-slack-webhook';
 import { AnyData } from 'src/common/types/any-data.type';
-import { Artwork } from 'src/domain/artworks/artwork.entity';
-import { CreateArtworkDto } from 'src/domain/artworks/dto/create-artwork.dto';
-import { UpdateArtworkDto } from 'src/domain/artworks/dto/update-artwork.dto';
 import { Hashtag } from 'src/domain/hashtags/hashtag.entity';
+import { CreateSurveyDto } from 'src/domain/Surveys/dto/create-Survey.dto';
+import { UpdateSurveyDto } from 'src/domain/Surveys/dto/update-Survey.dto';
+import { Survey } from 'src/domain/Surveys/Survey.entity';
 import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { Repository } from 'typeorm/repository/Repository';
 @Injectable()
-export class ArtworksService {
+export class SurveysService {
   constructor(
     @InjectSlack() private readonly slack: IncomingWebhook,
-    @InjectRepository(Artwork)
-    private readonly repository: Repository<Artwork>,
+    @InjectRepository(Survey)
+    private readonly repository: Repository<Survey>,
     @InjectRepository(Hashtag)
     private readonly hashtagsRepository: Repository<Hashtag>,
     private readonly s3Service: S3Service,
@@ -33,30 +33,30 @@ export class ArtworksService {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  // Artwork 생성
+  // Survey 생성
   async create(
-    dto: CreateArtworkDto,
+    dto: CreateSurveyDto,
     message: string | null = null,
-  ): Promise<Artwork> {
+  ): Promise<Survey> {
     if (message) {
       this.slack.send(`[local-test] ${message}`);
     }
-    const artwork = this.repository.create(dto);
-    return await this.repository.save(artwork);
+    const Survey = this.repository.create(dto);
+    return await this.repository.save(Survey);
   }
 
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
 
-  // Artwork 리스트 w/ Pagination
-  async findAll(query: PaginateQuery): Promise<Paginated<Artwork>> {
+  // Survey 리스트 w/ Pagination
+  async findAll(query: PaginateQuery): Promise<Paginated<Survey>> {
     const queryBuilder = this.repository
-      .createQueryBuilder('artwork')
-      .leftJoinAndSelect('artwork.artist', 'artist')
+      .createQueryBuilder('Survey')
+      .leftJoinAndSelect('Survey.artist', 'artist')
       .leftJoinAndSelect('artist.user', 'user');
 
-    const config: PaginateConfig<Artwork> = {
+    const config: PaginateConfig<Survey> = {
       sortableColumns: [
         'id',
         'artistName',
@@ -83,8 +83,8 @@ export class ArtworksService {
     return paginate(query, queryBuilder, config);
   }
 
-  // Artwork 상세보기
-  async findById(id: number, relations: string[] = []): Promise<Artwork> {
+  // Survey 상세보기
+  async findById(id: number, relations: string[] = []): Promise<Survey> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -103,37 +103,34 @@ export class ArtworksService {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  // Artwork 갱신
-  async update(id: number, dto: UpdateArtworkDto): Promise<Artwork> {
-    const artwork = await this.repository.preload({ id, ...dto });
-    if (!artwork) {
+  // Survey 갱신
+  async update(id: number, dto: UpdateSurveyDto): Promise<Survey> {
+    const Survey = await this.repository.preload({ id, ...dto });
+    if (!Survey) {
       throw new NotFoundException(`entity not found`);
     }
 
-    return await this.repository.save(artwork);
+    return await this.repository.save(Survey);
   }
 
-  // Artwork 이미지 저장후 URL (string) 리턴
+  // Survey 이미지 저장후 URL (string) 리턴
   async uploadImage(id: number, file: Express.Multer.File): Promise<AnyData> {
-    const path = `local/artworks/${id}/${randomName('artwork', file.mimetype)}`;
+    const path = `local/Surveys/${id}/${randomName('Survey', file.mimetype)}`;
     await this.s3Service.upload(file.buffer, path);
 
     return { data: `${process.env.AWS_CLOUDFRONT_URL}/${path}` };
   }
 
-  // Artwork 이미지들 저장후 URLs (string[]) 리턴
+  // Survey 이미지들 저장후 URLs (string[]) 리턴
   async uploadImages(
     id: number,
     files: Array<Express.Multer.File>,
   ): Promise<AnyData> {
-    const artwork = await this.findById(id);
-    const images = artwork.images ?? [];
+    const Survey = await this.findById(id);
+    const images = Survey.images ?? [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const path = `local/artworks/${id}/${randomName(
-        'artwork',
-        file.mimetype,
-      )}`;
+      const path = `local/Surveys/${id}/${randomName('Survey', file.mimetype)}`;
       await this.s3Service.upload(file.buffer, path);
       images.push(`${process.env.AWS_CLOUDFRONT_URL}/${path}`);
     }
@@ -141,7 +138,7 @@ export class ArtworksService {
     return { data: images };
   }
 
-  // ArtworkId 없이 Artwork 이미지 저장후  URLs (string[]) 리턴; Non-preferred way
+  // SurveyId 없이 Survey 이미지 저장후  URLs (string[]) 리턴; Non-preferred way
   async uploadFiles(
     userId: number,
     files: Array<Express.Multer.File>,
@@ -150,7 +147,7 @@ export class ArtworksService {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const path = `local/files/${userId}/${randomName(
-        'artwork',
+        'Survey',
         file.mimetype,
       )}`;
       await this.s3Service.upload(file.buffer, path);
@@ -160,14 +157,14 @@ export class ArtworksService {
     return { data: images };
   }
 
-  // Artwork 이미지 삭제
-  async deleteImages(id: number, urls: Array<string>): Promise<Artwork> {
-    const artwork = await this.findById(id);
-    const images = artwork.images.filter((url) => {
+  // Survey 이미지 삭제
+  async deleteImages(id: number, urls: Array<string>): Promise<Survey> {
+    const Survey = await this.findById(id);
+    const images = Survey.images.filter((url) => {
       return !urls.includes(url);
     });
-    if (artwork.images.length !== images.length) {
-      artwork.images.map(async (url) => {
+    if (Survey.images.length !== images.length) {
+      Survey.images.map(async (url) => {
         if (urls.includes(url)) {
           await this.s3Service.delete(url);
         }
@@ -178,7 +175,7 @@ export class ArtworksService {
     throw new NotFoundException(`file not found`);
   }
 
-  // Artwork 뷰잉룸 이미지 합성
+  // Survey 뷰잉룸 이미지 합성
   async composeImage(
     id: number,
     option: string,
@@ -186,13 +183,13 @@ export class ArtworksService {
   ): Promise<AnyData> {
     let offsetX, offsetY, transparentBg;
     // validation check
-    const artwork = await this.findById(id);
-    const width = artwork.width;
-    const height = artwork.height;
+    const Survey = await this.findById(id);
+    const width = Survey.width;
+    const height = Survey.height;
     if (width < 10 && height < 10) {
       throw new Error('fix the width and height first.');
     }
-    // artwork width * ratio = 타겟의 가로 "픽셀" 사이즈 (bg1 의 경우, 600 pixels = 30cm 로 가정)
+    // Survey width * ratio = 타겟의 가로 "픽셀" 사이즈 (bg1 의 경우, 600 pixels = 30cm 로 가정)
     const ratio = option === 'bg1' ? 2 / 3 : 5 / 6;
     const shadowOption =
       option === 'bg1'
@@ -253,7 +250,7 @@ export class ArtworksService {
       .composite(intermediateImgWithShadow, offsetX, offsetY)
       .composite(obj, 0, 0)
       .getBufferAsync(Jimp.MIME_JPEG); // file.mimetype
-    const path = `local/artworks/${id}/${randomName('composite')}`;
+    const path = `local/Surveys/${id}/${randomName('composite')}`;
     await this.s3Service.upload(finalImg, path);
 
     return { data: `${process.env.AWS_CLOUDFRONT_URL}/${path}` };
@@ -263,14 +260,14 @@ export class ArtworksService {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async softRemove(id: number): Promise<Artwork> {
-    const artwork = await this.findById(id);
-    return await this.repository.softRemove(artwork);
+  async softRemove(id: number): Promise<Survey> {
+    const Survey = await this.findById(id);
+    return await this.repository.softRemove(Survey);
   }
 
-  async remove(id: number): Promise<Artwork> {
-    const artwork = await this.findById(id);
-    return await this.repository.remove(artwork);
+  async remove(id: number): Promise<Survey> {
+    const Survey = await this.findById(id);
+    return await this.repository.remove(Survey);
   }
 
   //--------------------------------------------------------------------------//
@@ -285,7 +282,7 @@ export class ArtworksService {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const path = `local/files/${userId}/${randomName(
-        'artwork',
+        'Survey',
         file.mimetype,
       )}`;
       const url = await this.s3Service.generatePresignedUrl(path);
@@ -298,21 +295,21 @@ export class ArtworksService {
   // Hashtag related endpoints
   //--------------------------------------------------------------------------//
 
-  async syncHashtags(id: number, keys: string[]): Promise<Artwork> {
-    const artwork = await this.findById(id);
-    const artworkHashtags = await this.repository
+  async syncHashtags(id: number, keys: string[]): Promise<Survey> {
+    const Survey = await this.findById(id);
+    const SurveyHashtags = await this.repository
       .createQueryBuilder()
-      .relation(Artwork, 'hashtags')
-      .of(artwork)
+      .relation(Survey, 'hashtags')
+      .of(Survey)
       .loadMany();
     await this.repository
       .createQueryBuilder()
-      .relation(Artwork, 'hashtags')
-      .of(artwork)
-      .remove(artworkHashtags);
+      .relation(Survey, 'hashtags')
+      .of(Survey)
+      .remove(SurveyHashtags);
 
     if (keys.length < 1) {
-      return artwork;
+      return Survey;
     }
 
     const parents = keys
@@ -333,21 +330,21 @@ export class ArtworksService {
     const hashtags = await this.hashtagsRepository.find({
       where: conditions,
     });
-    artwork.hashtags = hashtags;
-    return await this.repository.save(artwork);
+    Survey.hashtags = hashtags;
+    return await this.repository.save(Survey);
   }
 
-  async attachHashtag(artworkId: number, hashtagId: number): Promise<any> {
+  async attachHashtag(SurveyId: number, hashtagId: number): Promise<any> {
     return await this.repository.manager.query(
-      'INSERT IGNORE INTO `hashtag_artwork` (artworkId, hashtagId) VALUES (?, ?)',
-      [artworkId, hashtagId],
+      'INSERT IGNORE INTO `hashtag_Survey` (SurveyId, hashtagId) VALUES (?, ?)',
+      [SurveyId, hashtagId],
     );
   }
 
-  async detachHashtag(artworkId: number, hashtagId: number): Promise<any> {
+  async detachHashtag(SurveyId: number, hashtagId: number): Promise<any> {
     return await this.repository.manager.query(
-      'DELETE FROM `hashtag_artwork` WHERE artworkId = ? AND hashtagId = ?',
-      [artworkId, hashtagId],
+      'DELETE FROM `hashtag_Survey` WHERE SurveyId = ? AND hashtagId = ?',
+      [SurveyId, hashtagId],
     );
   }
 }

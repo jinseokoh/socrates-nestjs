@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
-export class CreateBidDto {
+export class CreateGameDto {
   @ApiProperty({ description: '호가' })
   @IsNumber()
   amount: number;
