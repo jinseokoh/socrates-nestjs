@@ -47,7 +47,7 @@ export class User extends BaseEntity {
 
   @Column({ length: 1, nullable: true })
   @ApiProperty({ description: 'gender' })
-  gender: string;
+  gender: string | null;
 
   @Column({ nullable: true })
   @ApiProperty({ description: 'dob' })

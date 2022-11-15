@@ -1,21 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SlackModule } from 'nestjs-slack-webhook';
-import { Hashtag } from 'src/domain/hashtags/hashtag.entity';
-import { QuestionsModule } from 'src/domain/questions/questions.module';
-import { Survey } from 'src/domain/Surveys/Survey.entity';
-import { SurveysController } from 'src/domain/Surveys/Surveys.controller';
-import { SurveysService } from 'src/domain/Surveys/Surveys.service';
-import { UsersModule } from 'src/domain/users/users.module';
-import { S3Module } from 'src/services/aws/s3.module';
+import { Survey } from 'src/domain/surveys/survey.entity';
+import { SurveysController } from 'src/domain/surveys/surveys.controller';
+import { SurveysService } from 'src/domain/surveys/surveys.service';
+import { User } from 'src/domain/users/user.entity';
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Survey, Hashtag]),
-    UsersModule,
-    QuestionsModule,
-    SlackModule,
-    S3Module,
-  ],
+  imports: [TypeOrmModule.forFeature([Survey, User])],
   exports: [SurveysService],
   providers: [SurveysService],
   controllers: [SurveysController],

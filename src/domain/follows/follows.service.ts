@@ -25,8 +25,10 @@ export class FollowsService {
 
   async find(myUserId: number, otherUserId: number) {
     return await this.repository.findOne({
-      followerId: myUserId,
-      followingId: otherUserId,
+      where: {
+        followerId: myUserId,
+        followingId: otherUserId,
+      },
     });
   }
 

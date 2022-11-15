@@ -1,42 +1,39 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
-  IsBoolean,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
-export class CreatesurveyDto {
-  @ApiProperty({ description: '작품명', required: true })
+import { Category } from 'src/common/enums/category';
+export class CreateSurveyDto {
+  @ApiProperty({ description: '질문', required: true })
   @IsString()
   question: string;
 
-  @ApiProperty({ description: '작품이미지', required: false })
+  @ApiProperty({ description: '답변', required: true })
   @IsArray()
-  @IsOptional()
-  answers?: string[] | null;
+  answers: string[];
 
-  @ApiProperty({ description: '비공개 메모', required: false })
-  @IsString()
-  @IsOptional()
-  note?: string | null;
+  @ApiProperty({
+    description: 'category',
+    default: Category.FOOD,
+  })
+  @IsEnum(Category)
+  category: Category;
 
-  @ApiProperty({ description: '작가 아이디', required: false })
+  @ApiProperty({ description: '사용자 아이디' })
   @IsNumber()
   @IsOptional()
-  artistId?: number | null;
-
-  @ApiProperty({ description: '리셀러(유저) 아이디', required: false })
-  @IsNumber()
-  @IsOptional()
-  ownerId?: number | null;
+  userId: number | null;
 
   //?-------------------------------------------------------------------------//
   //? additional slack message flag
   //?-------------------------------------------------------------------------//
 
-  @ApiProperty({ description: '슬랙메시지 여부', default: true })
-  @IsBoolean()
-  @IsOptional()
-  slack?: boolean = true;
+  // @ApiProperty({ description: '슬랙메시지 여부', default: true })
+  // @IsBoolean()
+  // @IsOptional()
+  // slack?: boolean = true;
 }

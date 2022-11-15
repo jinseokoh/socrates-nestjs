@@ -5,7 +5,6 @@ import { Transport } from '@nestjs/microservices';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
-import { sseMiddleware } from 'express-sse-middleware';
 import * as firebaseAdmin from 'firebase-admin';
 import helmet from 'helmet';
 import { AppModule } from 'src/app.module';
@@ -27,7 +26,7 @@ async function bootstrap() {
   });
   await app.startAllMicroservices();
 
-  app.setGlobalPrefix('v2', { exclude: ['/'] });
+  app.setGlobalPrefix('v1', { exclude: ['/'] });
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
   // app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalPipes(
@@ -55,13 +54,13 @@ async function bootstrap() {
 
   app.enableCors();
   app.use(helmet());
-  app.use(sseMiddleware);
+  // app.use(sseMiddleware);
   app.use(helmet.hidePoweredBy());
 
   const config = new DocumentBuilder()
-    .setTitle('Flea Auction v2')
-    .setDescription('A revamped API running on top of NestJS.')
-    .setVersion('2.0')
+    .setTitle('Meet Sage v1')
+    .setDescription('An API running on top of NestJS.')
+    .setVersion('1.0')
     .addTag('API written by GoK with lots of 💔')
     .build();
   const document = SwaggerModule.createDocument(app, config);

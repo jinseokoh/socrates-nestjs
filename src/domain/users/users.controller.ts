@@ -21,7 +21,6 @@ import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { UpdateProfileDto } from 'src/domain/profiles/dto/update-profile.dto';
 import { Profile } from 'src/domain/profiles/profile.entity';
-import { UserFilter } from 'src/domain/users/decorators/user-filter.decorator';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
@@ -34,14 +33,12 @@ import { User } from 'src/domain/users/user.entity';
 import { UsersService } from 'src/domain/users/users.service';
 import { multerOptions } from 'src/helpers/multer-options';
 import { IamportService } from 'src/services/iamport/iamport.service';
-import { NaverService } from 'src/services/naver/naver.service';
 import { AvatarInterceptor } from './interceptors/avatar-interceptor';
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly naverService: NaverService,
     private readonly iamportService: IamportService,
   ) {}
 
@@ -60,19 +57,6 @@ export class UsersController {
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '[관리자] ExtendedUser 리스트 w/ Pagination' })
-  @UseInterceptors(AvatarInterceptor)
-  @PaginateQueryOptions()
-  @Get('admin')
-  async getExtendedUsers(
-    @UserFilter() filterQuery: any,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<User>> {
-    const queryParams = { ...query, ...filterQuery };
-    console.log(queryParams, 'query');
-    return this.usersService.findAllExtended(queryParams);
-  }
 
   @ApiOperation({ description: 'User 리스트 w/ Pagination' })
   @UseInterceptors(AvatarInterceptor)
@@ -220,33 +204,5 @@ export class UsersController {
     if (!user.phone) {
       throw new BadRequestException(`user has no phone number`);
     }
-
-    await this.naverService.sendAlimtalk(
-      'PAYSUCCESS',
-      user.phone,
-      `안녕하세요. ${user.username}님!
-
-플리옥션 결제가 완료되었습니다.
-소중한 작품이 곧 컬렉터님을 찾아갈 예정입니다.
-
-아트 컬렉팅의 시작, 플리옥션!
-컬렉터가 되어주셔서 감사합니다.`,
-    );
-  }
-
-  // To notify a user via SMS
-  @ApiOperation({ description: '사용자 SMS 보내기' })
-  @Post(':id/sms')
-  async sendSms(
-    @Param('id') id: number,
-    @Body('message') message: string,
-  ): Promise<void> {
-    const user = await this.usersService.findById(id);
-
-    if (!user.phone) {
-      throw new BadRequestException(`user has no phone number`);
-    }
-
-    await this.naverService.sendSms(user.phone, message);
   }
 }

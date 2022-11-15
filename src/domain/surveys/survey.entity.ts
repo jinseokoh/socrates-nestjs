@@ -1,13 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { GameCategory } from 'src/common/enums/game-category';
+import { Category } from 'src/common/enums/category';
 import { User } from 'src/domain/users/user.entity';
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity() // 작품
@@ -16,21 +19,33 @@ export class Survey extends BaseEntity {
   @ApiProperty({ description: 'id' })
   id: number;
 
-  @Column({ length: 128 })
+  @Column({ length: 255, nullable: false })
   @ApiProperty({ description: '질문' })
   question: string;
 
-  @Column('json', { nullable: true })
+  @Column('json', { nullable: false })
   @ApiProperty({ description: '답변' })
-  images: string[] | null;
+  answers: string[];
+
+  @Column({ default: false })
+  isApproved: boolean;
 
   @Column({
     type: 'enum',
-    enum: GameCategory,
-    default: GameCategory.FOOD,
+    enum: Category,
+    default: Category.FOOD,
   })
   @ApiProperty({ description: 'category' })
-  category: GameCategory;
+  category: Category;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date | null;
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo

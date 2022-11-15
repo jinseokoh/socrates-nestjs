@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 export const configuration = () => ({
   nodeEnv: process.env.NODE_ENV,
-  appPort: Number(process.env.APP_PORT ?? '3001'),
+  appPort: Number(process.env.APP_PORT ?? '4001'),
   timeZone: process.env.TIME_ZONE,
   database: {
     engine: process.env.DB_ENGINE ?? 'mysql',

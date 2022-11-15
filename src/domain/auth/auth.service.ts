@@ -22,7 +22,7 @@ import { ProvidersService } from 'src/domain/providers/providers.service';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { User } from 'src/domain/users/user.entity';
 import { UsersService } from 'src/domain/users/users.service';
-import { makeUsername } from 'src/helpers/random-username';
+import { getUsername } from 'src/helpers/random-username';
 
 @Injectable()
 export class AuthService {
@@ -70,7 +70,7 @@ export class AuthService {
   async register(dto: UserCredentialsDto) {
     const user = await this.usersService.create(<CreateUserDto>dto);
     const tokens = await this._getTokens(user);
-    const username = makeUsername(user.id);
+    const username = getUsername(user.id);
 
     await this._updateUserName(user.id, username);
     await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
@@ -171,7 +171,7 @@ export class AuthService {
     const user = await this.usersService.create({ ...dto, isActive: true });
     await this.providersService.create({ ...dto, userId: user.id });
     const tokens = await this._getTokens(user);
-    const username = makeUsername(user.id);
+    const username = getUsername(user.id);
 
     await this._updateUserName(user.id, username);
     await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
@@ -268,7 +268,7 @@ export class AuthService {
     };
     const accessTokenOptions = {
       secret: process.env.AUTH_TOKEN_SECRET ?? 'AUTH-TOKEN-SECRET',
-      expiresIn: '1d', // todo. change it to '15m' in production
+      expiresIn: '15m', // todo. change it to '15m' in production
     };
     const refreshTokenOptions = {
       secret: process.env.REFRESH_TOKEN_SECRET ?? 'REFRESH-TOKEN-SECRET',
@@ -291,7 +291,7 @@ export class AuthService {
       charset: 'numeric',
     });
 
-    await this.cacheManager.set(key, randomValue, { ttl: 60 * 10 });
+    await this.cacheManager.set(key, randomValue, 60 * 10);
     return randomValue;
   }
 

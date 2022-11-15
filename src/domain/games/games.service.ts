@@ -1,11 +1,9 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -13,14 +11,10 @@ import {
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
-import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
-import { Status } from 'src/common/enums';
-import { Auction } from 'src/domain/auctions/auction.entity';
-import { Game } from 'src/domain/bids/bid.entity';
-import { CreateGameDto } from 'src/domain/bids/dto/create-bid.dto';
-import { UpdateGameDto } from 'src/domain/bids/dto/update-bid.dto';
+import { CreateGameDto } from 'src/domain/games/dto/create-game.dto';
+import { UpdateGameDto } from 'src/domain/games/dto/update-game.dto';
+import { Game } from 'src/domain/games/game.entity';
 import { User } from 'src/domain/users/user.entity';
-import { FcmService } from 'src/services/fcm/fcm.service';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -28,13 +22,8 @@ export class GamesService {
   private readonly logger = new Logger(GamesService.name);
 
   constructor(
-    private readonly fcmService: FcmService,
-    @Inject(REDIS_PUBSUB_CLIENT)
-    private readonly redisClient: ClientProxy,
     @InjectRepository(Game)
     private readonly repository: Repository<Game>,
-    @InjectRepository(Auction)
-    private readonly auctionsRepository: Repository<Auction>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
   ) {}
@@ -44,29 +33,14 @@ export class GamesService {
   //?-------------------------------------------------------------------------//
 
   async create(dto: CreateGameDto): Promise<Game> {
-    this.logger.log(dto);
     const user = await this.usersRepository.findOneOrFail({
       where: { id: dto.userId },
     });
-
-    // perform basic validation checks
     if (user.isBanned) {
-      throw new BadRequestException(`not allowed to bid`);
+      throw new BadRequestException(`not allowed to use`);
     }
-    const bid = this.repository.create(dto);
-    const auction = await this.auctionsRepository.findOne({
-      id: dto.auctionId,
-    });
-    if (auction.status !== Status.ONGOING) {
-      throw new BadRequestException(`invalid status`);
-    }
-    if (auction.lastGameAmount >= dto.amount) {
-      throw new BadRequestException(`invalid bid amount`);
-    }
-
-    // record this bid for good
-    const result = await this.repository.save(bid);
-    return result;
+    const game = this.repository.create(dto);
+    return await this.repository.save(game);
   }
 
   //?-------------------------------------------------------------------------//
@@ -79,10 +53,10 @@ export class GamesService {
       searchableColumns: [],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
-        auctionId: [FilterOperator.EQ, FilterOperator.IN],
+        title: [FilterOperator.EQ],
         userId: [FilterOperator.EQ, FilterOperator.IN],
       },
-      relations: ['auction'],
+      relations: ['user'],
     });
   }
 
@@ -106,11 +80,11 @@ export class GamesService {
   //?-------------------------------------------------------------------------//
 
   async update(id: number, dto: UpdateGameDto): Promise<Game> {
-    const bid = await this.repository.preload({ id, ...dto });
-    if (!bid) {
+    const game = await this.repository.preload({ id, ...dto });
+    if (!game) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.repository.save(bid);
+    return await this.repository.save(game);
   }
 
   //?-------------------------------------------------------------------------//
@@ -118,12 +92,12 @@ export class GamesService {
   //?-------------------------------------------------------------------------//
 
   async softRemove(id: number): Promise<Game> {
-    const bid = await this.findById(id);
-    return await this.repository.softRemove(bid);
+    const game = await this.findById(id);
+    return await this.repository.softRemove(game);
   }
 
   async remove(id: number): Promise<Game> {
-    const bid = await this.findById(id);
-    return await this.repository.remove(bid);
+    const game = await this.findById(id);
+    return await this.repository.remove(game);
   }
 }

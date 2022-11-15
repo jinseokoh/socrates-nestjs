@@ -13,80 +13,68 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { Game } from 'src/domain/bids/bid.entity';
-import { GamesService } from 'src/domain/bids/bids.service';
-import { CreateGameDto } from 'src/domain/bids/dto/create-bid.dto';
-import { UpdateGameDto } from 'src/domain/bids/dto/update-bid.dto';
+import { CreateGameDto } from 'src/domain/games/dto/create-game.dto';
+import { UpdateGameDto } from 'src/domain/games/dto/update-game.dto';
+import { Game } from 'src/domain/games/game.entity';
+import { GamesService } from 'src/domain/games/games.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller()
+@Controller('games')
 export class GamesController {
-  constructor(private readonly bidsService: GamesService) {}
+  constructor(private readonly gamesService: GamesService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '입찰 생성' })
-  @Post('auctions/:auctionId/bids')
+  @ApiOperation({ description: 'Game 생성' })
+  @Post()
   async create(
     @CurrentUserId() userId: number,
-    @Param('auctionId') auctionId: number,
-    @Body()
-    dto: CreateGameDto,
+    @Body() dto: CreateGameDto,
   ): Promise<Game> {
-    return await this.bidsService.create({ ...dto, userId, auctionId });
+    console.log({ ...dto, userId });
+    return await this.gamesService.create({ ...dto, userId });
   }
 
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '모든 입찰 리스트 w/ Pagination' })
+  @ApiOperation({ description: '모든 Game 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get('bids')
-  async getAllGames(
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Game>> {
-    return await this.bidsService.findAll(query);
+  @Get()
+  async getGames(@Paginate() query: PaginateQuery): Promise<Paginated<Game>> {
+    console.log(query);
+    return await this.gamesService.findAll(query);
   }
 
-  @ApiOperation({ description: '특정 경매상품 입찰 리스트 w/ Pagination' })
-  @PaginateQueryOptions()
-  @Get('auctions/:auctionId/bids')
-  async getGamesWithAuctionId(
-    @Param('auctionId') auctionId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Game>> {
-    return await this.bidsService.findAllWithAuctionId(auctionId, query);
-  }
-
-  @ApiOperation({ description: '입찰 상세보기' })
-  @Get('bids/:bidId')
-  async getGameById(@Param('bidId') id: number): Promise<Game> {
-    return this.bidsService.findById(id, ['auction', 'user']);
+  @ApiOperation({ description: 'Game 상세보기' })
+  @Get(':id')
+  async getGameById(@Param('id') id: number): Promise<Game> {
+    return this.gamesService.findById(id, ['user']);
   }
 
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '입찰 수정' })
-  @Patch('bids/:bidId')
+  @ApiOperation({ description: 'Game 갱신' })
+  @Patch(':id')
   async update(
-    @Param('bidId') id: number,
+    @Param('id') id: number,
     @Body() dto: UpdateGameDto,
   ): Promise<Game> {
-    return await this.bidsService.update(id, dto);
+    return await this.gamesService.update(id, dto);
   }
 
   //?-------------------------------------------------------------------------//
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '관리자) 입찰 soft 삭제' })
-  @Delete('bids/:bidId')
-  async remove(@Param('bidId') id: number): Promise<Game> {
-    return await this.bidsService.softRemove(id);
+  @ApiOperation({ description: 'Game soft 삭제' })
+  @Delete(':id')
+  async remove(@Param('id') id: number): Promise<Game> {
+    return await this.gamesService.softRemove(id);
   }
 }

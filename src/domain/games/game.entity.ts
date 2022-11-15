@@ -1,4 +1,6 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { Rate } from 'src/common/enums/rate';
 import { User } from 'src/domain/users/user.entity';
 import {
   BaseEntity,
@@ -8,29 +10,28 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
-  Unique,
   UpdateDateColumn,
 } from 'typeorm';
-@Entity() //? 경매입찰내용
-@Unique('auction_id_bid_amount_key', ['auctionId', 'amount'])
+@Entity()
 export class Game extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
-  @Column({ type: 'int' })
-  amount: number;
-
-  @Column({ length: 255 })
+  @Column({ length: 255, nullable: false })
+  @ApiProperty({ description: '제목' })
   title: string;
 
   @Column({ length: 1 })
+  @ApiProperty({ description: 'gender' })
   gender: string;
 
-  @Column({ length: 1 })
-  myGender: string;
-
-  @Column({ length: 1 })
-  rate: string;
+  @Column({
+    type: 'enum',
+    enum: Rate,
+    default: Rate.NSFW,
+  })
+  @ApiProperty({ description: 'rate', default: Rate.NSFW })
+  rate: Rate;
 
   @CreateDateColumn()
   createdAt: Date;

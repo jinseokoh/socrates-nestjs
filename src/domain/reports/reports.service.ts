@@ -1,13 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IncomingWebhook } from '@slack/webhook';
 import {
   FilterOperator,
   paginate,
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
-import { InjectSlack } from 'nestjs-slack-webhook';
 import { ReportTarget } from 'src/common/enums/report-status';
 import { CreateReportDto } from 'src/domain/reports/dto/create-report.dto';
 import { UpdateReportDto } from 'src/domain/reports/dto/update-report.dto';
@@ -18,7 +16,6 @@ import { Repository } from 'typeorm/repository/Repository';
 @Injectable()
 export class ReportsService {
   constructor(
-    @InjectSlack() private readonly slack: IncomingWebhook,
     @InjectRepository(Report)
     private readonly repository: Repository<Report>,
     @InjectRepository(User)
@@ -32,9 +29,9 @@ export class ReportsService {
   async create(dto: CreateReportDto): Promise<Report> {
     const report = this.repository.create(dto);
     const target = dto.target === ReportTarget.USER ? '사용자' : '아티클댓글';
-    this.slack.send(
-      `[local-test] 신고가 접수되었습니다.\n- 대상: ${target}\n- 이유:${dto.reason}`,
-    );
+    // this.slack.send(
+    //   `[local-test] 신고가 접수되었습니다.\n- 대상: ${target}\n- 이유:${dto.reason}`,
+    // );
 
     return await this.repository.save(report);
   }

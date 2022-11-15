@@ -1,24 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Artist } from 'src/domain/artists/artist.entity';
-import { Auction } from 'src/domain/auctions/auction.entity';
 import { Profile } from 'src/domain/profiles/profile.entity';
-import { UserAuctionsController } from 'src/domain/users/user-auctions.controller';
 import { User } from 'src/domain/users/user.entity';
 import { UsersController } from 'src/domain/users/users.controller';
 import { UsersService } from 'src/domain/users/users.service';
 import { S3Module } from 'src/services/aws/s3.module';
 import { IamportModule } from 'src/services/iamport/iamport.module';
-import { NaverModule } from 'src/services/naver/naver.module';
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, Artist, Auction, Profile]),
-    S3Module,
-    NaverModule,
-    IamportModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User, Profile]), S3Module, IamportModule],
   exports: [UsersService],
   providers: [UsersService],
-  controllers: [UsersController, UserAuctionsController],
+  controllers: [UsersController],
 })
 export class UsersModule {}

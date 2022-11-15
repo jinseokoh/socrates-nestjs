@@ -1,4 +1,4 @@
-export enum GameCategory {
+export enum Theme {
   FOOD = 'FOOD',
   ALCOHOL = 'ALCOHOL',
   MOVIE = 'MOVIE',
@@ -10,5 +10,4 @@ export enum GameCategory {
   MUSIC = 'MUSIC',
   BOOK = 'BOOK',
   LOVE = 'LOVE',
-  MYSTERY = 'MYSTERY',
 }
