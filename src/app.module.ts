@@ -67,9 +67,3 @@ import { SseModule } from 'src/services/sse/sse.module';
   ],
 })
 export class AppModule {}
-
-// export class AppModule implements NestModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer.apply(SseMiddleware).forRoutes('*');
-//   }
-// }

@@ -24,6 +24,7 @@ import { User } from 'src/domain/users/user.entity';
 import { randomName } from 'src/helpers/random-filename';
 import { getUsername } from 'src/helpers/random-username';
 import { S3Service } from 'src/services/aws/s3.service';
+import { CrawlerService } from 'src/services/crawler/crawler.service';
 import { FindOneOptions } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 @Injectable()
@@ -33,6 +34,7 @@ export class UsersService {
     private readonly repository: Repository<User>,
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
+    private readonly crawlerService: CrawlerService,
     private readonly s3Service: S3Service,
   ) {}
 
@@ -54,6 +56,21 @@ export class UsersService {
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
+
+  // 운세보기
+  async askLuck(params: any): Promise<any> {
+    return await this.crawlerService.askLuck(params);
+  }
+
+  // 운세보기
+  async askLove(params: any): Promise<any> {
+    return await this.crawlerService.askLove(params);
+  }
+
+  // 역술사주팔자
+  async askYuksul(params: any): Promise<any> {
+    return await this.crawlerService.askYuksul(params);
+  }
 
   // User 리스트 w/ Pagination
   async findAll(query: PaginateQuery): Promise<Paginated<User>> {
@@ -97,8 +114,6 @@ export class UsersService {
         withDeleted: true,
       });
 
-      response.followerCount = +data.followerCount;
-      response.followingCount = +data.followingCount;
       return response;
     } catch (e) {
       throw new NotFoundException('entity not found');

@@ -4,7 +4,6 @@ import { Role } from 'src/common/enums';
 import { Game } from 'src/domain/games/game.entity';
 import { Profile } from 'src/domain/profiles/profile.entity';
 import { Provider } from 'src/domain/providers/provider.entity';
-import { Report } from 'src/domain/reports/report.entity';
 import { Survey } from 'src/domain/surveys/survey.entity';
 import {
   BaseEntity,
@@ -17,7 +16,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Follow } from '../follows/follow.entity';
 @Entity() //? 사용자
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -109,11 +107,6 @@ export class User extends BaseEntity {
   //**--------------------------------------------------------------------------*/
   //** 1-to-many hasMany
 
-  @OneToMany(() => Report, (report) => report.user, {
-    // cascade: ['insert', 'update'],
-  })
-  reports: Report[];
-
   @OneToMany(() => Survey, (survey) => survey.user, {
     // cascade: ['insert', 'update'],
   })
@@ -129,23 +122,6 @@ export class User extends BaseEntity {
   })
   games: Game[];
 
-  @OneToMany(() => Follow, (follow) => follow.follower, {
-    // cascade: ['insert', 'update'],
-  })
-  followers: Follow[];
-
-  @OneToMany(() => Follow, (follow) => follow.following, {
-    // cascade: ['insert', 'update'],
-  })
-  followings: Follow[];
-
   //**--------------------------------------------------------------------------*/
   //** many-to-many
-
-  //??--------------------------------------------------------------------------*/
-  //?? some tricks
-
-  followingCount?: number;
-
-  followerCount?: number;
 }

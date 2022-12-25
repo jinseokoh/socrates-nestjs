@@ -268,7 +268,7 @@ export class AuthService {
     };
     const accessTokenOptions = {
       secret: process.env.AUTH_TOKEN_SECRET ?? 'AUTH-TOKEN-SECRET',
-      expiresIn: '15m', // todo. change it to '15m' in production
+      expiresIn: '1d', // todo. change it to '15m' in production
     };
     const refreshTokenOptions = {
       secret: process.env.REFRESH_TOKEN_SECRET ?? 'REFRESH-TOKEN-SECRET',

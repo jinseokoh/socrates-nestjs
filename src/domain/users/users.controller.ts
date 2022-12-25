@@ -77,6 +77,24 @@ export class UsersController {
     return await this.usersService.findById(id);
   }
 
+  @ApiOperation({ description: '신한사주' })
+  @Get('luck')
+  async askLuck(@Param('id') id: number): Promise<any> {
+    return await this.usersService.askLuck(id);
+  }
+
+  @ApiOperation({ description: '신한궁합' })
+  @Get('love')
+  async askLove(@Param('id') id: number): Promise<any> {
+    return await this.usersService.askLove(id);
+  }
+
+  @ApiOperation({ description: '역술' })
+  @Get('yuksul')
+  async askYuksul(@Param('id') id: number): Promise<any> {
+    return await this.usersService.askYuksul(id);
+  }
+
   @ApiOperation({ description: 'User 상세보기' })
   @Get(':id')
   async getUserById(@Param('id') id: number): Promise<User> {
@@ -194,15 +212,4 @@ export class UsersController {
   //--------------------------------------------------------------------------//
   // Some extra endpoints
   //--------------------------------------------------------------------------//
-
-  // To notify a user via Kakao
-  @ApiOperation({ description: '사용자 카카오 알림 보내기' })
-  @Post(':id/alim')
-  async sendAlimtalk(@Param('id') id: number): Promise<void> {
-    const user = await this.usersService.findById(id);
-
-    if (!user.phone) {
-      throw new BadRequestException(`user has no phone number`);
-    }
-  }
 }
