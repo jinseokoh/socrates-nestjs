@@ -20,6 +20,7 @@ import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
+import { YearlyInputDto } from 'src/domain/users/dto/yearly-input-dto';
 import { User } from 'src/domain/users/user.entity';
 import { randomName } from 'src/helpers/random-filename';
 import { getUsername } from 'src/helpers/random-username';
@@ -57,9 +58,14 @@ export class UsersService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  // 운세보기
-  async askLuck(params: any): Promise<any> {
-    return await this.crawlerService.askLuck(params);
+  // 올해의 운세보기
+  async askYearly(dto: YearlyInputDto): Promise<any> {
+    return await this.crawlerService.askYearly(dto);
+  }
+
+  // 오늘의 운세보기
+  async askDaily(params: any): Promise<any> {
+    return await this.crawlerService.askDaily(params);
   }
 
   // 운세보기

@@ -1,15 +1,57 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-
 import { Iconv } from 'iconv';
 import { JSDOM } from 'jsdom';
 import { BioDto } from 'src/domain/users/dto/biod-dto';
+import { YearlyInputDto } from 'src/domain/users/dto/yearly-input-dto';
 import { convertUtf8ToEucKr } from 'src/helpers/ko-encoder';
 @Injectable()
 export class CrawlerService {
   // ref) https://kdexp.com/main.kd
 
-  async askLuck(params: any): Promise<any> {
+  async askYearly(dto: YearlyInputDto): Promise<any> {
+    const { data } = await axios.post(
+      'https://shinhanlife.sinbiun.com/unse/good_luck.php',
+      dto,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
+    );
+
+    return data;
+
+    const items: string[] = [];
+    const months: string[] = [];
+    const dom = new JSDOM(data);
+    const { document } = dom.window;
+    const divs = document.querySelectorAll('div.result_cont');
+
+    divs.forEach((element) => {
+      const title = element.querySelector('h3 span');
+      const content = element.querySelector('div.content');
+      const outerList = content.querySelectorAll('ul.month_li > li');
+
+      if (outerList && outerList.length > 0) {
+        outerList.forEach((v) => {
+          const items = v.querySelectorAll('ul > li');
+          const monthText = items[0] ? items[0].textContent : null;
+          const monthDesc = items[1] ? items[1].textContent : null;
+          months.push(`${monthText} : ${monthDesc}`);
+        });
+      } else {
+        items.push(`${title.textContent} : ${content.textContent}`);
+      }
+    });
+
+    return {
+      items,
+      months,
+    };
+  }
+
+  async askDaily(params: any): Promise<any> {
     const { data } = await axios.post(
       'https://shinhanlife.sinbiun.com/unse/good_luck.php',
       {

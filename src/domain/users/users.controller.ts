@@ -26,9 +26,11 @@ import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
 import { IamportCertificationDto } from 'src/domain/users/dto/iamport-certification.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
+import { YearlyInputDto } from 'src/domain/users/dto/yearly-input-dto';
 import { AmendUsernamePipe } from 'src/domain/users/pipes/amend-username.pipe';
 import { HashPasswordPipe } from 'src/domain/users/pipes/hash-password.pipe';
 import { UniqueKeysPipe } from 'src/domain/users/pipes/unique-keys.pipe';
+import { YearlyInputPipe } from 'src/domain/users/pipes/yearly-input.pipe';
 import { User } from 'src/domain/users/user.entity';
 import { UsersService } from 'src/domain/users/users.service';
 import { multerOptions } from 'src/helpers/multer-options';
@@ -77,10 +79,17 @@ export class UsersController {
     return await this.usersService.findById(id);
   }
 
-  @ApiOperation({ description: '신한사주' })
-  @Get('luck')
-  async askLuck(@Param('id') id: number): Promise<any> {
-    return await this.usersService.askLuck(id);
+  @ApiOperation({ description: '신한사주 올해의 운세' })
+  @Post('yearly')
+  async askYearly(@Body(YearlyInputPipe) dto: YearlyInputDto): Promise<any> {
+    console.log(dto);
+    return await this.usersService.askYearly(dto);
+  }
+
+  @ApiOperation({ description: '신한사주 오늘의 운세' })
+  @Get('daily')
+  async askDaily(@Param('id') id: number): Promise<any> {
+    return await this.usersService.askDaily(id);
   }
 
   @ApiOperation({ description: '신한궁합' })
