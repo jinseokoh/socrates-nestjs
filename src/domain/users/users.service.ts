@@ -18,9 +18,10 @@ import { UpdateProfileDto } from 'src/domain/profiles/dto/update-profile.dto';
 import { Profile } from 'src/domain/profiles/profile.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
+import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune-dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
-import { YearlyInputDto } from 'src/domain/users/dto/yearly-input-dto';
+import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune-dto';
 import { User } from 'src/domain/users/user.entity';
 import { randomName } from 'src/helpers/random-filename';
 import { getUsername } from 'src/helpers/random-username';
@@ -59,13 +60,13 @@ export class UsersService {
   //?-------------------------------------------------------------------------//
 
   // 올해의 운세보기
-  async askYearly(dto: YearlyInputDto): Promise<any> {
+  async askYearly(dto: YearlyFortuneDto): Promise<any> {
     return await this.crawlerService.askYearly(dto);
   }
 
   // 오늘의 운세보기
-  async askDaily(params: any): Promise<any> {
-    return await this.crawlerService.askDaily(params);
+  async askDaily(dto: DailyFortuneDto): Promise<any> {
+    return await this.crawlerService.askDaily(dto);
   }
 
   // 운세보기

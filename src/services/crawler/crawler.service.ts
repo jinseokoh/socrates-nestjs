@@ -3,13 +3,14 @@ import axios from 'axios';
 import { Iconv } from 'iconv';
 import { JSDOM } from 'jsdom';
 import { BioDto } from 'src/domain/users/dto/biod-dto';
-import { YearlyInputDto } from 'src/domain/users/dto/yearly-input-dto';
+import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune-dto';
+import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune-dto';
 import { convertUtf8ToEucKr } from 'src/helpers/ko-encoder';
 @Injectable()
 export class CrawlerService {
   // ref) https://kdexp.com/main.kd
 
-  async askYearly(dto: YearlyInputDto): Promise<any> {
+  async askYearly(dto: YearlyFortuneDto): Promise<any> {
     const { data } = await axios.post(
       'https://shinhanlife.sinbiun.com/unse/good_luck.php',
       dto,
@@ -19,11 +20,15 @@ export class CrawlerService {
         },
       },
     );
+    console.log(dto);
+    // return data;
 
-    return data;
-
-    const items: string[] = [];
-    const months: string[] = [];
+    let summary: string;
+    let money: string;
+    let business: string;
+    let family: string;
+    let relationship: string;
+    const details: string[] = [];
     const dom = new JSDOM(data);
     const { document } = dom.window;
     const divs = document.querySelectorAll('div.result_cont');
@@ -38,48 +43,51 @@ export class CrawlerService {
           const items = v.querySelectorAll('ul > li');
           const monthText = items[0] ? items[0].textContent : null;
           const monthDesc = items[1] ? items[1].textContent : null;
-          months.push(`${monthText} : ${monthDesc}`);
+          details.push(`${monthText}. ${monthDesc}`);
         });
       } else {
-        items.push(`${title.textContent} : ${content.textContent}`);
+        if (title.textContent.includes(`총론`)) {
+          summary = `${content.textContent}`;
+        } else if (title.textContent.includes(`재물`)) {
+          money = `${content.textContent}`;
+        } else if (title.textContent.includes(`사업`)) {
+          business = `${content.textContent}`;
+        } else if (title.textContent.includes(`가정`)) {
+          family = `${content.textContent}`;
+        } else {
+          relationship = `${content.textContent}`;
+        }
       }
     });
 
     return {
-      items,
-      months,
+      summary,
+      money,
+      business,
+      family,
+      relationship,
+      details,
     };
   }
 
-  async askDaily(params: any): Promise<any> {
+  async askDaily(dto: DailyFortuneDto): Promise<any> {
     const { data } = await axios.post(
       'https://shinhanlife.sinbiun.com/unse/good_luck.php',
-      {
-        unse_code: 'A104',
-        name: '고객',
-        specific_year: '2022',
-        specific_month: '12',
-        specific_day: '25',
-        user_gender: 'M',
-        user_birth_year: '1970',
-        gender: 'M',
-        sl_cal: 'S',
-        birth_year: '1970',
-        birth_month: '1',
-        birth_day: '17',
-        birth_hour: '04',
-        sp_num: '2022-12-26',
-      },
+      dto,
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       },
     );
-
+    console.log(dto);
     // return data;
-    const items: string[] = [];
-    const months: string[] = [];
+
+    let score: number;
+    let summary: string;
+    let luck: string;
+    let money: string;
+    let love: string;
     const dom = new JSDOM(data);
     const { document } = dom.window;
     const divs = document.querySelectorAll('div.result_cont');
@@ -87,23 +95,27 @@ export class CrawlerService {
     divs.forEach((element) => {
       const title = element.querySelector('h3 span');
       const content = element.querySelector('div.content');
-      const outerList = content.querySelectorAll('ul.month_li > li');
 
-      if (outerList && outerList.length > 0) {
-        outerList.forEach((v) => {
-          const items = v.querySelectorAll('ul > li');
-          const monthText = items[0] ? items[0].textContent : null;
-          const monthDesc = items[1] ? items[1].textContent : null;
-          months.push(`${monthText} : ${monthDesc}`);
-        });
-      } else {
-        items.push(`${title.textContent} : ${content.textContent}`);
+      if (title.textContent.includes(`미니`)) {
+        const first = content.querySelector('div').children[1];
+        const second = content.children[1];
+        score = parseInt(first.textContent);
+        summary = `${second.textContent}`;
+      } else if (title.textContent.includes(`총론`)) {
+        luck = `${content.textContent}`;
+      } else if (title.textContent.includes(`재물`)) {
+        money = `${content.textContent}`;
+      } else if (title.textContent.includes(`러브`)) {
+        love = `${content.textContent}`;
       }
     });
 
     return {
-      items,
-      months,
+      score,
+      summary,
+      luck,
+      money,
+      love,
     };
   }
 

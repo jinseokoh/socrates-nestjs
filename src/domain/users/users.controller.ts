@@ -5,6 +5,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -23,14 +25,16 @@ import { UpdateProfileDto } from 'src/domain/profiles/dto/update-profile.dto';
 import { Profile } from 'src/domain/profiles/profile.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
+import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune-dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
 import { IamportCertificationDto } from 'src/domain/users/dto/iamport-certification.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
-import { YearlyInputDto } from 'src/domain/users/dto/yearly-input-dto';
+import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune-dto';
 import { AmendUsernamePipe } from 'src/domain/users/pipes/amend-username.pipe';
+import { DailyFortunePipe } from 'src/domain/users/pipes/daily-fortune.pipe';
 import { HashPasswordPipe } from 'src/domain/users/pipes/hash-password.pipe';
 import { UniqueKeysPipe } from 'src/domain/users/pipes/unique-keys.pipe';
-import { YearlyInputPipe } from 'src/domain/users/pipes/yearly-input.pipe';
+import { YearlyFortunePipe } from 'src/domain/users/pipes/yearly-fortune.pipe';
 import { User } from 'src/domain/users/user.entity';
 import { UsersService } from 'src/domain/users/users.service';
 import { multerOptions } from 'src/helpers/multer-options';
@@ -80,16 +84,19 @@ export class UsersController {
   }
 
   @ApiOperation({ description: '신한사주 올해의 운세' })
+  @HttpCode(HttpStatus.OK)
   @Post('yearly')
-  async askYearly(@Body(YearlyInputPipe) dto: YearlyInputDto): Promise<any> {
-    console.log(dto);
+  async askYearly(
+    @Body(YearlyFortunePipe) dto: YearlyFortuneDto,
+  ): Promise<any> {
     return await this.usersService.askYearly(dto);
   }
 
   @ApiOperation({ description: '신한사주 오늘의 운세' })
-  @Get('daily')
-  async askDaily(@Param('id') id: number): Promise<any> {
-    return await this.usersService.askDaily(id);
+  @HttpCode(HttpStatus.OK)
+  @Post('daily')
+  async askDaily(@Body(DailyFortunePipe) dto: DailyFortuneDto): Promise<any> {
+    return await this.usersService.askDaily(dto);
   }
 
   @ApiOperation({ description: '신한궁합' })

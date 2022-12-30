@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Gender } from 'src/common/enums/gender';
-export class YearlyInputDto {
+export class DailyFortuneDto {
   @ApiProperty({ description: 'date' })
   @Type(() => Date)
   @IsDate()
@@ -65,4 +65,8 @@ export class YearlyInputDto {
   @IsString()
   @IsOptional()
   birth_hour?: string | null;
+  @ApiProperty({ description: '', required: false })
+  @IsString()
+  @IsOptional()
+  sp_num?: string | null;
 }

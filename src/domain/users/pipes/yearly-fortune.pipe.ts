@@ -1,11 +1,14 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 import * as moment from 'moment';
 @Injectable()
-export class YearlyInputPipe implements PipeTransform {
+export class YearlyFortunePipe implements PipeTransform {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   transform(value: any, _metadata: ArgumentMetadata) {
     if (value.hasOwnProperty('date') && value.hasOwnProperty('gender')) {
       const now = moment();
+      const targetYear =
+        now.month() > 10 ? now.clone().add(1, 'year').year() : now.year();
+
       const dob = moment(value.date);
       return {
         ...value,
@@ -13,14 +16,14 @@ export class YearlyInputPipe implements PipeTransform {
         name: '고객',
         gender: value.gender,
         sl_cal: 'S',
-        specific_year: `${now.add('1', 'year').year()}`,
-        specific_month: `12`,
-        specific_day: `${now.date()}`,
+        specific_year: `${targetYear}`,
+        specific_month: now.format('MM'),
+        specific_day: now.format('DD'),
         // user_gender: value.gender,
         // user_birth_year: `${dob.year()}`,
-        birth_year: `${dob.year()}`,
-        birth_month: `${dob.month() + 1}`,
-        birth_day: `${dob.date()}`,
+        birth_year: dob.format('YYYY'),
+        birth_month: dob.format('MM'),
+        birth_day: dob.format('DD'),
         birth_hour: this._convertMomentToChineseTime(dob),
       };
     }
