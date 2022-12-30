@@ -1,22 +1,26 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 import * as moment from 'moment';
 @Injectable()
-export class YearlyFortunePipe implements PipeTransform {
+export class LoveFortunePipe implements PipeTransform {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   transform(value: any, _metadata: ArgumentMetadata) {
-    if (value.hasOwnProperty('dob') && value.hasOwnProperty('gender')) {
+    if (
+      value.hasOwnProperty('dob') &&
+      value.hasOwnProperty('gender') &&
+      value.hasOwnProperty('dob2') &&
+      value.hasOwnProperty('gender2')
+    ) {
       const now = moment();
       const dob = moment(value.dob);
-      const targetYear =
-        now.month() > 10 ? now.clone().add(1, 'year').year() : now.year();
+      const dob2 = moment(value.dob2);
       return {
         ...value,
-        unse_code: 'A104',
+        unse_code: 'B017',
         name: '고객',
 
         gender: value.gender,
         sl_cal: 'S',
-        specific_year: `${targetYear}`,
+        specific_year: now.format('YYYY'),
         specific_month: now.format('MM'),
         specific_day: now.format('DD'),
         // user_gender: value.gender,
@@ -25,6 +29,13 @@ export class YearlyFortunePipe implements PipeTransform {
         birth_month: dob.format('MM'),
         birth_day: dob.format('DD'),
         birth_hour: this._convertMomentToChineseTime(dob),
+
+        gender2: value.gender2,
+        sl_cal2: 'S',
+        birth_year2: dob2.format('YYYY'),
+        birth_month2: dob2.format('MM'),
+        birth_day2: dob2.format('DD'),
+        birth_hour2: this._convertMomentToChineseTime(dob2),
       };
     }
 

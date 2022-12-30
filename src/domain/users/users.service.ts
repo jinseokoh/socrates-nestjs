@@ -20,6 +20,7 @@ import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune-dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
+import { LoveFortuneDto } from 'src/domain/users/dto/love-fortune-dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune-dto';
 import { User } from 'src/domain/users/user.entity';
@@ -69,14 +70,9 @@ export class UsersService {
     return await this.crawlerService.askDaily(dto);
   }
 
-  // 운세보기
-  async askLove(params: any): Promise<any> {
-    return await this.crawlerService.askLove(params);
-  }
-
-  // 역술사주팔자
-  async askYuksul(params: any): Promise<any> {
-    return await this.crawlerService.askYuksul(params);
+  // 궁합보기
+  async askLove(dto: LoveFortuneDto): Promise<any> {
+    return await this.crawlerService.askLove(dto);
   }
 
   // User 리스트 w/ Pagination

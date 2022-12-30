@@ -4,13 +4,14 @@ import * as moment from 'moment';
 export class DailyFortunePipe implements PipeTransform {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   transform(value: any, _metadata: ArgumentMetadata) {
-    if (value.hasOwnProperty('date') && value.hasOwnProperty('gender')) {
+    if (value.hasOwnProperty('dob') && value.hasOwnProperty('gender')) {
       const now = moment();
-      const dob = moment(value.date);
+      const dob = moment(value.dob);
       return {
         ...value,
         unse_code: 'A027',
         name: '고객',
+
         gender: value.gender,
         sl_cal: 'S',
         birth_year: dob.format('YYYY'),

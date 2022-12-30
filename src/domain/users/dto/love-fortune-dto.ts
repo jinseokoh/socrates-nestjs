@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Gender } from 'src/common/enums/gender';
-export class YearlyFortuneDto {
+export class LoveFortuneDto {
   @ApiProperty({ description: 'dob' })
   @Type(() => Date)
   @IsDate()
@@ -16,6 +16,13 @@ export class YearlyFortuneDto {
   @ApiProperty({ description: 'gender', default: Gender.M })
   @IsEnum(Gender)
   gender: Gender;
+  @ApiProperty({ description: 'dob' })
+  @Type(() => Date)
+  @IsDate()
+  dob2: Date; // YYYY-MM-DD
+  @ApiProperty({ description: 'gender', default: Gender.M })
+  @IsEnum(Gender)
+  gender2: Gender;
 
   @ApiProperty({ description: '', required: false })
   @IsString()
@@ -68,4 +75,26 @@ export class YearlyFortuneDto {
   @IsString()
   @IsOptional()
   birth_hour?: string | null;
+
+  @ApiProperty({ description: '', required: false })
+  @IsNumber()
+  @IsOptional()
+  birth_year2?: number | null;
+  @ApiProperty({ description: '', required: false })
+  @IsNumber()
+  @IsOptional()
+  birth_month2?: number | null;
+  @ApiProperty({ description: '', required: false })
+  @IsNumber()
+  @IsOptional()
+  birth_day2?: number | null;
+  @ApiProperty({ description: '', required: false })
+  @IsString()
+  @IsOptional()
+  birth_hour2?: string | null;
+
+  @ApiProperty({ description: '', required: false })
+  @IsString()
+  @IsOptional()
+  sp_num?: string | null;
 }

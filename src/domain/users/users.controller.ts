@@ -28,11 +28,13 @@ import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune-dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
 import { IamportCertificationDto } from 'src/domain/users/dto/iamport-certification.dto';
+import { LoveFortuneDto } from 'src/domain/users/dto/love-fortune-dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune-dto';
 import { AmendUsernamePipe } from 'src/domain/users/pipes/amend-username.pipe';
 import { DailyFortunePipe } from 'src/domain/users/pipes/daily-fortune.pipe';
 import { HashPasswordPipe } from 'src/domain/users/pipes/hash-password.pipe';
+import { LoveFortunePipe } from 'src/domain/users/pipes/love-fortune.pipe';
 import { UniqueKeysPipe } from 'src/domain/users/pipes/unique-keys.pipe';
 import { YearlyFortunePipe } from 'src/domain/users/pipes/yearly-fortune.pipe';
 import { User } from 'src/domain/users/user.entity';
@@ -100,15 +102,10 @@ export class UsersController {
   }
 
   @ApiOperation({ description: '신한궁합' })
-  @Get('love')
-  async askLove(@Param('id') id: number): Promise<any> {
-    return await this.usersService.askLove(id);
-  }
-
-  @ApiOperation({ description: '역술' })
-  @Get('yuksul')
-  async askYuksul(@Param('id') id: number): Promise<any> {
-    return await this.usersService.askYuksul(id);
+  @HttpCode(HttpStatus.OK)
+  @Post('love')
+  async askLove(@Body(LoveFortunePipe) dto: LoveFortuneDto): Promise<any> {
+    return await this.usersService.askLove(dto);
   }
 
   @ApiOperation({ description: 'User 상세보기' })
