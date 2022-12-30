@@ -128,29 +128,52 @@ export class CrawlerService {
       },
     );
     console.log(dto);
-    return data;
+    // return data;
 
-    const items: string[] = [];
-    // const months: string[] = [];
+    let coupleScore: number;
+    let coupleDetail: string;
+    let spouseScore: number;
+    let spouseDetail: string;
+    let friendScore: number;
+    let friendDetail: string;
+    let partnerScore: number;
+    let partnerDetail: string;
     const dom = new JSDOM(data);
     const { document } = dom.window;
-    const divs = document.querySelectorAll('div.result_area > div.result_cont');
+    const divs = document.querySelectorAll('div.result_cont');
 
     divs.forEach((element) => {
-      const span = element.querySelector('h3 > span.tit_txt');
-      const divs = element.querySelectorAll('div > div.content');
+      const title = element.querySelector('h3 span');
+      const content = element.querySelector('div.content');
 
-      const title = span ? span.textContent : null;
-      const description = divs[1] ? divs[1].textContent : null;
-      const rating = divs[0]
-        ? divs[0].querySelector('div.view > div > div > span.u_point')
-            .textContent
-        : null;
-      items.push(`${title} : ${rating} : ${description}`);
+      if (title.textContent.includes(`연인`)) {
+        const first = content.querySelector('div').children[1];
+        const second = content.children[1];
+        coupleScore = parseInt(first.textContent);
+        coupleDetail = `${second.textContent}`;
+      } else if (title.textContent.includes(`결혼`)) {
+        const first = content.querySelector('div').children[1];
+        const second = content.children[1];
+        spouseScore = parseInt(first.textContent);
+        spouseDetail = `${second.textContent}`;
+      } else if (title.textContent.includes(`친구`)) {
+        const first = content.querySelector('div').children[1];
+        const second = content.children[1];
+        friendScore = parseInt(first.textContent);
+        friendDetail = `${second.textContent}`;
+      } else if (title.textContent.includes(`직장`)) {
+        const first = content.querySelector('div').children[1];
+        const second = content.children[1];
+        partnerScore = parseInt(first.textContent);
+        partnerDetail = `${second.textContent}`;
+      }
     });
 
     return {
-      items,
+      couple: { score: coupleScore, detail: coupleDetail },
+      spouse: { score: spouseScore, detail: spouseDetail },
+      friend: { score: friendScore, detail: friendDetail },
+      partner: { score: partnerScore, detail: partnerDetail },
     };
   }
 
