@@ -13,6 +13,7 @@ import { GamesModule } from 'src/domain/games/games.module';
 import { SurveysModule } from 'src/domain/surveys/surveys.module';
 import { UsersModule } from 'src/domain/users/users.module';
 import { SseModule } from 'src/services/sse/sse.module';
+import { ChatGateway } from './chat/chat.gateway';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -64,6 +65,7 @@ import { SseModule } from 'src/services/sse/sse.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    ChatGateway,
   ],
 })
 export class AppModule {}

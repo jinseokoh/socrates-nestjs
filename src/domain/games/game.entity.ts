@@ -53,6 +53,14 @@ export class Game extends BaseEntity {
   })
   user: User;
 
+  @Exclude()
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  otherId: number | null; // to make it available to Repository.
+  @ManyToOne(() => User, (user) => user.games, {
+    onDelete: 'SET NULL',
+  })
+  other: User;
+
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
