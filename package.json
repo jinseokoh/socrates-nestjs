@@ -60,7 +60,6 @@
     "express-formidable": "^1.2.0",
     "firebase-admin": "^11.3.0",
     "helmet": "^6.0.1",
-    "iamport-rest-client-nodejs": "github:jinseokoh/rest-client-nodejs",
     "ioredis": "^5.2.4",
     "jimp": "^0.16.2",
     "jsdom": "^20.0.3",

@@ -27,7 +27,6 @@ import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune-dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
-import { IamportCertificationDto } from 'src/domain/users/dto/iamport-certification.dto';
 import { LoveFortuneDto } from 'src/domain/users/dto/love-fortune-dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune-dto';
@@ -40,15 +39,11 @@ import { YearlyFortunePipe } from 'src/domain/users/pipes/yearly-fortune.pipe';
 import { User } from 'src/domain/users/user.entity';
 import { UsersService } from 'src/domain/users/users.service';
 import { multerOptions } from 'src/helpers/multer-options';
-import { IamportService } from 'src/services/iamport/iamport.service';
 import { AvatarInterceptor } from './interceptors/avatar-interceptor';
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly iamportService: IamportService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
@@ -164,28 +159,6 @@ export class UsersController {
     }
 
     return await this.usersService.changePassword(id, dto);
-  }
-
-  // I had to submit a request form to IAMPORT to be able to receive
-  // additinoal information including phone number (status: completed.)
-  @ApiOperation({ description: 'User 본인인증정보 갱신' })
-  @Patch(':id/certify')
-  async certify(
-    @Param('id') id: number,
-    @Body() dto: IamportCertificationDto,
-  ): Promise<User> {
-    const resp = await this.iamportService.getCertificationResponse(
-      dto.imp_uid,
-    );
-    const { name, gender, birth, phone } = resp;
-    const payload = {
-      realname: name,
-      gender: gender.includes('f') || gender.includes('F') ? 'F' : 'M',
-      dob: new Date(birth).toISOString(),
-      phone: phone,
-    } as UpdateUserDto;
-
-    return await this.usersService.update(id, payload);
   }
 
   // Technically, Profile is a different model but, it's tightly coupled
