@@ -1,7 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
-import { Transport } from '@nestjs/microservices';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
@@ -9,22 +8,22 @@ import * as firebaseAdmin from 'firebase-admin';
 import helmet from 'helmet';
 import { AppModule } from 'src/app.module';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
-import { IFirebaseConfig, IRedisConfig } from './common/interfaces/index';
+import { IFirebaseConfig } from './common/interfaces/index';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const { httpAdapter } = app.get(HttpAdapterHost);
 
   const configService = app.get<ConfigService>(ConfigService);
-  const redisConfig = configService.get<IRedisConfig>('redis');
-  app.connectMicroservice({
-    transport: Transport.REDIS,
-    options: {
-      host: redisConfig.host,
-      port: redisConfig.port,
-    },
-  });
-  await app.startAllMicroservices();
+  // const redisConfig = configService.get<IRedisConfig>('redis');
+  // app.connectMicroservice({
+  //   transport: Transport.REDIS,
+  //   options: {
+  //     host: redisConfig.host,
+  //     port: redisConfig.port,
+  //   },
+  // });
+  // await app.startAllMicroservices();
 
   app.setGlobalPrefix('v1', { exclude: ['/'] });
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
