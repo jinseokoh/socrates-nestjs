@@ -29,9 +29,9 @@ import { ChatGateway } from './chat/chat.gateway';
         const nodeEnv = configService.get<string>('nodeEnv');
         const awsConfig = configService.get<IAwsConfig>('aws');
         const databaseConfig =
-          nodeEnv === 'local'
-            ? configService.get<IDatabaseConfig>('database')
-            : await getAwsDatabaseConfig(awsConfig);
+          nodeEnv === 'prod'
+            ? await getAwsDatabaseConfig(awsConfig)
+            : configService.get<IDatabaseConfig>('database');
 
         return {
           type: databaseConfig.engine,
