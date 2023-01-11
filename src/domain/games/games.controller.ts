@@ -52,7 +52,7 @@ export class GamesController {
   @ApiOperation({ description: 'Game 상세보기' })
   @Get(':id')
   async getGameById(@Param('id') id: number): Promise<Game> {
-    return this.gamesService.findById(id, ['user']);
+    return this.gamesService.findById(id, ['user', 'other']);
   }
 
   //?-------------------------------------------------------------------------//
