@@ -56,7 +56,7 @@ export class GamesService {
         title: [FilterOperator.EQ],
         userId: [FilterOperator.EQ, FilterOperator.IN],
       },
-      relations: ['user'],
+      relations: ['user', 'other'],
     });
   }
 
