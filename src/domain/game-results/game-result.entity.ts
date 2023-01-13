@@ -55,19 +55,19 @@ export class GameResult extends BaseEntity {
 
   @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
-  userId: number | null; // to make it available to Repository.
-  @ManyToOne(() => User, (user) => user.games, {
+  hostId: number | null; // to make it available to Repository.
+  @ManyToOne(() => User, (user) => user.hostGames, {
     onDelete: 'SET NULL',
   })
-  user: User;
+  host: User;
 
   @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
-  otherId: number | null; // to make it available to Repository.
-  @ManyToOne(() => User, (user) => user.games, {
+  guestId: number | null; // to make it available to Repository.
+  @ManyToOne(() => User, (user) => user.guestGames, {
     onDelete: 'SET NULL',
   })
-  other: User;
+  guest: User;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

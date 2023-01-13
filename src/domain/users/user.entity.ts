@@ -117,10 +117,15 @@ export class User extends BaseEntity {
   })
   providers: Provider[];
 
-  @OneToMany(() => Game, (game) => game.user, {
+  @OneToMany(() => Game, (game) => game.host, {
     // cascade: ['insert', 'update'],
   })
-  games: Game[];
+  hostGames: Game[];
+
+  @OneToMany(() => Game, (game) => game.guest, {
+    // cascade: ['insert', 'update'],
+  })
+  guestGames: Game[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many

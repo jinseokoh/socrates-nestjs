@@ -54,9 +54,10 @@ export class GamesService {
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         title: [FilterOperator.EQ],
-        userId: [FilterOperator.EQ, FilterOperator.IN],
+        hostId: [FilterOperator.EQ, FilterOperator.IN],
+        guestId: [FilterOperator.EQ, FilterOperator.IN],
       },
-      relations: ['user', 'other'],
+      relations: ['host', 'guest'],
     });
   }
 

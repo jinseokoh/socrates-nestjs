@@ -34,15 +34,15 @@ export class GameResultsService {
     const game = await this.gamesRepository.findOneOrFail({
       where: { id: dto.gameId },
     });
-    if (!game.otherId) {
+    if (!game.guestId) {
       throw new BadRequestException(`the game room is not ready.`);
     }
 
     return await this.repository.save(
       this.repository.create({
         ...dto,
-        userId: game.userId,
-        otherId: game.otherId,
+        hostId: game.hostId,
+        guestId: game.guestId,
       }),
     );
   }

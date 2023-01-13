@@ -23,13 +23,13 @@ export class CreateGameResultDto {
   @IsNumber()
   gameId?: number;
 
-  @ApiProperty({ description: 'userId' })
+  @ApiProperty({ description: 'hostId' })
   @IsNumber()
   @IsOptional()
-  userId?: number | null;
+  hostId?: number | null;
 
-  @ApiProperty({ description: 'otherId' })
+  @ApiProperty({ description: 'guestId' })
   @IsNumber()
   @IsOptional()
-  otherId?: number | null;
+  guestId?: number | null;
 }
