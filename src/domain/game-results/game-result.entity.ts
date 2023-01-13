@@ -1,38 +1,37 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Rate } from 'src/common/enums/rate';
-import { GameResult } from 'src/domain/game-results/game-result.entity';
+import { Game } from 'src/domain/games/game.entity';
 import { User } from 'src/domain/users/user.entity';
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 @Entity()
-export class Game {
+export class GameResult extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
-  @Column({ length: 255, nullable: false })
-  @ApiProperty({ description: '제목' })
-  title: string;
+  @Column({ length: 255, nullable: true })
+  @ApiProperty({ description: '질문' })
+  question: string | null;
 
-  @Column({ length: 1 })
-  @ApiProperty({ description: 'wanted gender' })
-  genderWanted: string;
+  @Column({ length: 255, nullable: true })
+  @ApiProperty({ description: '답변' })
+  answer: string | null;
 
-  @Column({
-    type: 'enum',
-    enum: Rate,
-    default: Rate.NSFW,
-  })
-  @ApiProperty({ description: 'rate', default: Rate.NSFW })
-  rate: Rate;
+  @Column({ type: 'tinyint', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'user score' })
+  userScore: number;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'other score' })
+  otherScore: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -44,15 +43,15 @@ export class Game {
   deletedAt: Date | null;
 
   //**--------------------------------------------------------------------------*/
-  //** 1-to-many hasMany
-
-  @OneToMany(() => GameResult, (GameResult) => GameResult.game, {
-    // cascade: ['insert', 'update'],
-  })
-  gameResults: GameResult[];
-
-  //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
+
+  @Exclude()
+  @Column({ type: 'int', unsigned: true })
+  gameId: number;
+  @ManyToOne(() => Game, (game) => game.gameResults, {
+    onDelete: 'CASCADE',
+  })
+  game: Game;
 
   @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })

@@ -9,6 +9,7 @@ import { configuration } from 'src/common/config/configuration';
 import { IAwsConfig, IDatabaseConfig } from 'src/common/interfaces';
 import { AuthModule } from 'src/domain/auth/auth.module';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt-auth.guard';
+import { GameResultsModule } from 'src/domain/game-results/game-results.module';
 import { GamesModule } from 'src/domain/games/games.module';
 import { SurveysModule } from 'src/domain/surveys/surveys.module';
 import { UsersModule } from 'src/domain/users/users.module';
@@ -55,6 +56,7 @@ import { ChatGateway } from './chat/chat.gateway';
     }),
     AuthModule,
     GamesModule,
+    GameResultsModule,
     SurveysModule,
     UsersModule,
     SseModule,

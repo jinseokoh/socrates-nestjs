@@ -8,7 +8,7 @@ export class CreateGameDto {
 
   @ApiProperty({ description: '성별', default: 'F' })
   @IsString()
-  gender: string;
+  genderWanted: string;
 
   @ApiProperty({
     description: 'rate',
