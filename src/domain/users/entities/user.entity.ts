@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Role } from 'src/common/enums';
-import { Game } from 'src/domain/games/game.entity';
-import { Profile } from 'src/domain/profiles/profile.entity';
-import { Provider } from 'src/domain/providers/provider.entity';
-import { Survey } from 'src/domain/surveys/survey.entity';
+import { Game } from 'src/domain/games/entities/game.entity';
+import { Survey } from 'src/domain/surveys/entities/survey.entity';
+import { Profile } from 'src/domain/users/entities/profile.entity';
+import { Provider } from 'src/domain/users/entities/provider.entity';
 import {
   BaseEntity,
   Column,

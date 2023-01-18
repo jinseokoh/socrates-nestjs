@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Rate } from 'src/common/enums/rate';
-import { GameResult } from 'src/domain/game-results/game-result.entity';
-import { User } from 'src/domain/users/user.entity';
+import { GameResult } from 'src/domain/game-results/entities/game-result.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Game } from 'src/domain/games/game.entity';
-import { User } from 'src/domain/users/user.entity';
+import { Game } from 'src/domain/games/entities/game.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 import {
   BaseEntity,
   Column,

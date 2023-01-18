@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Survey } from 'src/domain/surveys/survey.entity';
+import { Survey } from 'src/domain/surveys/entities/survey.entity';
 import { SurveysController } from 'src/domain/surveys/surveys.controller';
 import { SurveysService } from 'src/domain/surveys/surveys.service';
-import { User } from 'src/domain/users/user.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Survey, User])],
   exports: [SurveysService],

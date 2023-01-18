@@ -6,9 +6,9 @@ import {
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
-import { CreateProviderDto } from 'src/domain/providers/dto/create-provider.dto';
-import { UpdateProviderDto } from 'src/domain/providers/dto/update-provider.dto';
-import { Provider } from 'src/domain/providers/provider.entity';
+import { CreateProviderDto } from 'src/domain/users/dto/create-provider.dto';
+import { UpdateProviderDto } from 'src/domain/users/dto/update-provider.dto';
+import { Provider } from 'src/domain/users/entities/provider.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 
 @Injectable()

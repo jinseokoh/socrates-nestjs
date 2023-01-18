@@ -15,7 +15,7 @@ import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { CreateGameDto } from 'src/domain/games/dto/create-game.dto';
 import { UpdateGameDto } from 'src/domain/games/dto/update-game.dto';
-import { Game } from 'src/domain/games/game.entity';
+import { Game } from 'src/domain/games/entities/game.entity';
 import { GamesService } from 'src/domain/games/games.service';
 
 @UseInterceptors(ClassSerializerInterceptor)

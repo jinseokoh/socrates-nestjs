@@ -13,8 +13,8 @@ import {
 } from 'nestjs-paginate';
 import { CreateGameDto } from 'src/domain/games/dto/create-game.dto';
 import { UpdateGameDto } from 'src/domain/games/dto/update-game.dto';
-import { Game } from 'src/domain/games/game.entity';
-import { User } from 'src/domain/users/user.entity';
+import { Game } from 'src/domain/games/entities/game.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

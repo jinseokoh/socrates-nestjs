@@ -14,7 +14,7 @@ import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { CreateGameResultDto } from 'src/domain/game-results/dto/create-game-result.dto';
 import { UpdateGameResultDto } from 'src/domain/game-results/dto/update-game-result.dto';
-import { GameResult } from 'src/domain/game-results/game-result.entity';
+import { GameResult } from 'src/domain/game-results/entities/game-result.entity';
 import { GameResultsService } from 'src/domain/game-results/game-results.service';
 
 @UseInterceptors(ClassSerializerInterceptor)

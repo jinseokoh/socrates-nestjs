@@ -18,9 +18,9 @@ import { ResetPasswordDto } from 'src/domain/auth/dto/reset-password.dto';
 import { UserCredentialsDto } from 'src/domain/auth/dto/user-credentials.dto';
 import { UserSocialIdDto } from 'src/domain/auth/dto/user-social-id.dto';
 import { Tokens } from 'src/domain/auth/types/tokens.type';
-import { ProvidersService } from 'src/domain/providers/providers.service';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
-import { User } from 'src/domain/users/user.entity';
+import { User } from 'src/domain/users/entities/user.entity';
+import { ProvidersService } from 'src/domain/users/providers.service';
 import { UsersService } from 'src/domain/users/users.service';
 import { getUsername } from 'src/helpers/random-username';
 

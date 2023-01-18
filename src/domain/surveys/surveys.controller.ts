@@ -15,7 +15,7 @@ import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { CreateSurveyDto } from 'src/domain/surveys/dto/create-survey.dto';
 import { UpdateSurveyDto } from 'src/domain/surveys/dto/update-survey.dto';
-import { Survey } from 'src/domain/surveys/survey.entity';
+import { Survey } from 'src/domain/surveys/entities/survey.entity';
 import { SurveysService } from 'src/domain/surveys/surveys.service';
 
 @UseInterceptors(ClassSerializerInterceptor)

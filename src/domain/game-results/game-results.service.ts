@@ -8,9 +8,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CreateGameResultDto } from 'src/domain/game-results/dto/create-game-result.dto';
 import { UpdateGameResultDto } from 'src/domain/game-results/dto/update-game-result.dto';
-import { GameResult } from 'src/domain/game-results/game-result.entity';
-import { Game } from 'src/domain/games/game.entity';
-import { User } from 'src/domain/users/user.entity';
+import { GameResult } from 'src/domain/game-results/entities/game-result.entity';
+import { Game } from 'src/domain/games/entities/game.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

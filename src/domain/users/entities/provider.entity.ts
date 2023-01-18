@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { User } from 'src/domain/users/user.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 import {
   BaseEntity,
   Column,

@@ -1,5 +1,5 @@
-import { Profile } from 'src/domain/profiles/profile.entity';
-import { User } from 'src/domain/users/user.entity';
+import { Profile } from 'src/domain/users/entities/profile.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 import {
   EntitySubscriberInterface,
   EventSubscriber,

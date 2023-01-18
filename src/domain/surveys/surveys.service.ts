@@ -13,8 +13,8 @@ import {
 } from 'nestjs-paginate';
 import { CreateSurveyDto } from 'src/domain/surveys/dto/create-survey.dto';
 import { UpdateSurveyDto } from 'src/domain/surveys/dto/update-survey.dto';
-import { Survey } from 'src/domain/surveys/survey.entity';
-import { User } from 'src/domain/users/user.entity';
+import { Survey } from 'src/domain/surveys/entities/survey.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 import { Repository } from 'typeorm/repository/Repository';
 @Injectable()
 export class SurveysService {

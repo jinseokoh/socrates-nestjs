@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateProfileDto } from 'src/domain/profiles/dto/create-profile.dto';
-import { UpdateProfileDto } from 'src/domain/profiles/dto/update-profile.dto';
-import { Profile } from 'src/domain/profiles/profile.entity';
+import { CreateProfileDto } from 'src/domain/users/dto/create-profile.dto';
+import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
+import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Repository } from 'typeorm';
 @Injectable()
 export class ProfilesService {

@@ -5,7 +5,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { map } from 'rxjs';
-import { User } from 'src/domain/users/user.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 
 export interface Response<T> {
   data: T;

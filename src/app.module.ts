@@ -11,10 +11,9 @@ import { AuthModule } from 'src/domain/auth/auth.module';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt-auth.guard';
 import { GameResultsModule } from 'src/domain/game-results/game-results.module';
 import { GamesModule } from 'src/domain/games/games.module';
+import { MessagesModule } from 'src/domain/messages/messages.module';
 import { SurveysModule } from 'src/domain/surveys/surveys.module';
 import { UsersModule } from 'src/domain/users/users.module';
-import { SseModule } from 'src/services/sse/sse.module';
-import { ChatGateway } from './chat/chat.gateway';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -59,7 +58,7 @@ import { ChatGateway } from './chat/chat.gateway';
     GameResultsModule,
     SurveysModule,
     UsersModule,
-    SseModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [
@@ -67,7 +66,6 @@ import { ChatGateway } from './chat/chat.gateway';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    ChatGateway,
   ],
 })
 export class AppModule {}
