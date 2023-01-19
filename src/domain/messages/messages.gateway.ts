@@ -23,8 +23,15 @@ export class MessagesGateway {
   constructor(private readonly messagesService: MessagesService) {}
 
   @SubscribeMessage('createMessage')
-  async create(@MessageBody() createMessageDto: CreateMessageDto) {
-    const message = await this.messagesService.create(createMessageDto);
+  async create(
+    @MessageBody() createMessageDto: CreateMessageDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const clientId = client.id;
+    const message = await this.messagesService.create(
+      clientId,
+      createMessageDto,
+    );
     this.server.emit('message', message);
 
     return message;
