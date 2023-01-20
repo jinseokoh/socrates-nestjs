@@ -25,6 +25,17 @@ async function bootstrap() {
   // });
   // await app.startAllMicroservices();
 
+  // Create new DynamoDB instance
+  // dynamoose.aws.ddb.local();
+  // const ddb = new dynamoose.aws.ddb.DynamoDB({
+  //   credentials: {
+  //     accessKeyId: configService.get('aws.accessKey'),
+  //     secretAccessKey: configService.get('aws.secretAccessKey'),
+  //   },
+  //   region: configService.get('aws.defaultRegion'),
+  // });
+  // dynamoose.aws.ddb.set(ddb);
+
   app.setGlobalPrefix('v1', { exclude: ['/'] });
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
   // app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));

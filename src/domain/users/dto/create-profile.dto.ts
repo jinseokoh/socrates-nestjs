@@ -37,7 +37,7 @@ export class CreateProfileDto {
   viewCount: number;
 
   @ApiProperty({ description: '사용자 아이디', required: false })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  userId?: number | null;
+  userId?: string | null;
 }

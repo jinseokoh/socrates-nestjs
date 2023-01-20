@@ -62,7 +62,7 @@ export class SurveysService {
   }
 
   // Survey 상세보기
-  async findById(id: number, relations: string[] = []): Promise<Survey> {
+  async findById(id: string, relations: string[] = []): Promise<Survey> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -81,7 +81,7 @@ export class SurveysService {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  async update(id: number, dto: UpdateSurveyDto): Promise<Survey> {
+  async update(id: string, dto: UpdateSurveyDto): Promise<Survey> {
     const survey = await this.repository.preload({ id, ...dto });
     if (!survey) {
       throw new NotFoundException(`entity not found`);
@@ -93,12 +93,12 @@ export class SurveysService {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async softRemove(id: number): Promise<Survey> {
+  async softRemove(id: string): Promise<Survey> {
     const Survey = await this.findById(id);
     return await this.repository.softRemove(Survey);
   }
 
-  async remove(id: number): Promise<Survey> {
+  async remove(id: string): Promise<Survey> {
     const Survey = await this.findById(id);
     return await this.repository.remove(Survey);
   }

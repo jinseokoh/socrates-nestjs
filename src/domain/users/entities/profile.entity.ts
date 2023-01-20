@@ -12,8 +12,8 @@ import {
 } from 'typeorm';
 @Entity() //? 사용자 프로파일 정보
 export class Profile extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ length: 255, nullable: true })
   bio: string | null;
@@ -46,8 +46,8 @@ export class Profile extends BaseEntity {
   //** 1-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'int', unsigned: true })
-  userId: number; // to make it available to Repository.
+  @Column({ type: 'uuid' })
+  userId: string; // to make it available to Repository.
 
   @OneToOne(() => User, (user) => user.profile)
   @JoinColumn()

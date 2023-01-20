@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Rate } from 'src/common/enums/rate';
-import { GameResult } from 'src/domain/game-results/entities/game-result.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -9,14 +8,13 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 @Entity()
-export class Game {
-  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
-  id: number;
+export class Room {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ length: 255, nullable: false })
   @ApiProperty({ description: '제목' })
@@ -46,26 +44,26 @@ export class Game {
   //**--------------------------------------------------------------------------*/
   //** 1-to-many hasMany
 
-  @OneToMany(() => GameResult, (GameResult) => GameResult.game, {
-    // cascade: ['insert', 'update'],
-  })
-  gameResults: GameResult[];
+  // @OneToMany(() => RoomResult, (RoomResult) => RoomResult.room, {
+  //   // cascade: ['insert', 'update'],
+  // })
+  // roomResults: RoomResult[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  hostId: number | null; // to make it available to Repository.
-  @ManyToOne(() => User, (user) => user.hostGames, {
+  @Column({ type: 'uuid', nullable: true })
+  hostId: string | null; // to make it available to Repository.
+  @ManyToOne(() => User, (user) => user.hostRooms, {
     onDelete: 'SET NULL',
   })
   host: User;
 
   @Exclude()
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  guestId: number | null; // to make it available to Repository.
-  @ManyToOne(() => User, (user) => user.guestGames, {
+  @Column({ type: 'uuid', nullable: true })
+  guestId: string | null; // to make it available to Repository.
+  @ManyToOne(() => User, (user) => user.guestRooms, {
     onDelete: 'SET NULL',
   })
   guest: User;
@@ -73,7 +71,7 @@ export class Game {
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  // constructor(partial: Partial<Game>) {
+  // constructor(partial: Partial<Room>) {
   //   Object.assign(this, partial);
   // }
 }

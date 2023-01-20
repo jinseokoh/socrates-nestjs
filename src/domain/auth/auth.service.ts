@@ -70,7 +70,8 @@ export class AuthService {
   async register(dto: UserCredentialsDto) {
     const user = await this.usersService.create(<CreateUserDto>dto);
     const tokens = await this._getTokens(user);
-    const username = getUsername(user.id);
+    const count = await this.usersService.count();
+    const username = getUsername(count);
 
     await this._updateUserName(user.id, username);
     await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
@@ -112,7 +113,7 @@ export class AuthService {
   }
 
   // OTP 확인하여 이메일 확인
-  async verify(id: number, code: string) {
+  async verify(id: string, code: string) {
     const key = `${this.env}:user:${id}:email`;
     const value = await this.cacheManager.get(key);
     if (!value) {
@@ -171,7 +172,8 @@ export class AuthService {
     const user = await this.usersService.create({ ...dto, isActive: true });
     await this.providersService.create({ ...dto, userId: user.id });
     const tokens = await this._getTokens(user);
-    const username = getUsername(user.id);
+    const count = await this.usersService.count();
+    const username = getUsername(count);
 
     await this._updateUserName(user.id, username);
     await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
@@ -195,7 +197,7 @@ export class AuthService {
   //? Private) 로그아웃
   //?-------------------------------------------------------------------------//
 
-  async logout(id: number) {
+  async logout(id: string) {
     return this._updateUserRefreshTokenHash(id, null);
   }
 
@@ -203,7 +205,7 @@ export class AuthService {
   //? Public) 토큰 refresh
   //?-------------------------------------------------------------------------//
 
-  async refreshToken(id: number, token: string | null) {
+  async refreshToken(id: string, token: string | null) {
     const user = await this.usersService.findById(id);
     if (!user) {
       throw new ForbiddenException('access denied');
@@ -248,15 +250,15 @@ export class AuthService {
   //? Privates
   //?-------------------------------------------------------------------------//
 
-  async _updateIsActive(id: number, isActive: boolean) {
+  async _updateIsActive(id: string, isActive: boolean) {
     await this.usersService.update(id, { isActive });
   }
 
-  async _updateUserName(id: number, username: string | null) {
+  async _updateUserName(id: string, username: string | null) {
     await this.usersService.update(id, { username });
   }
 
-  async _updateUserRefreshTokenHash(id: number, token: string | null) {
+  async _updateUserRefreshTokenHash(id: string, token: string | null) {
     const refreshTokenHash = token ? await bcrypt.hash(token, 10) : null;
     await this.usersService.update(id, { refreshTokenHash });
   }

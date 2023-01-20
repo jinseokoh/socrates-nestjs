@@ -65,3 +65,9 @@ export interface IPackCompositeIds {
   artistId: number;
   artworkIds: number[];
 }
+
+export interface IAuthor {
+  id: string;
+  username: string;
+  avatar: string | null;
+}

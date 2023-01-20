@@ -4,14 +4,15 @@ import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from 'src/app.controller';
 
+import { DynamooseModule } from 'nestjs-dynamoose';
 import { getAwsDatabaseConfig } from 'src/common/config/aws-database';
 import { configuration } from 'src/common/config/configuration';
 import { IAwsConfig, IDatabaseConfig } from 'src/common/interfaces';
 import { AuthModule } from 'src/domain/auth/auth.module';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt-auth.guard';
-import { GameResultsModule } from 'src/domain/game-results/game-results.module';
-import { GamesModule } from 'src/domain/games/games.module';
-import { MessagesModule } from 'src/domain/messages/messages.module';
+
+import { MessagesModule } from 'src/domain/chats/messages.module';
+import { RoomsModule } from 'src/domain/rooms/rooms.module';
 import { SurveysModule } from 'src/domain/surveys/surveys.module';
 import { UsersModule } from 'src/domain/users/users.module';
 @Module({
@@ -53,9 +54,21 @@ import { UsersModule } from 'src/domain/users/users.module';
         } as TypeOrmModuleOptions;
       },
     }),
+    DynamooseModule.forRoot({
+      local: process.env.NODE_ENV === 'local',
+      aws: {
+        region: process.env.AWS_DEFAULT_REGION,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
+      table: {
+        create: process.env.NODE_ENV === 'local',
+        prefix: `${process.env.NODE_ENV}-`,
+        suffix: '-table',
+      },
+    }),
     AuthModule,
-    GamesModule,
-    GameResultsModule,
+    RoomsModule,
     SurveysModule,
     UsersModule,
     MessagesModule,

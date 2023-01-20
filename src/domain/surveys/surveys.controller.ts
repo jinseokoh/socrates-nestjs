@@ -30,7 +30,7 @@ export class SurveysController {
   @ApiOperation({ description: 'Survey 생성' })
   @Post()
   async create(
-    @CurrentUserId() userId: number,
+    @CurrentUserId() userId: string,
     @Body() dto: CreateSurveyDto,
   ): Promise<Survey> {
     console.log({ ...dto, userId });
@@ -52,7 +52,7 @@ export class SurveysController {
 
   @ApiOperation({ description: 'Survey 상세보기' })
   @Get(':id')
-  async getSurveyById(@Param('id') id: number): Promise<Survey> {
+  async getSurveyById(@Param('id') id: string): Promise<Survey> {
     return await this.surveysService.findById(id, ['user']);
   }
 
@@ -63,7 +63,7 @@ export class SurveysController {
   @ApiOperation({ description: 'Survey 갱신' })
   @Patch(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() dto: UpdateSurveyDto,
   ): Promise<Survey> {
     return await this.surveysService.update(id, dto);
@@ -75,7 +75,7 @@ export class SurveysController {
 
   @ApiOperation({ description: 'Survey soft 삭제' })
   @Delete(':id')
-  async softRemove(@Param('id') id: number): Promise<Survey> {
+  async softRemove(@Param('id') id: string): Promise<Survey> {
     return await this.surveysService.softRemove(id);
   }
 }

@@ -15,9 +15,8 @@ import {
 
 @Entity() // 작품
 export class Survey extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
-  @ApiProperty({ description: 'id' })
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ length: 255, nullable: false })
   @ApiProperty({ description: '질문' })
@@ -51,8 +50,8 @@ export class Survey extends BaseEntity {
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  userId: number | null; // to make it available to Repository.
+  @Column({ type: 'uuid', nullable: true })
+  userId: string | null; // to make it available to Repository.
   @ManyToOne(() => User, (user) => user.surveys, {
     onDelete: 'SET NULL',
   })

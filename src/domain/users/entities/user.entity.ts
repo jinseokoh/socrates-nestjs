@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Role } from 'src/common/enums';
-import { Game } from 'src/domain/games/entities/game.entity';
+import { Room } from 'src/domain/rooms/entities/room.entity';
 import { Survey } from 'src/domain/surveys/entities/survey.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
@@ -18,9 +18,8 @@ import {
 } from 'typeorm';
 @Entity() //? 사용자
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
-  @ApiProperty({ description: 'id' })
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ length: 32, unique: true, nullable: true })
   @ApiProperty({ description: 'username' })
@@ -117,15 +116,15 @@ export class User extends BaseEntity {
   })
   providers: Provider[];
 
-  @OneToMany(() => Game, (game) => game.host, {
+  @OneToMany(() => Room, (room) => room.host, {
     // cascade: ['insert', 'update'],
   })
-  hostGames: Game[];
+  hostRooms: Room[];
 
-  @OneToMany(() => Game, (game) => game.guest, {
+  @OneToMany(() => Room, (room) => room.guest, {
     // cascade: ['insert', 'update'],
   })
-  guestGames: Game[];
+  guestRooms: Room[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many

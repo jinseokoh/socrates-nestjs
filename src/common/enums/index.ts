@@ -1,2 +1,2 @@
-export * from './category';
+export * from './message-type';
 export * from './role';
