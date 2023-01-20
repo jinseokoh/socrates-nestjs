@@ -18,11 +18,14 @@ const roomTableParams: CreateTableInput = {
 };
 
 const command = new CreateTableCommand(roomTableParams);
-client
-  .send(command)
-  .then((r) => {
-    console.log(r);
-  })
-  .catch((e) => {
-    console.error(e);
-  });
+
+export const migrateRooms = async () => {
+  client
+    .send(command)
+    .then((r) => {
+      console.log(r);
+    })
+    .catch((e) => {
+      console.error(e);
+    });
+};

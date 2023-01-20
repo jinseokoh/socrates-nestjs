@@ -1,5 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { Public } from 'src/common/decorators/public.decorator';
+import { migrateRooms } from 'src/dynamodb/migrate/rooms';
+import { migrateUsers } from 'src/dynamodb/migrate/users';
+import { migrateMessages } from './dynamodb/migrate/messages';
 @Controller()
 export class AppController {
   @Public()
@@ -12,6 +15,14 @@ export class AppController {
   @Get('/version')
   version(): string {
     return process.env.APP_VERSION;
+  }
+
+  @Public()
+  @Post('/migrate')
+  async migrate(): Promise<void> {
+    await migrateUsers();
+    await migrateRooms();
+    await migrateMessages();
   }
 
   // @EventPattern('RealTime')

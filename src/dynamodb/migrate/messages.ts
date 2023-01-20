@@ -18,11 +18,14 @@ const messageTableParams: CreateTableInput = {
 };
 
 const command = new CreateTableCommand(messageTableParams);
-client
-  .send(command)
-  .then((r) => {
-    console.log(r);
-  })
-  .catch((e) => {
-    console.error(e);
-  });
+
+export const migrateMessages = async () => {
+  client
+    .send(command)
+    .then((r) => {
+      console.log(r);
+    })
+    .catch((e) => {
+      console.error(e);
+    });
+};

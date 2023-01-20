@@ -12,11 +12,14 @@ const userTableParams: CreateTableInput = {
 };
 
 const command = new CreateTableCommand(userTableParams);
-client
-  .send(command)
-  .then((r) => {
-    console.log(r);
-  })
-  .catch((e) => {
-    console.error(e);
-  });
+
+export const migrateUsers = async () => {
+  client
+    .send(command)
+    .then((r) => {
+      console.log(r);
+    })
+    .catch((e) => {
+      console.error(e);
+    });
+};
