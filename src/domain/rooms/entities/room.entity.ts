@@ -1,13 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
 import { Rate } from 'src/common/enums/rate';
-import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -52,21 +49,21 @@ export class Room {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Exclude()
-  @Column({ type: 'uuid', nullable: true })
-  hostId: string | null; // to make it available to Repository.
-  @ManyToOne(() => User, (user) => user.hostRooms, {
-    onDelete: 'SET NULL',
-  })
-  host: User;
+  // @Exclude()
+  // @Column({ type: 'uuid', nullable: true })
+  // hostId: string | null; // to make it available to Repository.
+  // @ManyToOne(() => User, (user) => user.hostRooms, {
+  //   onDelete: 'SET NULL',
+  // })
+  // host: User;
 
-  @Exclude()
-  @Column({ type: 'uuid', nullable: true })
-  guestId: string | null; // to make it available to Repository.
-  @ManyToOne(() => User, (user) => user.guestRooms, {
-    onDelete: 'SET NULL',
-  })
-  guest: User;
+  // @Exclude()
+  // @Column({ type: 'uuid', nullable: true })
+  // guestId: string | null; // to make it available to Repository.
+  // @ManyToOne(() => User, (user) => user.guestRooms, {
+  //   onDelete: 'SET NULL',
+  // })
+  // guest: User;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

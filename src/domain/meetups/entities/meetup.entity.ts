@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Category } from 'src/common/enums/category';
+import { Expense } from 'src/common/enums/expense';
+import { Gender } from 'src/common/enums/gender';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   BaseEntity,
@@ -22,7 +24,7 @@ export class Meetup extends BaseEntity {
   @ApiProperty({ description: '제목' })
   title: string;
 
-  @Column({ length: 128 }) // from Pack
+  @Column({ length: 128, nullable: true }) // from Pack
   @ApiProperty({ description: 'subtitle' })
   subtitle: string;
 
@@ -34,19 +36,6 @@ export class Meetup extends BaseEntity {
   @ApiProperty({ description: '이미지 URL' })
   image: string | null;
 
-  @Column({ type: 'enum', enum: OrderType, default: OrderType.AUCTION })
-  orderType: OrderType;
-
-  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.WAITING })
-  orderStatus: OrderStatus;
-
-  @Column('json', { nullable: false })
-  @ApiProperty({ description: '답변' })
-  answers: string[];
-
-  @Column({ default: false })
-  isApproved: boolean;
-
   @Column({
     type: 'enum',
     enum: Category,
@@ -54,6 +43,21 @@ export class Meetup extends BaseEntity {
   })
   @ApiProperty({ description: 'category' })
   category: Category;
+
+  @Column({ type: 'enum', enum: Expense, default: Expense.BILLSONME })
+  expense: Expense;
+
+  @Column({ type: 'enum', enum: Gender, nullable: true })
+  gender: Gender;
+
+  @Column('geometry', {
+    spatialFeatureType: 'Point',
+    srid: 4326,
+  })
+  location: string;
+
+  @Column({ default: false })
+  isFlagged: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -69,11 +73,19 @@ export class Meetup extends BaseEntity {
 
   @Exclude()
   @Column({ type: 'uuid', nullable: true })
-  userId: string | null; // to make it available to Repository.
-  @ManyToOne(() => User, (user) => user.meetups, {
-    onDelete: 'SET NULL',
+  hostId: string | null; // to make it available to Repository.
+  @ManyToOne(() => User, (user) => user.hostMeetups, {
+    onDelete: 'CASCADE',
   })
-  user: User;
+  host: User;
+
+  @Exclude()
+  @Column({ type: 'uuid', nullable: true })
+  guestId: string | null; // to make it available to Repository.
+  @ManyToOne(() => User, (user) => user.hostMeetups, {
+    onDelete: 'CASCADE',
+  })
+  guest: User;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

@@ -54,10 +54,9 @@ export class MeetupsService {
       searchableColumns: [],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
-        question: [FilterOperator.EQ],
-        userId: [FilterOperator.EQ, FilterOperator.IN],
+        isFlagged: [FilterOperator.EQ],
       },
-      relations: ['user'],
+      relations: ['host', 'guest'],
     });
   }
 

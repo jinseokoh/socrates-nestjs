@@ -1,0 +1,5 @@
+export enum Expense {
+  SPLITEVEN = 'SPLITEVEN',
+  BILLSONME = 'BILLSONME',
+  CHALLENGE = 'CHALLENGE',
+}

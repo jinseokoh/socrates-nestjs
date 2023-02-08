@@ -54,10 +54,8 @@ export class RoomsService {
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         title: [FilterOperator.EQ],
-        hostId: [FilterOperator.EQ, FilterOperator.IN],
-        guestId: [FilterOperator.EQ, FilterOperator.IN],
       },
-      relations: ['host', 'guest'],
+      // relations: ['host', 'guest'],
     });
   }
 

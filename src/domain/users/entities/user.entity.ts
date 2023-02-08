@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Role } from 'src/common/enums';
-import { Room } from 'src/domain/rooms/entities/room.entity';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Survey } from 'src/domain/surveys/entities/survey.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
@@ -116,15 +116,15 @@ export class User extends BaseEntity {
   })
   providers: Provider[];
 
-  @OneToMany(() => Room, (room) => room.host, {
+  @OneToMany(() => Meetup, (meetup) => meetup.host, {
     // cascade: ['insert', 'update'],
   })
-  hostRooms: Room[];
+  hostMeetups: Meetup[];
 
-  @OneToMany(() => Room, (room) => room.guest, {
+  @OneToMany(() => Meetup, (meetup) => meetup.guest, {
     // cascade: ['insert', 'update'],
   })
-  guestRooms: Room[];
+  guestMeetups: Meetup[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many

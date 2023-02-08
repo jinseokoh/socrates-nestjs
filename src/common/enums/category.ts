@@ -1,20 +1,22 @@
 export enum Category {
-  FOOD = 'FOOD', // 음식
-  CAFE = 'CAFE', // 카페
-  MOVIE = 'MOVIE', // 영화
   ALCOHOL = 'ALCOHOL', // 술
-  WORKOUT = 'WORKOUT', // 운동
-  GAME = 'GAME', // 게임
-  BOOK = 'BOOK', // 독서
-  VIDEO = 'VIDEO', // youtube 창작
-  DRIVE = 'DRIVE', // 드라이브
-  CONTACTLESS = 'CONTACTLESS', // 비대면
-  PET = 'PET', // 반려동물
-  MUSIC = 'MUSIC', // 음악
   ART = 'ART', // 전시
-  ENTREPRENEUR = 'ENTREPRENEUR', // 창업
+  BOOK = 'BOOK', // 독서
+  CAFE = 'CAFE', // 카페
   CODING = 'CODING', // 코딩
+  CONTACTLESS = 'CONTACTLESS', // 비대면
+  CRAFT = 'CRAFT', // 공예
   CRYPTOCURRENCY = 'CRYPTOCURRENCY', // 코인
-  STUDY = 'STUDY', // 스터디
+  DANCE = 'DANCE', // 댄스
+  ENTREPRENEURSHIP = 'ENTREPRENEURSHIP', // 사업,창업
+  FOOD = 'FOOD', // 음식
+  GAME = 'GAME', // 게임
+  MOVIE = 'MOVIE', // 영화
+  MUSIC = 'MUSIC', // 음악
   OTHER = 'OTHER', // 기타
+  PET = 'PET', // 반려동물
+  STUDY = 'STUDY', // 스터디
+  TRAVEL = 'TRAVEL', // 여행
+  VIDEO = 'VIDEO', // youtube 창작
+  WORKOUT = 'WORKOUT', // 운동
 }
