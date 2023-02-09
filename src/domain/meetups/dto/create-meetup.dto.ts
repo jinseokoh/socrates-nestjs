@@ -12,7 +12,7 @@ export class CreateMeetupDto {
 
   @ApiProperty({
     description: 'category',
-    default: Category.FOOD,
+    default: Category.DINING,
   })
   @IsEnum(Category)
   category: Category;

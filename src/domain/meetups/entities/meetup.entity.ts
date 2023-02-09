@@ -5,7 +5,6 @@ import { Expense } from 'src/common/enums/expense';
 import { Gender } from 'src/common/enums/gender';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
-  BaseEntity,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -16,7 +15,7 @@ import {
 } from 'typeorm';
 
 @Entity() // 작품
-export class Meetup extends BaseEntity {
+export class Meetup {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -39,7 +38,7 @@ export class Meetup extends BaseEntity {
   @Column({
     type: 'enum',
     enum: Category,
-    default: Category.FOOD,
+    default: Category.DINING,
   })
   @ApiProperty({ description: 'category' })
   category: Category;

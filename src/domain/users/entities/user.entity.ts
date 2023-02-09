@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Role } from 'src/common/enums';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Survey } from 'src/domain/surveys/entities/survey.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
 import {
@@ -106,10 +105,10 @@ export class User extends BaseEntity {
   //**--------------------------------------------------------------------------*/
   //** 1-to-many hasMany
 
-  @OneToMany(() => Survey, (survey) => survey.user, {
-    // cascade: ['insert', 'update'],
-  })
-  surveys: Survey[];
+  // @OneToMany(() => Survey, (survey) => survey.user, {
+  //   // cascade: ['insert', 'update'],
+  // })
+  // surveys: Survey[];
 
   @OneToMany(() => Provider, (provider) => provider.user, {
     // cascade: ['insert', 'update'],

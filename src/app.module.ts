@@ -13,7 +13,6 @@ import { JwtAuthGuard } from 'src/domain/auth/guards/jwt-auth.guard';
 
 import { MessagesModule } from 'src/domain/chats/messages.module';
 import { RoomsModule } from 'src/domain/rooms/rooms.module';
-import { SurveysModule } from 'src/domain/surveys/surveys.module';
 import { UsersModule } from 'src/domain/users/users.module';
 @Module({
   imports: [
@@ -69,7 +68,6 @@ import { UsersModule } from 'src/domain/users/users.module';
     }),
     AuthModule,
     RoomsModule,
-    SurveysModule,
     UsersModule,
     MessagesModule,
   ],
