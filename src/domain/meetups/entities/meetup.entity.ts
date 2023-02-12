@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Category } from 'src/common/enums/category';
+import { Category as CategoryEnum } from 'src/common/enums/category';
 import { Expense } from 'src/common/enums/expense';
 import { Gender } from 'src/common/enums/gender';
 import { Time } from 'src/common/enums/time';
-import { Bookmark } from 'src/domain/meetups/entities/bookmark.entity';
+import { Bookmark } from 'src/domain/bookmarks/entities/bookmark.entity';
+import { Category } from 'src/domain/meetups/entities/category.entity';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Region } from 'src/domain/meetups/entities/region.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -18,7 +19,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity() // 작품
@@ -47,13 +48,13 @@ export class Meetup {
 
   @Column({
     type: 'enum',
-    enum: Category,
-    default: Category.DINING,
+    enum: CategoryEnum,
+    default: CategoryEnum.DINING,
   })
   @ApiProperty({ description: 'category' })
-  category: Category;
+  category: CategoryEnum;
 
-  @Column({ type: 'enum', enum: Expense, default: Expense.BILLSONME })
+  @Column({ type: 'enum', enum: Expense, default: Expense.SPLIT_EVEN })
   @ApiProperty({ description: '비용부담' })
   expense: Expense;
 
@@ -65,20 +66,21 @@ export class Meetup {
   @ApiProperty({ description: '시간대' })
   time: Time;
 
-  @Column({ length: 64 }) // from Auction
+  @Column({ length: 64, nullable: true }) // from Auction
   @ApiProperty({ description: '장소명' })
   venue?: string | null;
 
-  @Column({ length: 128 }) // from Auction
+  @Column({ length: 128, nullable: true }) // from Auction
   @ApiProperty({ description: '장소주소' })
   address?: string | null;
 
-  @Column('geometry', {
-    spatialFeatureType: 'Point',
-    srid: 4326,
-  })
-  @ApiProperty({ description: '경도,위도' })
-  geolocation?: string | null;
+  @Column({ type: 'decimal', precision: 10, scale: 8, nullable: true })
+  @ApiProperty({ description: '위도' })
+  latitude: number | null;
+
+  @Column({ type: 'decimal', precision: 11, scale: 8, nullable: true })
+  @ApiProperty({ description: '경도' })
+  longitude: number | null;
 
   @Column({ default: false })
   @ApiProperty({ description: '신고여부' })
@@ -109,12 +111,12 @@ export class Meetup {
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'uuid', nullable: true })
-  ownerId: string | null; // to make it available to Repository.
+  @Column({ type: 'uuid', length: 36, nullable: true })
+  userId: string | null; // to make it available to Repository.
   @ManyToOne(() => User, (user) => user.meetups, {
     onDelete: 'CASCADE',
   })
-  owner: User;
+  user: User;
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany
@@ -128,6 +130,10 @@ export class Meetup {
   @ManyToMany(() => Region, (region) => region.meetups)
   @JoinTable({ name: 'meetup_region' }) // owning side
   regions: Region[];
+
+  @ManyToMany(() => Category, (category) => category.meetups)
+  @JoinTable({ name: 'meetup_category' }) // owning side
+  categories: Category[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

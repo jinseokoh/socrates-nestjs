@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -10,15 +11,19 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-@Entity() //? 경매입찰내용
+@Entity() //? 북마크찜
 export class Bookmark {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'int' })
-  amount: number;
+  @Column({ default: false })
+  @ApiProperty({ description: '신청' })
+  isAsked: boolean;
 
-  @Exclude()
+  @Column({ default: false })
+  @ApiProperty({ description: '매칭' })
+  isMatched: boolean;
+
   @Column({ length: 255, nullable: true })
   note: string | null;
 
@@ -35,7 +40,7 @@ export class Bookmark {
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'string', nullable: true })
+  @Column({ type: 'uuid', length: 36, nullable: true })
   meetupId: string | null; // to make it available to Repository.
   @ManyToOne(() => Meetup, (meetup) => meetup.bookmarks, {
     onDelete: 'CASCADE',

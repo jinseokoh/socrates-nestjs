@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
   paginate,
+  PaginateConfig,
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
@@ -25,8 +26,10 @@ export class MeetupsService {
   constructor(
     @InjectRepository(Meetup)
     private readonly repository: Repository<Meetup>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
     @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -35,14 +38,30 @@ export class MeetupsService {
 
   // Meetup 생성
   async create(dto: CreateMeetupDto): Promise<Meetup> {
-    const user = await this.usersRepository.findOneOrFail({
-      where: { id: dto.ownerId },
+    const user = await this.userRepository.findOneOrFail({
+      where: { id: dto.userId },
     });
     if (user.isBanned) {
       throw new BadRequestException(`not allowed to use`);
     }
-    const Meetup = this.repository.create(dto);
-    return await this.repository.save(Meetup);
+
+    const meetup = await this.repository.save(this.repository.create(dto));
+    const category = await this.categoryRepository.findOne({
+      where: { slug: dto.category },
+    });
+    const categories = await this.repository.manager
+      .getTreeRepository(Category)
+      .findAncestors(category);
+    categories
+      .filter((v: Category) => v.depth > 0)
+      .map(async (v: Category) => {
+        await this.repository.manager.query(
+          'INSERT IGNORE INTO `meetup_category` (meetupId, categoryId) VALUES (?, ?)',
+          [meetup.id, v.id],
+        );
+      });
+
+    return meetup;
   }
 
   //?-------------------------------------------------------------------------//
@@ -51,15 +70,23 @@ export class MeetupsService {
 
   // Meetup 리스트 w/ Pagination
   async findAll(query: PaginateQuery): Promise<Paginated<Meetup>> {
-    return paginate(query, this.repository, {
+    const queryBuilder = this.repository
+      .createQueryBuilder('meetup')
+      .leftJoinAndSelect('meetup.user', 'user')
+      .leftJoinAndSelect('user.profile', 'profile');
+
+    const config: PaginateConfig<Meetup> = {
       sortableColumns: ['id'],
-      searchableColumns: [],
+      searchableColumns: ['title'],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
-        isFlagged: [FilterOperator.EQ],
+        id: [FilterOperator.IN, FilterOperator.EQ],
+        title: [FilterOperator.EQ],
+        expiredAt: [FilterOperator.GTE, FilterOperator.LT],
       },
-      relations: ['owner'],
-    });
+    };
+
+    return await paginate(query, queryBuilder, config);
   }
 
   // Meetup 상세보기

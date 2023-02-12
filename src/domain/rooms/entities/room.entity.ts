@@ -50,7 +50,7 @@ export class Room {
   //** many-to-1 belongsTo
 
   // @Exclude()
-  // @Column({ type: 'uuid', nullable: true })
+  // @Column({ type: 'uuid', length: 36, nullable: true })
   // hostId: string | null; // to make it available to Repository.
   // @ManyToOne(() => User, (user) => user.hostRooms, {
   //   onDelete: 'SET NULL',
@@ -58,7 +58,7 @@ export class Room {
   // host: User;
 
   // @Exclude()
-  // @Column({ type: 'uuid', nullable: true })
+  // @Column({ type: 'uuid', length: 36, nullable: true })
   // guestId: string | null; // to make it available to Repository.
   // @ManyToOne(() => User, (user) => user.guestRooms, {
   //   onDelete: 'SET NULL',

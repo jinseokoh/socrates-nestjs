@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Role } from 'src/common/enums';
-import { Bookmark } from 'src/domain/meetups/entities/bookmark.entity';
+import { Bookmark } from 'src/domain/bookmarks/entities/bookmark.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
@@ -116,7 +116,7 @@ export class User extends BaseEntity {
   })
   providers: Provider[];
 
-  @OneToMany(() => Meetup, (meetup) => meetup.owner, {
+  @OneToMany(() => Meetup, (meetup) => meetup.user, {
     // cascade: ['insert', 'update'],
   })
   meetups: Meetup[];

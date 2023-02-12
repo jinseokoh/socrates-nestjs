@@ -1,4 +1,6 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { IsArray } from 'class-validator';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   BaseEntity,
@@ -27,8 +29,10 @@ export class Profile extends BaseEntity {
   @Column({ default: true })
   notifyEmail: boolean;
 
-  @Column({ default: true })
-  notifyEvent: boolean;
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: '관심키워드' })
+  @IsArray()
+  keywords: string[] | null;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   payCount: number;
@@ -46,7 +50,7 @@ export class Profile extends BaseEntity {
   //** 1-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', length: 36 })
   userId: string; // to make it available to Repository.
 
   @OneToOne(() => User, (user) => user.profile)

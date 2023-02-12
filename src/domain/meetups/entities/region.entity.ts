@@ -12,7 +12,7 @@ import {
 @Entity()
 @Tree('nested-set')
 export class Region {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
   @Column({ length: 64 })

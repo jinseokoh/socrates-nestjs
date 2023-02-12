@@ -95,5 +95,5 @@ export class CreateMeetupDto {
 
   @ApiProperty({ description: '사용자 아이디' })
   @IsOptional()
-  ownerId: string;
+  userId: string;
 }

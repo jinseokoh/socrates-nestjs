@@ -34,11 +34,11 @@ export class MeetupsController {
     @Body() dto: CreateMeetupDto,
   ): Promise<Meetup> {
     console.log({ ...dto, userId });
-    return await this.meetupsService.create({ ...dto, ownerId: userId });
+    return await this.meetupsService.create({ ...dto, userId: userId });
   }
 
   @ApiOperation({ description: 'Meetup 생성' })
-  @Post('migrate')
+  @Post('seed')
   async category(): Promise<void> {
     return await this.meetupsService.seedCategory();
   }
@@ -59,7 +59,13 @@ export class MeetupsController {
   @ApiOperation({ description: 'Meetup 상세보기' })
   @Get(':id')
   async getMeetupById(@Param('id') id: string): Promise<Meetup> {
-    return await this.meetupsService.findById(id, ['user']);
+    console.log(id);
+    return await this.meetupsService.findById(id, [
+      'user',
+      'categories',
+      'bookmarks',
+      'bookmarks.user',
+    ]);
   }
 
   //?-------------------------------------------------------------------------//
