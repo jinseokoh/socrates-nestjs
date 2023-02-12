@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Role } from 'src/common/enums';
+import { Bookmark } from 'src/domain/meetups/entities/bookmark.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
@@ -105,25 +106,25 @@ export class User extends BaseEntity {
   //**--------------------------------------------------------------------------*/
   //** 1-to-many hasMany
 
-  // @OneToMany(() => Survey, (survey) => survey.user, {
-  //   // cascade: ['insert', 'update'],
-  // })
-  // surveys: Survey[];
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.user, {
+    // cascade: ['insert', 'update'],
+  })
+  bookmarks: Bookmark[];
 
   @OneToMany(() => Provider, (provider) => provider.user, {
     // cascade: ['insert', 'update'],
   })
   providers: Provider[];
 
-  @OneToMany(() => Meetup, (meetup) => meetup.host, {
+  @OneToMany(() => Meetup, (meetup) => meetup.owner, {
     // cascade: ['insert', 'update'],
   })
-  hostMeetups: Meetup[];
+  meetups: Meetup[];
 
-  @OneToMany(() => Meetup, (meetup) => meetup.guest, {
-    // cascade: ['insert', 'update'],
-  })
-  guestMeetups: Meetup[];
+  // @OneToMany(() => Meetup, (meetup) => meetup.guest, {
+  //   // cascade: ['insert', 'update'],
+  // })
+  // guestMeetups: Meetup[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many

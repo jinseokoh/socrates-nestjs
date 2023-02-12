@@ -1,8 +1,6 @@
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import {
   Column,
   Entity,
-  ManyToMany,
   PrimaryGeneratedColumn,
   Tree,
   TreeChildren,
@@ -11,7 +9,7 @@ import {
 
 @Entity()
 @Tree('nested-set')
-export class Region {
+export class Category {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -22,14 +20,8 @@ export class Region {
   depth: number;
 
   @TreeChildren()
-  children: Region[];
+  children: Category[];
 
   @TreeParent()
-  parent: Region;
-
-  //**--------------------------------------------------------------------------*/
-  //** many-to-many belongsToMany
-
-  @ManyToMany(() => Meetup, (meetup) => meetup.regions)
-  meetups: Meetup[];
+  parent: Category;
 }

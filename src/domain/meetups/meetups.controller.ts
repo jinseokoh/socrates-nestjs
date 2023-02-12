@@ -34,7 +34,13 @@ export class MeetupsController {
     @Body() dto: CreateMeetupDto,
   ): Promise<Meetup> {
     console.log({ ...dto, userId });
-    return await this.meetupsService.create({ ...dto, userId });
+    return await this.meetupsService.create({ ...dto, ownerId: userId });
+  }
+
+  @ApiOperation({ description: 'Meetup 생성' })
+  @Post('migrate')
+  async category(): Promise<void> {
+    return await this.meetupsService.seedCategory();
   }
 
   //?-------------------------------------------------------------------------//

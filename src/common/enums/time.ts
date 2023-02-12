@@ -1,0 +1,7 @@
+export enum Time {
+  MORNING = 'MORNING',
+  LUNCH = 'LUNCH',
+  AFTERNOON = 'AFTERNOON',
+  DINNER = 'DINNER',
+  EVENING = 'EVENING',
+}
