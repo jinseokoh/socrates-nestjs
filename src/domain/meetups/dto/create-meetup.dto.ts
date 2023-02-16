@@ -7,10 +7,11 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Category } from 'src/common/enums/category';
-import { Expense } from 'src/common/enums/expense';
-import { Gender } from 'src/common/enums/gender';
-import { Time } from 'src/common/enums/time';
+import { CategoryEnum } from 'src/common/enums/category';
+import { DayEnum } from 'src/common/enums/day';
+import { ExpenseEnum } from 'src/common/enums/expense';
+import { GenderEnum } from 'src/common/enums/gender';
+import { TimeEnum } from 'src/common/enums/time';
 export class CreateMeetupDto {
   @ApiProperty({ description: '타이틀', required: true })
   @IsString()
@@ -34,13 +35,13 @@ export class CreateMeetupDto {
   max: number;
 
   @ApiProperty({ description: 'category', required: true })
-  @IsEnum(Category)
-  category: Category;
+  @IsEnum(CategoryEnum)
+  category: CategoryEnum;
 
   @ApiProperty({ description: '노출하는 성별', required: false })
-  @IsEnum(Gender)
+  @IsEnum(GenderEnum)
   @IsOptional()
-  gender?: Gender;
+  gender?: GenderEnum;
 
   @ApiProperty({ description: 'region', required: true })
   @IsNumber()
@@ -61,9 +62,13 @@ export class CreateMeetupDto {
   @IsOptional()
   geolocation?: string;
 
+  @ApiProperty({ description: '언제', required: false })
+  @IsEnum(DayEnum)
+  day?: DayEnum;
+
   @ApiProperty({ description: '시간대', required: true })
-  @IsEnum(Time)
-  time: Time;
+  @IsEnum(TimeEnum)
+  time: TimeEnum;
 
   @ApiProperty({ description: '종료시각', required: true })
   @Type(() => Date)
@@ -71,9 +76,9 @@ export class CreateMeetupDto {
   expiredAt: Date;
 
   @ApiProperty({ description: '비용', required: true })
-  @IsEnum(Expense)
+  @IsEnum(ExpenseEnum)
   @IsOptional()
-  expense?: Expense;
+  expense?: ExpenseEnum;
 
   @ApiProperty({ description: '생성시각 (ISO8601)' })
   @Type(() => Date)

@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Category as CategoryEnum } from 'src/common/enums/category';
-import { Expense } from 'src/common/enums/expense';
-import { Gender } from 'src/common/enums/gender';
-import { Time } from 'src/common/enums/time';
+import { CategoryEnum } from 'src/common/enums/category';
+import { DayEnum } from 'src/common/enums/day';
+import { ExpenseEnum } from 'src/common/enums/expense';
+import { GenderEnum } from 'src/common/enums/gender';
+import { TimeEnum } from 'src/common/enums/time';
 import { Bookmark } from 'src/domain/bookmarks/entities/bookmark.entity';
 import { Category } from 'src/domain/meetups/entities/category.entity';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
@@ -54,17 +55,21 @@ export class Meetup {
   @ApiProperty({ description: 'category' })
   category: CategoryEnum;
 
-  @Column({ type: 'enum', enum: Expense, default: Expense.SPLIT_EVEN })
+  @Column({ type: 'enum', enum: ExpenseEnum, default: ExpenseEnum.SPLIT_EVEN })
   @ApiProperty({ description: '비용부담' })
-  expense: Expense;
+  expense: ExpenseEnum;
 
-  @Column({ type: 'enum', enum: Gender, nullable: true })
+  @Column({ type: 'enum', enum: GenderEnum, nullable: true })
   @ApiProperty({ description: '원하는 성별' })
-  gender?: Gender | null;
+  gender?: GenderEnum | null;
 
-  @Column({ type: 'enum', enum: Time, nullable: true })
+  @Column({ type: 'enum', enum: DayEnum, nullable: true })
   @ApiProperty({ description: '시간대' })
-  time: Time;
+  day: DayEnum;
+
+  @Column({ type: 'enum', enum: TimeEnum, nullable: true })
+  @ApiProperty({ description: '시간대' })
+  time: TimeEnum;
 
   @Column({ length: 64, nullable: true }) // from Auction
   @ApiProperty({ description: '장소명' })

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Role } from 'src/common/enums';
+import { RoleEnum } from 'src/common/enums';
+import { GenderEnum } from 'src/common/enums/gender';
 import { Bookmark } from 'src/domain/bookmarks/entities/bookmark.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
@@ -42,9 +43,9 @@ export class User extends BaseEntity {
   @ApiProperty({ description: 'realname' })
   realname: string | null;
 
-  @Column({ length: 1, nullable: true })
-  @ApiProperty({ description: 'gender' })
-  gender: string | null;
+  @Column({ type: 'enum', enum: GenderEnum, nullable: true })
+  @ApiProperty({ description: '성별' })
+  gender: GenderEnum | null;
 
   @Column({ nullable: true })
   @ApiProperty({ description: 'dob' })
@@ -67,9 +68,9 @@ export class User extends BaseEntity {
   @ApiProperty({ description: 'refreshTokenHash' })
   refreshTokenHash: string | null;
 
-  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  @Column({ type: 'enum', enum: RoleEnum, default: RoleEnum.USER })
   @ApiProperty({ description: 'role' })
-  role: Role;
+  role: RoleEnum;
 
   @Column({ default: false })
   @ApiProperty({ description: 'isActive' })

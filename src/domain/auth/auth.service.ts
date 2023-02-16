@@ -14,6 +14,7 @@ import * as random from 'randomstring';
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
 import { AWS_SES_CONNECTION } from 'src/common/constants';
+import { GenderEnum } from 'src/common/enums/gender';
 import { ResetPasswordDto } from 'src/domain/auth/dto/reset-password.dto';
 import { UserCredentialsDto } from 'src/domain/auth/dto/user-credentials.dto';
 import { UserSocialIdDto } from 'src/domain/auth/dto/user-social-id.dto';
@@ -169,7 +170,17 @@ export class AuthService {
       return tokens;
     }
     // in case user w/ firebase-email not found
-    const user = await this.usersService.create({ ...dto, isActive: true });
+    const genderEnum: GenderEnum | null = dto.gender
+      ? dto.gender.toLowerCase().startsWith('f')
+        ? GenderEnum.F
+        : GenderEnum.M
+      : null;
+
+    const user = await this.usersService.create({
+      ...dto,
+      gender: genderEnum,
+      isActive: true,
+    });
     await this.providersService.create({ ...dto, userId: user.id });
     const tokens = await this._getTokens(user);
     const count = await this.usersService.count();

@@ -1,8 +1,0 @@
-export enum ArticleCategory {
-  INTERVIEW = 'INTERVIEW',
-  CURATION = 'CURATION',
-  PURPLE_LABEL = 'PURPLE_LABEL',
-  FLEA_AUCTION = 'FLEA_AUCTION',
-  SERVICE = 'SERVICE',
-  EVENT = 'EVENT',
-}

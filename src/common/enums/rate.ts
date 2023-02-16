@@ -1,4 +1,4 @@
 export enum Rate {
-  NSFW = 'NSFW',
-  SFW = 'SFW',
+  NSFW = 'nsfw',
+  SFW = 'sfw',
 }

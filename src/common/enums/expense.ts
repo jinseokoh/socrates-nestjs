@@ -1,5 +1,5 @@
-export enum Expense {
-  SPLIT_EVEN = 'SPLIT_EVEN',
-  BILLS_ON_ME = 'BILLS_ON_ME',
-  CHALLENGE = 'CHALLENGE',
+export enum ExpenseEnum {
+  SPLIT_EVEN = 'splitEven',
+  BILLS_ON_ME = 'billsOnMe',
+  WAGER = 'wager',
 }
