@@ -20,14 +20,20 @@ export class Profile extends BaseEntity {
   @Column({ length: 255, nullable: true })
   bio: string | null;
 
+  @Column({ length: 64, nullable: true })
+  region: string | null;
+
+  @Column({ length: 64, nullable: true })
+  career: string | null;
+
   @Column({ default: true })
   notifyPush: boolean;
 
   @Column({ default: true })
-  notifyKakao: boolean;
+  notifyEmail: boolean;
 
   @Column({ default: true })
-  notifyEmail: boolean;
+  notifyKakao: boolean;
 
   @Column('json', { nullable: true })
   @ApiProperty({ description: '관심키워드' })
@@ -35,10 +41,16 @@ export class Profile extends BaseEntity {
   keywords: string[] | null;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  payCount: number;
+  viewCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  viewCount: number;
+  postCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  matchCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  payCount: number;
 
   @CreateDateColumn()
   createdAt: Date;

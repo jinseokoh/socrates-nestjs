@@ -132,6 +132,7 @@ export class UsersController {
     @Param('id') id: string,
     @Body(AmendUsernamePipe) dto: UpdateUserDto,
   ): Promise<User> {
+    console.log(dto);
     return await this.usersService.update(id, dto);
   }
 

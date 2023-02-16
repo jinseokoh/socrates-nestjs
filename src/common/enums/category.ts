@@ -1,7 +1,7 @@
 export enum CategoryEnum {
   // leisure
   DINING = 'dining', // 식사
-  COFFEE = 'coffee', // 커피,카페
+  CAFE = 'cafe', // 커피,카페
   ALCOHOL = 'alcohol', // 술
   MOVIE = 'movie', // 영화
   NETFLIX = 'netflix', // OTT
@@ -13,9 +13,10 @@ export enum CategoryEnum {
   EXHIBITION = 'exhibition', // 공원
   PARK = 'park', // 공원
   THEMEPARK = 'themepark', // 테마파크
+  TRAVEL = 'travel', // 트래블
   SAUNA = 'sauna', // 찜질방,사우나
+  TALK_ONLINE = 'talkOnline', // JUST TALK
   OTHER_LEISURE = 'otherLeisure',
-
   // hobby
   GUITAR = 'guitar', // 기타
   PIANO = 'piano', // 피아노
@@ -33,31 +34,31 @@ export enum CategoryEnum {
   CAMPING = 'camping', // 캠핑
   DRIVING = 'driving', // 떼빙
   STEREO = 'stereo', // 스테레오
+  PLAMODEL = 'plamodel', // 프라모델
   COOKING = 'cooking', // 요리
   SHOPPING = 'shopping', // 쇼핑
   PHOTO_SHOOTING = 'photoShooting', // 사진출사
   PLANTING = 'planting', // 반려식물
   PET = 'pet', // 반려동물
   OTHER_HOBBY = 'otherHobby',
-
   // sports activities
   BADMINTON = 'badminton', // 배드민턴
   BASEBALL = 'baseball', // 야구
   BASKETBALL = 'basketball', // 농구
   VOLLEYBALL = 'volleyball', // 배구
+  FOOTBALL = 'football', // 축구
+  FUTSAL = 'futsal', // 풋살
   DODGEBALL = 'dodgeball', // 피구
   RACQUETBALL = 'racquetball', // 라켓볼
   TENNIS = 'tennis', // 테니스
   PINGPONG = 'pingpong', // 탁구
-  POOL = 'pool', // 당구
-  FOOTBALL = 'football', // 축구
-  FUTSAL = 'futsal', // 풋살
-  BIKE = 'bike', // 바이크
-  MOUNTAIN_BIKE = 'mountainBike', // 마운틴바이크
   BOWLING = 'bowling', // 볼링
+  POOL = 'pool', // 당구
+  GOLF = 'golf', // 골프
   MOUNTAIN = 'mountain', // 등산
   CLIMBING = 'climbing', // 클라이밍
-  GOLF = 'golf', // 골프
+  BIKE = 'bike', // 바이크
+  MOUNTAIN_BIKE = 'mountainBike', // 마운틴바이크
   ROLLER_SKATING = 'rollerSkating', // 롤러스케이팅
   ICE_SKATING = 'iceSkating', // 아이스스케이팅
   SKI = 'ski', // 스키,스노보드
@@ -71,9 +72,9 @@ export enum CategoryEnum {
   ARCHERY = 'archery', // 양궁
   HORSEBACK = 'horseback', // 승마
   OTHER_SPORTS = 'otherSports',
-
-  // investment
+  // other
   ONE_DAY_CLASS = 'oneDayClass', // 공부
+  VOLUNTARY_ACTIVITY = 'voluntaryActivity',
   LANGUAGE = 'language', // 언어교환
   READING = 'reading', // 독서
   CODING = 'coding', // 코딩
@@ -83,5 +84,5 @@ export enum CategoryEnum {
   CRYPTO = 'crypto', // 코인
   ENTREPRENEURSHIP = 'entrepreneurship', // 사업,창업
   MENTORSHIP = 'mentorship', // 멘터
-  OTHER_INVESTMENT = 'otherInvestment',
+  ALL_OTHER = 'allOther',
 }

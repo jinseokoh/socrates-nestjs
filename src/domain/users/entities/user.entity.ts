@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { RoleEnum } from 'src/common/enums';
 import { GenderEnum } from 'src/common/enums/gender';
 import { Bookmark } from 'src/domain/bookmarks/entities/bookmark.entity';
@@ -7,7 +7,6 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
 import {
-  BaseEntity,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -18,7 +17,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 @Entity() //? 사용자
-export class User extends BaseEntity {
+export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -47,6 +46,7 @@ export class User extends BaseEntity {
   @ApiProperty({ description: '성별' })
   gender: GenderEnum | null;
 
+  @Exclude()
   @Column({ nullable: true })
   @ApiProperty({ description: 'dob' })
   dob: Date;
@@ -127,6 +127,18 @@ export class User extends BaseEntity {
   // })
   // guestMeetups: Meetup[];
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-many
+  //??--------------------------------------------------------------------------*/
+  //?? constructor
+
+  constructor(partial: Partial<User>) {
+    Object.assign(this, partial);
+  }
+
+  @Expose()
+  get age(): number | null {
+    if (this.dob === null) return null;
+    const today = new Date().getTime();
+    const birth = new Date(this.dob).getTime();
+    return Math.floor((today - birth) / 3.15576e10);
+  }
 }

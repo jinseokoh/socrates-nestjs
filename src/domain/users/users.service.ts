@@ -79,9 +79,7 @@ export class UsersService {
   async findAll(query: PaginateQuery): Promise<Paginated<User>> {
     const queryBuilder = this.repository
       .createQueryBuilder('user')
-      .leftJoinAndSelect('user.profile', 'profile')
-      .leftJoinAndSelect('user.artist', 'artist')
-      .loadRelationCountAndMap('user.artworkCount', 'user.artworks');
+      .leftJoinAndSelect('user.profile', 'profile');
 
     const config: PaginateConfig<User> = {
       sortableColumns: ['id', 'username', 'email'],
@@ -270,8 +268,8 @@ export class UsersService {
       user.pushToken = dto.reason;
       user.isActive = false;
       user.isBanned = false;
-      await user.save();
-      // soft deletion
+      await this.repository.save(user);
+
       await this.softRemove(id);
     } catch (e) {
       throw new BadRequestException('already deleted');

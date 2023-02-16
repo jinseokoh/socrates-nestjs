@@ -66,9 +66,14 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Admin Panel
+## EC2 Commands to execute
 
-Among several feasible options including [refine](https://github.com/pankod/refine) and [adminjs](https://github.com/SoftwareBrothers/adminjs), I chose the latter to be my choice of admin pannel for this project. Since everything works with bare minimum configuration.
+```
+pm2 kill
+pm2 start dist/main.js
+pm2 monit
+```
+
 ## URLs
 
 - API - [localhost:3001](http://localhost:3001/)

@@ -33,8 +33,8 @@ export class MeetupsController {
     @CurrentUserId() userId: string,
     @Body() dto: CreateMeetupDto,
   ): Promise<Meetup> {
-    console.log({ ...dto, userId });
-    return await this.meetupsService.create({ ...dto, userId: userId });
+    const createMeetupDto = dto.userId ? dto : { ...dto, userId: userId };
+    return await this.meetupsService.create(createMeetupDto);
   }
 
   @ApiOperation({ description: 'Meetup 생성' })
