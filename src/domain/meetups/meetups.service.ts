@@ -73,16 +73,18 @@ export class MeetupsService {
   async findAll(query: PaginateQuery): Promise<Paginated<Meetup>> {
     const queryBuilder = this.repository
       .createQueryBuilder('meetup')
-      .leftJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('user.profile', 'profile');
+      .innerJoinAndSelect('meetup.user', 'user')
+      .innerJoinAndSelect('user.profile', 'profile');
 
     const config: PaginateConfig<Meetup> = {
-      sortableColumns: ['id'],
+      relations: ['categories'],
+      sortableColumns: ['createdAt'],
       searchableColumns: ['title'],
-      defaultSortBy: [['id', 'DESC']],
+      defaultSortBy: [['createdAt', 'DESC']],
       filterableColumns: {
         id: [FilterOperator.IN, FilterOperator.EQ],
-        title: [FilterOperator.EQ],
+        gender: [FilterOperator.EQ],
+        'categories.id': [FilterOperator.IN],
         expiredAt: [FilterOperator.GTE, FilterOperator.LT],
       },
     };

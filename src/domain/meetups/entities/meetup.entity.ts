@@ -15,12 +15,13 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 
 @Entity() // 작품
@@ -98,6 +99,7 @@ export class Meetup {
   @ApiProperty({ description: 'expiration' })
   expiredAt: Date;
 
+  @Index('created-at-index')
   @CreateDateColumn()
   createdAt: Date;
 
