@@ -47,6 +47,9 @@ export class Meetup {
   @Column({ type: 'tinyint', unsigned: true, default: 2 })
   max: number;
 
+  @Column({ type: 'smallint', unsigned: true, default: 0 })
+  count: number;
+
   @Column({
     type: 'enum',
     enum: CategoryEnum,
