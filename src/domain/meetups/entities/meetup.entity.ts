@@ -1,10 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { CategoryEnum } from 'src/common/enums/category';
-import { DayEnum } from 'src/common/enums/day';
-import { ExpenseEnum } from 'src/common/enums/expense';
-import { GenderEnum } from 'src/common/enums/gender';
-import { TimeEnum } from 'src/common/enums/time';
+import {
+  CategoryEnum,
+  DayEnum,
+  ExpenseEnum,
+  GenderEnum,
+  RegionEnum,
+  TimeEnum,
+} from 'src/common/enums';
 import { Bookmark } from 'src/domain/bookmarks/entities/bookmark.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
@@ -58,6 +61,14 @@ export class Meetup {
   })
   @ApiProperty({ description: 'category' })
   category: CategoryEnum;
+
+  @Column({
+    type: 'enum',
+    enum: RegionEnum,
+    default: RegionEnum.SEOUL,
+  })
+  @ApiProperty({ description: 'region' })
+  region: RegionEnum;
 
   @Column({ type: 'enum', enum: ExpenseEnum, default: ExpenseEnum.SPLIT_EVEN })
   @ApiProperty({ description: '비용부담' })

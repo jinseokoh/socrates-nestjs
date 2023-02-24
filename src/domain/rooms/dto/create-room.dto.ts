@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { Rate } from 'src/common/enums/rate';
+import { RateEnum } from 'src/common/enums';
 export class CreateRoomDto {
   @ApiProperty({ description: '제목', required: true })
   @IsString()
@@ -12,10 +12,10 @@ export class CreateRoomDto {
 
   @ApiProperty({
     description: 'rate',
-    default: Rate.NSFW,
+    default: RateEnum.NSFW,
   })
-  @IsEnum(Rate)
-  rate: Rate;
+  @IsEnum(RateEnum)
+  rate: RateEnum;
 
   @ApiProperty({ description: '사용자 아이디' })
   @IsString()

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Rate } from 'src/common/enums/rate';
+import { RateEnum } from 'src/common/enums/rate';
 import {
   Column,
   CreateDateColumn,
@@ -23,11 +23,11 @@ export class Room {
 
   @Column({
     type: 'enum',
-    enum: Rate,
-    default: Rate.NSFW,
+    enum: RateEnum,
+    default: RateEnum.NSFW,
   })
-  @ApiProperty({ description: 'rate', default: Rate.NSFW })
-  rate: Rate;
+  @ApiProperty({ description: 'rate', default: RateEnum.NSFW })
+  rate: RateEnum;
 
   @CreateDateColumn()
   createdAt: Date;

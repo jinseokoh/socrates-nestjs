@@ -11,6 +11,7 @@ import { CategoryEnum } from 'src/common/enums/category';
 import { DayEnum } from 'src/common/enums/day';
 import { ExpenseEnum } from 'src/common/enums/expense';
 import { GenderEnum } from 'src/common/enums/gender';
+import { RegionEnum } from 'src/common/enums/region';
 import { TimeEnum } from 'src/common/enums/time';
 export class CreateMeetupDto {
   @ApiProperty({ description: '타이틀', required: true })
@@ -34,19 +35,18 @@ export class CreateMeetupDto {
   @IsNumber()
   max: number;
 
-  @ApiProperty({ description: 'category', required: true })
-  @IsEnum(CategoryEnum)
-  category: CategoryEnum;
-
   @ApiProperty({ description: '노출하는 성별', required: false })
   @IsEnum(GenderEnum)
   @IsOptional()
   gender?: GenderEnum;
 
+  @ApiProperty({ description: 'category', required: true })
+  @IsEnum(CategoryEnum)
+  category: CategoryEnum;
+
   @ApiProperty({ description: 'region', required: true })
-  @IsNumber()
-  @IsOptional()
-  region: number;
+  @IsEnum(RegionEnum)
+  region: RegionEnum;
 
   @ApiProperty({ description: '섭타이틀', required: true })
   @IsString()

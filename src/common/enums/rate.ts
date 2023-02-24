@@ -1,4 +1,4 @@
-export enum Rate {
+export enum RateEnum {
   NSFW = 'nsfw',
   SFW = 'sfw',
 }
