@@ -1,5 +1,5 @@
 export enum CategoryEnum {
-  // leisure
+  // LEISURE = 'leisure'
   DINING = 'dining', // 식사
   CAFE = 'cafe', // 커피,카페
   ALCOHOL = 'alcohol', // 술
@@ -17,7 +17,7 @@ export enum CategoryEnum {
   SAUNA = 'sauna', // 찜질방,사우나
   TALK_ONLINE = 'talkOnline', // JUST TALK
   OTHER_LEISURE = 'otherLeisure',
-  // hobby
+  // HOBBY = 'hobby'
   GUITAR = 'guitar', // 기타
   PIANO = 'piano', // 피아노
   KARAOKE = 'karaoke', // 노래방
@@ -41,7 +41,7 @@ export enum CategoryEnum {
   PLANTING = 'planting', // 반려식물
   PET = 'pet', // 반려동물
   OTHER_HOBBY = 'otherHobby',
-  // sports activities
+  // SPORTS = 'sports'
   BADMINTON = 'badminton', // 배드민턴
   BASEBALL = 'baseball', // 야구
   BASKETBALL = 'basketball', // 농구
@@ -72,7 +72,7 @@ export enum CategoryEnum {
   ARCHERY = 'archery', // 양궁
   HORSEBACK = 'horseback', // 승마
   OTHER_SPORTS = 'otherSports',
-  // other
+  // OTHER = 'other',
   ONE_DAY_CLASS = 'oneDayClass', // 공부
   VOLUNTARY_ACTIVITY = 'voluntaryActivity',
   LANGUAGE = 'language', // 언어교환

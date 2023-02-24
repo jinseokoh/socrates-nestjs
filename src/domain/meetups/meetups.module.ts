@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Category } from 'src/domain/meetups/entities/category.entity';
-
+import { Category } from 'src/domain/categories/entities/category.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsController } from 'src/domain/meetups/meetups.controller';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';

@@ -37,12 +37,6 @@ export class MeetupsController {
     return await this.meetupsService.create(createMeetupDto);
   }
 
-  @ApiOperation({ description: 'Meetup 생성' })
-  @Post('seed')
-  async category(): Promise<void> {
-    return await this.meetupsService.seedCategory();
-  }
-
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//

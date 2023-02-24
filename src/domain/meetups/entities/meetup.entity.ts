@@ -6,9 +6,9 @@ import { ExpenseEnum } from 'src/common/enums/expense';
 import { GenderEnum } from 'src/common/enums/gender';
 import { TimeEnum } from 'src/common/enums/time';
 import { Bookmark } from 'src/domain/bookmarks/entities/bookmark.entity';
-import { Category } from 'src/domain/meetups/entities/category.entity';
+import { Category } from 'src/domain/categories/entities/category.entity';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
-import { Region } from 'src/domain/meetups/entities/region.entity';
+import { Region } from 'src/domain/regions/entities/region.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,

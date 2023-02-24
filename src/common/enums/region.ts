@@ -1,6 +1,4 @@
 export enum RegionEnum {
-  ROOT = 'root', // AS OPPOSED TO CONTACTLESS
-
   KOREA = 'korea',
   JAPAN = 'japan',
   TAIWAN = 'taiwan',
@@ -15,6 +13,13 @@ export enum RegionEnum {
   GUAM = 'guam',
   CANADA = 'canada',
   AMERICA = 'america',
+  AUSTRALIA = 'australia',
+  NEW_ZEALAND = 'newZealand',
+  ENGLAND = 'england',
+  FRANCE = 'france',
+  GERMANY = 'germany',
+  ITALY = 'italy',
+  SPAIN = 'spain',
   OTHER = 'other',
 
   SEOUL = 'seoul',
