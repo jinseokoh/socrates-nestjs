@@ -2,6 +2,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Param,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
@@ -21,6 +22,12 @@ export class CategoriesController {
   @Get('')
   async getAllCategories(): Promise<any> {
     return await this.categoriesService.findAll();
+  }
+
+  @ApiOperation({ description: 'return sub-trees' })
+  @Get(':slug')
+  async getBySlug(@Param('slug') slug: string): Promise<any> {
+    return await this.categoriesService.findBySlug(slug);
   }
 
   //?-------------------------------------------------------------------------//

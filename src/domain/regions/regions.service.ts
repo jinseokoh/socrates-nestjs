@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RegionEnum } from 'src/common/enums/region';
+import { AnyData } from 'src/common/types';
 
 import { Region } from 'src/domain/regions/entities/region.entity';
 import { Repository } from 'typeorm';
@@ -18,8 +19,24 @@ export class RegionsService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  async findAll(): Promise<any> {
-    return await this.repository.manager.getTreeRepository(Region).findTrees();
+  async findAll(): Promise<AnyData> {
+    const data = await this.repository.manager
+      .getTreeRepository(Region)
+      .findTrees();
+
+    return { data };
+  }
+
+  async findBySlug(slug: string): Promise<AnyData> {
+    const parent = await this.repository.findOneOrFail({
+      where: {
+        slug,
+      },
+    });
+    const data = await this.repository.manager
+      .getTreeRepository(Region)
+      .findDescendantsTree(parent);
+    return { data: data.children };
   }
 
   //?-------------------------------------------------------------------------//

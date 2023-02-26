@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEnum } from 'src/common/enums/category';
+import { AnyData } from './../../common/types/index';
 
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Repository } from 'typeorm';
@@ -18,10 +19,24 @@ export class CategoriesService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  async findAll(): Promise<any> {
-    return await this.repository.manager
+  async findAll(): Promise<AnyData> {
+    const data = await this.repository.manager
       .getTreeRepository(Category)
       .findTrees();
+
+    return { data };
+  }
+
+  async findBySlug(slug: string): Promise<AnyData> {
+    const parent = await this.repository.findOneOrFail({
+      where: {
+        slug,
+      },
+    });
+    const data = await this.repository.manager
+      .getTreeRepository(Category)
+      .findDescendantsTree(parent);
+    return { data: data.children };
   }
 
   //?-------------------------------------------------------------------------//
