@@ -135,11 +135,6 @@ export class CategoriesService {
     leisure.parent = leisureRoot;
     await this.repository.manager.save(leisure);
     leisure = new Category();
-    leisure.slug = CategoryEnum.TALK_ONLINE;
-    leisure.depth = 2;
-    leisure.parent = leisureRoot;
-    await this.repository.manager.save(leisure);
-    leisure = new Category();
     leisure.slug = CategoryEnum.OTHER_LEISURE;
     leisure.depth = 2;
     leisure.parent = leisureRoot;
@@ -433,6 +428,11 @@ export class CategoriesService {
     otherRoot.parent = root;
     await this.repository.manager.save(otherRoot);
 
+    invest = new Category();
+    invest.slug = CategoryEnum.TALK_ONLINE;
+    invest.depth = 2;
+    invest.parent = otherRoot;
+    await this.repository.manager.save(invest);
     invest = new Category();
     invest.slug = CategoryEnum.ONE_DAY_CLASS;
     invest.depth = 2;

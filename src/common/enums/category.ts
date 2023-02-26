@@ -15,7 +15,6 @@ export enum CategoryEnum {
   THEMEPARK = 'themepark', // 테마파크
   TRAVEL = 'travel', // 트래블
   SAUNA = 'sauna', // 찜질방,사우나
-  TALK_ONLINE = 'talkOnline', // JUST TALK
   OTHER_LEISURE = 'otherLeisure',
   // HOBBY = 'hobby'
   GUITAR = 'guitar', // 기타
@@ -73,6 +72,7 @@ export enum CategoryEnum {
   HORSEBACK = 'horseback', // 승마
   OTHER_SPORTS = 'otherSports',
   // OTHER = 'other',
+  TALK_ONLINE = 'talkOnline', // Online
   ONE_DAY_CLASS = 'oneDayClass', // 공부
   VOLUNTARY_ACTIVITY = 'voluntaryActivity',
   LANGUAGE = 'language', // 언어교환
