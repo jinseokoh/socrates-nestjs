@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { IsArray } from 'class-validator';
 import {
   CategoryEnum,
   DayEnum,
@@ -24,7 +25,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity() // 작품
@@ -44,15 +45,22 @@ export class Meetup {
   @ApiProperty({ description: '모임정보' })
   body: string | null;
 
-  @Column({ length: 255, nullable: true })
-  @ApiProperty({ description: '이미지 URL' })
-  image: string | null;
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: '이미지들' })
+  @IsArray()
+  images: string[] | null;
 
   @Column({ type: 'tinyint', unsigned: true, default: 2 })
+  @ApiProperty({ description: '최대인원수' })
   max: number;
 
-  @Column({ type: 'smallint', unsigned: true, default: 0 })
-  count: number;
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'like count' })
+  likeCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'view count' })
+  viewCount: number;
 
   @Column({
     type: 'enum',
