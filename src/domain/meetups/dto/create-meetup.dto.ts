@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsDate,
   IsEnum,
   IsNumber,
@@ -27,13 +28,10 @@ export class CreateMeetupDto {
   @IsString()
   body: string;
 
-  @ApiProperty({ description: '모임이미지', required: true })
-  @IsString()
-  image: string;
-
-  @ApiProperty({ description: '모임인원', required: true })
-  @IsNumber()
-  max: number;
+  @ApiProperty({ description: '이미지들 (String[])', required: false })
+  @IsArray()
+  @IsOptional()
+  images?: string[] | null;
 
   @ApiProperty({ description: '노출하는 성별', required: false })
   @IsEnum(GenderEnum)
@@ -48,19 +46,14 @@ export class CreateMeetupDto {
   @IsEnum(RegionEnum)
   region: RegionEnum;
 
-  @ApiProperty({ description: '섭타이틀', required: true })
-  @IsString()
-  @IsOptional()
-  venue?: string;
+  // @IsString()
+  // @IsOptional()
+  // geolocation?: string;
 
-  @ApiProperty({ description: '섭타이틀', required: true })
-  @IsString()
+  @ApiProperty({ description: '비용', required: true })
+  @IsEnum(ExpenseEnum)
   @IsOptional()
-  address?: string;
-
-  @IsString()
-  @IsOptional()
-  geolocation?: string;
+  expense?: ExpenseEnum;
 
   @ApiProperty({ description: '언제', required: false })
   @IsEnum(DayEnum)
@@ -70,15 +63,26 @@ export class CreateMeetupDto {
   @IsEnum(TimeEnum)
   time: TimeEnum;
 
+  @ApiProperty({ description: 'max 인원', required: true })
+  @IsNumber()
+  max: number;
+
+  @ApiProperty({ description: 'like count', required: true })
+  @IsNumber()
+  likeCount: number;
+
+  @ApiProperty({ description: 'view count', required: true })
+  @IsNumber()
+  viewCount: number;
+
+  @ApiProperty({ description: '신고여부', required: true })
+  @IsNumber()
+  isFlagged: boolean;
+
   @ApiProperty({ description: '종료시각', required: true })
   @Type(() => Date)
   @IsDate()
   expiredAt: Date;
-
-  @ApiProperty({ description: '비용', required: true })
-  @IsEnum(ExpenseEnum)
-  @IsOptional()
-  expense?: ExpenseEnum;
 
   @ApiProperty({ description: '생성시각 (ISO8601)' })
   @Type(() => Date)

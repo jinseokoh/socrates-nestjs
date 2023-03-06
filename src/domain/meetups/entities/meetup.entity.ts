@@ -7,13 +7,14 @@ import {
   ExpenseEnum,
   GenderEnum,
   RegionEnum,
-  TimeEnum,
+  TimeEnum
 } from 'src/common/enums';
 import { Bookmark } from 'src/domain/bookmarks/entities/bookmark.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Region } from 'src/domain/regions/entities/region.entity';
 import { User } from 'src/domain/users/entities/user.entity';
+import { Venue } from 'src/domain/venues/entities/venue.entity';
 import {
   Column,
   CreateDateColumn,
@@ -24,8 +25,9 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 
 @Entity() // 작품
@@ -50,17 +52,9 @@ export class Meetup {
   @IsArray()
   images: string[] | null;
 
-  @Column({ type: 'tinyint', unsigned: true, default: 2 })
-  @ApiProperty({ description: '최대인원수' })
-  max: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'like count' })
-  likeCount: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'view count' })
-  viewCount: number;
+  @Column({ type: 'enum', enum: GenderEnum, nullable: true })
+  @ApiProperty({ description: '원하는 성별' })
+  gender?: GenderEnum | null;
 
   @Column({
     type: 'enum',
@@ -82,10 +76,6 @@ export class Meetup {
   @ApiProperty({ description: '비용부담' })
   expense: ExpenseEnum;
 
-  @Column({ type: 'enum', enum: GenderEnum, nullable: true })
-  @ApiProperty({ description: '원하는 성별' })
-  gender?: GenderEnum | null;
-
   @Column({ type: 'enum', enum: DayEnum, nullable: true })
   @ApiProperty({ description: '시간대' })
   day: DayEnum;
@@ -94,21 +84,17 @@ export class Meetup {
   @ApiProperty({ description: '시간대' })
   time: TimeEnum;
 
-  @Column({ length: 64, nullable: true }) // from Auction
-  @ApiProperty({ description: '장소명' })
-  venue?: string | null;
+  @Column({ type: 'tinyint', unsigned: true, default: 2 })
+  @ApiProperty({ description: '최대인원수' })
+  max: number;
 
-  @Column({ length: 128, nullable: true }) // from Auction
-  @ApiProperty({ description: '장소주소' })
-  address?: string | null;
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'like count' })
+  likeCount: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 8, nullable: true })
-  @ApiProperty({ description: '위도' })
-  latitude: number | null;
-
-  @Column({ type: 'decimal', precision: 11, scale: 8, nullable: true })
-  @ApiProperty({ description: '경도' })
-  longitude: number | null;
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'view count' })
+  viewCount: number;
 
   @Column({ default: false })
   @ApiProperty({ description: '신고여부' })
@@ -127,6 +113,14 @@ export class Meetup {
 
   @DeleteDateColumn()
   deletedAt: Date | null;
+
+  //**--------------------------------------------------------------------------*/
+  //** 1-to-1 hasOne
+
+  @OneToOne(() => Venue, (venue) => venue.meetup, {
+    // cascade: ['insert', 'update'],
+  })
+  venue: Venue;
 
   //**--------------------------------------------------------------------------*/
   //** 1-to-many hasMany
