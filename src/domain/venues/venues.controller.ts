@@ -1,12 +1,18 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
-  Post,
+  Patch,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
+import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
+import { UpdateVenueDto } from 'src/domain/venues/dto/update-venue.dto';
+import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { VenuesService } from 'src/domain/venues/venues.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -18,19 +24,8 @@ export class VenuesController {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  async create(dto: CreateVenueDto): Promise<Meetup> {
-    const user = await this.userRepository.findOneOrFail({
-      where: { id: dto.userId },
-    });
-    if (user.isBanned) {
-      throw new BadRequestException(`not allowed to use`);
-    }
-
-    const meetup = await this.repository.save(this.repository.create(dto));
-    await this._linkWithCategory(dto.category, meetup.id);
-    await this._linkWithRegion(dto.category, meetup.id);
-
-    return meetup;
+  async create(dto: CreateVenueDto): Promise<Venue> {
+    return await this.venuesService.create(dto);
   }
 
   //?-------------------------------------------------------------------------//
@@ -38,24 +33,29 @@ export class VenuesController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'return all trees' })
-  @Get('')
-  async getAllVenues(): Promise<any> {
-    return await this.venuesService.findAll();
+  @PaginateQueryOptions()
+  @Get()
+  async getVenues(@Paginate() query: PaginateQuery): Promise<Paginated<Venue>> {
+    return this.venuesService.findAll(query);
   }
 
-  @ApiOperation({ description: 'return sub-trees' })
-  @Get(':slug')
-  async getBySlug(@Param('slug') slug: string): Promise<any> {
-    return await this.venuesService.findBySlug(slug);
+  @ApiOperation({ description: '상세보기' })
+  @Get(':id')
+  async getVenueById(@Param('id') id: string): Promise<Venue> {
+    console.log(id);
+    return await this.venuesService.findById(id, ['user', 'meetup']);
   }
 
   //?-------------------------------------------------------------------------//
-  //? SEED
+  //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: 'seed venues' })
-  @Post('seed')
-  async category(): Promise<void> {
-    return await this.venuesService.seedCategory();
+  @ApiOperation({ description: 'Meetup 갱신' })
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateVenueDto,
+  ): Promise<Venue> {
+    return await this.venuesService.update(id, dto);
   }
 }

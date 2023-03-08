@@ -1,5 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  FilterOperator,
+  paginate,
+  PaginateConfig,
+  Paginated,
+  PaginateQuery,
+} from 'nestjs-paginate';
 import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
 import { UpdateVenueDto } from 'src/domain/venues/dto/update-venue.dto';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
@@ -11,11 +18,41 @@ export class VenuesService {
     private readonly repository: Repository<Venue>,
   ) {}
 
+  //?-------------------------------------------------------------------------//
+  //? CREATE
+  //?-------------------------------------------------------------------------//
+
   async create(dto: CreateVenueDto): Promise<Venue> {
     const venue = this.repository.create(dto);
     return await this.repository.save(venue);
   }
 
+  //?-------------------------------------------------------------------------//
+  //? READ
+  //?-------------------------------------------------------------------------//
+
+  // Meetup 리스트 w/ Pagination
+  async findAll(query: PaginateQuery): Promise<Paginated<Venue>> {
+    const queryBuilder = this.repository
+      .createQueryBuilder('meetup')
+      .innerJoinAndSelect('meetup.venue', 'venue')
+      .innerJoinAndSelect('meetup.user', 'user')
+      .innerJoinAndSelect('user.profile', 'profile');
+
+    const config: PaginateConfig<Venue> = {
+      relations: ['meetup'],
+      sortableColumns: ['name'],
+      searchableColumns: ['name'],
+      defaultSortBy: [['name', 'DESC']],
+      filterableColumns: {
+        id: [FilterOperator.IN, FilterOperator.EQ],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // Meetup 상세보기
   async findById(id: string, relations: string[] = []): Promise<Venue> {
     try {
       return relations.length > 0
@@ -31,6 +68,10 @@ export class VenuesService {
     }
   }
 
+  //?-------------------------------------------------------------------------//
+  //? UPDATE
+  //?-------------------------------------------------------------------------//
+
   async update(id: string, dto: UpdateVenueDto): Promise<Venue> {
     const venue = await this.repository.preload({ id, ...dto });
     if (!venue) {
@@ -38,6 +79,10 @@ export class VenuesService {
     }
     return await this.repository.save(venue);
   }
+
+  //?-------------------------------------------------------------------------//
+  //? DELETE
+  //?-------------------------------------------------------------------------//
 
   async remove(id: string): Promise<Venue> {
     const venue = await this.findById(id);

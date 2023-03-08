@@ -45,12 +45,12 @@ export class MeetupsService {
       where: { id: dto.userId },
     });
     if (user.isBanned) {
-      throw new BadRequestException(`not allowed to use`);
+      throw new BadRequestException(`not allowed to create`);
     }
 
     const meetup = await this.repository.save(this.repository.create(dto));
     await this._linkWithCategory(dto.category, meetup.id);
-    await this._linkWithRegion(dto.category, meetup.id);
+    await this._linkWithRegion(dto.region, meetup.id);
 
     return meetup;
   }

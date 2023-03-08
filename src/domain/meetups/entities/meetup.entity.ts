@@ -53,7 +53,7 @@ export class Meetup {
   images: string[] | null;
 
   @Column({ type: 'enum', enum: GenderEnum, nullable: true })
-  @ApiProperty({ description: '원하는 성별' })
+  @ApiProperty({ description: 'gender looking for' })
   gender?: GenderEnum | null;
 
   @Column({
@@ -90,7 +90,11 @@ export class Meetup {
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'like count' })
-  likeCount: number;
+  matchCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'like count' })
+  keepCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'view count' })

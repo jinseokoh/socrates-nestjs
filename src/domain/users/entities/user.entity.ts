@@ -3,6 +3,7 @@ import { Exclude, Expose } from 'class-transformer';
 import { RoleEnum } from 'src/common/enums';
 import { GenderEnum } from 'src/common/enums/gender';
 import { Bookmark } from 'src/domain/bookmarks/entities/bookmark.entity';
+import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
@@ -122,10 +123,11 @@ export class User {
   })
   meetups: Meetup[];
 
-  // @OneToMany(() => Meetup, (meetup) => meetup.guest, {
-  //   // cascade: ['insert', 'update'],
-  // })
-  // guestMeetups: Meetup[];
+  //**--------------------------------------------------------------------------*/
+  //** many-to-many
+
+  @OneToMany(() => MeetupUser, (meetupUser) => meetupUser.user)
+  public meetupUsers!: MeetupUser[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

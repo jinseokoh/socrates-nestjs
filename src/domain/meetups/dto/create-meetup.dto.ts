@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsDate,
   IsEnum,
   IsNumber,
@@ -69,14 +70,17 @@ export class CreateMeetupDto {
 
   @ApiProperty({ description: 'like count', required: true })
   @IsNumber()
+  @IsOptional()
   likeCount: number;
 
   @ApiProperty({ description: 'view count', required: true })
   @IsNumber()
+  @IsOptional()
   viewCount: number;
 
   @ApiProperty({ description: '신고여부', required: true })
-  @IsNumber()
+  @IsBoolean()
+  @IsOptional()
   isFlagged: boolean;
 
   @ApiProperty({ description: '종료시각', required: true })

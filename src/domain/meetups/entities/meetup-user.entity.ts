@@ -1,17 +1,39 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { Status } from 'src/common/enums/status';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class MeetupUser {
   @Exclude()
-  @Column({ default: false })
-  public approve: boolean;
+  @Column({ nullable: true })
+  public acked: boolean;
 
-  @Exclude()
-  @Column({ default: false })
-  public bookmark: boolean;
+  @Index()
+  @Column({
+    type: 'enum',
+    enum: Status,
+    default: Status.KEEP,
+  })
+  @ApiProperty({ description: 'KEEP|MATCH' })
+  status: Status;
+
+  @Index('created-at-index')
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @Exclude()
   @PrimaryColumn({ type: 'uuid', length: 36 })

@@ -47,9 +47,7 @@ export class MeetupsController {
   async getMeetups(
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Meetup>> {
-    const a = this.meetupsService.findAll(query);
-    console.log(a);
-    return a;
+    return this.meetupsService.findAll(query);
   }
 
   @ApiOperation({ description: 'Meetup 상세보기' })
@@ -59,6 +57,7 @@ export class MeetupsController {
     return await this.meetupsService.findById(id, [
       'user',
       'categories',
+      'regions',
       'bookmarks',
       'bookmarks.user',
     ]);
