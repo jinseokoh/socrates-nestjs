@@ -14,7 +14,6 @@ import { JwtAuthGuard } from 'src/domain/auth/guards/jwt-auth.guard';
 import { CategoriesModule } from 'src/domain/categories/categories.module';
 import { MessagesModule } from 'src/domain/chats/messages.module';
 import { MeetupsModule } from 'src/domain/meetups/meetups.module';
-import { RegionsModule } from 'src/domain/regions/regions.module';
 import { RoomsModule } from 'src/domain/rooms/rooms.module';
 import { UsersModule } from 'src/domain/users/users.module';
 @Module({
@@ -72,7 +71,7 @@ import { UsersModule } from 'src/domain/users/users.module';
     AuthModule,
     RoomsModule,
     CategoriesModule,
-    RegionsModule,
+    // RegionsModule,
     MeetupsModule,
     UsersModule,
     MessagesModule,

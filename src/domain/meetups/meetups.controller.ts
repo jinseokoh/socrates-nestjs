@@ -17,11 +17,15 @@ import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
+import { VenuesService } from 'src/domain/venues/venues.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
 export class MeetupsController {
-  constructor(private readonly meetupsService: MeetupsService) {}
+  constructor(
+    private readonly meetupsService: MeetupsService,
+    private readonly venuesService: VenuesService,
+  ) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
@@ -33,8 +37,13 @@ export class MeetupsController {
     @CurrentUserId() userId: string,
     @Body() dto: CreateMeetupDto,
   ): Promise<Meetup> {
-    const createMeetupDto = dto.userId ? dto : { ...dto, userId: userId };
-    return await this.meetupsService.create(createMeetupDto);
+    const meetupDto = dto.userId ? dto : { ...dto, userId: userId };
+    const meetup = await this.meetupsService.create(meetupDto);
+    const venue = await this.venuesService.create({
+      ...dto.venue,
+      meetupId: meetup.id,
+    });
+    return meetup;
   }
 
   //?-------------------------------------------------------------------------//
@@ -57,9 +66,7 @@ export class MeetupsController {
     return await this.meetupsService.findById(id, [
       'user',
       'categories',
-      'regions',
-      'bookmarks',
-      'bookmarks.user',
+      'venue',
     ]);
   }
 

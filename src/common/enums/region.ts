@@ -1,4 +1,25 @@
 export enum RegionEnum {
+  SEOUL = 'seoul',
+  BUSAN = 'busan',
+  INCHEON = 'incheon',
+  ULSAN = 'ulsan',
+  DAEJEON = 'daejeon',
+  DAEGU = 'daegu',
+  GWANGJU = 'gwangju',
+  SEJONG = 'sejong',
+  GYEONGGI = 'gyeonggi',
+  GANGWON = 'gangwon',
+  NORTHERN_JEOLLA = 'northernJeolla',
+  SOUTHERN_JEOLLA = 'southernJeolla',
+  NORTHERN_GYEONGSANG = 'northernGyeongsang',
+  SOUTHERN_GYEONGSANG = 'southernGyeongsang',
+  NORTHERN_CHUNGCHEONG = 'northernChungcheong',
+  SOUTHERN_CHUNGCHEONG = 'southernChungcheong',
+  JEJU = 'jeju',
+}
+
+/*
+export enum RegionEnum {
   KOREA = 'korea',
   JAPAN = 'japan',
   TAIWAN = 'taiwan',
@@ -284,3 +305,4 @@ export enum RegionEnum {
   JEJU_JEJU = 'jejuJeju',
   JEJU_SEOGWIPO = 'jejuSeogwipo',
 }
+*/

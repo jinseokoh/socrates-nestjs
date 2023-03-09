@@ -8,6 +8,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
 import { CategoryEnum } from 'src/common/enums/category';
 import { DayEnum } from 'src/common/enums/day';
@@ -15,6 +16,7 @@ import { ExpenseEnum } from 'src/common/enums/expense';
 import { GenderEnum } from 'src/common/enums/gender';
 import { RegionEnum } from 'src/common/enums/region';
 import { TimeEnum } from 'src/common/enums/time';
+import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
 export class CreateMeetupDto {
   @ApiProperty({ description: '타이틀', required: true })
   @IsString()
@@ -83,6 +85,10 @@ export class CreateMeetupDto {
   @IsOptional()
   isFlagged: boolean;
 
+  @Type(() => CreateVenueDto)
+  @ValidateNested()
+  venue: CreateVenueDto;
+
   @ApiProperty({ description: '종료시각', required: true })
   @Type(() => Date)
   @IsDate()
@@ -106,7 +112,13 @@ export class CreateMeetupDto {
   @IsOptional()
   deletedAt?: Date | null;
 
-  @ApiProperty({ description: '사용자 아이디' })
+  @ApiProperty({ description: 'User 아이디' })
+  @IsString()
   @IsOptional()
-  userId: string;
+  userId?: string;
+
+  @ApiProperty({ description: 'Venue 아이디' })
+  @IsString()
+  @IsOptional()
+  venueId?: string;
 }

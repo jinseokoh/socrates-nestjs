@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { RoleEnum } from 'src/common/enums';
 import { GenderEnum } from 'src/common/enums/gender';
-import { Bookmark } from 'src/domain/bookmarks/entities/bookmark.entity';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
@@ -108,10 +107,10 @@ export class User {
   //**--------------------------------------------------------------------------*/
   //** 1-to-many hasMany
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.user, {
-    // cascade: ['insert', 'update'],
-  })
-  bookmarks: Bookmark[];
+  // @OneToMany(() => Bookmark, (bookmark) => bookmark.user, {
+  //   // cascade: ['insert', 'update'],
+  // })
+  // bookmarks: Bookmark[];
 
   @OneToMany(() => Provider, (provider) => provider.user, {
     // cascade: ['insert', 'update'],

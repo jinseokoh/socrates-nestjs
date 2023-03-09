@@ -2,17 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
 import {
-  CategoryEnum,
   DayEnum,
   ExpenseEnum,
   GenderEnum,
   RegionEnum,
-  TimeEnum
+  TimeEnum,
 } from 'src/common/enums';
-import { Bookmark } from 'src/domain/bookmarks/entities/bookmark.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
-import { Region } from 'src/domain/regions/entities/region.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
 import {
@@ -27,7 +24,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity() // 작품
@@ -55,14 +52,6 @@ export class Meetup {
   @Column({ type: 'enum', enum: GenderEnum, nullable: true })
   @ApiProperty({ description: 'gender looking for' })
   gender?: GenderEnum | null;
-
-  @Column({
-    type: 'enum',
-    enum: CategoryEnum,
-    default: CategoryEnum.DINING,
-  })
-  @ApiProperty({ description: 'category' })
-  category: CategoryEnum;
 
   @Column({
     type: 'enum',
@@ -126,13 +115,13 @@ export class Meetup {
   })
   venue: Venue;
 
-  //**--------------------------------------------------------------------------*/
-  //** 1-to-many hasMany
+  // //**--------------------------------------------------------------------------*/
+  // //** 1-to-many hasMany
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.meetup, {
-    // cascade: ['insert', 'update'],
-  })
-  bookmarks: Bookmark[];
+  // @OneToMany(() => Bookmark, (bookmark) => bookmark.meetup, {
+  //   // cascade: ['insert', 'update'],
+  // })
+  // bookmarks: Bookmark[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
@@ -154,9 +143,9 @@ export class Meetup {
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany
 
-  @ManyToMany(() => Region, (region) => region.meetups)
-  @JoinTable({ name: 'meetup_region' }) // owning side
-  regions: Region[];
+  // @ManyToMany(() => Region, (region) => region.meetups)
+  // @JoinTable({ name: 'meetup_region' }) // owning side
+  // regions: Region[];
 
   @ManyToMany(() => Category, (category) => category.meetups)
   @JoinTable({ name: 'meetup_category' }) // owning side

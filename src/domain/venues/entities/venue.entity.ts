@@ -26,14 +26,6 @@ export class Venue {
   @ApiProperty({ description: 'comma separated hashtags for this venue' })
   tags?: string | null;
 
-  @Column({ length: 32 })
-  @ApiProperty({ description: 'city' })
-  city: string;
-
-  @Column({ length: 32 })
-  @ApiProperty({ description: 'state' })
-  state: string;
-
   @Column({ type: 'decimal', precision: 10, scale: 8 })
   @ApiProperty({ description: '위도' })
   latitude: number;

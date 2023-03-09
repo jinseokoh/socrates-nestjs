@@ -24,14 +24,19 @@ export class CreateVenueDto {
 
   @ApiProperty({ description: '위도', required: true })
   @IsNumber()
-  latitude: number;
+  latitude: number; // y as number
 
   @ApiProperty({ description: '경도', required: true })
   @IsNumber()
-  longitude: number;
+  longitude: number; // x as number
 
   @ApiProperty({ description: '네이버 장소ID', required: true })
   @IsString()
   @IsOptional()
-  providerId?: string;
+  providerId?: string; // id as id
+
+  @ApiProperty({ description: 'Meetup ID', required: true })
+  @IsString()
+  @IsOptional()
+  meetupId?: string; // id as id
 }

@@ -17,7 +17,6 @@ import { Category } from 'src/domain/categories/entities/category.entity';
 import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Region } from 'src/domain/regions/entities/region.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Repository } from 'typeorm/repository/Repository';
 @Injectable()
@@ -29,8 +28,6 @@ export class MeetupsService {
     private readonly repository: Repository<Meetup>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
-    @InjectRepository(Region)
-    private readonly regionRepository: Repository<Region>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
@@ -50,7 +47,7 @@ export class MeetupsService {
 
     const meetup = await this.repository.save(this.repository.create(dto));
     await this._linkWithCategory(dto.category, meetup.id);
-    await this._linkWithRegion(dto.region, meetup.id);
+    // await this._linkWithRegion(dto.region, meetup.id);
 
     return meetup;
   }
@@ -72,22 +69,22 @@ export class MeetupsService {
       });
   }
 
-  async _linkWithRegion(regionSlug: string, meetupId: string) {
-    const region = await this.regionRepository.findOne({
-      where: { slug: regionSlug },
-    });
-    const regions = await this.repository.manager
-      .getTreeRepository(Region)
-      .findAncestors(region);
-    regions
-      .filter((v: Region) => v.depth > 1) // remove root, korea
-      .map(async (v: Region) => {
-        await this.repository.manager.query(
-          'INSERT IGNORE INTO `meetup_region` (meetupId, regionId) VALUES (?, ?)',
-          [meetupId, v.id],
-        );
-      });
-  }
+  // async _linkWithRegion(regionSlug: string, meetupId: string) {
+  //   const region = await this.regionRepository.findOne({
+  //     where: { slug: regionSlug },
+  //   });
+  //   const regions = await this.repository.manager
+  //     .getTreeRepository(Region)
+  //     .findAncestors(region);
+  //   regions
+  //     .filter((v: Region) => v.depth > 1) // remove root, korea
+  //     .map(async (v: Region) => {
+  //       await this.repository.manager.query(
+  //         'INSERT IGNORE INTO `meetup_region` (meetupId, regionId) VALUES (?, ?)',
+  //         [meetupId, v.id],
+  //       );
+  //     });
+  // }
 
   //?-------------------------------------------------------------------------//
   //? READ

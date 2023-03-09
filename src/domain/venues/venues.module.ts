@@ -5,6 +5,7 @@ import { VenuesController } from 'src/domain/venues/venues.controller';
 import { VenuesService } from 'src/domain/venues/venues.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Venue])],
+  exports: [VenuesService],
   providers: [VenuesService],
   controllers: [VenuesController],
 })
