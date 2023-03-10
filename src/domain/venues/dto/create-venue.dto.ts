@@ -14,14 +14,6 @@ export class CreateVenueDto {
   @IsOptional()
   tags?: string | null;
 
-  @ApiProperty({ description: 'city', required: true })
-  @IsString()
-  city: string;
-
-  @ApiProperty({ description: 'state', required: true })
-  @IsString()
-  state: string;
-
   @ApiProperty({ description: '위도', required: true })
   @IsNumber()
   latitude: number; // y as number

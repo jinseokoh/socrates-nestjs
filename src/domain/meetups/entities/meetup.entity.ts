@@ -65,11 +65,11 @@ export class Meetup {
   @ApiProperty({ description: '비용부담' })
   expense: ExpenseEnum;
 
-  @Column({ type: 'enum', enum: DayEnum, nullable: true })
+  @Column({ type: 'enum', enum: DayEnum, default: DayEnum.WEEKDAYS })
   @ApiProperty({ description: '시간대' })
   day: DayEnum;
 
-  @Column({ type: 'enum', enum: TimeEnum, nullable: true })
+  @Column({ type: 'enum', enum: TimeEnum, default: TimeEnum.DINNER })
   @ApiProperty({ description: '시간대' })
   time: TimeEnum;
 

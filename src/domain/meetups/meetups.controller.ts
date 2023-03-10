@@ -18,6 +18,7 @@ import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
 import { VenuesService } from 'src/domain/venues/venues.service';
+import { addressToRegionEnum } from 'src/helpers/address-to-region';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
@@ -37,7 +38,10 @@ export class MeetupsController {
     @CurrentUserId() userId: string,
     @Body() dto: CreateMeetupDto,
   ): Promise<Meetup> {
-    const meetupDto = dto.userId ? dto : { ...dto, userId: userId };
+    const region = addressToRegionEnum(dto.venue.address);
+    const meetupDto = dto.userId
+      ? { ...dto, region }
+      : { ...dto, region, userId };
     const meetup = await this.meetupsService.create(meetupDto);
     const venue = await this.venuesService.create({
       ...dto.venue,
