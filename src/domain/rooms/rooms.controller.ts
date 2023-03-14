@@ -30,7 +30,7 @@ export class RoomsController {
   @ApiOperation({ description: 'Room 생성' })
   @Post()
   async create(
-    @CurrentUserId() hostId: string,
+    @CurrentUserId() hostId: number,
     @Body() dto: CreateRoomDto,
   ): Promise<Room> {
     return await this.roomsService.create({ ...dto, hostId });

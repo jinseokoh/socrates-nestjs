@@ -35,7 +35,7 @@ export class MeetupsController {
   @ApiOperation({ description: 'Meetup 생성' })
   @Post()
   async create(
-    @CurrentUserId() userId: string,
+    @CurrentUserId() userId: number,
     @Body() dto: CreateMeetupDto,
   ): Promise<Meetup> {
     const region = addressToRegionEnum(dto.venue.address);

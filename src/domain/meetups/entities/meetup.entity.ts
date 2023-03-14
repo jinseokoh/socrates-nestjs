@@ -127,8 +127,9 @@ export class Meetup {
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'uuid', length: 36, nullable: true })
-  userId: string | null; // to make it available to Repository.
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  userId: number | null; // to make it available to Repository.
+
   @ManyToOne(() => User, (user) => user.meetups, {
     onDelete: 'CASCADE',
   })

@@ -18,8 +18,8 @@ import {
 } from 'typeorm';
 @Entity() //? 사용자
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
+  id: number;
 
   @Column({ length: 32, unique: true, nullable: true })
   @ApiProperty({ description: 'username' })

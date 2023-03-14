@@ -16,7 +16,7 @@ export class ProfilesService {
     return await this.repository.save(profile);
   }
 
-  async findById(id: string, relations: string[] = []): Promise<Profile> {
+  async findById(id: number, relations: string[] = []): Promise<Profile> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -31,7 +31,7 @@ export class ProfilesService {
     }
   }
 
-  async update(id: string, dto: UpdateProfileDto): Promise<Profile> {
+  async update(id: number, dto: UpdateProfileDto): Promise<Profile> {
     const profile = await this.repository.preload({ id, ...dto });
     if (!profile) {
       throw new NotFoundException(`entity not found`);
@@ -39,7 +39,7 @@ export class ProfilesService {
     return await this.repository.save(profile);
   }
 
-  async remove(id: string): Promise<Profile> {
+  async remove(id: number): Promise<Profile> {
     const profile = await this.findById(id);
     return await this.repository.remove(profile);
   }

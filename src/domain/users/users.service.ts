@@ -3,7 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   Logger,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -13,7 +13,7 @@ import {
   paginate,
   PaginateConfig,
   Paginated,
-  PaginateQuery,
+  PaginateQuery
 } from 'nestjs-paginate';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
@@ -54,8 +54,7 @@ export class UsersService {
     if (user.username) {
       return user;
     }
-    const count = await this.repository.count();
-    const username = getUsername(count);
+    const username = getUsername(user.id);
     return this.update(user.id, { username });
   }
 
@@ -100,7 +99,7 @@ export class UsersService {
 
   // User 상세보기 (w/ id)
   async findUserDetailById(
-    id: string,
+    id: number,
     relations: string[] = [],
   ): Promise<User> {
     console.log(id);
@@ -125,7 +124,7 @@ export class UsersService {
   }
 
   // User 상세보기 (w/ id)
-  async findById(id: string, relations: string[] = []): Promise<User> {
+  async findById(id: number, relations: string[] = []): Promise<User> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -152,7 +151,7 @@ export class UsersService {
   //?-------------------------------------------------------------------------//
 
   // [관리자] User 갱신
-  async updateExtended(id: string, body: any): Promise<User> {
+  async updateExtended(id: number, body: any): Promise<User> {
     console.log(body, '~~ body');
 
     // avatar
@@ -183,7 +182,7 @@ export class UsersService {
   }
 
   // User 갱신
-  async update(id: string, dto: UpdateUserDto): Promise<User> {
+  async update(id: number, dto: UpdateUserDto): Promise<User> {
     const dbUser = await this.findById(id);
     if (dto.usernamedAt && dbUser.usernamedAt) {
       const oldDate = moment(dbUser.usernamedAt);
@@ -199,7 +198,7 @@ export class UsersService {
   }
 
   // User 프로필사진 갱신
-  async upload(id: string, file: Express.Multer.File): Promise<User> {
+  async upload(id: number, file: Express.Multer.File): Promise<User> {
     // see if id is valid
     await this.findById(id);
     const path = `local/users/${id}/${randomName('avatar')}`;
@@ -216,7 +215,7 @@ export class UsersService {
   }
 
   // User 비밀번호 갱신
-  async changePassword(id: string, dto: ChangePasswordDto): Promise<User> {
+  async changePassword(id: number, dto: ChangePasswordDto): Promise<User> {
     const user = await this.findById(id);
     const passwordMatches = await bcrypt.compare(dto.current, user.password);
     if (!passwordMatches) {
@@ -227,7 +226,7 @@ export class UsersService {
   }
 
   // User 와 연계된 Profile 갱신
-  async updateProfile(id: string, dto: UpdateProfileDto): Promise<Profile> {
+  async updateProfile(id: number, dto: UpdateProfileDto): Promise<Profile> {
     const user = await this.findById(id, ['profile']);
     const profileId = user.profile.id;
 
@@ -246,18 +245,18 @@ export class UsersService {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async softRemove(id: string): Promise<User> {
+  async softRemove(id: number): Promise<User> {
     const user = await this.findById(id);
     return await this.repository.softRemove(user);
   }
 
-  async remove(id: string): Promise<User> {
+  async remove(id: number): Promise<User> {
     const user = await this.findById(id);
     return await this.repository.remove(user);
   }
 
   // User 탈퇴
-  async quit(id: string, dto: DeleteUserDto): Promise<any> {
+  async quit(id: number, dto: DeleteUserDto): Promise<any> {
     const user = await this.findById(id);
     try {
       // following 관계 hard 삭제
@@ -306,7 +305,7 @@ export class UsersService {
   //--------------------------------------------------------------------------//
 
   // todo refactor) this responsibility belongs to Profile. (priority: low)
-  async increasePayCount(id: string): Promise<void> {
+  async increasePayCount(id: number): Promise<void> {
     await this.profileRepository
       .createQueryBuilder()
       .update(Profile)
@@ -316,7 +315,7 @@ export class UsersService {
   }
 
   // todo refactor) this responsibility belongs to Profile. (priority: low)
-  async decreasePayCount(id: string): Promise<void> {
+  async decreasePayCount(id: number): Promise<void> {
     await this.profileRepository
       .createQueryBuilder()
       .update(Profile)
@@ -329,14 +328,14 @@ export class UsersService {
   // Some private shit
   //--------------------------------------------------------------------------//
 
-  async _hardRemovalOnFollow(id: string) {
+  async _hardRemovalOnFollow(id: number) {
     await this.repository.manager.query(
       'DELETE FROM follow WHERE followingId = ? OR followerId = ?',
       [id, id],
     );
   }
 
-  async _voidPersonalInformation(id: string): Promise<any> {
+  async _voidPersonalInformation(id: number): Promise<any> {
     const user = await this.findById(id);
     const email = user.email;
     const phone = user.phone;

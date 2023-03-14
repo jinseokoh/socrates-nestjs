@@ -36,8 +36,9 @@ export class MeetupUser {
   updatedAt: Date;
 
   @Exclude()
-  @PrimaryColumn({ type: 'uuid', length: 36 })
-  public userId!: string;
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  userId: number | null; // to make it available to Repository.
+
   @ManyToOne(() => User, (user) => user.meetups)
   public user!: User;
 

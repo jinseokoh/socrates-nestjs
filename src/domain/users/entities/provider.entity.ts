@@ -14,8 +14,8 @@ import {
 @Unique('provider_name_provider_id_key', ['providerName', 'providerId'])
 export class Provider extends BaseEntity {
   @Exclude()
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
+  id: number;
 
   @Column({ length: 16, nullable: true })
   providerName: string | null;
@@ -36,8 +36,9 @@ export class Provider extends BaseEntity {
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'uuid', length: 36 })
-  userId: string; // to make it available to Repository.
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  userId: number | null; // to make it available to Repository.
+
   @ManyToOne(() => User, (user) => user.providers, {
     // onDelete: 'SET NULL',
   })

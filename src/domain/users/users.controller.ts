@@ -76,7 +76,7 @@ export class UsersController {
   // hey, controller is all about routing. method order matters here. do not change the order.
   @ApiOperation({ description: '본인 User 상세보기' })
   @Get('mine')
-  async getMine(@CurrentUserId() id: string): Promise<User> {
+  async getMine(@CurrentUserId() id: number): Promise<User> {
     return await this.usersService.findById(id);
   }
 
@@ -105,7 +105,7 @@ export class UsersController {
 
   @ApiOperation({ description: 'User 상세보기' })
   @Get(':id')
-  async getUserById(@Param('id') id: string): Promise<User> {
+  async getUserById(@Param('id') id: number): Promise<User> {
     return await this.usersService.findUserDetailById(id, [
       'profile',
       'artist',
@@ -120,7 +120,7 @@ export class UsersController {
   @ApiOperation({ description: '[관리자] User 갱신' })
   @Patch('admin/:id')
   async updateExtended(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() body: any,
   ): Promise<User> {
     return await this.usersService.updateExtended(id, body);
@@ -129,7 +129,7 @@ export class UsersController {
   @ApiOperation({ description: 'User 갱신' })
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body(AmendUsernamePipe) dto: UpdateUserDto,
   ): Promise<User> {
     console.log(dto);
@@ -140,7 +140,7 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('file', multerOptions))
   @Post(':id/avatar')
   async upload(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @UploadedFile() file: Express.Multer.File,
   ) {
     return await this.usersService.upload(id, file);
@@ -151,8 +151,8 @@ export class UsersController {
   @ApiOperation({ description: 'User 비밀번호 갱신' })
   @Patch(':id/password')
   async changePassword(
-    @CurrentUserId() userId: string,
-    @Param('id') id: string,
+    @CurrentUserId() userId: number,
+    @Param('id') id: number,
     @Body(HashPasswordPipe) dto: ChangePasswordDto,
   ): Promise<User> {
     if (id !== userId) {
@@ -167,7 +167,7 @@ export class UsersController {
   @ApiOperation({ description: 'User 와 연계된 Profile 갱신' })
   @Patch(':id/profile')
   async updateProfile(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() dto: UpdateProfileDto,
   ): Promise<Profile> {
     return await this.usersService.updateProfile(id, dto);
@@ -190,7 +190,7 @@ export class UsersController {
   @ApiOperation({ description: 'User 탈퇴' })
   @Delete(':id')
   async remove(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() dto: DeleteUserDto,
   ): Promise<User> {
     return await this.usersService.quit(id, dto);

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 export class CreateProviderDto {
   @ApiProperty({ description: '소셜로그인 제공자', required: false })
   @IsString()
@@ -10,6 +10,6 @@ export class CreateProviderDto {
   providerId: string;
 
   @ApiProperty({ description: '사용자 아이디', required: false })
-  @IsString()
-  userId: string;
+  @IsNumber()
+  userId: number;
 }

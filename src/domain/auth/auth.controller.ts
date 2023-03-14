@@ -156,7 +156,7 @@ export class AuthController {
   @ApiCreatedResponse({ description: 'refresh 성공' })
   @Post('refresh')
   refresh(
-    @CurrentUserId() id: string,
+    @CurrentUserId() id: number,
     @GetCurrentRefreshToken() token: string,
   ): any {
     return this.authService.refreshToken(id, token);
@@ -170,7 +170,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({ description: '성공' })
   @Post('logout')
-  logout(@CurrentUserId() id: string): any {
+  logout(@CurrentUserId() id: number): any {
     return this.authService.logout(id);
   }
 

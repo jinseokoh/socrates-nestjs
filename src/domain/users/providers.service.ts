@@ -34,7 +34,7 @@ export class ProvidersService {
     });
   }
 
-  async findById(id: string, relations: string[] = []): Promise<Provider> {
+  async findById(id: number, relations: string[] = []): Promise<Provider> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -53,7 +53,7 @@ export class ProvidersService {
     return await this.repository.findOne(params);
   }
 
-  async update(id: string, dto: UpdateProviderDto): Promise<Provider> {
+  async update(id: number, dto: UpdateProviderDto): Promise<Provider> {
     const provider = await this.repository.preload({ id, ...dto });
     if (!provider) {
       throw new NotFoundException(`entity not found`);
@@ -61,7 +61,7 @@ export class ProvidersService {
     return await this.repository.save(provider);
   }
 
-  async remove(id: string): Promise<Provider> {
+  async remove(id: number): Promise<Provider> {
     const provider = await this.findById(id);
     return await this.repository.remove(provider);
   }

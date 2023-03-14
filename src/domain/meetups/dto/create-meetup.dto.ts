@@ -113,9 +113,9 @@ export class CreateMeetupDto {
   deletedAt?: Date | null;
 
   @ApiProperty({ description: 'User 아이디' })
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  userId?: string;
+  userId?: number;
 
   @ApiProperty({ description: 'Venue 아이디' })
   @IsString()
