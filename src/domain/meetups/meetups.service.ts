@@ -142,6 +142,22 @@ export class MeetupsService {
     return await this.repository.save(meetup);
   }
 
+  async increaseViewCount(id: string): Promise<void> {
+    // in case you need the increased count
+    // const meetup = await this.findById(id);
+    // const count = meetup.viewCount + 1;
+    // meetup.viewCount = count;
+    // await this.repository.save(meetup);
+    // return count;
+    // otherwise,
+    await this.repository
+      .createQueryBuilder()
+      .update(Meetup)
+      .where('id = :id', { id })
+      .set({ viewCount: () => 'viewCount + 1' })
+      .execute();
+  }
+
   //?-------------------------------------------------------------------------//
   //? DELETE
   //?-------------------------------------------------------------------------//
