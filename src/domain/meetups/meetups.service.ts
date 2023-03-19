@@ -12,12 +12,15 @@ import {
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
+import { AnyData } from 'src/common/types';
 
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
+import { randomName } from 'src/helpers/random-filename';
+import { S3Service } from 'src/services/aws/s3.service';
 import { Repository } from 'typeorm/repository/Repository';
 @Injectable()
 export class MeetupsService {
@@ -30,6 +33,7 @@ export class MeetupsService {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly s3Service: S3Service,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -170,5 +174,54 @@ export class MeetupsService {
   async remove(id: string): Promise<Meetup> {
     const Meetup = await this.findById(id);
     return await this.repository.remove(Meetup);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? UPLOAD
+  //?-------------------------------------------------------------------------//
+
+  // 단일 이미지 저장후 URL (string) 리턴
+  async uploadImage(
+    userId: number,
+    file: Express.Multer.File,
+  ): Promise<AnyData> {
+    const path = `${process.env.NODE_ENV}/files/${userId}/${randomName(
+      'meetup',
+      file.mimetype,
+    )}`;
+    await this.s3Service.upload(file.buffer, path);
+
+    return { data: `${process.env.AWS_CLOUDFRONT_URL}/${path}` };
+  }
+
+  // 다중 이미지 저장후 URL (string) 리턴
+  async uploadImages(
+    userId: number,
+    files: Array<Express.Multer.File>,
+  ): Promise<AnyData> {
+    const images = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const path = `${process.env.NODE_ENV}/files/${userId}/${randomName(
+        'meetup',
+        file.mimetype,
+      )}`;
+      await this.s3Service.upload(file.buffer, path);
+      images.push(`${process.env.AWS_CLOUDFRONT_URL}/${path}`);
+    }
+
+    return { data: images };
+  }
+
+  // S3 직접 업로드를 위한 signedUrl 리턴
+  async getSignedUrl(
+    userId: number,
+    mimeType = 'image/jpeg',
+  ): Promise<AnyData> {
+    const fileUri = randomName('banner', mimeType);
+    const path = `${process.env.NODE_ENV}/files/${userId}/${fileUri}`;
+    const url = await this.s3Service.generateSignedUrl(path);
+
+    return { data: url };
   }
 }

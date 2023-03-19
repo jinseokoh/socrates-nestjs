@@ -109,33 +109,33 @@ export class MeetupsController {
   @ApiOperation({ description: '단일 이미지 저장후 URL (string) 리턴' })
   @UseInterceptors(FileInterceptor('file', multerOptions))
   @Post('image')
-  async uploadImageWithoutArtworkId(
-    @Param('id') id: number,
+  async uploadImage(
+    @CurrentUserId() userId: number,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<AnyData> {
-    return await this.meetupsService.uploadImage(0, file);
+    return await this.meetupsService.uploadImage(userId, file);
   }
 
   @ApiOperation({ description: 'Artwork 이미지들 저장후 URLs (string[]) 리턴' })
   @UseInterceptors(FilesInterceptor('files', 9, multerOptions))
   @Post('images')
   async uploadImages(
-    @Param('id') id: number,
+    @CurrentUserId() userId: number,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ): Promise<AnyData> {
-    return await this.meetupsService.uploadImages(id, files);
+    return await this.meetupsService.uploadImages(userId, files);
   }
 
   @ApiOperation({
     description: 's3 직접 업로드를 위한 signedUrl 리턴',
   })
   @Post('image/url')
-  async uploadUrl(
-    @Param('id') id: number,
+  async getSignedUrl(
+    @CurrentUserId() userId: number,
     @Body('mimeType') mimeType: string,
   ): Promise<AnyData> {
     if (mimeType) {
-      return await this.meetupsService.getSignedUrl(id, mimeType);
+      return await this.meetupsService.getSignedUrl(userId, mimeType);
     }
     return { data: '' };
   }

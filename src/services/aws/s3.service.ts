@@ -1,6 +1,5 @@
 import {
   DeleteObjectCommand,
-  GetObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -24,6 +23,10 @@ export class S3Service {
       accessKeyId: configService.get('aws.accessKey'),
       secretAccessKey: configService.get('aws.secretAccessKey'),
     };
+    // note that we don't, in fact, have to embed the credentials the way i did
+    // in the following line. AWS library will pick them up from environment
+    // variables automatically.
+    // refer @https://stackoverflow.com/questions/68264237/how-to-set-credentials-in-aws-sdk-v3-javascript
     this.s3 = new S3Client({
       region: this.region,
       credentials: this.credentials,
@@ -76,28 +79,14 @@ export class S3Service {
     await this.s3.send(command);
   }
 
-  async generateUploadUrl(path: string): Promise<string> {
+  async generateSignedUrl(path: string): Promise<any> {
     const params = {
       Bucket: this.bucket,
       Key: path,
     };
-    const command = new GetObjectCommand(params);
+    const command = new PutObjectCommand(params);
     return await getSignedUrl(this.s3, command, {
-      expiresIn: 60 * 2,
+      expiresIn: 60 * 10, // for 10 mins
     });
-  }
-
-  async generatePresignedUrl(path: string): Promise<any> {
-    const bucketParams = {
-      Bucket: this.bucket,
-      Key: path,
-    };
-    const command = new PutObjectCommand(bucketParams);
-    const signedUrl = await getSignedUrl(this.s3, command, {
-      expiresIn: 60 * 10,
-    });
-    // console.log(`key: "${bucketParams.Key}" bucket: "${bucketParams.Bucket}"`);
-
-    return signedUrl;
   }
 }
