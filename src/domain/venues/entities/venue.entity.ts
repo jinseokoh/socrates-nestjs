@@ -22,9 +22,9 @@ export class Venue {
   @ApiProperty({ description: '주소' })
   address?: string | null;
 
-  @Column({ length: 255, nullable: true }) // from Auction
+  @Column({ length: 255, nullable: false }) // from Auction
   @ApiProperty({ description: 'image' })
-  image?: string | null;
+  image: string;
 
   @Column({ length: 128, nullable: true }) // from Auction
   @ApiProperty({ description: 'comma separated hashtags for this venue' })
