@@ -1,4 +1,4 @@
-export enum RegionEnum {
+export enum Region {
   SEOUL = 'seoul',
   BUSAN = 'busan',
   INCHEON = 'incheon',
@@ -19,7 +19,7 @@ export enum RegionEnum {
 }
 
 /*
-export enum RegionEnum {
+export enum Region {
   KOREA = 'korea',
   JAPAN = 'japan',
   TAIWAN = 'taiwan',

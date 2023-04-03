@@ -10,89 +10,89 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { CategoryEnum } from 'src/common/enums/category';
-import { DayEnum } from 'src/common/enums/day';
-import { ExpenseEnum } from 'src/common/enums/expense';
-import { GenderEnum } from 'src/common/enums/gender';
-import { RegionEnum } from 'src/common/enums/region';
-import { TimeEnum } from 'src/common/enums/time';
+import { Day } from 'src/common/enums/day';
+import { Expense } from 'src/common/enums/expense';
+import { Gender } from 'src/common/enums/gender';
+import { Time } from 'src/common/enums/time';
 import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
 export class CreateMeetupDto {
-  @ApiProperty({ description: '타이틀', required: true })
+  @ApiProperty({ description: '제목', required: true })
   @IsString()
   title: string;
 
-  @ApiProperty({ description: '섭타이틀', required: false })
+  @ApiProperty({ description: '설명', required: true })
   @IsString()
-  @IsOptional()
-  subtitle?: string;
+  description: string;
 
-  @ApiProperty({ description: '모임정보', required: true })
-  @IsString()
-  body: string;
-
-  @ApiProperty({ description: '이미지들 (String[])', required: false })
+  @ApiProperty({ description: '이미지들 (String[])', required: true })
   @IsArray()
-  @IsOptional()
-  images?: string[] | null;
+  images: string[];
 
-  @ApiProperty({ description: '노출하는 성별', required: false })
-  @IsEnum(GenderEnum)
-  @IsOptional()
-  gender?: GenderEnum;
+  @ApiProperty({ description: '자동) category', required: true })
+  @IsNumber()
+  category: number;
 
-  @ApiProperty({ description: 'category', required: true })
-  @IsEnum(CategoryEnum)
-  category: CategoryEnum;
+  @ApiProperty({ description: '자동) career', required: true })
+  @IsNumber()
+  career: number;
 
-  @ApiProperty({ description: 'region', required: true })
-  @IsEnum(RegionEnum)
-  region: RegionEnum;
+  @ApiProperty({ description: '노출하는 성별', default: Gender.ALL })
+  @IsEnum(Gender)
+  gender: Gender;
 
-  // @IsString()
-  // @IsOptional()
-  // geolocation?: string;
+  @ApiProperty({ description: '비용', default: Expense.BILLS_ON_ME })
+  @IsEnum(Expense)
+  expense: Expense;
 
-  @ApiProperty({ description: '비용', required: true })
-  @IsEnum(ExpenseEnum)
-  @IsOptional()
-  expense?: ExpenseEnum;
+  @ApiProperty({ description: '요일', default: Day.ANYDAY })
+  @IsEnum(Day)
+  day: Day;
 
-  @ApiProperty({ description: '언제', required: false })
-  @IsEnum(DayEnum)
-  day?: DayEnum;
-
-  @ApiProperty({ description: '시간대', required: true })
-  @IsEnum(TimeEnum)
-  time: TimeEnum;
+  @ApiProperty({ description: '시간', default: Time.AFTERNOON })
+  @IsEnum(Time)
+  time: Time;
 
   @ApiProperty({ description: 'max 인원', required: true })
   @IsNumber()
   max: number;
 
-  @ApiProperty({ description: 'like count', required: true })
+  @ApiProperty({ description: '장소에 대한 경험치', required: true })
+  @IsNumber()
+  patron: number;
+
+  @ApiProperty({ description: '기술/레벨', required: true })
+  @IsNumber()
+  skill: number;
+
+  @ApiProperty({ description: 'match count' })
   @IsNumber()
   @IsOptional()
-  likeCount: number;
+  matchCount: number;
 
-  @ApiProperty({ description: 'view count', required: true })
+  @ApiProperty({ description: 'keep count' })
+  @IsNumber()
+  @IsOptional()
+  keepCount: number;
+
+  @ApiProperty({ description: 'view count' })
   @IsNumber()
   @IsOptional()
   viewCount: number;
 
-  @ApiProperty({ description: '신고여부', required: true })
+  @ApiProperty({ description: '신고여부' })
   @IsBoolean()
   @IsOptional()
   isFlagged: boolean;
 
-  @Type(() => CreateVenueDto)
+  @ApiProperty({ description: 'CreateVenueDto' })
   @ValidateNested()
+  @Type(() => CreateVenueDto)
   venue: CreateVenueDto;
 
-  @ApiProperty({ description: '종료시각', required: true })
+  @ApiProperty({ description: '종료시각' })
   @Type(() => Date)
   @IsDate()
-  expiredAt: Date;
+  expiredAt?: Date;
 
   @ApiProperty({ description: '생성시각 (ISO8601)' })
   @Type(() => Date)

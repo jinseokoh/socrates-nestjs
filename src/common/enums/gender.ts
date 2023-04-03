@@ -1,5 +1,5 @@
-export enum GenderEnum {
-  F = 'f',
-  M = 'm',
-  A = 'a',
+export enum Gender {
+  ALL = 'a',
+  FEMALE = 'f',
+  MALE = 'm',
 }

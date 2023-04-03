@@ -7,22 +7,22 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { GenderEnum } from 'src/common/enums/gender';
+import { Gender } from 'src/common/enums/gender';
 export class LoveFortuneDto {
   @ApiProperty({ description: 'dob' })
   @Type(() => Date)
   @IsDate()
   dob: Date; // YYYY-MM-DD
-  @ApiProperty({ description: 'gender', default: GenderEnum.M })
-  @IsEnum(GenderEnum)
-  gender: GenderEnum;
+  @ApiProperty({ description: 'gender', default: Gender.MALE })
+  @IsEnum(Gender)
+  gender: Gender;
   @ApiProperty({ description: 'dob' })
   @Type(() => Date)
   @IsDate()
   dob2: Date; // YYYY-MM-DD
-  @ApiProperty({ description: 'gender', default: GenderEnum.M })
-  @IsEnum(GenderEnum)
-  gender2: GenderEnum;
+  @ApiProperty({ description: 'gender', default: Gender.MALE })
+  @IsEnum(Gender)
+  gender2: Gender;
 
   @ApiProperty({ description: '', required: false })
   @IsString()

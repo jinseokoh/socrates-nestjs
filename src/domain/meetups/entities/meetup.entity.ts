@@ -1,13 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
-import {
-  DayEnum,
-  ExpenseEnum,
-  GenderEnum,
-  RegionEnum,
-  TimeEnum,
-} from 'src/common/enums';
+import { Day, Expense, Gender, Region, Time } from 'src/common/enums';
+import { Career } from 'src/common/enums/career';
+import { Category as CategoryEnum } from 'src/common/enums/category';
+import { SubCategory } from 'src/common/enums/subcategory';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -32,50 +29,66 @@ export class Meetup {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ length: 128 }) // from Auction
+  @Column({ length: 64 }) // from Auction
   @ApiProperty({ description: '제목' })
   title: string;
 
-  @Column({ length: 128, nullable: true }) // from Pack
-  @ApiProperty({ description: 'subtitle' })
-  subtitle: string;
-
   @Column({ type: 'text', nullable: true })
   @ApiProperty({ description: '모임정보' })
-  body: string | null;
+  description: string | null;
 
   @Column('json', { nullable: true })
   @ApiProperty({ description: '이미지들' })
   @IsArray()
   images: string[] | null;
 
-  @Column({ type: 'enum', enum: GenderEnum, nullable: true })
+  @Column({ type: 'enum', enum: Gender, default: Gender.ALL })
   @ApiProperty({ description: 'gender looking for' })
-  gender?: GenderEnum | null;
+  gender: Gender;
+
+  @Column({ type: 'enum', enum: Career, default: Career.ALL })
+  @ApiProperty({ description: 'career looking career' })
+  career: Career;
+
+  @Column({ type: 'enum', enum: Category, default: CategoryEnum.OTHER })
+  @ApiProperty({ description: 'category' })
+  category: Category;
+
+  @Column({ type: 'enum', enum: SubCategory, default: SubCategory.ALL_OTHER })
+  @ApiProperty({ description: 'subcategory' })
+  subCategory: SubCategory;
 
   @Column({
     type: 'enum',
-    enum: RegionEnum,
-    default: RegionEnum.SEOUL,
+    enum: Region,
+    default: Region.SEOUL,
   })
   @ApiProperty({ description: 'region' })
-  region: RegionEnum;
+  region: Region;
 
-  @Column({ type: 'enum', enum: ExpenseEnum, default: ExpenseEnum.SPLIT_EVEN })
+  @Column({ type: 'enum', enum: Expense, default: Expense.SPLIT_EVEN })
   @ApiProperty({ description: '비용부담' })
-  expense: ExpenseEnum;
+  expense: Expense;
 
-  @Column({ type: 'enum', enum: DayEnum, default: DayEnum.WEEKDAYS })
-  @ApiProperty({ description: '시간대' })
-  day: DayEnum;
+  @Column({ type: 'enum', enum: Day, default: Day.WEEKDAYS })
+  @ApiProperty({ description: '요일' })
+  day: Day;
 
-  @Column({ type: 'enum', enum: TimeEnum, default: TimeEnum.DINNER })
+  @Column({ type: 'enum', enum: Time, default: Time.DINNER })
   @ApiProperty({ description: '시간대' })
-  time: TimeEnum;
+  time: Time;
 
   @Column({ type: 'tinyint', unsigned: true, default: 2 })
-  @ApiProperty({ description: '최대인원수' })
+  @ApiProperty({ description: 'max # of participants' })
   max: number;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 2 })
+  @ApiProperty({ description: 'patron level' })
+  patron: number;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 2 })
+  @ApiProperty({ description: 'skill level' })
+  skill: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'like count' })

@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiOperation } from '@nestjs/swagger';
-import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { AnyData } from 'src/common/types';
@@ -21,8 +21,9 @@ import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
+import { AddressToRegionPipe } from 'src/domain/meetups/pipes/address-to-region.pipe';
+import { ExtractCategoriesPipe } from 'src/domain/meetups/pipes/extract-categories-pipe';
 import { VenuesService } from 'src/domain/venues/venues.service';
-import { addressToRegionEnum } from 'src/helpers/address-to-region';
 import { multerOptions } from 'src/helpers/multer-options';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -41,17 +42,14 @@ export class MeetupsController {
   @Post()
   async create(
     @CurrentUserId() userId: number,
-    @Body() dto: CreateMeetupDto,
+    @Body(AddressToRegionPipe, ExtractCategoriesPipe) dto: CreateMeetupDto,
   ): Promise<Meetup> {
-    const region = addressToRegionEnum(dto.venue.address);
-    const meetupDto = dto.userId
-      ? { ...dto, region }
-      : { ...dto, region, userId };
-    const meetup = await this.meetupsService.create(meetupDto);
-    const venue = await this.venuesService.create({
-      ...dto.venue,
-      meetupId: meetup.id,
-    });
+    const createMeetupDto = dto.userId ? { ...dto } : { ...dto, userId };
+    const meetup = await this.meetupsService.create(createMeetupDto);
+    // const venue = await this.venuesService.create({
+    //   ...dto.venue,
+    //   meetupId: meetup.id,
+    // });
     return meetup;
   }
 

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { RoleEnum } from 'src/common/enums';
-import { GenderEnum } from 'src/common/enums/gender';
+import { Gender } from 'src/common/enums/gender';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
@@ -42,9 +42,9 @@ export class User {
   @ApiProperty({ description: 'realname' })
   realname: string | null;
 
-  @Column({ type: 'enum', enum: GenderEnum, nullable: true })
+  @Column({ type: 'enum', enum: Gender, nullable: true })
   @ApiProperty({ description: '성별' })
-  gender: GenderEnum | null;
+  gender: Gender | null;
 
   @Exclude()
   @Column({ nullable: true })

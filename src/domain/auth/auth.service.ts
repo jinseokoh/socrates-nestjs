@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SES } from 'aws-sdk';
@@ -14,7 +14,7 @@ import * as random from 'randomstring';
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
 import { AWS_SES_CONNECTION } from 'src/common/constants';
-import { GenderEnum } from 'src/common/enums/gender';
+import { Gender } from 'src/common/enums/gender';
 import { ResetPasswordDto } from 'src/domain/auth/dto/reset-password.dto';
 import { UserCredentialsDto } from 'src/domain/auth/dto/user-credentials.dto';
 import { UserSocialIdDto } from 'src/domain/auth/dto/user-social-id.dto';
@@ -169,10 +169,10 @@ export class AuthService {
       return tokens;
     }
     // in case user w/ firebase-email not found
-    const genderEnum: GenderEnum | null = dto.gender
+    const genderEnum: Gender | null = dto.gender
       ? dto.gender.toLowerCase().startsWith('f')
-        ? GenderEnum.F
-        : GenderEnum.M
+        ? Gender.FEMALE
+        : Gender.MALE
       : null;
 
     const user = await this.usersService.create({

@@ -1,4 +1,4 @@
-export enum TimeEnum {
+export enum Time {
   MORNING = 'morning',
   LUNCH = 'lunch',
   AFTERNOON = 'afternoon',

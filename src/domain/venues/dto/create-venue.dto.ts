@@ -1,18 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateVenueDto {
+  @ApiProperty({ description: '이미지 url' })
+  @IsString()
+  image: string | null;
+
   @ApiProperty({ description: '장소명', required: true })
   @IsString()
   name: string;
 
-  @ApiProperty({ description: '주소', required: false })
+  @ApiProperty({ description: '주소', required: true })
   @IsString()
-  address?: string | null;
+  address: string;
 
-  @ApiProperty({ description: 'hashtags', required: true })
+  @ApiProperty({ description: 'hashtags' })
   @IsString()
-  @IsOptional()
-  tags?: string | null;
+  tags: string | null;
 
   @ApiProperty({ description: '위도', required: true })
   @IsNumber()
@@ -24,8 +27,7 @@ export class CreateVenueDto {
 
   @ApiProperty({ description: '네이버 장소ID', required: true })
   @IsString()
-  @IsOptional()
-  providerId?: string; // id as id
+  providerId: string; // id as id
 
   @ApiProperty({ description: 'Meetup ID', required: true })
   @IsString()

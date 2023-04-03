@@ -7,10 +7,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
-  paginate,
   PaginateConfig,
-  Paginated,
   PaginateQuery,
+  Paginated,
+  paginate,
 } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
 
@@ -50,7 +50,7 @@ export class MeetupsService {
     }
 
     const meetup = await this.repository.save(this.repository.create(dto));
-    await this._linkWithCategory(dto.category, meetup.id);
+    //await this._linkWithCategory(dto.category, meetup.id);
     // await this._linkWithRegion(dto.region, meetup.id);
 
     return meetup;
