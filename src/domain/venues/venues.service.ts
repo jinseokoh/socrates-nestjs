@@ -2,10 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
-  paginate,
   PaginateConfig,
-  Paginated,
   PaginateQuery,
+  Paginated,
+  paginate,
 } from 'nestjs-paginate';
 import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
 import { UpdateVenueDto } from 'src/domain/venues/dto/update-venue.dto';
@@ -40,7 +40,6 @@ export class VenuesService {
       .innerJoinAndSelect('user.profile', 'profile');
 
     const config: PaginateConfig<Venue> = {
-      relations: ['meetup'],
       sortableColumns: ['name'],
       searchableColumns: ['name'],
       defaultSortBy: [['name', 'DESC']],

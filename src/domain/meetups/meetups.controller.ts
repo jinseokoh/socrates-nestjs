@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiOperation } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
@@ -21,8 +22,6 @@ import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
-import { AddressToRegionPipe } from 'src/domain/meetups/pipes/address-to-region.pipe';
-import { ExtractCategoriesPipe } from 'src/domain/meetups/pipes/extract-categories-pipe';
 import { VenuesService } from 'src/domain/venues/venues.service';
 import { multerOptions } from 'src/helpers/multer-options';
 
@@ -40,16 +39,17 @@ export class MeetupsController {
 
   @ApiOperation({ description: 'Meetup 생성' })
   @Post()
-  async create(
-    @CurrentUserId() userId: number,
-    @Body(AddressToRegionPipe, ExtractCategoriesPipe) dto: CreateMeetupDto,
-  ): Promise<Meetup> {
-    const createMeetupDto = dto.userId ? { ...dto } : { ...dto, userId };
-    const meetup = await this.meetupsService.create(createMeetupDto);
+  async create(@CurrentUserId() userId: number, @Body() dto): Promise<any> {
+    //const createMeetupDto = dto.userId ? { ...dto } : { ...dto, userId };
+    const createMeetupDto = plainToInstance(CreateMeetupDto, dto);
+
+    console.log(createMeetupDto);
+    // const meetup = await this.meetupsService.create(createMeetupDto);
     // const venue = await this.venuesService.create({
     //   ...dto.venue,
     //   meetupId: meetup.id,
     // });
+    const meetup = null;
     return meetup;
   }
 

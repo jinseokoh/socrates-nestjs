@@ -3,23 +3,18 @@ import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
 import { Day, Expense, Gender, Region, Time } from 'src/common/enums';
 import { Career } from 'src/common/enums/career';
-import { Category as CategoryEnum } from 'src/common/enums/category';
-import { SubCategory } from 'src/common/enums/subcategory';
-import { Category } from 'src/domain/categories/entities/category.entity';
+import { MainCategory } from 'src/common/enums/main-category';
+import { SubCategory } from 'src/common/enums/sub-category';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Venue } from 'src/domain/venues/entities/venue.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
   Index,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -42,6 +37,14 @@ export class Meetup {
   @IsArray()
   images: string[] | null;
 
+  @Column({ type: 'enum', enum: MainCategory, default: MainCategory.OTHER })
+  @ApiProperty({ description: 'category' })
+  category: MainCategory;
+
+  @Column({ type: 'enum', enum: SubCategory, default: SubCategory.ALL_OTHER })
+  @ApiProperty({ description: 'subcategory' })
+  subCategory: SubCategory;
+
   @Column({ type: 'enum', enum: Gender, default: Gender.ALL })
   @ApiProperty({ description: 'gender looking for' })
   gender: Gender;
@@ -49,14 +52,6 @@ export class Meetup {
   @Column({ type: 'enum', enum: Career, default: Career.ALL })
   @ApiProperty({ description: 'career looking career' })
   career: Career;
-
-  @Column({ type: 'enum', enum: Category, default: CategoryEnum.OTHER })
-  @ApiProperty({ description: 'category' })
-  category: Category;
-
-  @Column({ type: 'enum', enum: SubCategory, default: SubCategory.ALL_OTHER })
-  @ApiProperty({ description: 'subcategory' })
-  subCategory: SubCategory;
 
   @Column({
     type: 'enum',
@@ -123,10 +118,10 @@ export class Meetup {
   //**--------------------------------------------------------------------------*/
   //** 1-to-1 hasOne
 
-  @OneToOne(() => Venue, (venue) => venue.meetup, {
-    // cascade: ['insert', 'update'],
-  })
-  venue: Venue;
+  // @OneToOne(() => Venue, (venue) => venue.meetup, {
+  //   // cascade: ['insert', 'update'],
+  // })
+  // venue: Venue;
 
   // //**--------------------------------------------------------------------------*/
   // //** 1-to-many hasMany
@@ -146,7 +141,7 @@ export class Meetup {
   @ManyToOne(() => User, (user) => user.meetups, {
     onDelete: 'CASCADE',
   })
-  user: User;
+  user?: User;
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany
@@ -161,9 +156,9 @@ export class Meetup {
   // @JoinTable({ name: 'meetup_region' }) // owning side
   // regions: Region[];
 
-  @ManyToMany(() => Category, (category) => category.meetups)
-  @JoinTable({ name: 'meetup_category' }) // owning side
-  categories: Category[];
+  // @ManyToMany(() => Category, (category) => category.meetups)
+  // @JoinTable({ name: 'meetup_category' }) // owning side
+  // categories: Category[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

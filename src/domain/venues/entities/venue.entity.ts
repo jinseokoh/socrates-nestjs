@@ -1,13 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Venue {
@@ -58,11 +50,11 @@ export class Venue {
   //**--------------------------------------------------------------------------*/
   //** 1-to-1 belongsToOne
 
-  @Exclude()
-  @Column({ type: 'uuid', length: 36 })
-  meetupId: string; // to make it available to Repository.
+  // @Exclude()
+  // @Column({ type: 'uuid', length: 36 })
+  // meetupId: string; // to make it available to Repository.
 
-  @OneToOne(() => Meetup, (meetup) => meetup.venue)
-  @JoinColumn()
-  meetup: Meetup;
+  // @OneToOne(() => Meetup, (meetup) => meetup.venue)
+  // @JoinColumn()
+  // meetup: Meetup;
 }

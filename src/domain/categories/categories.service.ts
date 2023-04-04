@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SubCategory } from 'src/common/enums/subcategory';
+import { SubCategory } from 'src/common/enums/sub-category';
 import { AnyData } from 'src/common/types';
 import { Category } from 'src/domain/categories/entities/category.entity';
 

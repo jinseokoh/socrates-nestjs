@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -10,11 +10,14 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { MainCategory, Region, SubCategory } from 'src/common/enums';
+import { Career } from 'src/common/enums/career';
 import { Day } from 'src/common/enums/day';
 import { Expense } from 'src/common/enums/expense';
 import { Gender } from 'src/common/enums/gender';
 import { Time } from 'src/common/enums/time';
 import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
+import { addressToRegion } from 'src/helpers/address-to-region';
 export class CreateMeetupDto {
   @ApiProperty({ description: '제목', required: true })
   @IsString()
@@ -28,17 +31,26 @@ export class CreateMeetupDto {
   @IsArray()
   images: string[];
 
-  @ApiProperty({ description: '자동) category', required: true })
-  @IsNumber()
-  category: number;
+  @ApiProperty({ description: 'category', default: MainCategory.OTHER })
+  @IsEnum(MainCategory)
+  category: MainCategory;
 
-  @ApiProperty({ description: '자동) career', required: true })
-  @IsNumber()
-  career: number;
+  @ApiProperty({ description: 'subCategory', default: SubCategory.ALL_OTHER })
+  @IsEnum(SubCategory)
+  subCategory: SubCategory;
 
   @ApiProperty({ description: '노출하는 성별', default: Gender.ALL })
   @IsEnum(Gender)
   gender: Gender;
+
+  @Exclude()
+  @ApiProperty({ description: '자동) career', default: Career.ALL })
+  @IsEnum(Career)
+  career: Career;
+
+  //
+  // region
+  //
 
   @ApiProperty({ description: '비용', default: Expense.BILLS_ON_ME })
   @IsEnum(Expense)
@@ -121,4 +133,9 @@ export class CreateMeetupDto {
   @IsString()
   @IsOptional()
   venueId?: string;
+
+  @Expose()
+  get region(): Region {
+    return addressToRegion(this.venue.address);
+  }
 }

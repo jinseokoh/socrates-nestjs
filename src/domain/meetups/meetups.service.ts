@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -41,19 +36,20 @@ export class MeetupsService {
   //?-------------------------------------------------------------------------//
 
   // Meetup 생성
-  async create(dto: CreateMeetupDto): Promise<Meetup> {
-    const user = await this.userRepository.findOneOrFail({
-      where: { id: dto.userId },
-    });
-    if (user.isBanned) {
-      throw new BadRequestException(`not allowed to create`);
-    }
+  async create(dto: CreateMeetupDto): Promise<any> {
+    console.log(dto);
+    // const user = await this.userRepository.findOneOrFail({
+    //   where: { id: dto.userId },
+    // });
+    // if (user.isBanned) {
+    //   throw new BadRequestException(`not allowed to create`);
+    // }
 
-    const meetup = await this.repository.save(this.repository.create(dto));
-    //await this._linkWithCategory(dto.category, meetup.id);
-    // await this._linkWithRegion(dto.region, meetup.id);
+    // const meetup = await this.repository.save(this.repository.create(dto));
+    // //await this._linkWithCategory(dto.category, meetup.id);
+    // // await this._linkWithRegion(dto.region, meetup.id);
 
-    return meetup;
+    // return meetup;
   }
 
   async _linkWithCategory(categorySlug: string, meetupId: string) {
@@ -103,14 +99,13 @@ export class MeetupsService {
       .innerJoinAndSelect('user.profile', 'profile');
 
     const config: PaginateConfig<Meetup> = {
-      relations: ['categories'],
       sortableColumns: ['createdAt'],
       searchableColumns: ['title'],
       defaultSortBy: [['createdAt', 'DESC']],
       filterableColumns: {
         id: [FilterOperator.IN, FilterOperator.EQ],
         gender: [FilterOperator.EQ],
-        'categories.id': [FilterOperator.IN],
+        // 'categories.id': [FilterOperator.IN],
         expiredAt: [FilterOperator.GTE, FilterOperator.LT],
       },
     };
