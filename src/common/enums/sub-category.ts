@@ -8,11 +8,11 @@ export enum SubCategory {
   CONCERT = 'concert', // 콘서트
   STADIUM = 'stadium', // 스포츠관람
   INDIE = 'indie', // 인디밴드,버스킹
-  EXHIBITION = 'exhibition', // 공원
+  EXHIBITION = 'exhibition', // 전시공연
   PARK = 'park', // 공원
-  TRAVEL = 'travel', // 트래블
+  TRAVEL = 'travel', // 여행
   OTHER_LEISURE = 'otherLeisure',
-  // HOBBY
+  // HOBBY 기술 장비 준비물 지식 연습
   MUSICAL_INSTRUMENT = 'musicalInstrument', // 악기
   KARAOKE = 'karaoke', // 노래방
   DANCING = 'dancing', // KPOP댄스
@@ -26,7 +26,7 @@ export enum SubCategory {
   CAMPING = 'camping', // 캠핑
   DRIVING = 'driving', // 떼빙
   COOKING = 'cooking', // 요리
-  SHOPPING = 'shopping', // 쇼핑
+  BOOK = 'book', // 책,글쓰기
   PHOTO_SHOOTING = 'photoShooting', // 사진출사
   PLANTING = 'planting', // 반려식물
   PET = 'pet', // 반려동물
@@ -56,17 +56,13 @@ export enum SubCategory {
   WORKOUT = 'workout', // 짐
   YOGA = 'yoga', // 요가,필라테스
   OTHER_SPORTS = 'otherSports',
-  // OTHER
-  TALK_ONLINE = 'talkOnline', // Online
-  ONE_DAY_CLASS = 'oneDayClass', // 공부
-  VOLUNTARY_ACTIVITY = 'voluntaryActivity',
-  LANGUAGE = 'language', // 언어교환
-  READING = 'reading', // 독서
-  CODING = 'coding', // 코딩
+  // OTHER 발전/도전
   STUDY = 'study', // 공부
-  YOUTUBE = 'youtube', // 유튜버
-  SECURITIES = 'securities', // 주식
-  CRYPTO = 'crypto', // 코인
+  ONE_DAY_CLASS = 'oneDayClass', // 일일체험
+  LANGUAGE = 'language', // 언어교환
+  CODING = 'coding', // 코딩
+  SECURITIES = 'securities', // 주식,재테크
+  VOLUNTARY_ACTIVITY = 'voluntaryActivity', // 봉사
   ENTREPRENEURSHIP = 'entrepreneurship', // 사업,창업
   ALL_OTHER = 'allOther',
 }

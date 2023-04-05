@@ -10,14 +10,13 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { MainCategory, Region, SubCategory } from 'src/common/enums';
+import { MainCategory, SubCategory } from 'src/common/enums';
 import { Career } from 'src/common/enums/career';
 import { Day } from 'src/common/enums/day';
 import { Expense } from 'src/common/enums/expense';
 import { Gender } from 'src/common/enums/gender';
 import { Time } from 'src/common/enums/time';
 import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
-import { addressToRegion } from 'src/helpers/address-to-region';
 export class CreateMeetupDto {
   @ApiProperty({ description: '제목', required: true })
   @IsString()
@@ -31,11 +30,14 @@ export class CreateMeetupDto {
   @IsArray()
   images: string[];
 
-  @ApiProperty({ description: 'category', default: MainCategory.OTHER })
+  @ApiProperty({ description: 'category', default: MainCategory.LEISURE })
   @IsEnum(MainCategory)
   category: MainCategory;
 
-  @ApiProperty({ description: 'subCategory', default: SubCategory.ALL_OTHER })
+  @ApiProperty({
+    description: 'subCategory',
+    default: SubCategory.OTHER_LEISURE,
+  })
   @IsEnum(SubCategory)
   subCategory: SubCategory;
 
@@ -129,13 +131,14 @@ export class CreateMeetupDto {
   @IsOptional()
   userId?: number;
 
-  @ApiProperty({ description: 'Venue 아이디' })
-  @IsString()
-  @IsOptional()
-  venueId?: string;
+  // @ApiProperty({ description: 'Venue 아이디' })
+  // @IsString()
+  // @IsOptional()
+  // venueId?: string;
 
   @Expose()
-  get region(): Region {
-    return addressToRegion(this.venue.address);
+  public get isOnlineMeetup(): boolean {
+    console.log('is this even called in meetup?');
+    return this.venue?.name === '비대면';
   }
 }

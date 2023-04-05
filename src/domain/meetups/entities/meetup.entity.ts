@@ -7,6 +7,7 @@ import { MainCategory } from 'src/common/enums/main-category';
 import { SubCategory } from 'src/common/enums/sub-category';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { User } from 'src/domain/users/entities/user.entity';
+import { Venue } from 'src/domain/venues/entities/venue.entity';
 import {
   Column,
   CreateDateColumn,
@@ -15,6 +16,7 @@ import {
   Index,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -37,11 +39,15 @@ export class Meetup {
   @IsArray()
   images: string[] | null;
 
-  @Column({ type: 'enum', enum: MainCategory, default: MainCategory.OTHER })
+  @Column({ type: 'enum', enum: MainCategory, default: MainCategory.LEISURE })
   @ApiProperty({ description: 'category' })
   category: MainCategory;
 
-  @Column({ type: 'enum', enum: SubCategory, default: SubCategory.ALL_OTHER })
+  @Column({
+    type: 'enum',
+    enum: SubCategory,
+    default: SubCategory.OTHER_LEISURE,
+  })
   @ApiProperty({ description: 'subcategory' })
   subCategory: SubCategory;
 
@@ -118,10 +124,10 @@ export class Meetup {
   //**--------------------------------------------------------------------------*/
   //** 1-to-1 hasOne
 
-  // @OneToOne(() => Venue, (venue) => venue.meetup, {
-  //   // cascade: ['insert', 'update'],
-  // })
-  // venue: Venue;
+  @OneToOne(() => Venue, (venue) => venue.meetup, {
+    // cascade: ['insert', 'update'],
+  })
+  venue: Venue;
 
   // //**--------------------------------------------------------------------------*/
   // //** 1-to-many hasMany

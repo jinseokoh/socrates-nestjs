@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateVenueDto {
   @ApiProperty({ description: '이미지 url' })
@@ -33,4 +34,10 @@ export class CreateVenueDto {
   @IsString()
   @IsOptional()
   meetupId?: string; // id as id
+
+  @Expose()
+  public get isOnlineVenue(): boolean {
+    console.log('is this even called in venue?');
+    return this.name === '비대면';
+  }
 }

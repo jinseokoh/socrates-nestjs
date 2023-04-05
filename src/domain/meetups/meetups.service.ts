@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -14,6 +19,7 @@ import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
+import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { Repository } from 'typeorm/repository/Repository';
@@ -24,6 +30,8 @@ export class MeetupsService {
   constructor(
     @InjectRepository(Meetup)
     private readonly repository: Repository<Meetup>,
+    @InjectRepository(Venue)
+    private readonly venueRepository: Repository<Venue>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(User)
@@ -37,19 +45,24 @@ export class MeetupsService {
 
   // Meetup 생성
   async create(dto: CreateMeetupDto): Promise<any> {
-    console.log(dto);
-    // const user = await this.userRepository.findOneOrFail({
-    //   where: { id: dto.userId },
-    // });
-    // if (user.isBanned) {
-    //   throw new BadRequestException(`not allowed to create`);
-    // }
+    const user = await this.userRepository.findOneOrFail({
+      where: { id: dto.userId },
+    });
+    if (user.isBanned) {
+      throw new BadRequestException(`not allowed to create`);
+    }
 
-    // const meetup = await this.repository.save(this.repository.create(dto));
+    const meetup = await this.repository.save(this.repository.create(dto));
+    if (dto.venue?.name !== '비대면') {
+      await this.venueRepository.save(
+        this.venueRepository.create({ ...dto, meetupId: meetup.id }),
+      );
+    }
+
     // //await this._linkWithCategory(dto.category, meetup.id);
     // // await this._linkWithRegion(dto.region, meetup.id);
 
-    // return meetup;
+    return meetup;
   }
 
   async _linkWithCategory(categorySlug: string, meetupId: string) {
