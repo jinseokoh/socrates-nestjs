@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiOperation } from '@nestjs/swagger';
+import * as moment from 'moment';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
@@ -37,11 +38,15 @@ export class MeetupsController {
 
   @ApiOperation({ description: 'Meetup 생성' })
   @Post()
-  async create(@CurrentUserId() userId: number, @Body() dto): Promise<Meetup> {
-    const createMeetupDto = dto.userId ? { ...dto } : { ...dto, userId };
+  async create(@CurrentUserId() id: number, @Body() dto): Promise<Meetup> {
+    const userId = dto.userId ? dto.userId : id;
+    const expiredAt = dto.expiredAt
+      ? dto.expiredAt
+      : moment().add(1, 'week').format(`YYYY-MM-DD HH:mm:ss`);
+    const createMeetupDto = { ...dto, userId, expiredAt };
+
     console.log(createMeetupDto);
-    const meetup = await this.meetupsService.create(createMeetupDto);
-    return meetup;
+    return await this.meetupsService.create(createMeetupDto);
   }
 
   //?-------------------------------------------------------------------------//

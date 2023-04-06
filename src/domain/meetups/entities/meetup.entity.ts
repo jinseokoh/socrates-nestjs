@@ -127,7 +127,7 @@ export class Meetup {
   @OneToOne(() => Venue, (venue) => venue.meetup, {
     // cascade: ['insert', 'update'],
   })
-  venue: Venue;
+  venue?: Venue;
 
   // //**--------------------------------------------------------------------------*/
   // //** 1-to-many hasMany

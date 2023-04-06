@@ -45,10 +45,10 @@ export class MeetupsService {
 
   // Meetup 생성
   async create(dto: CreateMeetupDto): Promise<any> {
-    const user = await this.userRepository.findOneOrFail({
+    const user = await this.userRepository.findOne({
       where: { id: dto.userId },
     });
-    if (user.isBanned) {
+    if (!user || user?.isBanned) {
       throw new BadRequestException(`not allowed to create`);
     }
 
