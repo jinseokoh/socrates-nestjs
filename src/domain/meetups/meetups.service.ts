@@ -53,11 +53,9 @@ export class MeetupsService {
     }
 
     const meetup = await this.repository.save(this.repository.create(dto));
-    if (dto.venue?.name !== '비대면') {
-      await this.venueRepository.save(
-        this.venueRepository.create({ ...dto, meetupId: meetup.id }),
-      );
-    }
+    await this.venueRepository.save(
+      this.venueRepository.create({ ...dto.venue, meetupId: meetup.id }),
+    );
 
     // //await this._linkWithCategory(dto.category, meetup.id);
     // // await this._linkWithRegion(dto.region, meetup.id);
@@ -107,7 +105,7 @@ export class MeetupsService {
   async findAll(query: PaginateQuery): Promise<Paginated<Meetup>> {
     const queryBuilder = this.repository
       .createQueryBuilder('meetup')
-      .innerJoinAndSelect('meetup.venue', 'venue')
+      // .innerJoinAndSelect('meetup.venue', 'venue')
       .innerJoinAndSelect('meetup.user', 'user')
       .innerJoinAndSelect('user.profile', 'profile');
 

@@ -3,7 +3,7 @@ import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
 import { Day, Expense, Gender, Region, Time } from 'src/common/enums';
 import { Career } from 'src/common/enums/career';
-import { MainCategory } from 'src/common/enums/main-category';
+import { Category } from 'src/common/enums/category';
 import { SubCategory } from 'src/common/enums/sub-category';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -39,9 +39,9 @@ export class Meetup {
   @IsArray()
   images: string[] | null;
 
-  @Column({ type: 'enum', enum: MainCategory, default: MainCategory.LEISURE })
+  @Column({ type: 'enum', enum: Category, default: Category.LEISURE })
   @ApiProperty({ description: 'category' })
-  category: MainCategory;
+  category: Category;
 
   @Column({
     type: 'enum',
@@ -51,13 +51,13 @@ export class Meetup {
   @ApiProperty({ description: 'subcategory' })
   subCategory: SubCategory;
 
-  @Column({ type: 'enum', enum: Gender, default: Gender.ALL })
+  @Column({ type: 'enum', enum: Gender, default: null })
   @ApiProperty({ description: 'gender looking for' })
-  gender: Gender;
+  gender: Gender | null;
 
-  @Column({ type: 'enum', enum: Career, default: Career.ALL })
+  @Column({ type: 'enum', enum: Career, default: null })
   @ApiProperty({ description: 'career looking career' })
-  career: Career;
+  career: Career | null;
 
   @Column({
     type: 'enum',
@@ -67,10 +67,6 @@ export class Meetup {
   @ApiProperty({ description: 'region' })
   region: Region;
 
-  @Column({ type: 'enum', enum: Expense, default: Expense.SPLIT_EVEN })
-  @ApiProperty({ description: '비용부담' })
-  expense: Expense;
-
   @Column({ type: 'enum', enum: Day, default: Day.WEEKDAYS })
   @ApiProperty({ description: '요일' })
   day: Day;
@@ -78,6 +74,10 @@ export class Meetup {
   @Column({ type: 'enum', enum: Time, default: Time.DINNER })
   @ApiProperty({ description: '시간대' })
   time: Time;
+
+  @Column({ type: 'enum', enum: Expense, default: Expense.SPLIT_EVEN })
+  @ApiProperty({ description: '비용부담' })
+  expense: Expense;
 
   @Column({ type: 'tinyint', unsigned: true, default: 2 })
   @ApiProperty({ description: 'max # of participants' })

@@ -1,5 +1,4 @@
 export enum Career {
-  ALL = 'all',
   STUDENT = 'student',
   ACCOUNTING = 'accounting',
   HR = 'hr',

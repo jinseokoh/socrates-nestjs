@@ -18,6 +18,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { AnyData } from 'src/common/types';
+import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
@@ -38,14 +39,18 @@ export class MeetupsController {
 
   @ApiOperation({ description: 'Meetup 생성' })
   @Post()
-  async create(@CurrentUserId() id: number, @Body() dto): Promise<Meetup> {
+  async create(
+    @CurrentUserId() id: number,
+    @Body() dto: CreateMeetupDto,
+  ): Promise<Meetup> {
+    console.log(dto);
+
     const userId = dto.userId ? dto.userId : id;
     const expiredAt = dto.expiredAt
       ? dto.expiredAt
-      : moment().add(1, 'week').format(`YYYY-MM-DD HH:mm:ss`);
+      : moment().add(1, 'week').toDate();
     const createMeetupDto = { ...dto, userId, expiredAt };
 
-    console.log(createMeetupDto);
     return await this.meetupsService.create(createMeetupDto);
   }
 
@@ -66,11 +71,7 @@ export class MeetupsController {
   @Get(':id')
   async getMeetupById(@Param('id') id: string): Promise<Meetup> {
     console.log(id);
-    return await this.meetupsService.findById(id, [
-      'user',
-      'categories',
-      'venue',
-    ]);
+    return await this.meetupsService.findById(id, ['user', 'venue']);
   }
 
   //?-------------------------------------------------------------------------//

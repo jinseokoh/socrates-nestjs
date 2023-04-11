@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -10,7 +10,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { MainCategory, SubCategory } from 'src/common/enums';
+import { Category, Region, SubCategory } from 'src/common/enums';
 import { Career } from 'src/common/enums/career';
 import { Day } from 'src/common/enums/day';
 import { Expense } from 'src/common/enums/expense';
@@ -30,9 +30,9 @@ export class CreateMeetupDto {
   @IsArray()
   images: string[];
 
-  @ApiProperty({ description: 'category', default: MainCategory.LEISURE })
-  @IsEnum(MainCategory)
-  category: MainCategory;
+  @ApiProperty({ description: 'category', default: Category.LEISURE })
+  @IsEnum(Category)
+  category: Category;
 
   @ApiProperty({
     description: 'subCategory',
@@ -41,22 +41,19 @@ export class CreateMeetupDto {
   @IsEnum(SubCategory)
   subCategory: SubCategory;
 
-  @ApiProperty({ description: '노출하는 성별', default: Gender.ALL })
+  @ApiProperty({ description: '노출하는 성별', required: false })
   @IsEnum(Gender)
-  gender: Gender;
+  @IsOptional()
+  gender: Gender | null;
 
-  @Exclude()
-  @ApiProperty({ description: '자동) career', default: Career.ALL })
+  @ApiProperty({ description: '노출하는 career', required: false })
   @IsEnum(Career)
-  career: Career;
+  @IsOptional()
+  career: Career | null;
 
-  //
-  // region
-  //
-
-  @ApiProperty({ description: '비용', default: Expense.BILLS_ON_ME })
-  @IsEnum(Expense)
-  expense: Expense;
+  @ApiProperty({ description: 'region', default: Region.SEOUL })
+  @IsEnum(Region)
+  region: Region;
 
   @ApiProperty({ description: '요일', default: Day.ANYDAY })
   @IsEnum(Day)
@@ -66,34 +63,41 @@ export class CreateMeetupDto {
   @IsEnum(Time)
   time: Time;
 
+  @ApiProperty({ description: '비용', default: Expense.BILLS_ON_ME })
+  @IsEnum(Expense)
+  expense: Expense;
+
   @ApiProperty({ description: 'max 인원', required: true })
+  @Type(() => Number)
   @IsNumber()
   max: number;
 
   @ApiProperty({ description: '장소에 대한 경험치', required: true })
+  @Type(() => Number)
   @IsNumber()
   patron: number;
 
   @ApiProperty({ description: '기술/레벨', required: true })
+  @Type(() => Number)
   @IsNumber()
   skill: number;
 
-  @ApiProperty({ description: 'match count' })
+  @ApiProperty({ description: 'match count', default: 0 })
   @IsNumber()
   @IsOptional()
   matchCount: number;
 
-  @ApiProperty({ description: 'keep count' })
+  @ApiProperty({ description: 'keep count', default: 0 })
   @IsNumber()
   @IsOptional()
   keepCount: number;
 
-  @ApiProperty({ description: 'view count' })
+  @ApiProperty({ description: 'view count', default: 0 })
   @IsNumber()
   @IsOptional()
   viewCount: number;
 
-  @ApiProperty({ description: '신고여부' })
+  @ApiProperty({ description: '신고여부', default: false })
   @IsBoolean()
   @IsOptional()
   isFlagged: boolean;
@@ -106,7 +110,7 @@ export class CreateMeetupDto {
   @ApiProperty({ description: '종료시각' })
   @Type(() => Date)
   @IsDate()
-  expiredAt?: Date;
+  expiredAt: Date;
 
   @ApiProperty({ description: '생성시각 (ISO8601)' })
   @Type(() => Date)
@@ -135,10 +139,4 @@ export class CreateMeetupDto {
   // @IsString()
   // @IsOptional()
   // venueId?: string;
-
-  @Expose()
-  public get isOnlineMeetup(): boolean {
-    console.log('is this even called in meetup?');
-    return this.venue?.name === '비대면';
-  }
 }

@@ -17,7 +17,6 @@ export enum SubCategory {
   KARAOKE = 'karaoke', // 노래방
   DANCING = 'dancing', // KPOP댄스
   DRAWING = 'drawing', // 일러스트
-  PAINTING = 'painting', // 원화그림
   POTTERY = 'pottery', // 도자기
   CRAFTING = 'crafting', // 공예
   BOARD_GAME = 'boardGame', // 보드게임
@@ -32,13 +31,12 @@ export enum SubCategory {
   PET = 'pet', // 반려동물
   OTHER_HOBBY = 'otherHobby',
   // SPORTS
-  BADMINTON = 'badminton', // 배드민턴
-  BASEBALL = 'baseball', // 야구
   BASKETBALL = 'basketball', // 농구
   VOLLEYBALL = 'volleyball', // 배구
+  BASEBALL = 'baseball', // 야구
   FOOTBALL = 'football', // 축구
-  FUTSAL = 'futsal', // 풋살
   TENNIS = 'tennis', // 테니스
+  BADMINTON = 'badminton', // 배드민턴
   PINGPONG = 'pingpong', // 탁구
   BOWLING = 'bowling', // 볼링
   POOL = 'pool', // 당구
@@ -46,8 +44,7 @@ export enum SubCategory {
   MOUNTAIN = 'mountain', // 등산
   CLIMBING = 'climbing', // 클라이밍
   BIKE = 'bike', // 바이크
-  ROLLER_SKATING = 'rollerSkating', // 롤러스케이팅
-  ICE_SKATING = 'iceSkating', // 아이스스케이팅
+  SKATING = 'skating', // 스케이팅
   SKI = 'ski', // 스키,스노보드
   SWIMMING = 'swimming', // 수영
   SCUBA_DIVING = 'scubaDiving', // 스쿠버다이빙
@@ -64,5 +61,5 @@ export enum SubCategory {
   SECURITIES = 'securities', // 주식,재테크
   VOLUNTARY_ACTIVITY = 'voluntaryActivity', // 봉사
   ENTREPRENEURSHIP = 'entrepreneurship', // 사업,창업
-  ALL_OTHER = 'allOther',
+  OTHER_CHALLENGE = 'otherChallenge', // 기타
 }
