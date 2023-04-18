@@ -12,7 +12,7 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { AnyData } from 'src/common/types';
+import { AnyData, SignedUrl } from 'src/common/types';
 
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
@@ -223,11 +223,14 @@ export class MeetupsService {
   async getSignedUrl(
     userId: number,
     mimeType = 'image/jpeg',
-  ): Promise<AnyData> {
-    const fileUri = randomName('banner', mimeType);
-    const path = `${process.env.NODE_ENV}/files/${userId}/${fileUri}`;
+  ): Promise<SignedUrl> {
+    const fileUri = randomName('mesa', mimeType);
+    const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}.jpeg`;
     const url = await this.s3Service.generateSignedUrl(path);
 
-    return { data: url };
+    return {
+      upload: url,
+      image: `https://cdn.fleaauction.world/${path}`,
+    };
   }
 }

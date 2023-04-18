@@ -16,9 +16,9 @@ export type UploadedFile = {
   name: string | null;
 };
 
-export type ShippingCost = {
-  reason: string;
-  cost: number;
+export type SignedUrl = {
+  upload: string;
+  image: string;
 };
 
 export type AuctionItem = {

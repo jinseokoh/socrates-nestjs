@@ -17,7 +17,7 @@ import * as moment from 'moment';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { AnyData } from 'src/common/types';
+import { AnyData, SignedUrl } from 'src/common/types';
 import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
@@ -128,10 +128,10 @@ export class MeetupsController {
   async getSignedUrl(
     @CurrentUserId() userId: number,
     @Body('mimeType') mimeType: string,
-  ): Promise<AnyData> {
+  ): Promise<SignedUrl> {
     if (mimeType) {
       return await this.meetupsService.getSignedUrl(userId, mimeType);
     }
-    return { data: '' };
+    return { upload: '', image: '' }; // todo. unacceptable. change this later.
   }
 }
