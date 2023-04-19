@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import {
   Column,
@@ -30,11 +30,22 @@ export class Venue {
   @ApiProperty({ description: 'comma separated hashtags for this venue' })
   tags?: string | null;
 
-  @Column({ type: 'decimal', precision: 10, scale: 8 })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 8,
+    // transformer: new ColumnNumericTransformer(),
+  })
+  @Transform(({ value }) => parseFloat(value))
   @ApiProperty({ description: '위도' })
   latitude: number;
 
-  @Column({ type: 'decimal', precision: 11, scale: 8 })
+  @Column({
+    type: 'decimal',
+    precision: 11,
+    scale: 8,
+  })
+  @Transform(({ value }) => parseFloat(value))
   @ApiProperty({ description: '경도' })
   longitude: number;
 
