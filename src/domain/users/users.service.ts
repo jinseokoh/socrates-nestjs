@@ -10,10 +10,10 @@ import * as bcrypt from 'bcrypt';
 import * as moment from 'moment';
 import {
   FilterOperator,
-  paginate,
   PaginateConfig,
+  PaginateQuery,
   Paginated,
-  PaginateQuery
+  paginate,
 } from 'nestjs-paginate';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
@@ -156,7 +156,7 @@ export class UsersService {
 
     // avatar
     if (!body.avatar) {
-      body.avatar = 'https://cdn.fleaauction.world/images/user.png';
+      body.avatar = 'https://cdn.fleameetup.world/images/user.png';
     }
     // profile
     const profileDto: UpdateProfileDto = new UpdateProfileDto();
@@ -286,20 +286,6 @@ export class UsersService {
     };
   }
 
-  // 사용자 s3 파일 삭제
-  async deleteS3file(url: string) {
-    if (url === 'https://cdn.fleaauction.world/images/user.png') {
-      return;
-    }
-
-    try {
-      await this.s3Service.delete(url);
-      return { data: { url } };
-    } catch (e) {
-      console.log(url, e, 'dang... s3 failed?');
-    }
-  }
-
   //--------------------------------------------------------------------------//
   // Some extra shit
   //--------------------------------------------------------------------------//
@@ -322,6 +308,16 @@ export class UsersService {
       .set({ payCount: () => 'payCount - 1' })
       .where('userId = :id', { id })
       .execute();
+  }
+
+  // 내가 찜한 Meetup 아이디 리스트
+  async getUserFavedMeetupIds(id: number): Promise<string[]> {
+    return await this.repository.manager.query(
+      'SELECT `meetup`.id AS meetupId FROM `user` \
+      INNER JOIN `meetup_user` ON `user`.id = `meetup_user`.userId AND `meetup_user`.status = ? \
+      WHERE `user`.id = ?',
+      ['fave', id],
+    );
   }
 
   //--------------------------------------------------------------------------//

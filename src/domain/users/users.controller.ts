@@ -177,16 +177,6 @@ export class UsersController {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  // This doesn't necessarily belong to User model. and, surely, you can even
-  // call this AWS S3 API within a client. But, in case you want it to exist
-  // on a server side... This is it.
-  //! method order matters here.
-  @ApiOperation({ description: '사용자 s3 파일 삭제' })
-  @Delete('/s3')
-  async deleteAvatar(@Body('src') src: string) {
-    return await this.usersService.deleteS3file(src);
-  }
-
   @ApiOperation({ description: 'User 탈퇴' })
   @Delete(':id')
   async remove(

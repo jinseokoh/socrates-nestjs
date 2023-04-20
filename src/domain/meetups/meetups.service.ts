@@ -12,6 +12,8 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
+import { Status } from 'src/common/enums/status';
+
 import { AnyData, SignedUrl } from 'src/common/types';
 
 import { Category } from 'src/domain/categories/entities/category.entity';
@@ -231,7 +233,64 @@ export class MeetupsService {
 
     return {
       upload: url,
-      image: `https://cdn.fleaauction.world/${path}`,
+      image: `https://cdn.fleameetup.world/${path}`,
     };
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Faves
+  //?-------------------------------------------------------------------------//
+
+  async getFavers(id: string): Promise<Meetup> {
+    try {
+      return await this.repository.findOneOrFail({
+        where: {
+          id: id,
+          meetupUsers: {
+            status: Status.FAVE,
+          },
+        },
+        //relations: ['bookmarkers', 'bookmarkers.profile'],
+        relations: [
+          'meetupUsers',
+          'meetupUsers.user',
+          'meetupUsers.user.profile',
+        ],
+      });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  async checkFaver(meetupId: string, userId: number): Promise<boolean> {
+    const rows = await this.repository.manager.query(
+      'SELECT * FROM `meetup_user` WHERE meetupId = ? AND userId = ? AND status = ?',
+      [meetupId, userId, Status.FAVE],
+    );
+    return rows.length > 0;
+  }
+
+  async attachFaver(meetupId: string, userId: number): Promise<any> {
+    await this.repository.increment({ id: meetupId }, 'faveCount', 1);
+    await this.repository.manager.query(
+      'INSERT IGNORE INTO `meetup_user` (meetupId, userId, status) VALUES (?, ?)',
+      [meetupId, userId, Status.FAVE],
+    );
+    // doesn't seem to be necessary here
+    // return await this.repository.manager.query(
+    //   'UPDATE `meetup_user` SET status = ? WHERE meetupId = ? AND userId = ?',
+    //   [Status.FAVE, meetupId, userId],
+    // );
+  }
+
+  async detachFaver(meetupId: string, userId: number): Promise<any> {
+    await this.repository.manager.query(
+      'UPDATE `meetup` SET faveCount = faveCount - 1 WHERE id = ? AND faveCount > 0',
+      [meetupId],
+    );
+    await this.repository.manager.query(
+      'DELETE FROM `meetup_user` WHERE meetupId = ? AND userId = ? AND status = ?',
+      [meetupId, userId, Status.FAVE],
+    );
   }
 }

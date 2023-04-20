@@ -92,12 +92,12 @@ export class Meetup {
   skill: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'like count' })
+  @ApiProperty({ description: 'match count' })
   matchCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'like count' })
-  keepCount: number;
+  @ApiProperty({ description: 'fave count' })
+  faveCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'view count' })

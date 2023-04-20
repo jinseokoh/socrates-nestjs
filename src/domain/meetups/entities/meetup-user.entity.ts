@@ -23,12 +23,12 @@ export class MeetupUser {
   @Column({
     type: 'enum',
     enum: Status,
-    default: Status.KEEP,
+    default: Status.FAVE,
   })
-  @ApiProperty({ description: 'KEEP|MATCH' })
+  @ApiProperty({ description: 'FAVE|MATCH' })
   status: Status;
 
-  @Index('created-at-index')
+  // @Index('created-at-index')
   @CreateDateColumn()
   createdAt: Date;
 
