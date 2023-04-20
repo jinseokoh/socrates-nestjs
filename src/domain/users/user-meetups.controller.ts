@@ -18,6 +18,6 @@ export class UserMeetupsController {
   @PaginateQueryOptions()
   @Get(':id/faves')
   async getUserFavedMeetupIds(@Param('id') id: number): Promise<string[]> {
-    return this.usersService.getUserFavedMeetupIds(id);
+    return this.usersService.getFavMeetupIds(id);
   }
 }

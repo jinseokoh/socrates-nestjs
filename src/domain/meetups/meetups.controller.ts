@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UploadedFile,
@@ -22,16 +23,12 @@ import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
-import { VenuesService } from 'src/domain/venues/venues.service';
 import { multerOptions } from 'src/helpers/multer-options';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
 export class MeetupsController {
-  constructor(
-    private readonly meetupsService: MeetupsService,
-    private readonly venuesService: VenuesService,
-  ) {}
+  constructor(private readonly meetupsService: MeetupsService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
@@ -69,7 +66,7 @@ export class MeetupsController {
 
   @ApiOperation({ description: 'Meetup 상세보기' })
   @Get(':id')
-  async getMeetupById(@Param('id') id: string): Promise<Meetup> {
+  async getMeetupById(@Param('id', ParseUUIDPipe) id: string): Promise<Meetup> {
     console.log(id);
     return await this.meetupsService.findById(id, ['user', 'venue']);
   }
@@ -81,7 +78,7 @@ export class MeetupsController {
   @ApiOperation({ description: 'Meetup 갱신' })
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateMeetupDto,
   ): Promise<Meetup> {
     return await this.meetupsService.update(id, dto);
@@ -93,7 +90,7 @@ export class MeetupsController {
 
   @ApiOperation({ description: 'Meetup soft 삭제' })
   @Delete(':id')
-  async softRemove(@Param('id') id: string): Promise<Meetup> {
+  async softRemove(@Param('id', ParseUUIDPipe) id: string): Promise<Meetup> {
     return await this.meetupsService.softRemove(id);
   }
 

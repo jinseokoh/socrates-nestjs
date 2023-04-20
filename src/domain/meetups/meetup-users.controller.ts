@@ -5,12 +5,14 @@ import {
   Delete,
   Get,
   Param,
-  Put,
+  ParseIntPipe,
+  ParseUUIDPipe,
+  Post,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { NumberData } from 'src/common/types';
+import { AnyData } from 'src/common/types';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
 
@@ -25,7 +27,7 @@ export class MeetupUsersController {
 
   @ApiOperation({ description: 'Meetup faves' })
   @Get(':id/faves')
-  async getFavers(@Param('id') id: string): Promise<Meetup> {
+  async getFavers(@Param('id', ParseUUIDPipe) id: string): Promise<Meetup> {
     return await this.meetupsService.getFavers(id);
   }
 
@@ -36,8 +38,8 @@ export class MeetupUsersController {
   @ApiOperation({ description: '옥션 관심사용자 등록확인' })
   @Get(':meetupId/users/:userId/check')
   async checkFaver(
-    @Param('meetupId') meetupId: string,
-    @Param('userId') userId: number,
+    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+    @Param('userId', ParseIntPipe) userId: number,
   ): Promise<any> {
     const val = await this.meetupsService.checkFaver(meetupId, userId);
     return { data: val };
@@ -48,20 +50,17 @@ export class MeetupUsersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '옥션 관심사용자 추가' })
-  @Put(':meetupId/users/:userId')
+  @Post(':meetupId/users/:userId')
   async attachFaver(
     @CurrentUserId() id: number,
-    @Param('meetupId') meetupId: string,
-    @Param('userId') userId: number,
-  ): Promise<NumberData> {
+    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<AnyData> {
     if (id !== userId) {
       throw new BadRequestException(`doh! mind your id`);
     }
-    const { affectedRows } = await this.meetupsService.attachFaver(
-      meetupId,
-      userId,
-    );
-    return { data: affectedRows };
+    await this.meetupsService.attachFaver(meetupId, userId);
+    return { data: 'ok' };
   }
 
   //?-------------------------------------------------------------------------//
@@ -72,16 +71,13 @@ export class MeetupUsersController {
   @Delete(':meetupId/users/:userId')
   async detachFaver(
     @CurrentUserId() id: number,
-    @Param('meetupId') meetupId: string,
-    @Param('userId') userId: number,
-  ): Promise<NumberData> {
+    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<AnyData> {
     if (id !== userId) {
       throw new BadRequestException(`doh! mind your id`);
     }
-    const { affectedRows } = await this.meetupsService.detachFaver(
-      meetupId,
-      userId,
-    );
-    return { data: affectedRows };
+    await this.meetupsService.detachFaver(meetupId, userId);
+    return { data: 'ok' };
   }
 }

@@ -15,6 +15,7 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
+import { Status } from 'src/common/enums/status';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune-dto';
@@ -311,13 +312,15 @@ export class UsersService {
   }
 
   // 내가 찜한 Meetup 아이디 리스트
-  async getUserFavedMeetupIds(id: number): Promise<string[]> {
-    return await this.repository.manager.query(
-      'SELECT `meetup`.id AS meetupId FROM `user` \
+  async getFavMeetupIds(id: number): Promise<string[]> {
+    const items = await this.repository.manager.query(
+      'SELECT meetupId FROM `user` \
       INNER JOIN `meetup_user` ON `user`.id = `meetup_user`.userId AND `meetup_user`.status = ? \
       WHERE `user`.id = ?',
-      ['fave', id],
+      [Status.FAVE, id],
     );
+
+    return items.map(({ meetupId }) => meetupId);
   }
 
   //--------------------------------------------------------------------------//

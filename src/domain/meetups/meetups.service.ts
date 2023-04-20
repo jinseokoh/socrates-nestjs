@@ -271,11 +271,14 @@ export class MeetupsService {
   }
 
   async attachFaver(meetupId: string, userId: number): Promise<any> {
-    await this.repository.increment({ id: meetupId }, 'faveCount', 1);
-    await this.repository.manager.query(
-      'INSERT IGNORE INTO `meetup_user` (meetupId, userId, status) VALUES (?, ?)',
+    const { affectedRows } = await this.repository.manager.query(
+      'INSERT IGNORE INTO `meetup_user` (meetupId, userId, status) VALUES (?, ?, ?)',
       [meetupId, userId, Status.FAVE],
     );
+    console.log(affectedRows);
+    if (affectedRows > 0) {
+      await this.repository.increment({ id: meetupId }, 'faveCount', 1);
+    }
     // doesn't seem to be necessary here
     // return await this.repository.manager.query(
     //   'UPDATE `meetup_user` SET status = ? WHERE meetupId = ? AND userId = ?',
@@ -284,13 +287,16 @@ export class MeetupsService {
   }
 
   async detachFaver(meetupId: string, userId: number): Promise<any> {
-    await this.repository.manager.query(
-      'UPDATE `meetup` SET faveCount = faveCount - 1 WHERE id = ? AND faveCount > 0',
-      [meetupId],
-    );
-    await this.repository.manager.query(
+    const { affectedRows } = await this.repository.manager.query(
       'DELETE FROM `meetup_user` WHERE meetupId = ? AND userId = ? AND status = ?',
       [meetupId, userId, Status.FAVE],
     );
+    if (affectedRows > 0) {
+      await this.repository.decrement({ id: meetupId }, 'faveCount', 1);
+      // await this.repository.manager.query(
+      //   'UPDATE `meetup` SET faveCount = faveCount - 1 WHERE id = ? AND faveCount > 0',
+      //   [meetupId],
+      // );
+    }
   }
 }
