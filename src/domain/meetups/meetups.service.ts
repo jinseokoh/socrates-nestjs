@@ -53,9 +53,10 @@ export class MeetupsService {
     }
 
     const meetup = await this.repository.save(this.repository.create(dto));
-    await this.venueRepository.save(
+    const venue = await this.venueRepository.save(
       this.venueRepository.create({ ...dto.venue, meetupId: meetup.id }),
     );
+    meetup.venue = venue;
 
     // //await this._linkWithCategory(dto.category, meetup.id);
     // // await this._linkWithRegion(dto.region, meetup.id);
@@ -225,7 +226,7 @@ export class MeetupsService {
     mimeType = 'image/jpeg',
   ): Promise<SignedUrl> {
     const fileUri = randomName('mesa', mimeType);
-    const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}.jpeg`;
+    const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
     return {
