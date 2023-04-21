@@ -233,7 +233,7 @@ export class MeetupsService {
 
     return {
       upload: url,
-      image: `https://cdn.fleameetup.world/${path}`,
+      image: `https://cdn.fleaauction.world/${path}`,
     };
   }
 

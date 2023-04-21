@@ -153,11 +153,9 @@ export class UsersService {
 
   // [관리자] User 갱신
   async updateExtended(id: number, body: any): Promise<User> {
-    console.log(body, '~~ body');
-
     // avatar
     if (!body.avatar) {
-      body.avatar = 'https://cdn.fleameetup.world/images/user.png';
+      body.avatar = 'https://cdn.fleaauction.world/images/user.png';
     }
     // profile
     const profileDto: UpdateProfileDto = new UpdateProfileDto();
