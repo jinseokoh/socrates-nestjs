@@ -236,10 +236,6 @@ export class UsersService {
     return await this.profileRepository.save(profile);
   }
 
-  async count(): Promise<number> {
-    return await this.repository.count();
-  }
-
   //?-------------------------------------------------------------------------//
   //? DELETE
   //?-------------------------------------------------------------------------//
@@ -286,8 +282,28 @@ export class UsersService {
   }
 
   //--------------------------------------------------------------------------//
-  // Some extra shit
+  // Removal logics when user closes his/her account
   //--------------------------------------------------------------------------//
+
+  async _hardRemovalOnFollow(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM follow WHERE followingId = ? OR followerId = ?',
+      [id, id],
+    );
+  }
+
+  async _voidPersonalInformation(id: number): Promise<any> {
+    const user = await this.findById(id);
+    const email = user.email;
+    const phone = user.phone;
+    user.email = `${email}.deleted`;
+    user.phone = `---${phone.substring(3)}`;
+    await this.repository.save(user);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Some Extra shit
+  //?-------------------------------------------------------------------------//
 
   // todo refactor) this responsibility belongs to Profile. (priority: low)
   async increasePayCount(id: number): Promise<void> {
@@ -319,25 +335,5 @@ export class UsersService {
     );
 
     return items.map(({ meetupId }) => meetupId);
-  }
-
-  //--------------------------------------------------------------------------//
-  // Some private shit
-  //--------------------------------------------------------------------------//
-
-  async _hardRemovalOnFollow(id: number) {
-    await this.repository.manager.query(
-      'DELETE FROM follow WHERE followingId = ? OR followerId = ?',
-      [id, id],
-    );
-  }
-
-  async _voidPersonalInformation(id: number): Promise<any> {
-    const user = await this.findById(id);
-    const email = user.email;
-    const phone = user.phone;
-    user.email = `${email}.deleted`;
-    user.phone = `---${phone.substring(3)}`;
-    await this.repository.save(user);
   }
 }

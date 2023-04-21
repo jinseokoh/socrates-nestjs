@@ -11,10 +11,18 @@ export class ProfilesService {
     private readonly repository: Repository<Profile>,
   ) {}
 
+  //?-------------------------------------------------------------------------//
+  //? CREATE
+  //?-------------------------------------------------------------------------//
+
   async create(dto: CreateProfileDto): Promise<Profile> {
     const profile = this.repository.create(dto);
     return await this.repository.save(profile);
   }
+
+  //?-------------------------------------------------------------------------//
+  //? READ
+  //?-------------------------------------------------------------------------//
 
   async findById(id: number, relations: string[] = []): Promise<Profile> {
     try {
@@ -31,6 +39,10 @@ export class ProfilesService {
     }
   }
 
+  //?-------------------------------------------------------------------------//
+  //? UPDATE
+  //?-------------------------------------------------------------------------//
+
   async update(id: number, dto: UpdateProfileDto): Promise<Profile> {
     const profile = await this.repository.preload({ id, ...dto });
     if (!profile) {
@@ -38,6 +50,10 @@ export class ProfilesService {
     }
     return await this.repository.save(profile);
   }
+
+  //?-------------------------------------------------------------------------//
+  //? REMOVE
+  //?-------------------------------------------------------------------------//
 
   async remove(id: number): Promise<Profile> {
     const profile = await this.findById(id);

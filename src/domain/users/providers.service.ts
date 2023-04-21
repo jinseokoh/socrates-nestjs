@@ -2,9 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
-  paginate,
-  Paginated,
   PaginateQuery,
+  Paginated,
+  paginate,
 } from 'nestjs-paginate';
 import { CreateProviderDto } from 'src/domain/users/dto/create-provider.dto';
 import { UpdateProviderDto } from 'src/domain/users/dto/update-provider.dto';
@@ -18,10 +18,18 @@ export class ProvidersService {
     private readonly repository: Repository<Provider>,
   ) {}
 
+  //?-------------------------------------------------------------------------//
+  //? CREATE
+  //?-------------------------------------------------------------------------//
+
   async create(dto: CreateProviderDto): Promise<Provider> {
     const provider = this.repository.create(dto);
     return await this.repository.save(provider);
   }
+
+  //?-------------------------------------------------------------------------//
+  //? READ
+  //?-------------------------------------------------------------------------//
 
   async findAll(query: PaginateQuery): Promise<Paginated<Provider>> {
     return paginate(query, this.repository, {
@@ -53,6 +61,10 @@ export class ProvidersService {
     return await this.repository.findOne(params);
   }
 
+  //?-------------------------------------------------------------------------//
+  //? UPDATE
+  //?-------------------------------------------------------------------------//
+
   async update(id: number, dto: UpdateProviderDto): Promise<Provider> {
     const provider = await this.repository.preload({ id, ...dto });
     if (!provider) {
@@ -60,6 +72,10 @@ export class ProvidersService {
     }
     return await this.repository.save(provider);
   }
+
+  //?-------------------------------------------------------------------------//
+  //? DELETE
+  //?-------------------------------------------------------------------------//
 
   async remove(id: number): Promise<Provider> {
     const provider = await this.findById(id);
