@@ -228,6 +228,7 @@ export class UsersService {
   async updateProfile(id: number, dto: UpdateProfileDto): Promise<Profile> {
     const user = await this.findById(id, ['profile']);
     const profileId = user.profile.id;
+    console.log(user);
 
     const profile = await this.profileRepository.preload({
       id: profileId,
