@@ -108,7 +108,7 @@ export class MeetupsService {
   async findAll(query: PaginateQuery): Promise<Paginated<Meetup>> {
     const queryBuilder = this.repository
       .createQueryBuilder('meetup')
-      // .innerJoinAndSelect('meetup.venue', 'venue')
+      .innerJoinAndSelect('meetup.venue', 'venue')
       .innerJoinAndSelect('meetup.user', 'user')
       .innerJoinAndSelect('user.profile', 'profile');
 

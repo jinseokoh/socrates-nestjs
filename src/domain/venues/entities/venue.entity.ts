@@ -49,6 +49,7 @@ export class Venue {
   @ApiProperty({ description: '경도' })
   longitude: number;
 
+  @Exclude()
   @Column({ length: 32 })
   @ApiProperty({ description: '네이버 장소ID' })
   providerId: string;

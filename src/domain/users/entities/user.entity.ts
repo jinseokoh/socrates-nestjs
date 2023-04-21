@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { RoleEnum } from 'src/common/enums';
+import { Role } from 'src/common/enums';
 import { Gender } from 'src/common/enums/gender';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
@@ -68,14 +68,17 @@ export class User {
   @ApiProperty({ description: 'refreshTokenHash' })
   refreshTokenHash: string | null;
 
-  @Column({ type: 'enum', enum: RoleEnum, default: RoleEnum.USER })
+  @Exclude()
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
   @ApiProperty({ description: 'role' })
-  role: RoleEnum;
+  role: Role;
 
+  @Exclude()
   @Column({ default: false })
   @ApiProperty({ description: 'isActive' })
   isActive: boolean;
 
+  @Exclude()
   @Column({ default: false })
   @ApiProperty({ description: 'isBanned' })
   isBanned: boolean;

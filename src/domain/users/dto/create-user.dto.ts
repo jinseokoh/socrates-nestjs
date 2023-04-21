@@ -7,7 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { RoleEnum } from 'src/common/enums';
+import { Role } from 'src/common/enums';
 import { Gender } from 'src/common/enums/gender';
 export class CreateUserDto {
   @ApiProperty({ description: '닉네임', required: false })
@@ -66,11 +66,11 @@ export class CreateUserDto {
   @ApiProperty({
     description: '사용자역할',
     required: false,
-    default: RoleEnum.USER,
+    default: Role.USER,
   })
-  @IsEnum(RoleEnum)
+  @IsEnum(Role)
   @IsOptional()
-  role?: RoleEnum | null;
+  role?: Role | null;
 
   @ApiProperty({ description: '로케일정보', required: false, default: 'ko' })
   @IsString()
