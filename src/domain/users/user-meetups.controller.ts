@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
+import { AnyData } from 'src/common/types';
 import { UsersService } from 'src/domain/users/users.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -17,7 +18,7 @@ export class UserMeetupsController {
   @ApiOperation({ description: '내가 찜한 meetup 아이디 리스트' })
   @PaginateQueryOptions()
   @Get(':id/faves')
-  async getUserFavedMeetupIds(@Param('id') id: number): Promise<string[]> {
+  async getUserFavedMeetupIds(@Param('id') id: number): Promise<AnyData> {
     return this.usersService.getFavMeetupIds(id);
   }
 }
