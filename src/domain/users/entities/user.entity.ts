@@ -63,22 +63,18 @@ export class User {
   @ApiProperty({ description: 'pushToken' })
   pushToken: string | null;
 
-  @Exclude()
   @Column({ length: 64, nullable: true })
   @ApiProperty({ description: 'refreshTokenHash' })
   refreshTokenHash: string | null;
 
-  @Exclude()
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   @ApiProperty({ description: 'role' })
   role: Role;
 
-  @Exclude()
   @Column({ default: false })
   @ApiProperty({ description: 'isActive' })
   isActive: boolean;
 
-  @Exclude()
   @Column({ default: false })
   @ApiProperty({ description: 'isBanned' })
   isBanned: boolean;

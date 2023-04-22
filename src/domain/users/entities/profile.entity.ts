@@ -43,11 +43,9 @@ export class Profile extends BaseEntity {
   @Column({ type: 'int', unsigned: true, default: 0 })
   viewCount: number;
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true, default: 0 })
   postCount: number;
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true, default: 0 })
   matchCount: number;
 
