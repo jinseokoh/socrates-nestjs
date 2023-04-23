@@ -104,7 +104,6 @@ export class UsersService {
     id: number,
     relations: string[] = [],
   ): Promise<User> {
-    console.log(id);
     try {
       const [data] = await this.repository.manager.query(
         'SELECT \

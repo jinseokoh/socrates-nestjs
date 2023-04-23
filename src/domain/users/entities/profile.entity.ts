@@ -19,6 +19,9 @@ export class Profile {
   @Column({ length: 255, nullable: true })
   bio: string | null;
 
+  @Column({ length: 4, nullable: true })
+  mbti: string | null;
+
   @Column({ length: 64, nullable: true })
   region: string | null;
 

@@ -77,7 +77,16 @@ export class UsersController {
   @ApiOperation({ description: '본인 User 상세보기' })
   @Get('mine')
   async getMine(@CurrentUserId() id: number): Promise<User> {
-    return await this.usersService.findById(id);
+    return await this.usersService.findById(id, ['profile']);
+  }
+
+  @ApiOperation({ description: 'User 상세보기' })
+  @Get(':id')
+  async getUserDetailById(@Param('id') id: number): Promise<User> {
+    return await this.usersService.findUserDetailById(id, [
+      'profile',
+      'provider',
+    ]);
   }
 
   @ApiOperation({ description: '신한사주 올해의 운세' })
@@ -101,15 +110,6 @@ export class UsersController {
   @Post('love')
   async askLove(@Body(LoveFortunePipe) dto: LoveFortuneDto): Promise<any> {
     return await this.usersService.askLove(dto);
-  }
-
-  @ApiOperation({ description: 'User 상세보기' })
-  @Get(':id')
-  async getUserById(@Param('id') id: number): Promise<User> {
-    return await this.usersService.findUserDetailById(id, [
-      'profile',
-      'artist',
-    ]);
   }
 
   //?-------------------------------------------------------------------------//
