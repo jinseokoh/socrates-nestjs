@@ -48,7 +48,8 @@ export class Report {
 
   @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
-  userId: number | null; // to make it available to Repository.
+  userId: number | null;
+   // to make it available to Repository.
   @ManyToOne(() => User, (user) => user.reports, {
     onDelete: 'CASCADE', // SET NULL seems to cause 500 error
   })

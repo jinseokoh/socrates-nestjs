@@ -1,7 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
-  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -12,7 +11,7 @@ import {
 } from 'typeorm';
 @Entity() //? 사용자 소셜로그인 정보
 @Unique('provider_name_provider_id_key', ['providerName', 'providerId'])
-export class Provider extends BaseEntity {
+export class Provider {
   @Exclude()
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
@@ -47,7 +46,7 @@ export class Provider extends BaseEntity {
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  // constructor(partial: Partial<Provider>) {
-  //   Object.assign(this, partial);
-  // }
+  constructor(partial: Partial<Provider>) {
+    Object.assign(this, partial);
+  }
 }

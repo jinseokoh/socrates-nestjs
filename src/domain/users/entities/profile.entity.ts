@@ -3,7 +3,6 @@ import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
-  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -13,7 +12,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 @Entity() //? 사용자 프로파일 정보
-export class Profile extends BaseEntity {
+export class Profile {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
@@ -75,7 +74,7 @@ export class Profile extends BaseEntity {
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  // constructor(partial: Partial<Profile>) {
-  //   Object.assign(this, partial);
-  // }
+  constructor(partial: Partial<Profile>) {
+    Object.assign(this, partial);
+  }
 }

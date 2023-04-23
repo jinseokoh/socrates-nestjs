@@ -9,7 +9,7 @@ import {
 import { ReportTarget } from 'src/common/enums';
 import { CreateReportDto } from 'src/domain/reports/dto/create-report.dto';
 import { UpdateReportDto } from 'src/domain/reports/dto/update-report.dto';
-import { Report } from 'src/domain/reports/report.entity';
+import { Report } from 'src/domain/reports/entities/report.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Repository } from 'typeorm/repository/Repository';
 

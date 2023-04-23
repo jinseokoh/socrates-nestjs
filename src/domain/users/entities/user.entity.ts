@@ -4,6 +4,7 @@ import { Role } from 'src/common/enums';
 import { Gender } from 'src/common/enums/gender';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { Report } from 'src/domain/reports/entities/report.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
 import {
@@ -106,10 +107,10 @@ export class User {
   //**--------------------------------------------------------------------------*/
   //** 1-to-many hasMany
 
-  // @OneToMany(() => Bookmark, (bookmark) => bookmark.user, {
-  //   // cascade: ['insert', 'update'],
-  // })
-  // bookmarks: Bookmark[];
+  @OneToMany(() => Report, (report) => report.user, {
+    // cascade: ['insert', 'update'],
+  })
+  reports: Report[];
 
   @OneToMany(() => Provider, (provider) => provider.user, {
     // cascade: ['insert', 'update'],

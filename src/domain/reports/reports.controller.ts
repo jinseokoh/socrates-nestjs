@@ -12,7 +12,7 @@ import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { CreateReportDto } from 'src/domain/reports/dto/create-report.dto';
 import { UpdateReportDto } from 'src/domain/reports/dto/update-report.dto';
-import { Report } from 'src/domain/reports/report.entity';
+import { Report } from 'src/domain/reports/entities/report.entity';
 import { ReportsService } from 'src/domain/reports/reports.service';
 
 @Controller('reports')
