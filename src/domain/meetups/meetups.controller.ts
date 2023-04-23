@@ -67,8 +67,11 @@ export class MeetupsController {
   @ApiOperation({ description: 'Meetup 상세보기' })
   @Get(':id')
   async getMeetupById(@Param('id', ParseUUIDPipe) id: string): Promise<Meetup> {
-    console.log(id);
-    return await this.meetupsService.findById(id, ['user', 'venue']);
+    return await this.meetupsService.findById(id, [
+      'user',
+      'user.profile',
+      'venue',
+    ]);
   }
 
   //?-------------------------------------------------------------------------//
