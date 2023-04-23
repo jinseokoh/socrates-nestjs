@@ -5,5 +5,5 @@ export enum ReportStatus {
 
 export enum ReportTarget {
   USER = 'USER',
-  ARTICLE_COMMENT = 'ARTICLE_COMMENT',
+  MEETUP = 'MEETUP',
 }

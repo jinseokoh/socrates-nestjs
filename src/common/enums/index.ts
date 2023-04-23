@@ -6,6 +6,7 @@ export * from './interest';
 export * from './personality';
 export * from './rate';
 export * from './region';
+export * from './report';
 export * from './role';
 export * from './sub-category';
 export * from './time';
