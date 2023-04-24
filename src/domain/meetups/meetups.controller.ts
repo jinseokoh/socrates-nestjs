@@ -121,9 +121,7 @@ export class MeetupsController {
     return await this.meetupsService.uploadImages(userId, files);
   }
 
-  @ApiOperation({
-    description: 's3 직접 업로드를 위한 signedUrl 리턴',
-  })
+  @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
   @Post('image/url')
   async getSignedUrl(
     @CurrentUserId() userId: number,

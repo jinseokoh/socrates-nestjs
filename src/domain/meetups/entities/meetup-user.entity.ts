@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { Status } from 'src/common/enums/status';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -8,11 +8,13 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
+// https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 export class MeetupUser {
   @Exclude()
@@ -35,17 +37,18 @@ export class MeetupUser {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })
   userId: number | null; // to make it available to Repository.
-
-  @ManyToOne(() => User, (user) => user.meetupUsers)
-  public user!: User;
 
   @Exclude()
   @PrimaryColumn({ type: 'uuid', length: 36 })
   public meetupId!: string;
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.meetupUsers)
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: 'userId' })
+  public user!: User;
+
+  @ManyToOne(() => Meetup, (meetup) => meetup.id)
+  @JoinColumn({ name: 'meetupId' })
   public meetup!: Meetup;
 }

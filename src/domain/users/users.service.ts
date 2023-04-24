@@ -13,11 +13,11 @@ import {
   PaginateConfig,
   PaginateQuery,
   Paginated,
-  Paginated,
   paginate,
 } from 'nestjs-paginate';
 import { Status } from 'src/common/enums/status';
 import { AnyData } from 'src/common/types';
+import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
@@ -44,6 +44,8 @@ export class UsersService {
     private readonly repository: Repository<User>,
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
+    @InjectRepository(MeetupUser)
+    private readonly meetupUserRepository: Repository<MeetupUser>,
     private readonly crawlerService: CrawlerService,
     private readonly s3Service: S3Service,
   ) {}
@@ -329,28 +331,33 @@ export class UsersService {
   }
 
   // 내가 찜한 Meetup 리스트
-  async getFavMeetups(id: number): Promise<User> {
-    try {
-      return await this.repository.findOneOrFail({
-        where: {
-          id: id,
-          // meetupUsers: {
-          //   status: 'fave',
-          // },
-        },
-        relations: [
-          'meetupUsers',
-          'meetupUsers.user',
-          'meetupUsers.user.profile',
-        ],
+  async getUserFavMeetups(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<MeetupUser>> {
+    const queryBuilder = this.meetupUserRepository
+      .createQueryBuilder('meetupUser')
+      .leftJoinAndSelect('meetupUser.meetup', 'meetup')
+      .leftJoinAndSelect('meetup.venue', 'venue')
+      .where({
+        userId,
       });
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
+
+    const config: PaginateConfig<MeetupUser> = {
+      sortableColumns: ['createdAt'],
+      searchableColumns: ['meetup.title'],
+      defaultLimit: 20,
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {
+        status: [FilterOperator.EQ],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
   }
 
   // 내가 찜한 Meetup 아이디 리스트
-  async getFavMeetupIds(id: number): Promise<AnyData> {
+  async getFavMeetupIdsById(id: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId FROM `user` \
       INNER JOIN `meetup_user` ON `user`.id = `meetup_user`.userId AND `meetup_user`.status = ? \
