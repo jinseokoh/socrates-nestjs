@@ -13,10 +13,12 @@ import {
   PaginateConfig,
   PaginateQuery,
   Paginated,
+  Paginated,
   paginate,
 } from 'nestjs-paginate';
 import { Status } from 'src/common/enums/status';
 import { AnyData } from 'src/common/types';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune-dto';
@@ -324,6 +326,27 @@ export class UsersService {
       .set({ payCount: () => 'payCount - 1' })
       .where('userId = :id', { id })
       .execute();
+  }
+
+  // 내가 찜한 Meetup 리스트
+  async getFavMeetups(id: number): Promise<User> {
+    try {
+      return await this.repository.findOneOrFail({
+        where: {
+          id: id,
+          // meetupUsers: {
+          //   status: 'fave',
+          // },
+        },
+        relations: [
+          'meetupUsers',
+          'meetupUsers.user',
+          'meetupUsers.user.profile',
+        ],
+      });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
   }
 
   // 내가 찜한 Meetup 아이디 리스트

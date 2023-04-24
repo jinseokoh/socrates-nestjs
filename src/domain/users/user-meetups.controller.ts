@@ -1,3 +1,4 @@
+import { User } from 'src/domain/users/entities/user.entity';
 import {
   ClassSerializerInterceptor,
   Controller,
@@ -18,6 +19,13 @@ export class UserMeetupsController {
   @ApiOperation({ description: '내가 찜한 meetup 아이디 리스트' })
   @PaginateQueryOptions()
   @Get(':id/faves')
+  async getUserFavMeetups(@Param('id') id: number): Promise<User> {
+    return this.usersService.getFavMeetups(id);
+  }
+
+  @ApiOperation({ description: '내가 찜한 meetup 아이디 리스트' })
+  @PaginateQueryOptions()
+  @Get(':id/fave-ids')
   async getUserFavedMeetupIds(@Param('id') id: number): Promise<AnyData> {
     return this.usersService.getFavMeetupIds(id);
   }
