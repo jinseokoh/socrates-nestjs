@@ -23,10 +23,16 @@ export class Profile {
   mbti: string | null;
 
   @Column({ length: 64, nullable: true })
+  @ApiProperty({ description: '지역' })
   region: string | null;
 
   @Column({ length: 64, nullable: true })
-  career: string | null;
+  @ApiProperty({ description: '직업' })
+  occupation: string | null;
+
+  @Column({ length: 64, nullable: true })
+  @ApiProperty({ description: '학력' })
+  education: string | null;
 
   @Column({ default: true })
   notifyPush: boolean;
