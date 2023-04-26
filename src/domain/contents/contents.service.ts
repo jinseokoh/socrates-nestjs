@@ -30,21 +30,7 @@ export class ContentsService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  // 공지사항 리스트 (관리자)
-  async findAllExtended(query: PaginateQuery): Promise<Paginated<Content>> {
-    return await paginate(query, this.repository, {
-      sortableColumns: ['id', 'title'],
-      searchableColumns: ['title', 'body'],
-      defaultSortBy: [['id', 'DESC']],
-      filterableColumns: {
-        id: [FilterOperator.IN, FilterOperator.EQ],
-        category: [FilterOperator.EQ],
-        isPublished: [FilterOperator.EQ],
-      },
-    });
-  }
-
-  // 공지사항 리스트
+  // 리스트
   async findAll(query: PaginateQuery): Promise<Paginated<Content>> {
     const queryBuilder = this.repository
       .createQueryBuilder('content')
@@ -64,7 +50,7 @@ export class ContentsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 공지사항 상세보기
+  // 상세보기
   async findById(id: number, relations: string[] = []): Promise<Content> {
     try {
       return relations.length > 0
