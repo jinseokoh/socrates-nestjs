@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { ContentType } from 'src/common/enums';
 import {
   Column,
@@ -7,7 +8,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 @Entity()
-
 export class Content {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
@@ -30,6 +30,10 @@ export class Content {
     default: ContentType.NEWS,
   })
   category: ContentType;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'view count' })
+  viewCount: number;
 
   @Column({ default: true })
   isPublished: boolean;
