@@ -10,13 +10,14 @@ import { configuration } from 'src/common/config/configuration';
 import { IAwsConfig, IDatabaseConfig } from 'src/common/interfaces';
 import { AuthModule } from 'src/domain/auth/auth.module';
 import { JwtAuthGuard } from 'src/domain/auth/guards/jwt-auth.guard';
-
 import { CareersModule } from 'src/domain/careers/careers.module';
 import { CategoriesModule } from 'src/domain/categories/categories.module';
+import { ContentsModule } from 'src/domain/contents/contents.module';
 import { MessagesModule } from 'src/domain/chats/messages.module';
 import { MeetupsModule } from 'src/domain/meetups/meetups.module';
 import { RoomsModule } from 'src/domain/rooms/rooms.module';
 import { UsersModule } from 'src/domain/users/users.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -73,6 +74,7 @@ import { UsersModule } from 'src/domain/users/users.module';
     RoomsModule,
     CategoriesModule,
     CareersModule,
+    ContentsModule,
     MeetupsModule,
     UsersModule,
     MessagesModule,

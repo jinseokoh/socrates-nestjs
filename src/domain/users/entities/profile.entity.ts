@@ -26,11 +26,11 @@ export class Profile {
   @ApiProperty({ description: '지역' })
   region: string | null;
 
-  @Column({ length: 64, nullable: true })
+  @Column({ length: 16, nullable: true })
   @ApiProperty({ description: '직업' })
   occupation: string | null;
 
-  @Column({ length: 64, nullable: true })
+  @Column({ length: 16, nullable: true })
   @ApiProperty({ description: '학력' })
   education: string | null;
 
