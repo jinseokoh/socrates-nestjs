@@ -40,15 +40,22 @@ export class MeetupUser {
   @PrimaryColumn({ type: 'int', unsigned: true })
   userId: number | null; // to make it available to Repository.
 
-  @Exclude()
   @PrimaryColumn({ type: 'uuid', length: 36 })
   public meetupId!: string;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'RESTRICT',
+  })
   @JoinColumn({ name: 'userId' })
   public user!: User;
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.id)
+  @ManyToOne(() => Meetup, (meetup) => meetup.id, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'meetupId' })
   public meetup!: Meetup;
 }
