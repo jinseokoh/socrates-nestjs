@@ -16,6 +16,7 @@ export enum Region {
   NORTHERN_CHUNGCHEONG = 'northernChungcheong',
   SOUTHERN_CHUNGCHEONG = 'southernChungcheong',
   JEJU = 'jeju',
+  OTHER = 'other',
 }
 
 /*
