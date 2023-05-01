@@ -12,11 +12,22 @@ import { AnyData } from 'src/common/types';
 import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 export class UserMeetupsController {
   constructor(private readonly usersService: UsersService) {}
+
+  @ApiOperation({ description: '내가 찜한 meetup 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/meetups')
+  async getMeetupsByUserId(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Meetup>> {
+    return this.usersService.getUserMeetups(userId, query);
+  }
 
   @ApiOperation({ description: '내가 찜한 meetup 리스트' })
   @PaginateQueryOptions()

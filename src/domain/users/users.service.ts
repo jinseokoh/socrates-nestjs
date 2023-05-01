@@ -46,6 +46,8 @@ export class UsersService {
     private readonly profileRepository: Repository<Profile>,
     @InjectRepository(MeetupUser)
     private readonly meetupUserRepository: Repository<MeetupUser>,
+    @InjectRepository(Meetup)
+    private readonly meetupRepository: Repository<Meetup>,
     private readonly crawlerService: CrawlerService,
     private readonly s3Service: S3Service,
   ) {}
@@ -328,6 +330,34 @@ export class UsersService {
       .set({ payCount: () => 'payCount - 1' })
       .where('userId = :id', { id })
       .execute();
+  }
+
+  // 내가 만든 Meetup 리스트
+  async getUserMeetups(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Meetup>> {
+    const queryBuilder = this.meetupRepository
+      .createQueryBuilder('meetup')
+      .leftJoinAndSelect('meetup.venue', 'venue')
+      .where({
+        userId,
+      });
+
+    const config: PaginateConfig<Meetup> = {
+      sortableColumns: ['createdAt', 'expiredAt'],
+      searchableColumns: ['title'],
+      defaultLimit: 20,
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {
+        region: [FilterOperator.EQ, FilterOperator.IN],
+        career: [FilterOperator.EQ, FilterOperator.IN],
+        gender: [FilterOperator.EQ, FilterOperator.IN],
+        expiredAt: [FilterOperator.GTE, FilterOperator.LT],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
   }
 
   // 내가 찜한 Meetup 리스트

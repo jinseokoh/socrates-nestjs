@@ -118,8 +118,9 @@ export class MeetupsService {
       defaultSortBy: [['createdAt', 'DESC']],
       filterableColumns: {
         id: [FilterOperator.IN, FilterOperator.EQ],
-        gender: [FilterOperator.EQ],
-        // 'categories.id': [FilterOperator.IN],
+        region: [FilterOperator.EQ, FilterOperator.IN],
+        career: [FilterOperator.EQ, FilterOperator.IN],
+        gender: [FilterOperator.EQ, FilterOperator.IN],
         expiredAt: [FilterOperator.GTE, FilterOperator.LT],
       },
     };
