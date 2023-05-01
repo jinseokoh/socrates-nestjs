@@ -1,9 +1,13 @@
 import { User } from 'src/domain/users/entities/user.entity';
 import {
+  BadRequestException,
   ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
+  ParseIntPipe,
+  ParseUUIDPipe,
+  Post,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -13,6 +17,7 @@ import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -45,4 +50,51 @@ export class UserMeetupsController {
   async getFavMeetupIdsById(@Param('id') id: number): Promise<AnyData> {
     return this.usersService.getFavMeetupIdsById(id);
   }
+
+  //?-------------------------------------------------------------------------//
+  //? 바로신청 추가
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '신청 추가' })
+  @Post(':userId/meetups/:meetupId')
+  async attachAsker(
+    @CurrentUserId() id: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+  ): Promise<AnyData> {
+    if (id !== userId) {
+      throw new BadRequestException(`doh! mind your id`);
+    }
+    await this.usersService.attachAsker(userId, meetupId);
+    return { data: 'ok' };
+  }
+
+  @ApiOperation({ description: '신청 추가' })
+  @Post(':userId/meetups/:meetupId')
+  async attachFaver(
+    @CurrentUserId() id: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+  ): Promise<AnyData> {
+    if (id !== userId) {
+      throw new BadRequestException(`doh! mind your id`);
+    }
+    await this.usersService.attachFaver(userId, meetupId);
+    return { data: 'ok' };
+  }
+
+  @ApiOperation({ description: '신청 추가' })
+  @Post(':userId/meetups/:meetupId')
+  async detachFaver(
+    @CurrentUserId() id: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+  ): Promise<AnyData> {
+    if (id !== userId) {
+      throw new BadRequestException(`doh! mind your id`);
+    }
+    await this.usersService.detachFaver(userId, meetupId);
+    return { data: 'ok' };
+  }
 }
+

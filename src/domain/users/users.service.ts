@@ -3,7 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   Logger,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -398,5 +398,49 @@ export class UsersService {
     return {
       data: items.map(({ meetupId }) => meetupId),
     };
+  }
+
+  async attachAsker(userId: number, meetupId: string): Promise<any> {
+    const { affectedRows } = await this.repository.manager.query(
+      'INSERT IGNORE INTO `meetup_user` (meetupId, userId, status) VALUES (?, ?, ?)',
+      [meetupId, userId, Status.ASK],
+    );
+    if (affectedRows < 1) {
+      return await this.repository.manager.query(
+        'UPDATE `meetup_user` SET status = ? WHERE userId = ? AND meetupId = ?',
+        [Status.ASK, userId, meetupId],
+      );
+    }
+  }
+
+  async upgrade(userId: number, meetupId: string): Promise<any> {
+    return await this.repository.manager.query(
+      'UPDATE `meetup_user` SET status = ? WHERE userId = ? AND meetupId = ?',
+      [Status.ASK, userId, meetupId],
+    );
+  }
+
+  async attachFaver(userId: number, meetupId: string): Promise<any> {
+    const { affectedRows } = await this.repository.manager.query(
+      'INSERT IGNORE INTO `meetup_user` (meetupId, userId, status) VALUES (?, ?, ?)',
+      [meetupId, userId, Status.FAVE],
+    );
+    if (affectedRows > 0) {
+      await this.meetupRepository.increment({ id: meetupId }, 'faveCount', 1);
+    }
+  }
+
+  async detachFaver(userId: number, meetupId: string): Promise<any> {
+    const { affectedRows } = await this.repository.manager.query(
+      'DELETE FROM `meetup_user` WHERE meetupId = ? AND userId = ? AND status = ?',
+      [meetupId, userId, Status.FAVE],
+    );
+    if (affectedRows > 0) {
+      // await this.meetupRrepository.decrement({ meetupId }, 'faveCount', 1);
+      await this.repository.manager.query(
+        'UPDATE `meetup` SET faveCount = faveCount - 1 WHERE id = ? AND faveCount > 0',
+        [meetupId],
+      );
+    }
   }
 }

@@ -35,7 +35,7 @@ export class MeetupUsersController {
   //? 찜 확인
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '옥션 관심사용자 등록확인' })
+  @ApiOperation({ description: '찜 여부 확인' })
   @Get(':meetupId/users/:userId/check')
   async checkFaver(
     @Param('meetupId', ParseUUIDPipe) meetupId: string,

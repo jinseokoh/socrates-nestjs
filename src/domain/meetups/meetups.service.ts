@@ -251,7 +251,6 @@ export class MeetupsService {
             status: Status.FAVE,
           },
         },
-        //relations: ['bookmarkers', 'bookmarkers.profile'],
         relations: [
           'meetupUsers',
           'meetupUsers.user',
