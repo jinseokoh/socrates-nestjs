@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SubCategory } from 'src/common/enums/sub-category';
+import { SubCategory } from 'src/common/enums/subcategory';
 import { AnyData } from 'src/common/types';
 import { Category } from 'src/domain/categories/entities/category.entity';
 
@@ -133,11 +133,6 @@ export class CategoriesService {
     hobby.parent = hobbyRoot;
     await this.repository.manager.save(hobby);
     hobby = new Category();
-    hobby.slug = SubCategory.POTTERY;
-    hobby.depth = 2;
-    hobby.parent = hobbyRoot;
-    await this.repository.manager.save(hobby);
-    hobby = new Category();
     hobby.slug = SubCategory.CRAFTING;
     hobby.depth = 2;
     hobby.parent = hobbyRoot;
@@ -158,11 +153,6 @@ export class CategoriesService {
     hobby.parent = hobbyRoot;
     await this.repository.manager.save(hobby);
     hobby = new Category();
-    hobby.slug = SubCategory.BOARD_GAME;
-    hobby.depth = 2;
-    hobby.parent = hobbyRoot;
-    await this.repository.manager.save(hobby);
-    hobby = new Category();
     hobby.slug = SubCategory.GAME;
     hobby.depth = 2;
     hobby.parent = hobbyRoot;
@@ -174,11 +164,6 @@ export class CategoriesService {
     await this.repository.manager.save(hobby);
     hobby = new Category();
     hobby.slug = SubCategory.CAMPING;
-    hobby.depth = 2;
-    hobby.parent = hobbyRoot;
-    await this.repository.manager.save(hobby);
-    hobby = new Category();
-    hobby.slug = SubCategory.DRIVING;
     hobby.depth = 2;
     hobby.parent = hobbyRoot;
     await this.repository.manager.save(hobby);
@@ -306,22 +291,12 @@ export class CategoriesService {
     sports.parent = sportsRoot;
     await this.repository.manager.save(sports);
     sports = new Category();
-    sports.slug = SubCategory.WALKING; // snowboard
-    sports.depth = 2;
-    sports.parent = sportsRoot;
-    await this.repository.manager.save(sports);
-    sports = new Category();
     sports.slug = SubCategory.RUNNING;
     sports.depth = 2;
     sports.parent = sportsRoot;
     await this.repository.manager.save(sports);
     sports = new Category();
-    sports.slug = SubCategory.WORKOUT;
-    sports.depth = 2;
-    sports.parent = sportsRoot;
-    await this.repository.manager.save(sports);
-    sports = new Category();
-    sports.slug = SubCategory.YOGA; // pilates
+    sports.slug = SubCategory.GYM; // pilates
     sports.depth = 2;
     sports.parent = sportsRoot;
     await this.repository.manager.save(sports);
@@ -344,11 +319,6 @@ export class CategoriesService {
     challenge.parent = otherRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
-    challenge.slug = SubCategory.ONE_DAY_CLASS;
-    challenge.depth = 2;
-    challenge.parent = otherRoot;
-    await this.repository.manager.save(challenge);
-    challenge = new Category();
     challenge.slug = SubCategory.LANGUAGE;
     challenge.depth = 2;
     challenge.parent = otherRoot;
@@ -359,17 +329,22 @@ export class CategoriesService {
     challenge.parent = otherRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
-    challenge.slug = SubCategory.SECURITIES;
+    challenge.slug = SubCategory.ONE_DAY_CLASS;
     challenge.depth = 2;
     challenge.parent = otherRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
-    challenge.slug = SubCategory.VOLUNTARY_ACTIVITY;
+    challenge.slug = SubCategory.STOCKS;
     challenge.depth = 2;
     challenge.parent = otherRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
     challenge.slug = SubCategory.ENTREPRENEURSHIP;
+    challenge.depth = 2;
+    challenge.parent = otherRoot;
+    await this.repository.manager.save(challenge);
+    challenge = new Category();
+    challenge.slug = SubCategory.VOLUNTARY_ACTIVITY;
     challenge.depth = 2;
     challenge.parent = otherRoot;
     await this.repository.manager.save(challenge);

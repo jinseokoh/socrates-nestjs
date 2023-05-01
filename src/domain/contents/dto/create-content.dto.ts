@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
-import { ContentType } from 'src/common/enums';
+import { ContentCategory } from 'src/common/enums';
 export class CreateContentDto {
   @ApiProperty({ description: 'Slug' })
   @IsString()
@@ -23,11 +23,11 @@ export class CreateContentDto {
 
   @ApiProperty({
     description: '분류',
-    default: ContentType.NEWS,
+    default: ContentCategory.NEWS,
   })
-  @IsEnum(ContentType)
+  @IsEnum(ContentCategory)
   @IsOptional()
-  category?: ContentType;
+  category?: ContentCategory;
 
   @ApiProperty({
     description: '공개여부',

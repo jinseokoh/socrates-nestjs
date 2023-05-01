@@ -1,5 +1,7 @@
 export * from './category';
-export * from './content-type';
+export * from './subcategory';
+export * from './content-category';
+export * from './content-subcategory';
 export * from './day';
 export * from './expense';
 export * from './gender';
@@ -10,5 +12,4 @@ export * from './rate';
 export * from './region';
 export * from './report';
 export * from './role';
-export * from './sub-category';
 export * from './time';

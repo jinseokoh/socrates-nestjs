@@ -4,7 +4,7 @@ import { IsArray } from 'class-validator';
 import { Day, Expense, Gender, Region, Time } from 'src/common/enums';
 import { Career } from 'src/common/enums/career';
 import { Category } from 'src/common/enums/category';
-import { SubCategory } from 'src/common/enums/sub-category';
+import { SubCategory } from 'src/common/enums/subcategory';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';

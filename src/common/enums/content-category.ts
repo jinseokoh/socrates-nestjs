@@ -1,4 +1,4 @@
-export enum ContentType {
+export enum ContentCategory {
   COPYRIGHTS = 'copyrights',
   PRIVACY = 'privacy',
   TERMS = 'terms',

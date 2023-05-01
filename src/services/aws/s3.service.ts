@@ -72,7 +72,7 @@ export class S3Service {
       Body: imgResized,
       Key: path,
       ACL: 'private',
-      ContentType: 'image/jpeg',
+      ContentCategory: 'image/jpeg',
     };
     // upload the manipulated image to S3
     const command = new PutObjectCommand(bucketParams);
