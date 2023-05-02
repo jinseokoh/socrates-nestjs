@@ -45,7 +45,7 @@ export class UsersService {
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
     @InjectRepository(Match)
-    private readonly MatchRepository: Repository<Match>,
+    private readonly matchRepository: Repository<Match>,
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
     private readonly crawlerService: CrawlerService,
@@ -365,7 +365,7 @@ export class UsersService {
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Match>> {
-    const queryBuilder = this.MatchRepository
+    const queryBuilder = this.matchRepository
       .createQueryBuilder('Match')
       .leftJoinAndSelect('Match.meetup', 'meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
@@ -389,10 +389,8 @@ export class UsersService {
   // 내가 찜한 Meetup 아이디 리스트
   async getFavMeetupIdsById(id: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
-      'SELECT meetupId FROM `user` \
-      INNER JOIN `meetup_user` ON `user`.id = `meetup_user`.userId AND `meetup_user`.status = ? \
-      WHERE `user`.id = ?',
-      [Status.FAVE, id],
+      'SELECT meetupId FROM `user` INNER JOIN `meetup_user` ON `user`.id = `meetup_user`.userId WHERE `user`.id = ?',
+      [id],
     );
 
     return {
@@ -400,40 +398,65 @@ export class UsersService {
     };
   }
 
-  async attachMatcher(userId: number, meetupId: string): Promise<any> {
+  //?-------------------------------------------------------------------------//
+  //? Match Pivot
+  //?-------------------------------------------------------------------------//
+  async attachToMatchPivot(
+    askingUserId: number,
+    askedUserId: number,
+    meetupId: string,
+  ): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `meetup_user` (meetupId, userId, status) VALUES (?, ?, ?)',
-      [meetupId, userId, Status.ASK],
+      'INSERT IGNORE INTO `matches` (askingUserId, askedUserId, meetupId) VALUES (?, ?, ?)',
+      [askingUserId, askedUserId, meetupId],
     );
-    if (affectedRows < 1) {
-      return await this.repository.manager.query(
-        'UPDATE `meetup_user` SET status = ? WHERE userId = ? AND meetupId = ?',
-        [Status.ASK, userId, meetupId],
-      );
-    }
+    // if (affectedRows > 0) {
+    //   await this.meetupRepository.increment({ id: meetupId }, 'faveCount', 1);
+    // }
   }
 
-  async upgrade(userId: number, meetupId: string): Promise<any> {
-    return await this.repository.manager.query(
-      'UPDATE `meetup_user` SET status = ? WHERE userId = ? AND meetupId = ?',
-      [Status.ASK, userId, meetupId],
+  async detachFromMatchPivot(
+    askingUserId: number,
+    askedUserId: number,
+    meetupId: string,
+  ): Promise<any> {
+    const { affectedRows } = await this.repository.manager.query(
+      'DELETE FROM `matches` WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
+      [askingUserId, askedUserId, meetupId],
     );
+    // if (affectedRows > 0) {
+    //   // await this.meetupRrepository.decrement({ meetupId }, 'faveCount', 1);
+    //   await this.repository.manager.query(
+    //     'UPDATE `meetup` SET faveCount = faveCount - 1 WHERE id = ? AND faveCount > 0',
+    //     [meetupId],
+    //   );
+    // }
   }
 
-  async attachFaver(userId: number, meetupId: string): Promise<any> {
+  //?-------------------------------------------------------------------------//
+  //? MeetupUser Pivot
+  //?-------------------------------------------------------------------------//
+
+  async attachToMeetupUserPivot(
+    userId: number,
+    meetupId: string,
+  ): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `meetup_user` (meetupId, userId, status) VALUES (?, ?, ?)',
-      [meetupId, userId, Status.FAVE],
+      'INSERT IGNORE INTO `meetup_user` (userId, meetupId) VALUES (?, ?)',
+      [userId, meetupId],
     );
     if (affectedRows > 0) {
       await this.meetupRepository.increment({ id: meetupId }, 'faveCount', 1);
     }
   }
 
-  async detachFaver(userId: number, meetupId: string): Promise<any> {
+  async detachFromMeetupUserPivot(
+    userId: number,
+    meetupId: string,
+  ): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `meetup_user` WHERE meetupId = ? AND userId = ? AND status = ?',
-      [meetupId, userId, Status.FAVE],
+      'DELETE FROM `meetup_user` WHERE userId = ? AND meetupId = ?',
+      [userId, meetupId],
     );
     if (affectedRows > 0) {
       // await this.meetupRrepository.decrement({ meetupId }, 'faveCount', 1);

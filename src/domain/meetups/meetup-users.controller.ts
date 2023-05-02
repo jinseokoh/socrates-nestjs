@@ -25,59 +25,9 @@ export class MatchsController {
   //? 찜 리스트
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: 'Meetup faves' })
-  @Get(':id/faves')
+  @ApiOperation({ description: '이 모임을 찜한 모든 사용자 리스트' })
+  @Get(':id/users')
   async getFavers(@Param('id', ParseUUIDPipe) id: string): Promise<Meetup> {
     return await this.meetupsService.getFavers(id);
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 찜 확인
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '찜 여부 확인' })
-  @Get(':meetupId/users/:userId/check')
-  async checkFaver(
-    @Param('meetupId', ParseUUIDPipe) meetupId: string,
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<any> {
-    const val = await this.meetupsService.checkFaver(meetupId, userId);
-    return { data: val };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 찜 추가
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '옥션 관심사용자 추가' })
-  @Post(':meetupId/users/:userId')
-  async attachFaver(
-    @CurrentUserId() id: number,
-    @Param('meetupId', ParseUUIDPipe) meetupId: string,
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<AnyData> {
-    if (id !== userId) {
-      throw new BadRequestException(`doh! mind your id`);
-    }
-    await this.meetupsService.attachFaver(meetupId, userId);
-    return { data: 'ok' };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 찜 삭제
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '옥션 관심사용자 삭제' })
-  @Delete(':meetupId/users/:userId')
-  async detachFaver(
-    @CurrentUserId() id: number,
-    @Param('meetupId', ParseUUIDPipe) meetupId: string,
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<AnyData> {
-    if (id !== userId) {
-      throw new BadRequestException(`doh! mind your id`);
-    }
-    await this.meetupsService.detachFaver(meetupId, userId);
-    return { data: 'ok' };
   }
 }

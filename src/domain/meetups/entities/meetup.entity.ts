@@ -3,10 +3,11 @@ import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
 import { Day, Expense, Gender, Region, Time } from 'src/common/enums';
 import { Career } from 'src/common/enums/career';
-import { Category } from 'src/common/enums/category';
+import { Category as CategoryEnum } from 'src/common/enums/category';
 import { SubCategory } from 'src/common/enums/subcategory';
 import { Match } from 'src/domain/meetups/entities/match.entity';
 import { User } from 'src/domain/users/entities/user.entity';
+import { Category } from 'src/domain/categories/entities/category.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
 import {
   Column,
@@ -14,6 +15,8 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -39,9 +42,9 @@ export class Meetup {
   @IsArray()
   images: string[] | null;
 
-  @Column({ type: 'enum', enum: Category, default: Category.LEISURE })
+  @Column({ type: 'enum', enum: CategoryEnum, default: CategoryEnum.LEISURE })
   @ApiProperty({ description: 'category' })
-  category: Category;
+  category: CategoryEnum;
 
   @Column({
     type: 'enum',
@@ -154,7 +157,7 @@ export class Meetup {
   //** many-to-many belongsToMany
 
   @OneToMany(() => Match, (match) => match.meetup)
-  public matchs!: Match[];
+  public matches!: Match[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany
@@ -163,9 +166,13 @@ export class Meetup {
   // @JoinTable({ name: 'meetup_region' }) // owning side
   // regions: Region[];
 
-  // @ManyToMany(() => Category, (category) => category.meetups)
-  // @JoinTable({ name: 'meetup_category' }) // owning side
-  // categories: Category[];
+  @ManyToMany(() => Category, (category) => category.meetups)
+  @JoinTable({ name: 'meetup_category' }) // owning side
+  categories: Category[];
+
+  @ManyToMany(() => User, (user) => user.meetups)
+  @JoinTable({ name: 'meetup_user' }) // owning side
+  users: User[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

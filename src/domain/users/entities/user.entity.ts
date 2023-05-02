@@ -13,6 +13,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -122,16 +123,17 @@ export class User {
   })
   providers: Provider[];
 
-  @OneToMany(() => Meetup, (meetup) => meetup.user, {
-    // cascade: ['insert', 'update'],
-  })
-  meetups: Meetup[];
-
   //**--------------------------------------------------------------------------*/
   //** many-to-many
 
-  @OneToMany(() => Match, (match) => match.user)
-  public matchs!: Match[];
+  @OneToMany(() => Match, (match) => match.askingUser)
+  public askingMatches!: Match[];
+
+  @OneToMany(() => Match, (match) => match.askedUser)
+  public askedMatches!: Match[];
+
+  @ManyToMany(() => Meetup, (meetup) => meetup.users)
+  meetups: Meetup[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

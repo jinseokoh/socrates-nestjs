@@ -3,6 +3,7 @@ import {
   BadRequestException,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -24,17 +25,56 @@ import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 export class UserMeetupsController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiOperation({ description: '내가 찜한 meetup 리스트' })
+  //?-------------------------------------------------------------------------//
+  //? MeetupUser Pivot
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '나의 찜 리스트에 추가' })
   @PaginateQueryOptions()
-  @Get(':userId/meetups')
-  async getMeetupsByUserId(
-    @Param('userId') userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Meetup>> {
-    return this.usersService.getUserMeetups(userId, query);
+  @Post(':userId/meetups/:meetupId')
+  async attachToMeetupUserPivot(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+  ): Promise<any> {
+    return this.usersService.attachToMeetupUserPivot(userId, meetupId);
   }
 
-  @ApiOperation({ description: '내가 찜한 meetup 리스트' })
+  @ApiOperation({ description: '나의 찜 리스트에서 삭제' })
+  @PaginateQueryOptions()
+  @Delete(':userId/meetups/:meetupId')
+  async detachFromMeetupUserPivot(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+  ): Promise<any> {
+    return this.usersService.detachFromMeetupUserPivot(userId, meetupId);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Match Pivot
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '내가 매치신청 리스트에 추가' })
+  @PaginateQueryOptions()
+  @Post(':askingId/matches/:askedId/meetups/:meetupId')
+  async attachToMatchPivot(
+    @Param('askingId') askingId: number,
+    @Param('askedId') askedId: number,
+    @Param('meetupId') meetupId: string,
+  ): Promise<any> {
+    return this.usersService.attachToMatchPivot(askingId, askedId, meetupId);
+  }
+
+  @ApiOperation({ description: '나의 찜 리스트에서 삭제' })
+  @PaginateQueryOptions()
+  @Delete(':askingId/matches/:askedId/meetups/:meetupId')
+  async detachFromMatchPivot(
+    @Param('askingId') askingId: number,
+    @Param('askedId') askedId: number,
+    @Param('meetupId') meetupId: string,
+  ): Promise<any> {
+    return this.usersService.detachFromMatchPivot(askingId, askedId, meetupId);
+  }
+
   @PaginateQueryOptions()
   @Get(':userId/faves')
   async getFavMeetupsById(
@@ -50,51 +90,4 @@ export class UserMeetupsController {
   async getFavMeetupIdsById(@Param('id') id: number): Promise<AnyData> {
     return this.usersService.getFavMeetupIdsById(id);
   }
-
-  //?-------------------------------------------------------------------------//
-  //? 바로신청 추가
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '신청 추가' })
-  @Post(':userId/meetups/:meetupId')
-  async attachMatcher(
-    @CurrentUserId() id: number,
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('meetupId', ParseUUIDPipe) meetupId: string,
-  ): Promise<AnyData> {
-    if (id !== userId) {
-      throw new BadRequestException(`doh! mind your id`);
-    }
-    await this.usersService.attachMatcher(userId, meetupId);
-    return { data: 'ok' };
-  }
-
-  @ApiOperation({ description: '신청 추가' })
-  @Post(':userId/meetups/:meetupId')
-  async attachFaver(
-    @CurrentUserId() id: number,
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('meetupId', ParseUUIDPipe) meetupId: string,
-  ): Promise<AnyData> {
-    if (id !== userId) {
-      throw new BadRequestException(`doh! mind your id`);
-    }
-    await this.usersService.attachFaver(userId, meetupId);
-    return { data: 'ok' };
-  }
-
-  @ApiOperation({ description: '신청 추가' })
-  @Post(':userId/meetups/:meetupId')
-  async detachFaver(
-    @CurrentUserId() id: number,
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('meetupId', ParseUUIDPipe) meetupId: string,
-  ): Promise<AnyData> {
-    if (id !== userId) {
-      throw new BadRequestException(`doh! mind your id`);
-    }
-    await this.usersService.detachFaver(userId, meetupId);
-    return { data: 'ok' };
-  }
 }
-

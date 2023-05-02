@@ -239,7 +239,7 @@ export class MeetupsService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Faves
+  //? 찜했던 모든 사용자 리스트
   //?-------------------------------------------------------------------------//
 
   async getFavers(id: string): Promise<Meetup> {
@@ -247,56 +247,11 @@ export class MeetupsService {
       return await this.repository.findOneOrFail({
         where: {
           id: id,
-          Matchs: {
-            status: Status.FAVE,
-          },
         },
-        relations: [
-          'Matchs',
-          'Matchs.user',
-          'Matchs.user.profile',
-        ],
+        relations: ['users', 'users.profile'],
       });
     } catch (e) {
       throw new NotFoundException('entity not found');
-    }
-  }
-
-  async checkFaver(meetupId: string, userId: number): Promise<boolean> {
-    const rows = await this.repository.manager.query(
-      'SELECT * FROM `meetup_user` WHERE meetupId = ? AND userId = ? AND status = ?',
-      [meetupId, userId, Status.FAVE],
-    );
-    return rows.length > 0;
-  }
-
-  async attachFaver(meetupId: string, userId: number): Promise<any> {
-    const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `meetup_user` (meetupId, userId, status) VALUES (?, ?, ?)',
-      [meetupId, userId, Status.FAVE],
-    );
-    console.log(affectedRows);
-    if (affectedRows > 0) {
-      await this.repository.increment({ id: meetupId }, 'faveCount', 1);
-    }
-    // doesn't seem to be necessary here
-    // return await this.repository.manager.query(
-    //   'UPDATE `meetup_user` SET status = ? WHERE meetupId = ? AND userId = ?',
-    //   [Status.FAVE, meetupId, userId],
-    // );
-  }
-
-  async detachFaver(meetupId: string, userId: number): Promise<any> {
-    const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `meetup_user` WHERE meetupId = ? AND userId = ? AND status = ?',
-      [meetupId, userId, Status.FAVE],
-    );
-    if (affectedRows > 0) {
-      await this.repository.decrement({ id: meetupId }, 'faveCount', 1);
-      // await this.repository.manager.query(
-      //   'UPDATE `meetup` SET faveCount = faveCount - 1 WHERE id = ? AND faveCount > 0',
-      //   [meetupId],
-      // );
     }
   }
 }
