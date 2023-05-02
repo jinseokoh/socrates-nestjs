@@ -1,4 +1,4 @@
 export enum Status {
-  FAVE = 'fave', // 찜
-  ASK = 'ask', // 신청
+  ACCEPTED = 'accepted', // 찜
+  DENIED = 'denied', // 신청
 }

@@ -15,7 +15,7 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { AnyData } from 'src/common/types';
 import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
-import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
+import { Match } from 'src/domain/meetups/entities/match.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 
@@ -40,7 +40,7 @@ export class UserMeetupsController {
   async getFavMeetupsById(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<MeetupUser>> {
+  ): Promise<Paginated<Match>> {
     return this.usersService.getUserFavMeetups(userId, query);
   }
 
@@ -57,7 +57,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '신청 추가' })
   @Post(':userId/meetups/:meetupId')
-  async attachAsker(
+  async attachMatcher(
     @CurrentUserId() id: number,
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseUUIDPipe) meetupId: string,
@@ -65,7 +65,7 @@ export class UserMeetupsController {
     if (id !== userId) {
       throw new BadRequestException(`doh! mind your id`);
     }
-    await this.usersService.attachAsker(userId, meetupId);
+    await this.usersService.attachMatcher(userId, meetupId);
     return { data: 'ok' };
   }
 

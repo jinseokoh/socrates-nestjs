@@ -18,7 +18,7 @@ import { MeetupsService } from 'src/domain/meetups/meetups.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
-export class MeetupUsersController {
+export class MatchsController {
   constructor(private readonly meetupsService: MeetupsService) {}
 
   //?-------------------------------------------------------------------------//

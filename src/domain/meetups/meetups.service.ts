@@ -247,14 +247,14 @@ export class MeetupsService {
       return await this.repository.findOneOrFail({
         where: {
           id: id,
-          meetupUsers: {
+          Matchs: {
             status: Status.FAVE,
           },
         },
         relations: [
-          'meetupUsers',
-          'meetupUsers.user',
-          'meetupUsers.user.profile',
+          'Matchs',
+          'Matchs.user',
+          'Matchs.user.profile',
         ],
       });
     } catch (e) {

@@ -17,7 +17,7 @@ import {
 } from 'nestjs-paginate';
 import { Status } from 'src/common/enums/status';
 import { AnyData } from 'src/common/types';
-import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
+import { Match } from 'src/domain/meetups/entities/match.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
@@ -44,8 +44,8 @@ export class UsersService {
     private readonly repository: Repository<User>,
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
-    @InjectRepository(MeetupUser)
-    private readonly meetupUserRepository: Repository<MeetupUser>,
+    @InjectRepository(Match)
+    private readonly MatchRepository: Repository<Match>,
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
     private readonly crawlerService: CrawlerService,
@@ -364,16 +364,16 @@ export class UsersService {
   async getUserFavMeetups(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<MeetupUser>> {
-    const queryBuilder = this.meetupUserRepository
-      .createQueryBuilder('meetupUser')
-      .leftJoinAndSelect('meetupUser.meetup', 'meetup')
+  ): Promise<Paginated<Match>> {
+    const queryBuilder = this.MatchRepository
+      .createQueryBuilder('Match')
+      .leftJoinAndSelect('Match.meetup', 'meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
       .where({
         userId,
       });
 
-    const config: PaginateConfig<MeetupUser> = {
+    const config: PaginateConfig<Match> = {
       sortableColumns: ['createdAt'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,
@@ -400,7 +400,7 @@ export class UsersService {
     };
   }
 
-  async attachAsker(userId: number, meetupId: string): Promise<any> {
+  async attachMatcher(userId: number, meetupId: string): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
       'INSERT IGNORE INTO `meetup_user` (meetupId, userId, status) VALUES (?, ?, ?)',
       [meetupId, userId, Status.ASK],

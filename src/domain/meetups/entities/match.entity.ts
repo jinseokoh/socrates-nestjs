@@ -16,18 +16,10 @@ import {
 
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-export class MeetupUser {
-  @Exclude()
-  @Column({ nullable: true })
-  public acked: boolean;
-
+export class Match {
   @Index()
-  @Column({
-    type: 'enum',
-    enum: Status,
-    default: Status.FAVE,
-  })
-  @ApiProperty({ description: 'FAVE|MATCH' })
+  @Column({ type: 'enum', enum: Status, nullable: true })
+  @ApiProperty({ description: 'ACCEPTED|DENIED' })
   status: Status;
 
   // @Index('created-at-index')
@@ -38,18 +30,29 @@ export class MeetupUser {
   updatedAt: Date;
 
   @PrimaryColumn({ type: 'int', unsigned: true })
-  userId: number | null; // to make it available to Repository.
-
-  @PrimaryColumn({ type: 'uuid', length: 36 })
-  public meetupId!: string;
+  askingUserId: number | null; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'userId' })
-  public user!: User;
+  @JoinColumn({ name: 'askingUserId' })
+  public askingUser!: User;
+
+  @PrimaryColumn({ type: 'int', unsigned: true })
+  askedUserId: number | null; // to make it available to Repository.
+
+  @ManyToOne(() => User, (user) => user.id, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'askedUserId' })
+  public askedUser!: User;
+
+  @PrimaryColumn({ type: 'uuid', length: 36 })
+  public meetupId!: string;
 
   @ManyToOne(() => Meetup, (meetup) => meetup.id, {
     nullable: false,

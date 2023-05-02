@@ -3,7 +3,7 @@ import { Exclude, Expose } from 'class-transformer';
 import { Role } from 'src/common/enums';
 import { Career } from 'src/common/enums/career';
 import { Gender } from 'src/common/enums/gender';
-import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
+import { Match } from 'src/domain/meetups/entities/match.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Report } from 'src/domain/reports/entities/report.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
@@ -130,8 +130,8 @@ export class User {
   //**--------------------------------------------------------------------------*/
   //** many-to-many
 
-  @OneToMany(() => MeetupUser, (meetupUser) => meetupUser.user)
-  public meetupUsers!: MeetupUser[];
+  @OneToMany(() => Match, (match) => match.user)
+  public matchs!: Match[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
