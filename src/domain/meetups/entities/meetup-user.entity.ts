@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
@@ -5,6 +6,7 @@ import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 export class MeetupUser {
+  @Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })
   userId: number | null; // to make it available to Repository.
 
@@ -16,6 +18,7 @@ export class MeetupUser {
   @JoinColumn({ name: 'userId' })
   public user!: User;
 
+  @Exclude()
   @PrimaryColumn({ type: 'uuid', length: 36 })
   public meetupId!: string;
 

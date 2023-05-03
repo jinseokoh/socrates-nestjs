@@ -20,6 +20,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Status } from 'src/common/enums/status';
+import { Match } from 'src/domain/meetups/entities/match.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -84,8 +85,17 @@ export class UserMeetupsController {
   async getMeetupsLikedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<MeetupUser>> {
-    return this.usersService.getMeetupsLikedByMe(userId, query);
+  ): Promise<Paginated<Meetup>> {
+    const { data, meta, links } = await this.usersService.getMeetupsLikedByMe(
+      userId,
+      query,
+    );
+
+    return {
+      data: data.map((v) => v.meetup),
+      meta: meta,
+      links: links,
+    } as Paginated<Meetup>;
   }
 
   @ApiOperation({ description: '내가 찜한 모임ID 리스트' })
@@ -128,7 +138,7 @@ export class UserMeetupsController {
   @ApiOperation({ description: '매치신청 승인/거부' })
   @PaginateQueryOptions()
   @Patch(':askingUserId/matches/:askedUserId/meetups/:meetupId')
-  async updateMatchToAccept(
+  async updateMatchToAcceptOrDeny(
     @Param('askingUserId') askingUserId: number,
     @Param('askedUserId') askedUserId: number,
     @Param('meetupId') meetupId: string,
@@ -155,7 +165,7 @@ export class UserMeetupsController {
   async getUsersAskingMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<any> {
+  ): Promise<Paginated<Match>> {
     return await this.usersService.getUsersAskingMe(userId, query);
   }
 
@@ -165,7 +175,7 @@ export class UserMeetupsController {
   async getUsersAskedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<any> {
+  ): Promise<Paginated<Match>> {
     return await this.usersService.getUsersAskedByMe(userId, query);
   }
 }
