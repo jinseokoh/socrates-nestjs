@@ -58,7 +58,6 @@ export class AuthController {
   @ApiOperation({ description: '기이메일 확인 후 OTP 전송' })
   @HttpCode(HttpStatus.OK)
   @Public()
-  @ApiCreatedResponse({ description: 'forgot 성공' })
   @Post('forgot')
   async forgotEmailAndSendOtp(@Body('email') email): Promise<any> {
     await this.authService.takeExistingEmailAndSendOtp(email);
@@ -68,7 +67,6 @@ export class AuthController {
   @ApiOperation({ description: '이메일 OTP 확인' })
   @HttpCode(HttpStatus.OK)
   @Public()
-  @ApiCreatedResponse({ description: 'otp 성공' })
   @Get('otp')
   async validateOtp(
     @Query('email') email: string,
@@ -81,7 +79,6 @@ export class AuthController {
   @ApiOperation({ description: '비밀번호 재설정' })
   @HttpCode(HttpStatus.OK)
   @Public()
-  @ApiCreatedResponse({ description: 'reset 성공' })
   @Patch('reset')
   async resetPassword(
     @Body(HashPasswordPipe) dto: ResetPasswordDto,

@@ -7,7 +7,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
@@ -17,10 +16,13 @@ import {
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 export class Match {
-  @Index()
   @Column({ type: 'enum', enum: Status, nullable: true })
   @ApiProperty({ description: 'ACCEPTED|DENIED' })
   status: Status;
+
+  @Column({ length: 32, unique: true, nullable: true })
+  @ApiProperty({ description: 'message' })
+  message: string | null;
 
   // @Index('created-at-index')
   @CreateDateColumn()

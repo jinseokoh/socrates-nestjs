@@ -62,12 +62,9 @@ export class UsersController {
 
   @ApiOperation({ description: 'User 리스트 w/ Pagination' })
   @UseInterceptors(AvatarInterceptor)
-  @PaginateQueryOptions()
-  @ApiCreatedResponse({
-    type: Paginated<User>,
-  })
-  @Get()
   @UsePipes(new ValidationPipe({ transform: true }))
+  @PaginateQueryOptions()
+  @Get()
   async getUsers(@Paginate() query: PaginateQuery): Promise<Paginated<User>> {
     return this.usersService.findAll(query);
   }

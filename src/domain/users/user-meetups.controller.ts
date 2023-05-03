@@ -1,6 +1,6 @@
-import { User } from 'src/domain/users/entities/user.entity';
 import {
   BadRequestException,
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Delete,
@@ -8,6 +8,7 @@ import {
   Param,
   ParseIntPipe,
   ParseUUIDPipe,
+  Patch,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,9 +17,9 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { AnyData } from 'src/common/types';
 import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
-import { Match } from 'src/domain/meetups/entities/match.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
+import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
+import { Status } from 'src/common/enums/status';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -26,68 +27,145 @@ export class UserMeetupsController {
   constructor(private readonly usersService: UsersService) {}
 
   //?-------------------------------------------------------------------------//
+  //? 내가 만든 모임 리스트
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '내가 만든 모임 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/meetups')
+  async getMyMeetups(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Meetup>> {
+    return await this.usersService.getMyMeetups(userId, query);
+  }
+
+  //?-------------------------------------------------------------------------//
   //? MeetupUser Pivot
   //?-------------------------------------------------------------------------//
 
+  // todo. validate faveCount
+  // todo. validate this meetup belongs to me
   @ApiOperation({ description: '나의 찜 리스트에 추가' })
-  @PaginateQueryOptions()
   @Post(':userId/meetups/:meetupId')
   async attachToMeetupUserPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseUUIDPipe) meetupId: string,
   ): Promise<any> {
-    return this.usersService.attachToMeetupUserPivot(userId, meetupId);
+    try {
+      await this.usersService.attachToMeetupUserPivot(userId, meetupId);
+      return {
+        data: 'ok',
+      };
+    } catch (e) {
+      throw new BadRequestException();
+    }
   }
 
   @ApiOperation({ description: '나의 찜 리스트에서 삭제' })
-  @PaginateQueryOptions()
   @Delete(':userId/meetups/:meetupId')
   async detachFromMeetupUserPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseUUIDPipe) meetupId: string,
   ): Promise<any> {
-    return this.usersService.detachFromMeetupUserPivot(userId, meetupId);
+    try {
+      await this.usersService.detachFromMeetupUserPivot(userId, meetupId);
+      return {
+        data: 'ok',
+      };
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
+
+  @ApiOperation({ description: '내가 찜한 모임 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/faves')
+  async getMeetupsLikedByMe(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<MeetupUser>> {
+    return this.usersService.getMeetupsLikedByMe(userId, query);
+  }
+
+  @ApiOperation({ description: '내가 찜한 모임ID 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/faveids')
+  async getMeetupIdsLikedByMe(
+    @Param('userId') userId: number,
+  ): Promise<AnyData> {
+    return this.usersService.getMeetupIdsLikedByMe(userId);
   }
 
   //?-------------------------------------------------------------------------//
   //? Match Pivot
   //?-------------------------------------------------------------------------//
 
+  // todo. validate this meetup belongs to me
   @ApiOperation({ description: '내가 매치신청 리스트에 추가' })
   @PaginateQueryOptions()
-  @Post(':askingId/matches/:askedId/meetups/:meetupId')
+  @Post(':askingUserId/matches/:askedUserId/meetups/:meetupId')
   async attachToMatchPivot(
-    @Param('askingId') askingId: number,
-    @Param('askedId') askedId: number,
+    @Param('askingUserId') askingUserId: number,
+    @Param('askedUserId') askedUserId: number,
     @Param('meetupId') meetupId: string,
-  ): Promise<any> {
-    return this.usersService.attachToMatchPivot(askingId, askedId, meetupId);
+  ): Promise<AnyData> {
+    try {
+      await this.usersService.attachToMatchPivot(
+        askingUserId,
+        askedUserId,
+        meetupId,
+      );
+      return {
+        data: 'ok',
+      };
+    } catch (e) {
+      throw new BadRequestException();
+    }
   }
 
-  @ApiOperation({ description: '나의 찜 리스트에서 삭제' })
+  // todo. validate asking/asked combo is the other way around
+  @ApiOperation({ description: '매치신청 승인/거부' })
   @PaginateQueryOptions()
-  @Delete(':askingId/matches/:askedId/meetups/:meetupId')
-  async detachFromMatchPivot(
-    @Param('askingId') askingId: number,
-    @Param('askedId') askedId: number,
+  @Patch(':askingUserId/matches/:askedUserId/meetups/:meetupId')
+  async updateMatchToAccept(
+    @Param('askingUserId') askingUserId: number,
+    @Param('askedUserId') askedUserId: number,
     @Param('meetupId') meetupId: string,
-  ): Promise<any> {
-    return this.usersService.detachFromMatchPivot(askingId, askedId, meetupId);
+    @Body('status') status: Status,
+  ): Promise<AnyData> {
+    try {
+      await this.usersService.updateMatchToAcceptOrDeny(
+        askingUserId,
+        askedUserId,
+        meetupId,
+        status,
+      );
+      return {
+        data: 'ok',
+      };
+    } catch (e) {
+      throw new BadRequestException();
+    }
   }
 
+  @ApiOperation({ description: '내에게 만나자고 신청한 호구 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/faves')
-  async getFavMeetupsById(
+  @Get(':userId/usersasking')
+  async getUsersAskingMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Match>> {
-    return this.usersService.getUserFavMeetups(userId, query);
+  ): Promise<any> {
+    return await this.usersService.getUsersAskingMe(userId, query);
   }
 
-  @ApiOperation({ description: '내가 찜한 meetup 아이디 리스트' })
+  @ApiOperation({ description: '내가 만나자고 신청드린 상대방 리스트' })
   @PaginateQueryOptions()
-  @Get(':id/faveids')
-  async getFavMeetupIdsById(@Param('id') id: number): Promise<AnyData> {
-    return this.usersService.getFavMeetupIdsById(id);
+  @Get(':userId/usersasked')
+  async getUsersAskedByMe(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<any> {
+    return await this.usersService.getUsersAskedByMe(userId, query);
   }
 }

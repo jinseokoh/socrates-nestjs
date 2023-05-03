@@ -18,6 +18,7 @@ import {
 import { Status } from 'src/common/enums/status';
 import { AnyData } from 'src/common/types';
 import { Match } from 'src/domain/meetups/entities/match.entity';
+import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
@@ -44,10 +45,12 @@ export class UsersService {
     private readonly repository: Repository<User>,
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
-    @InjectRepository(Match)
-    private readonly matchRepository: Repository<Match>,
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
+    @InjectRepository(MeetupUser)
+    private readonly meetupUserRepository: Repository<MeetupUser>,
+    @InjectRepository(Match)
+    private readonly matchRepository: Repository<Match>,
     private readonly crawlerService: CrawlerService,
     private readonly s3Service: S3Service,
   ) {}
@@ -69,21 +72,6 @@ export class UsersService {
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
-
-  // 올해의 운세보기
-  async askYearly(dto: YearlyFortuneDto): Promise<any> {
-    return await this.crawlerService.askYearly(dto);
-  }
-
-  // 오늘의 운세보기
-  async askDaily(dto: DailyFortuneDto): Promise<any> {
-    return await this.crawlerService.askDaily(dto);
-  }
-
-  // 궁합보기
-  async askLove(dto: LoveFortuneDto): Promise<any> {
-    return await this.crawlerService.askLove(dto);
-  }
 
   // User 리스트 w/ Pagination
   async findAll(query: PaginateQuery): Promise<Paginated<User>> {
@@ -360,83 +348,43 @@ export class UsersService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내가 찜한 Meetup 리스트
-  async getUserFavMeetups(
+  //?-------------------------------------------------------------------------//
+  //? Meetups
+  //?-------------------------------------------------------------------------//
+
+  // 내가 만든 모임 리스트
+  async getMyMeetups(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Match>> {
-    const queryBuilder = this.matchRepository
-      .createQueryBuilder('Match')
-      .leftJoinAndSelect('Match.meetup', 'meetup')
+  ): Promise<Paginated<Meetup>> {
+    const queryBuilder = this.meetupRepository
+      .createQueryBuilder('meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
       .where({
         userId,
       });
 
-    const config: PaginateConfig<Match> = {
+    const config: PaginateConfig<Meetup> = {
       sortableColumns: ['createdAt'],
-      searchableColumns: ['meetup.title'],
+      searchableColumns: ['title'],
       defaultLimit: 20,
       defaultSortBy: [['createdAt', 'DESC']],
       filterableColumns: {
-        status: [FilterOperator.EQ],
+        region: [FilterOperator.EQ, FilterOperator.IN],
+        career: [FilterOperator.EQ, FilterOperator.IN],
+        gender: [FilterOperator.EQ, FilterOperator.IN],
+        expiredAt: [FilterOperator.GTE, FilterOperator.LT],
       },
     };
 
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내가 찜한 Meetup 아이디 리스트
-  async getFavMeetupIdsById(id: number): Promise<AnyData> {
-    const items = await this.repository.manager.query(
-      'SELECT meetupId FROM `user` INNER JOIN `meetup_user` ON `user`.id = `meetup_user`.userId WHERE `user`.id = ?',
-      [id],
-    );
-
-    return {
-      data: items.map(({ meetupId }) => meetupId),
-    };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? Match Pivot
-  //?-------------------------------------------------------------------------//
-  async attachToMatchPivot(
-    askingUserId: number,
-    askedUserId: number,
-    meetupId: string,
-  ): Promise<any> {
-    const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `matches` (askingUserId, askedUserId, meetupId) VALUES (?, ?, ?)',
-      [askingUserId, askedUserId, meetupId],
-    );
-    // if (affectedRows > 0) {
-    //   await this.meetupRepository.increment({ id: meetupId }, 'faveCount', 1);
-    // }
-  }
-
-  async detachFromMatchPivot(
-    askingUserId: number,
-    askedUserId: number,
-    meetupId: string,
-  ): Promise<any> {
-    const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `matches` WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
-      [askingUserId, askedUserId, meetupId],
-    );
-    // if (affectedRows > 0) {
-    //   // await this.meetupRrepository.decrement({ meetupId }, 'faveCount', 1);
-    //   await this.repository.manager.query(
-    //     'UPDATE `meetup` SET faveCount = faveCount - 1 WHERE id = ? AND faveCount > 0',
-    //     [meetupId],
-    //   );
-    // }
-  }
-
   //?-------------------------------------------------------------------------//
   //? MeetupUser Pivot
   //?-------------------------------------------------------------------------//
 
+  // 찜 리스트에 추가
   async attachToMeetupUserPivot(
     userId: number,
     meetupId: string,
@@ -450,6 +398,7 @@ export class UsersService {
     }
   }
 
+  // 찜 리스트에서 삭제
   async detachFromMeetupUserPivot(
     userId: number,
     meetupId: string,
@@ -465,5 +414,158 @@ export class UsersService {
         [meetupId],
       );
     }
+  }
+
+  // 내가 찜한 모임 리스트
+  async getMeetupsLikedByMe(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<MeetupUser>> {
+    const queryBuilder = this.meetupUserRepository
+      .createQueryBuilder('meetupUser')
+      .leftJoinAndSelect('meetupUser.meetup', 'meetup')
+      .leftJoinAndSelect('meetup.venue', 'venue')
+      .where({
+        userId,
+      });
+
+    const config: PaginateConfig<MeetupUser> = {
+      sortableColumns: ['userId'],
+      searchableColumns: ['meetup.title'],
+      defaultLimit: 20,
+      defaultSortBy: [['userId', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내가 찜한 모임 ID 리스트
+  async getMeetupIdsLikedByMe(userId: number): Promise<AnyData> {
+    const items = await this.repository.manager.query(
+      'SELECT meetupId \
+      FROM `user` INNER JOIN `meetup_user` ON `user`.id = `meetup_user`.userId \
+      WHERE `user`.id = ?',
+      [userId],
+    );
+
+    return {
+      data: items.map(({ meetupId }) => meetupId),
+    };
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Match Pivot
+  //?-------------------------------------------------------------------------//
+
+  // 신청리스트에 추가
+  async attachToMatchPivot(
+    askingUserId: number,
+    askedUserId: number,
+    meetupId: string,
+  ): Promise<any> {
+    const meetup = await this.meetupRepository.findOneOrFail({
+      where: { id: meetupId },
+    });
+    if (meetup.userId == askedUserId) {
+      // 찜한 사람이 방장에게 asking
+      // to make sure if this meetup is on the asking user's likes list
+      await this.attachToMeetupUserPivot(askingUserId, meetupId);
+    } else {
+      // 방장이 찜한 사람에게 asking
+    }
+
+    await this.repository.manager.query(
+      'INSERT IGNORE INTO `match` (askingUserId, askedUserId, meetupId) VALUES (?, ?, ?)',
+      [askingUserId, askedUserId, meetupId],
+    );
+  }
+
+  // 매치신청 승인
+  async updateMatchToAcceptOrDeny(
+    askingUserId: number,
+    askedUserId: number,
+    meetupId: string,
+    status: Status,
+  ): Promise<any> {
+    await this.repository.manager.query(
+      'UPDATE `match` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
+      [status, askingUserId, askedUserId, meetupId],
+    );
+  }
+
+  // 내에게 만나자고 신청한 호구 리스트
+  async getUsersAskingMe(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Match>> {
+    const queryBuilder = this.matchRepository
+      .createQueryBuilder('match')
+      .leftJoinAndSelect('match.meetup', 'meetup')
+      .leftJoinAndSelect('meetup.venue', 'venue')
+      .leftJoinAndSelect('match.askingUser', 'askingUser')
+      .leftJoinAndSelect('askingUser.profile', 'profile')
+      .where({
+        askedUserId: userId,
+      });
+
+    const config: PaginateConfig<Match> = {
+      sortableColumns: ['createdAt'],
+      searchableColumns: ['meetup.title'],
+      defaultLimit: 20,
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {
+        status: [FilterOperator.EQ],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내가 만나자고 신청드린 상대방 리스트
+  async getUsersAskedByMe(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Match>> {
+    const queryBuilder = this.matchRepository
+      .createQueryBuilder('match')
+      .leftJoinAndSelect('match.meetup', 'meetup')
+      .leftJoinAndSelect('meetup.venue', 'venue')
+      .leftJoinAndSelect('match.askedUser', 'askedUser')
+      .leftJoinAndSelect('askedUser.profile', 'profile')
+      .where({
+        askingUserId: userId,
+      });
+
+    const config: PaginateConfig<Match> = {
+      sortableColumns: ['createdAt'],
+      searchableColumns: ['meetup.title'],
+      defaultLimit: 20,
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {
+        status: [FilterOperator.EQ],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? 신한운세
+  //?-------------------------------------------------------------------------//
+
+  // 올해의 운세보기
+  async askYearly(dto: YearlyFortuneDto): Promise<any> {
+    return await this.crawlerService.askYearly(dto);
+  }
+
+  // 오늘의 운세보기
+  async askDaily(dto: DailyFortuneDto): Promise<any> {
+    return await this.crawlerService.askDaily(dto);
+  }
+
+  // 궁합보기
+  async askLove(dto: LoveFortuneDto): Promise<any> {
+    return await this.crawlerService.askLove(dto);
   }
 }

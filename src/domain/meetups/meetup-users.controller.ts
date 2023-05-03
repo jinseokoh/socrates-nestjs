@@ -1,13 +1,9 @@
 import {
-  BadRequestException,
   ClassSerializerInterceptor,
   Controller,
-  Delete,
   Get,
   Param,
-  ParseIntPipe,
   ParseUUIDPipe,
-  Post,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -27,7 +23,13 @@ export class MatchsController {
 
   @ApiOperation({ description: '이 모임을 찜한 모든 사용자 리스트' })
   @Get(':id/users')
-  async getFavers(@Param('id', ParseUUIDPipe) id: string): Promise<Meetup> {
-    return await this.meetupsService.getFavers(id);
+  async getLikedUsers(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<AnyData> {
+    const users = await this.meetupsService.getLikedUsers(id);
+
+    return {
+      data: users,
+    };
   }
 }

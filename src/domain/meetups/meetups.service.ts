@@ -12,10 +12,7 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { Status } from 'src/common/enums/status';
-
 import { AnyData, SignedUrl } from 'src/common/types';
-
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
@@ -65,6 +62,10 @@ export class MeetupsService {
 
     return meetup;
   }
+
+  //--------------------------------------------------------------------------//
+  // set relations
+  //--------------------------------------------------------------------------//
 
   async _linkWithCategory(categorySlug: string, meetupId: string) {
     const category = await this.categoryRepository.findOne({
@@ -157,13 +158,16 @@ export class MeetupsService {
   }
 
   async increaseViewCount(id: string): Promise<void> {
-    // in case you need the increased count
+    // in case you need the increased count, use:
+    //
     // const meetup = await this.findById(id);
     // const count = meetup.viewCount + 1;
     // meetup.viewCount = count;
     // await this.repository.save(meetup);
     // return count;
-    // otherwise,
+    //
+    // otherwise, the following is atomic
+    //
     await this.repository
       .createQueryBuilder()
       .update(Meetup)
@@ -191,6 +195,7 @@ export class MeetupsService {
   //?-------------------------------------------------------------------------//
 
   // 단일 이미지 저장후 URL (string) 리턴
+  // todo. wtf?! remove anydata from services
   async uploadImage(
     userId: number,
     file: Express.Multer.File,
@@ -205,6 +210,7 @@ export class MeetupsService {
   }
 
   // 다중 이미지 저장후 URL (string) 리턴
+  // todo. wtf?! remove anydata from services
   async uploadImages(
     userId: number,
     files: Array<Express.Multer.File>,
@@ -242,14 +248,16 @@ export class MeetupsService {
   //? 찜했던 모든 사용자 리스트
   //?-------------------------------------------------------------------------//
 
-  async getFavers(id: string): Promise<Meetup> {
+  async getLikedUsers(id: string): Promise<Array<User>> {
     try {
-      return await this.repository.findOneOrFail({
+      const meetup = await this.repository.findOneOrFail({
         where: {
           id: id,
         },
         relations: ['users', 'users.profile'],
       });
+
+      return meetup.users;
     } catch (e) {
       throw new NotFoundException('entity not found');
     }
