@@ -19,7 +19,7 @@ export class MessagesController {
   @ApiOperation({ description: 'Message 생성' })
   @Post()
   async create(
-    @CurrentUserId() userId: string,
+    @CurrentUserId() id: string,
     @Body() createMessageDto: CreateMessageDto,
   ): Promise<any> {
     return await this.messagesService.create(createMessageDto);

@@ -7,9 +7,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { AnyData } from 'src/common/types';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -26,7 +24,7 @@ export class MatchsController {
   async getLikedUsers(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<AnyData> {
-    const users = await this.meetupsService.getLikedUsers(id);
+    const users = await this.meetupsService.getAllFavedUsers(id);
 
     return {
       data: users,

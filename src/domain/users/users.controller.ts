@@ -142,13 +142,12 @@ export class UsersController {
     return await this.usersService.upload(id, file);
   }
 
-  // You can argue with me that this isn't necessary but, I assumed a dedicated
-  // endpoint to update password wouldn't hurt anyone.
+  // A dedicated endpoin to update password only.
   @ApiOperation({ description: 'User 비밀번호 갱신' })
   @Patch(':id/password')
   async changePassword(
-    @CurrentUserId() userId: number,
-    @Param('id') id: number,
+    @CurrentUserId() id: number,
+    @Param('userId') userId: number,
     @Body(HashPasswordPipe) dto: ChangePasswordDto,
   ): Promise<User> {
     if (id !== userId) {

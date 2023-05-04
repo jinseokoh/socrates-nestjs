@@ -469,7 +469,7 @@ export class UsersService {
     });
     if (meetup.userId == askedUserId) {
       // 찜한 사람이 방장에게 asking
-      // to make sure if this meetup is on the asking user's likes list
+      // to make sure if this meetup is on the asking user's favez list
       await this.attachToMeetupUserPivot(askingUserId, meetupId);
     } else {
       // 방장이 찜한 사람에게 asking
@@ -504,7 +504,9 @@ export class UsersService {
       .leftJoinAndSelect('match.meetup', 'meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
       .leftJoinAndSelect('match.askingUser', 'askingUser')
-      .leftJoinAndSelect('askingUser.profile', 'profile')
+      .leftJoinAndSelect('askingUser.profile', 'askingUserProfile')
+      .leftJoinAndSelect('match.askedUser', 'askedUser')
+      .leftJoinAndSelect('askedUser.profile', 'askedUserProfile')
       .where({
         askedUserId: userId,
       });

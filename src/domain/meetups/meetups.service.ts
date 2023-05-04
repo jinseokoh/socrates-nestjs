@@ -248,7 +248,7 @@ export class MeetupsService {
   //? 찜했던 모든 사용자 리스트
   //?-------------------------------------------------------------------------//
 
-  async getLikedUsers(id: string): Promise<Array<User>> {
+  async getAllFavedUsers(id: string): Promise<Array<User>> {
     try {
       const meetup = await this.repository.findOneOrFail({
         where: {

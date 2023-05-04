@@ -70,6 +70,7 @@ export class MeetupsController {
     return await this.meetupsService.findById(id, [
       'user',
       'user.profile',
+      'users',
       'venue',
     ]);
   }
@@ -105,31 +106,31 @@ export class MeetupsController {
   @UseInterceptors(FileInterceptor('file', multerOptions))
   @Post('image')
   async uploadImage(
-    @CurrentUserId() userId: number,
+    @CurrentUserId() id: number,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<AnyData> {
-    return await this.meetupsService.uploadImage(userId, file);
+    return await this.meetupsService.uploadImage(id, file);
   }
 
   @ApiOperation({ description: 'Artwork 이미지들 저장후 URLs (string[]) 리턴' })
   @UseInterceptors(FilesInterceptor('files', 9, multerOptions))
   @Post('images')
   async uploadImages(
-    @CurrentUserId() userId: number,
+    @CurrentUserId() id: number,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ): Promise<AnyData> {
-    return await this.meetupsService.uploadImages(userId, files);
+    return await this.meetupsService.uploadImages(id, files);
   }
 
   @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
   @Post('image/url')
   async getSignedUrl(
-    @CurrentUserId() userId: number,
+    @CurrentUserId() id: number,
     @Body('mimeType') mimeType: string,
   ): Promise<SignedUrl> {
     if (mimeType) {
-      return await this.meetupsService.getSignedUrl(userId, mimeType);
+      return await this.meetupsService.getSignedUrl(id, mimeType);
     }
-    return { upload: '', image: '' }; // todo. unacceptable. change this later.
+    return { upload: '', image: '' }; // todo. do something meaningful like throwing an exception. idiot!
   }
 }

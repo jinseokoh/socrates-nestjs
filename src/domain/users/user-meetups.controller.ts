@@ -21,6 +21,7 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Status } from 'src/common/enums/status';
 import { Match } from 'src/domain/meetups/entities/match.entity';
+import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -45,14 +46,15 @@ export class UserMeetupsController {
   //? MeetupUser Pivot
   //?-------------------------------------------------------------------------//
 
-  // todo. validate faveCount
-  // todo. validate this meetup belongs to me
   @ApiOperation({ description: '나의 찜 리스트에 추가' })
   @Post(':userId/meetups/:meetupId')
   async attachToMeetupUserPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseUUIDPipe) meetupId: string,
   ): Promise<any> {
+    //? checking if this meetup belongs to the user costs a database access,
+    //? which you can get around if you design your application carefully.
+    //? so user validation has been removed. keep that in mind.
     try {
       await this.usersService.attachToMeetupUserPivot(userId, meetupId);
       return {
@@ -69,6 +71,9 @@ export class UserMeetupsController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseUUIDPipe) meetupId: string,
   ): Promise<any> {
+    //? checking if this meetup belongs to the user costs a database access,
+    //? which you can get around if you design your application carefully.
+    //? so user validation has been removed. keep that in mind.
     try {
       await this.usersService.detachFromMeetupUserPivot(userId, meetupId);
       return {
