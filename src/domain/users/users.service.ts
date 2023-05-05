@@ -505,8 +505,8 @@ export class UsersService {
       .leftJoinAndSelect('meetup.venue', 'venue')
       .leftJoinAndSelect('match.askingUser', 'askingUser')
       .leftJoinAndSelect('askingUser.profile', 'askingUserProfile')
-      .leftJoinAndSelect('match.askedUser', 'askedUser')
-      .leftJoinAndSelect('askedUser.profile', 'askedUserProfile')
+      // .leftJoinAndSelect('match.askedUser', 'askedUser')
+      // .leftJoinAndSelect('askedUser.profile', 'askedUserProfile')
       .where({
         askedUserId: userId,
       });

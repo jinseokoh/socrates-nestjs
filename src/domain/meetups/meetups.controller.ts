@@ -70,7 +70,8 @@ export class MeetupsController {
     return await this.meetupsService.findById(id, [
       'user',
       'user.profile',
-      'users',
+      'matches',
+      'matches.askingUser',
       'venue',
     ]);
   }
