@@ -456,10 +456,14 @@ export class UsersService {
   //?-------------------------------------------------------------------------//
 
   // 블락 리스트에 추가
-  async attachToHatePivot(userId: number, meetupId: string): Promise<any> {
+  async attachToHatePivot(
+    userId: number,
+    meetupId: string,
+    message: string,
+  ): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `hate` (userId, meetupId) VALUES (?, ?)',
-      [userId, meetupId],
+      'INSERT IGNORE INTO `hate` (userId, meetupId, message) VALUES (?, ?, ?)',
+      [userId, meetupId, message],
     );
     if (affectedRows > 0) {
       await this.meetupRepository.increment({ id: meetupId }, 'hateCount', 1);

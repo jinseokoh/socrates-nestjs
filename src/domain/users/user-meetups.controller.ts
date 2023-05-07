@@ -120,12 +120,14 @@ export class UserMeetupsController {
   async attachToHatePivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseUUIDPipe) meetupId: string,
+    @Body('message') message: string,
   ): Promise<any> {
     //? checking if this meetup belongs to the user costs a database access,
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.attachToHatePivot(userId, meetupId);
+      await this.usersService.attachToHatePivot(userId, meetupId, message);
+
       return {
         data: 'ok',
       };

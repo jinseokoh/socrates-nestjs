@@ -73,7 +73,7 @@ export class MeetupsController {
       'matches',
       'matches.askingUser',
       'venue',
-      'usersLiked',
+      // 'usersLiked',
       'usersHated',
     ]);
   }
