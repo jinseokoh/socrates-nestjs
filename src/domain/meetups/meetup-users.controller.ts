@@ -24,7 +24,7 @@ export class MatchsController {
   async getLikedUsers(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<AnyData> {
-    const users = await this.meetupsService.getAllFavedUsers(id);
+    const users = await this.meetupsService.getAllUsersLiked(id);
 
     return {
       data: users,

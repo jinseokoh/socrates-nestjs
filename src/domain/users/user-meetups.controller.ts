@@ -112,6 +112,76 @@ export class UserMeetupsController {
   }
 
   //?-------------------------------------------------------------------------//
+  //? Hate Pivot
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '나의 블락 리스트에 추가' })
+  @Post(':userId/hatemeetups/:meetupId')
+  async attachToHatePivot(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+  ): Promise<any> {
+    //? checking if this meetup belongs to the user costs a database access,
+    //? which you can get around if you design your application carefully.
+    //? so user validation has been removed. keep that in mind.
+    try {
+      await this.usersService.attachToHatePivot(userId, meetupId);
+      return {
+        data: 'ok',
+      };
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
+
+  @ApiOperation({ description: '나의 블락 리스트에서 삭제' })
+  @Delete(':userId/hatemeetups/:meetupId')
+  async detachFromHatePivot(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+  ): Promise<any> {
+    //? checking if this meetup belongs to the user costs a database access,
+    //? which you can get around if you design your application carefully.
+    //? so user validation has been removed. keep that in mind.
+    try {
+      await this.usersService.detachFromHatePivot(userId, meetupId);
+      return {
+        data: 'ok',
+      };
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
+
+  @ApiOperation({ description: '내가 블락한 모임 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/hatemeetups')
+  async getMeetupsHatedByMe(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Meetup>> {
+    const { data, meta, links } = await this.usersService.getMeetupsHatedByMe(
+      userId,
+      query,
+    );
+
+    return {
+      data: data.map((v) => v.meetup),
+      meta: meta,
+      links: links,
+    } as Paginated<Meetup>;
+  }
+
+  @ApiOperation({ description: '내가 블락한 모임ID 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/hatemeetupids')
+  async getMeetupIdsHatedByMe(
+    @Param('userId') userId: number,
+  ): Promise<AnyData> {
+    return this.usersService.getMeetupIdsHatedByMe(userId);
+  }
+
+  //?-------------------------------------------------------------------------//
   //? Match Pivot
   //?-------------------------------------------------------------------------//
 

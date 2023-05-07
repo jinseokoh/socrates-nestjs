@@ -23,6 +23,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Like } from 'src/domain/meetups/entities/like.entity';
+import { Hate } from 'src/domain/meetups/entities/hate.entity';
 
 @Entity() // 작품
 export class Meetup {
@@ -99,8 +101,12 @@ export class Meetup {
   matchCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'fave count' })
-  faveCount: number;
+  @ApiProperty({ description: 'like count' })
+  likeCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'hate count' })
+  hateCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'view count' })
@@ -146,10 +152,16 @@ export class Meetup {
   user?: User;
 
   //**--------------------------------------------------------------------------*/
-  //** many-to-many belongsToMany
+  //** many-to-many belongsToMany using one-to-many
 
   @OneToMany(() => Match, (match) => match.meetup)
   public matches!: Match[];
+
+  @OneToMany(() => Like, (like) => like.user)
+  public usersLiked: Like[];
+
+  @OneToMany(() => Hate, (hate) => hate.user)
+  public usersHated: Hate[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany
@@ -162,22 +174,10 @@ export class Meetup {
   @JoinTable({ name: 'meetup_category' }) // owning side
   categories: Category[];
 
-  @ManyToMany(() => User, (user) => user.likedMeetups)
-  @JoinTable({
-    name: 'like',
-  }) // owning side
-  likers: User[];
-
-  @ManyToMany(() => User, (user) => user.hatedMeetups)
-  @JoinTable({
-    name: 'hate',
-  }) // owning side
-  haters: User[];
-
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  // constructor(partial: Partial<Meetup>) {
-  //   Object.assign(this, partial);
-  // }
+  constructor(partial: Partial<Meetup>) {
+    Object.assign(this, partial);
+  }
 }

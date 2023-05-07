@@ -36,6 +36,7 @@ import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
 import { FindOneOptions } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
+import { Hate } from 'src/domain/meetups/entities/hate.entity';
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -49,6 +50,8 @@ export class UsersService {
     private readonly meetupRepository: Repository<Meetup>,
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
+    @InjectRepository(Hate)
+    private readonly hateRepository: Repository<Hate>,
     @InjectRepository(Match)
     private readonly matchRepository: Repository<Match>,
     private readonly crawlerService: CrawlerService,
@@ -391,7 +394,7 @@ export class UsersService {
       [userId, meetupId],
     );
     if (affectedRows > 0) {
-      await this.meetupRepository.increment({ id: meetupId }, 'faveCount', 1);
+      await this.meetupRepository.increment({ id: meetupId }, 'likeCount', 1);
     }
   }
 
@@ -402,9 +405,9 @@ export class UsersService {
       [userId, meetupId],
     );
     if (affectedRows > 0) {
-      // await this.meetupRrepository.decrement({ meetupId }, 'faveCount', 1);
+      // await this.meetupRrepository.decrement({ meetupId }, 'likeCount', 1);
       await this.repository.manager.query(
-        'UPDATE `meetup` SET faveCount = faveCount - 1 WHERE id = ? AND faveCount > 0',
+        'UPDATE `meetup` SET likeCount = likeCount - 1 WHERE id = ? AND likeCount > 0',
         [meetupId],
       );
     }
@@ -424,10 +427,10 @@ export class UsersService {
       });
 
     const config: PaginateConfig<Like> = {
-      sortableColumns: ['userId'],
+      sortableColumns: ['id'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,
-      defaultSortBy: [['userId', 'DESC']],
+      defaultSortBy: [['id', 'DESC']],
       filterableColumns: {},
     };
 
@@ -438,7 +441,75 @@ export class UsersService {
   async getMeetupIdsLikedByMe(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId \
-      FROM `user` INNER JOIN `likes` ON `user`.id = `meetup_user`.userId \
+      FROM `user` INNER JOIN `like` ON `user`.id = `like`.userId \
+      WHERE `user`.id = ?',
+      [userId],
+    );
+
+    return {
+      data: items.map(({ meetupId }) => meetupId),
+    };
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Hate Pivot
+  //?-------------------------------------------------------------------------//
+
+  // 블락 리스트에 추가
+  async attachToHatePivot(userId: number, meetupId: string): Promise<any> {
+    const { affectedRows } = await this.repository.manager.query(
+      'INSERT IGNORE INTO `hate` (userId, meetupId) VALUES (?, ?)',
+      [userId, meetupId],
+    );
+    if (affectedRows > 0) {
+      await this.meetupRepository.increment({ id: meetupId }, 'hateCount', 1);
+    }
+  }
+
+  // 블락 리스트에서 삭제
+  async detachFromHatePivot(userId: number, meetupId: string): Promise<any> {
+    const { affectedRows } = await this.repository.manager.query(
+      'DELETE FROM `hate` WHERE userId = ? AND meetupId = ?',
+      [userId, meetupId],
+    );
+    if (affectedRows > 0) {
+      // await this.meetupRrepository.decrement({ meetupId }, 'hateCount', 1);
+      await this.repository.manager.query(
+        'UPDATE `meetup` SET hateCount = hateCount - 1 WHERE id = ? AND hateCount > 0',
+        [meetupId],
+      );
+    }
+  }
+
+  // 내가 블락한 모임 리스트
+  async getMeetupsHatedByMe(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Hate>> {
+    const queryBuilder = this.hateRepository
+      .createQueryBuilder('hate')
+      .leftJoinAndSelect('hate.meetup', 'meetup')
+      .leftJoinAndSelect('meetup.venue', 'venue')
+      .where({
+        userId,
+      });
+
+    const config: PaginateConfig<Hate> = {
+      sortableColumns: ['id'],
+      searchableColumns: ['meetup.title'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내가 블락한 모임 ID 리스트
+  async getMeetupIdsHatedByMe(userId: number): Promise<AnyData> {
+    const items = await this.repository.manager.query(
+      'SELECT meetupId \
+      FROM `user` INNER JOIN `hate` ON `user`.id = `hate`.userId \
       WHERE `user`.id = ?',
       [userId],
     );

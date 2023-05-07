@@ -1,45 +1,22 @@
-import { Exclude } from 'class-transformer';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import {
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 export class Hate {
-  @CreateDateColumn()
-  createdAt: Date;
+  @PrimaryGeneratedColumn()
+  public id: number;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @Column({ type: 'int', unsigned: true })
+  public userId: number;
 
-  @Exclude()
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  userId: number | null; // to make it available to Repository.
+  @Column({ type: 'uuid', length: 36 })
+  public meetupId: string;
 
-  @ManyToOne(() => User, (user) => user.id, {
-    nullable: false,
-    onUpdate: 'CASCADE',
-    onDelete: 'RESTRICT',
-  })
-  @JoinColumn({ name: 'userId' })
-  public user!: User;
+  @ManyToOne(() => User, (user) => user.meetupsHated)
+  public user: User;
 
-  @Exclude()
-  @PrimaryColumn({ type: 'uuid', length: 36 })
-  public meetupId!: string;
-
-  @ManyToOne(() => Meetup, (meetup) => meetup.id, {
-    nullable: false,
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'meetupId' })
-  public meetup!: Meetup;
+  @ManyToOne(() => Meetup, (meetup) => meetup.usersHated)
+  public meetup: Meetup;
 }

@@ -3,6 +3,8 @@ import { Exclude, Expose } from 'class-transformer';
 import { Role } from 'src/common/enums';
 import { Career } from 'src/common/enums/career';
 import { Gender } from 'src/common/enums/gender';
+import { Hate } from 'src/domain/meetups/entities/hate.entity';
+import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Match } from 'src/domain/meetups/entities/match.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Report } from 'src/domain/reports/entities/report.entity';
@@ -13,7 +15,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -129,19 +130,19 @@ export class User {
   meetups: Meetup[];
 
   //**--------------------------------------------------------------------------*/
-  //** many-to-many
+  //** many-to-many belongsToMany using one-to-many
 
   @OneToMany(() => Match, (match) => match.askingUser)
-  public askingMatches!: Match[];
+  public askingMatches: Match[];
 
   @OneToMany(() => Match, (match) => match.askedUser)
-  public askedMatches!: Match[];
+  public askedMatches: Match[];
 
-  @ManyToMany(() => Meetup, (meetup) => meetup.likers)
-  likedMeetups: Meetup[];
+  @OneToMany(() => Like, (like) => like.meetup)
+  public meetupsLiked: Like[];
 
-  @ManyToMany(() => Meetup, (meetup) => meetup.haters)
-  hatedMeetups: Meetup[];
+  @OneToMany(() => Hate, (hate) => hate.meetup)
+  public meetupsHated: Hate[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

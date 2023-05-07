@@ -16,6 +16,7 @@ import { AnyData, SignedUrl } from 'src/common/types';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
+import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
@@ -248,16 +249,16 @@ export class MeetupsService {
   //? 찜했던 모든 사용자 리스트
   //?-------------------------------------------------------------------------//
 
-  async getAllFavedUsers(id: string): Promise<Array<User>> {
+  async getAllUsersLiked(id: string): Promise<Array<Like>> {
     try {
       const meetup = await this.repository.findOneOrFail({
         where: {
           id: id,
         },
-        relations: ['users', 'users.profile'],
+        relations: ['usersLiked', 'usersLiked.profile'],
       });
 
-      return meetup.likers;
+      return meetup.usersLiked;
     } catch (e) {
       throw new NotFoundException('entity not found');
     }

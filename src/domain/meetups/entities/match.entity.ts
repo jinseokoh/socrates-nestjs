@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
 import { Status } from 'src/common/enums/status';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -20,7 +19,7 @@ export class Match {
   @ApiProperty({ description: 'ACCEPTED|DENIED' })
   status: Status;
 
-  @Column({ length: 32, unique: true, nullable: true })
+  @Column({ length: 32, nullable: true })
   @ApiProperty({ description: 'message' })
   message: string | null;
 
@@ -32,7 +31,6 @@ export class Match {
 
   @PrimaryColumn({ type: 'int', unsigned: true })
   askingUserId: number | null; // to make it available to Repository.
-
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'CASCADE',
@@ -43,7 +41,6 @@ export class Match {
 
   @PrimaryColumn({ type: 'int', unsigned: true })
   askedUserId: number | null; // to make it available to Repository.
-
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'CASCADE',
@@ -54,7 +51,6 @@ export class Match {
 
   @PrimaryColumn({ type: 'uuid', length: 36 })
   public meetupId!: string;
-
   @ManyToOne(() => Meetup, (meetup) => meetup.id, {
     nullable: false,
     onUpdate: 'CASCADE',
