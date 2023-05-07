@@ -427,10 +427,10 @@ export class UsersService {
       });
 
     const config: PaginateConfig<Like> = {
-      sortableColumns: ['id'],
+      sortableColumns: ['meetupId'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,
-      defaultSortBy: [['id', 'DESC']],
+      defaultSortBy: [['meetupId', 'ASC']],
       filterableColumns: {},
     };
 
@@ -499,10 +499,10 @@ export class UsersService {
       });
 
     const config: PaginateConfig<Hate> = {
-      sortableColumns: ['id'],
+      sortableColumns: ['meetupId'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,
-      defaultSortBy: [['id', 'DESC']],
+      defaultSortBy: [['meetupId', 'DESC']],
       filterableColumns: {},
     };
 
