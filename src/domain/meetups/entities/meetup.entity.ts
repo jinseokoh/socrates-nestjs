@@ -155,12 +155,12 @@ export class Meetup {
   //** many-to-many belongsToMany using one-to-many
 
   @OneToMany(() => Match, (match) => match.meetup)
-  public matches!: Match[];
+  public matches: Match[];
 
-  @OneToMany(() => Like, (like) => like.user)
+  @OneToMany(() => Like, (like) => like.meetup)
   public usersLiked: Like[];
 
-  @OneToMany(() => Hate, (hate) => hate.user)
+  @OneToMany(() => Hate, (hate) => hate.meetup)
   public usersHated: Hate[];
 
   //**--------------------------------------------------------------------------*/

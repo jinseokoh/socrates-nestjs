@@ -138,10 +138,10 @@ export class User {
   @OneToMany(() => Match, (match) => match.askedUser)
   public askedMatches: Match[];
 
-  @OneToMany(() => Like, (like) => like.meetup)
+  @OneToMany(() => Like, (like) => like.user)
   public meetupsLiked: Like[];
 
-  @OneToMany(() => Hate, (hate) => hate.meetup)
+  @OneToMany(() => Hate, (hate) => hate.user)
   public meetupsHated: Hate[];
 
   //??--------------------------------------------------------------------------*/

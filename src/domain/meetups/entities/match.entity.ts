@@ -19,7 +19,7 @@ export class Match {
   @ApiProperty({ description: 'ACCEPTED|DENIED' })
   status: Status;
 
-  @Column({ length: 32, nullable: true })
+  @Column({ length: 36, nullable: true })
   @ApiProperty({ description: 'message' })
   message: string | null;
 
