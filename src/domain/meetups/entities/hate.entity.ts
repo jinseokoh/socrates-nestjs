@@ -5,7 +5,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 export class Hate {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
   public id: number;
 
   @Column({ length: 36, nullable: true })
