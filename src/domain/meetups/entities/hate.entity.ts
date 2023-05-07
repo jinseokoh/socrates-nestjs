@@ -8,6 +8,9 @@ export class Hate {
   @PrimaryGeneratedColumn()
   public id: number;
 
+  @Column({ length: 32, nullable: true })
+  message: string | null;
+
   @Column({ type: 'int', unsigned: true })
   public userId: number;
 

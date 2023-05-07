@@ -8,6 +8,9 @@ export class Like {
   @PrimaryGeneratedColumn()
   public id: number;
 
+  @Column({ length: 16, nullable: true })
+  message: string | null;
+
   @Column({ type: 'int', unsigned: true })
   public userId: number;
 
