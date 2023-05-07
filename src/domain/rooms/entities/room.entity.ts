@@ -10,8 +10,8 @@ import {
 } from 'typeorm';
 @Entity()
 export class Room {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  id: number;
 
   @Column({ length: 255, nullable: false })
   @ApiProperty({ description: '제목' })

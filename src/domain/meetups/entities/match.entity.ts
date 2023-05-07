@@ -49,8 +49,8 @@ export class Match {
   @JoinColumn({ name: 'askedUserId' })
   public askedUser!: User;
 
-  @PrimaryColumn({ type: 'uuid', length: 36 })
-  public meetupId!: string;
+  @PrimaryColumn({ type: 'bigint' })
+  public meetupId!: number;
   @ManyToOne(() => Meetup, (meetup) => meetup.id, {
     nullable: false,
     onUpdate: 'CASCADE',

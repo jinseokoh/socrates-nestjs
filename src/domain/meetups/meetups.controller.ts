@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Patch,
   Post,
@@ -66,7 +67,7 @@ export class MeetupsController {
 
   @ApiOperation({ description: 'Meetup 상세보기' })
   @Get(':id')
-  async getMeetupById(@Param('id', ParseUUIDPipe) id: string): Promise<Meetup> {
+  async getMeetupById(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
     return await this.meetupsService.findById(id, [
       'user',
       'user.profile',
@@ -85,7 +86,7 @@ export class MeetupsController {
   @ApiOperation({ description: 'Meetup 갱신' })
   @Patch(':id')
   async update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateMeetupDto,
   ): Promise<Meetup> {
     return await this.meetupsService.update(id, dto);
@@ -97,7 +98,7 @@ export class MeetupsController {
 
   @ApiOperation({ description: 'Meetup soft 삭제' })
   @Delete(':id')
-  async softRemove(@Param('id', ParseUUIDPipe) id: string): Promise<Meetup> {
+  async softRemove(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
     return await this.meetupsService.softRemove(id);
   }
 

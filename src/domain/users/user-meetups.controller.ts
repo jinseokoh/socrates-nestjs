@@ -49,7 +49,7 @@ export class UserMeetupsController {
   @Post(':userId/likemeetups/:meetupId')
   async attachToLikePivot(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<any> {
     //? checking if this meetup belongs to the user costs a database access,
     //? which you can get around if you design your application carefully.
@@ -68,7 +68,7 @@ export class UserMeetupsController {
   @Delete(':userId/likemeetups/:meetupId')
   async detachFromLikePivot(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<any> {
     //? checking if this meetup belongs to the user costs a database access,
     //? which you can get around if you design your application carefully.
@@ -119,7 +119,7 @@ export class UserMeetupsController {
   @Post(':userId/hatemeetups/:meetupId')
   async attachToHatePivot(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body('message') message: string,
   ): Promise<any> {
     //? checking if this meetup belongs to the user costs a database access,
@@ -140,7 +140,7 @@ export class UserMeetupsController {
   @Delete(':userId/hatemeetups/:meetupId')
   async detachFromHatePivot(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('meetupId', ParseUUIDPipe) meetupId: string,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<any> {
     //? checking if this meetup belongs to the user costs a database access,
     //? which you can get around if you design your application carefully.
@@ -194,7 +194,7 @@ export class UserMeetupsController {
   async attachToMatchPivot(
     @Param('askingUserId') askingUserId: number,
     @Param('askedUserId') askedUserId: number,
-    @Param('meetupId') meetupId: string,
+    @Param('meetupId') meetupId: number,
   ): Promise<AnyData> {
     try {
       await this.usersService.attachToMatchPivot(
@@ -217,7 +217,7 @@ export class UserMeetupsController {
   async updateMatchToAcceptOrDeny(
     @Param('askingUserId') askingUserId: number,
     @Param('askedUserId') askedUserId: number,
-    @Param('meetupId') meetupId: string,
+    @Param('meetupId') meetupId: number,
     @Body('status') status: Status,
   ): Promise<AnyData> {
     try {

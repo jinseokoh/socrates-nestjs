@@ -52,7 +52,7 @@ export class VenuesService {
   }
 
   // Meetup 상세보기
-  async findById(id: string, relations: string[] = []): Promise<Venue> {
+  async findById(id: number, relations: string[] = []): Promise<Venue> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -71,7 +71,7 @@ export class VenuesService {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  async update(id: string, dto: UpdateVenueDto): Promise<Venue> {
+  async update(id: number, dto: UpdateVenueDto): Promise<Venue> {
     const venue = await this.repository.preload({ id, ...dto });
     if (!venue) {
       throw new NotFoundException(`entity not found`);
@@ -83,7 +83,7 @@ export class VenuesService {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async remove(id: string): Promise<Venue> {
+  async remove(id: number): Promise<Venue> {
     const venue = await this.findById(id);
     return await this.repository.remove(venue);
   }

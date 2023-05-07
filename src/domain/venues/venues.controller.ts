@@ -41,7 +41,7 @@ export class VenuesController {
 
   @ApiOperation({ description: '상세보기' })
   @Get(':id')
-  async getVenueById(@Param('id') id: string): Promise<Venue> {
+  async getVenueById(@Param('id') id: number): Promise<Venue> {
     console.log(id);
     return await this.venuesService.findById(id, ['user', 'meetup']);
   }
@@ -53,7 +53,7 @@ export class VenuesController {
   @ApiOperation({ description: 'Meetup 갱신' })
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() dto: UpdateVenueDto,
   ): Promise<Venue> {
     return await this.venuesService.update(id, dto);

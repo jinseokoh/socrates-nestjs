@@ -68,7 +68,7 @@ export class MeetupsService {
   // set relations
   //--------------------------------------------------------------------------//
 
-  async _linkWithCategory(categorySlug: string, meetupId: string) {
+  async _linkWithCategory(categorySlug: string, meetupId: number) {
     const category = await this.categoryRepository.findOne({
       where: { slug: categorySlug },
     });
@@ -85,7 +85,7 @@ export class MeetupsService {
       });
   }
 
-  // async _linkWithRegion(regionSlug: string, meetupId: string) {
+  // async _linkWithRegion(regionSlug: string, meetupId: number) {
   //   const region = await this.regionRepository.findOne({
   //     where: { slug: regionSlug },
   //   });
@@ -131,7 +131,7 @@ export class MeetupsService {
   }
 
   // Meetup 상세보기
-  async findById(id: string, relations: string[] = []): Promise<Meetup> {
+  async findById(id: number, relations: string[] = []): Promise<Meetup> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -150,7 +150,7 @@ export class MeetupsService {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  async update(id: string, dto: UpdateMeetupDto): Promise<Meetup> {
+  async update(id: number, dto: UpdateMeetupDto): Promise<Meetup> {
     const meetup = await this.repository.preload({ id, ...dto });
     if (!meetup) {
       throw new NotFoundException(`entity not found`);
@@ -181,12 +181,12 @@ export class MeetupsService {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async softRemove(id: string): Promise<Meetup> {
+  async softRemove(id: number): Promise<Meetup> {
     const Meetup = await this.findById(id);
     return await this.repository.softRemove(Meetup);
   }
 
-  async remove(id: string): Promise<Meetup> {
+  async remove(id: number): Promise<Meetup> {
     const Meetup = await this.findById(id);
     return await this.repository.remove(Meetup);
   }
@@ -235,7 +235,7 @@ export class MeetupsService {
     userId: number,
     mimeType = 'image/jpeg',
   ): Promise<SignedUrl> {
-    const fileUri = randomName('mesa', mimeType);
+    const fileUri = randomName('meso', mimeType);
     const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
@@ -249,7 +249,7 @@ export class MeetupsService {
   //? 찜했던 모든 사용자 리스트
   //?-------------------------------------------------------------------------//
 
-  async getAllUsersLiked(id: string): Promise<Array<Like>> {
+  async getAllUsersLiked(id: number): Promise<Array<Like>> {
     try {
       const meetup = await this.repository.findOneOrFail({
         where: {

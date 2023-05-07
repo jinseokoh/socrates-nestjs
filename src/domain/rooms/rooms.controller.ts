@@ -50,7 +50,7 @@ export class RoomsController {
 
   @ApiOperation({ description: 'Room 상세보기' })
   @Get(':id')
-  async getRoomById(@Param('id') id: string): Promise<Room> {
+  async getRoomById(@Param('id') id: number): Promise<Room> {
     console.log(id);
     return this.roomsService.findById(id, ['host', 'guest']);
   }
@@ -62,7 +62,7 @@ export class RoomsController {
   @ApiOperation({ description: 'Room 갱신' })
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() dto: UpdateRoomDto,
   ): Promise<Room> {
     return await this.roomsService.update(id, dto);
@@ -74,7 +74,7 @@ export class RoomsController {
 
   @ApiOperation({ description: 'Room soft 삭제' })
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<Room> {
+  async remove(@Param('id') id: number): Promise<Room> {
     return await this.roomsService.softRemove(id);
   }
 }

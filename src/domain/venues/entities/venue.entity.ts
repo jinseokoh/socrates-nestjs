@@ -11,8 +11,8 @@ import {
 
 @Entity()
 export class Venue {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  id: number;
 
   @Column({ length: 64 })
   @ApiProperty({ description: '장소명' })
@@ -70,8 +70,8 @@ export class Venue {
   //** 1-to-1 belongsToOne
 
   @Exclude()
-  @Column({ type: 'uuid', length: 36 })
-  meetupId: string; // to make it available to Repository.
+  @Column({ type: 'bigint' })
+  meetupId: number; // to make it available to Repository.
 
   @OneToOne(() => Meetup, (meetup) => meetup.venue)
   @JoinColumn()

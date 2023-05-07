@@ -28,8 +28,8 @@ import { Hate } from 'src/domain/meetups/entities/hate.entity';
 
 @Entity() // 작품
 export class Meetup {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  id: number;
 
   @Column({ length: 64 }) // from Auction
   @ApiProperty({ description: '제목' })

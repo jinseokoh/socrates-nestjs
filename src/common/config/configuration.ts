@@ -8,7 +8,7 @@ export const configuration = () => ({
     engine: process.env.DB_ENGINE ?? 'mysql',
     host: process.env.DB_HOST ?? 'localhost',
     port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
-    dbname: process.env.DB_NAME ?? 'mesa',
+    dbname: process.env.DB_NAME ?? 'meso',
     username: process.env.DB_USERNAME ?? 'root',
     password: process.env.DB_PASSWORD ?? 'secret',
   },

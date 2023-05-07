@@ -388,7 +388,7 @@ export class UsersService {
   //?-------------------------------------------------------------------------//
 
   // 찜 리스트에 추가
-  async attachToLikePivot(userId: number, meetupId: string): Promise<any> {
+  async attachToLikePivot(userId: number, meetupId: number): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
       'INSERT IGNORE INTO `like` (userId, meetupId) VALUES (?, ?)',
       [userId, meetupId],
@@ -399,7 +399,7 @@ export class UsersService {
   }
 
   // 찜 리스트에서 삭제
-  async detachFromLikePivot(userId: number, meetupId: string): Promise<any> {
+  async detachFromLikePivot(userId: number, meetupId: number): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
       'DELETE FROM `like` WHERE userId = ? AND meetupId = ?',
       [userId, meetupId],
@@ -458,7 +458,7 @@ export class UsersService {
   // 블락 리스트에 추가
   async attachToHatePivot(
     userId: number,
-    meetupId: string,
+    meetupId: number,
     message: string,
   ): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
@@ -471,7 +471,7 @@ export class UsersService {
   }
 
   // 블락 리스트에서 삭제
-  async detachFromHatePivot(userId: number, meetupId: string): Promise<any> {
+  async detachFromHatePivot(userId: number, meetupId: number): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
       'DELETE FROM `hate` WHERE userId = ? AND meetupId = ?',
       [userId, meetupId],
@@ -531,7 +531,7 @@ export class UsersService {
   async attachToMatchPivot(
     askingUserId: number,
     askedUserId: number,
-    meetupId: string,
+    meetupId: number,
   ): Promise<any> {
     const meetup = await this.meetupRepository.findOneOrFail({
       where: { id: meetupId },
@@ -554,7 +554,7 @@ export class UsersService {
   async updateMatchToAcceptOrDeny(
     askingUserId: number,
     askedUserId: number,
-    meetupId: string,
+    meetupId: number,
     status: Status,
   ): Promise<any> {
     await this.repository.manager.query(

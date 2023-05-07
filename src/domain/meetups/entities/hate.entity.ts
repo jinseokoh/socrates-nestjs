@@ -14,8 +14,8 @@ export class Hate {
   @Column({ type: 'int', unsigned: true })
   public userId: number;
 
-  @Column({ type: 'uuid', length: 36 })
-  public meetupId: string;
+  @Column({ type: 'bigint' })
+  public meetupId: number;
 
   @ManyToOne(() => User, (user) => user.meetupsHated)
   public user: User;
