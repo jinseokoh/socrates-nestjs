@@ -257,7 +257,7 @@ export class MeetupsService {
         relations: ['users', 'users.profile'],
       });
 
-      return meetup.users;
+      return meetup.likers;
     } catch (e) {
       throw new NotFoundException('entity not found');
     }

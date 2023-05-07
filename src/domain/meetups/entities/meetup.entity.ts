@@ -133,14 +133,6 @@ export class Meetup {
   })
   venue?: Venue;
 
-  // //**--------------------------------------------------------------------------*/
-  // //** 1-to-many hasMany
-
-  // @OneToMany(() => Bookmark, (bookmark) => bookmark.meetup, {
-  //   // cascade: ['insert', 'update'],
-  // })
-  // bookmarks: Bookmark[];
-
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
@@ -170,9 +162,17 @@ export class Meetup {
   @JoinTable({ name: 'meetup_category' }) // owning side
   categories: Category[];
 
-  @ManyToMany(() => User, (user) => user.meetups)
-  @JoinTable({ name: 'meetup_user' }) // owning side
-  users: User[];
+  @ManyToMany(() => User, (user) => user.likedMeetups)
+  @JoinTable({
+    name: 'like',
+  }) // owning side
+  likers: User[];
+
+  @ManyToMany(() => User, (user) => user.hatedMeetups)
+  @JoinTable({
+    name: 'hate',
+  }) // owning side
+  haters: User[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

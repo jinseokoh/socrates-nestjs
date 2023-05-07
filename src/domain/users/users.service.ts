@@ -18,7 +18,7 @@ import {
 import { Status } from 'src/common/enums/status';
 import { AnyData } from 'src/common/types';
 import { Match } from 'src/domain/meetups/entities/match.entity';
-import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
+import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
@@ -47,8 +47,8 @@ export class UsersService {
     private readonly profileRepository: Repository<Profile>,
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
-    @InjectRepository(MeetupUser)
-    private readonly meetupUserRepository: Repository<MeetupUser>,
+    @InjectRepository(Like)
+    private readonly likeRepository: Repository<Like>,
     @InjectRepository(Match)
     private readonly matchRepository: Repository<Match>,
     private readonly crawlerService: CrawlerService,
@@ -381,16 +381,13 @@ export class UsersService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? MeetupUser Pivot
+  //? Like Pivot
   //?-------------------------------------------------------------------------//
 
   // 찜 리스트에 추가
-  async attachToMeetupUserPivot(
-    userId: number,
-    meetupId: string,
-  ): Promise<any> {
+  async attachToLikePivot(userId: number, meetupId: string): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `meetup_user` (userId, meetupId) VALUES (?, ?)',
+      'INSERT IGNORE INTO `like` (userId, meetupId) VALUES (?, ?)',
       [userId, meetupId],
     );
     if (affectedRows > 0) {
@@ -399,12 +396,9 @@ export class UsersService {
   }
 
   // 찜 리스트에서 삭제
-  async detachFromMeetupUserPivot(
-    userId: number,
-    meetupId: string,
-  ): Promise<any> {
+  async detachFromLikePivot(userId: number, meetupId: string): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `meetup_user` WHERE userId = ? AND meetupId = ?',
+      'DELETE FROM `like` WHERE userId = ? AND meetupId = ?',
       [userId, meetupId],
     );
     if (affectedRows > 0) {
@@ -420,16 +414,16 @@ export class UsersService {
   async getMeetupsLikedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<MeetupUser>> {
-    const queryBuilder = this.meetupUserRepository
-      .createQueryBuilder('meetupUser')
-      .leftJoinAndSelect('meetupUser.meetup', 'meetup')
+  ): Promise<Paginated<Like>> {
+    const queryBuilder = this.likeRepository
+      .createQueryBuilder('like')
+      .leftJoinAndSelect('like.meetup', 'meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
       .where({
         userId,
       });
 
-    const config: PaginateConfig<MeetupUser> = {
+    const config: PaginateConfig<Like> = {
       sortableColumns: ['userId'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,
@@ -444,7 +438,7 @@ export class UsersService {
   async getMeetupIdsLikedByMe(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId \
-      FROM `user` INNER JOIN `meetup_user` ON `user`.id = `meetup_user`.userId \
+      FROM `user` INNER JOIN `likes` ON `user`.id = `meetup_user`.userId \
       WHERE `user`.id = ?',
       [userId],
     );
@@ -470,7 +464,7 @@ export class UsersService {
     if (meetup.userId == askedUserId) {
       // 찜한 사람이 방장에게 asking
       // to make sure if this meetup is on the asking user's favez list
-      await this.attachToMeetupUserPivot(askingUserId, meetupId);
+      await this.attachToLikePivot(askingUserId, meetupId);
     } else {
       // 방장이 찜한 사람에게 asking
     }

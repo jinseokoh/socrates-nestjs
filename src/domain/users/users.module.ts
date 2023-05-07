@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Match } from 'src/domain/meetups/entities/match.entity';
-import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
+import { Like } from 'src/domain/meetups/entities/like.entity';
+import { Hate } from 'src/domain/meetups/entities/hate.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -10,9 +11,10 @@ import { UsersController } from 'src/domain/users/users.controller';
 import { UsersService } from 'src/domain/users/users.service';
 import { S3Module } from 'src/services/aws/s3.module';
 import { CrawlerModule } from 'src/services/crawler/crawler.module';
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Profile, Match, Meetup, MeetupUser]),
+    TypeOrmModule.forFeature([User, Profile, Match, Meetup, Like, Hate]),
     S3Module,
     CrawlerModule,
   ],

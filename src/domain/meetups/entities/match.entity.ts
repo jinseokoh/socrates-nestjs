@@ -24,7 +24,6 @@ export class Match {
   @ApiProperty({ description: 'message' })
   message: string | null;
 
-  // @Index('created-at-index')
   @CreateDateColumn()
   createdAt: Date;
 

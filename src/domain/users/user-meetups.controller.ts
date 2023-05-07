@@ -18,7 +18,6 @@ import { AnyData } from 'src/common/types';
 import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { MeetupUser } from 'src/domain/meetups/entities/meetup-user.entity';
 import { Status } from 'src/common/enums/status';
 import { Match } from 'src/domain/meetups/entities/match.entity';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
@@ -34,7 +33,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 만든 모임 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/meetups')
+  @Get(':userId/likemeetups')
   async getMyMeetups(
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
@@ -43,12 +42,12 @@ export class UserMeetupsController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? MeetupUser Pivot
+  //? Like Pivot
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '나의 찜 리스트에 추가' })
-  @Post(':userId/meetups/:meetupId')
-  async attachToMeetupUserPivot(
+  @Post(':userId/likemeetups/:meetupId')
+  async attachToLikePivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseUUIDPipe) meetupId: string,
   ): Promise<any> {
@@ -56,7 +55,7 @@ export class UserMeetupsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.attachToMeetupUserPivot(userId, meetupId);
+      await this.usersService.attachToLikePivot(userId, meetupId);
       return {
         data: 'ok',
       };
@@ -66,8 +65,8 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '나의 찜 리스트에서 삭제' })
-  @Delete(':userId/meetups/:meetupId')
-  async detachFromMeetupUserPivot(
+  @Delete(':userId/likemeetups/:meetupId')
+  async detachFromLikePivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseUUIDPipe) meetupId: string,
   ): Promise<any> {
@@ -75,7 +74,7 @@ export class UserMeetupsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.detachFromMeetupUserPivot(userId, meetupId);
+      await this.usersService.detachFromLikePivot(userId, meetupId);
       return {
         data: 'ok',
       };
@@ -86,7 +85,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 찜한 모임 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/faves')
+  @Get(':userId/likemeetups')
   async getMeetupsLikedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
@@ -105,7 +104,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 찜한 모임ID 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/faveids')
+  @Get(':userId/likemeetupids')
   async getMeetupIdsLikedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {

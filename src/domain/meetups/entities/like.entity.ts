@@ -1,11 +1,24 @@
 import { Exclude } from 'class-transformer';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-export class MeetupUser {
+export class Like {
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
   @Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })
   userId: number | null; // to make it available to Repository.

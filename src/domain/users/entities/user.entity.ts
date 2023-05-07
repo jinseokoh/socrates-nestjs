@@ -123,6 +123,11 @@ export class User {
   })
   providers: Provider[];
 
+  @OneToMany(() => Meetup, (meetup) => meetup.user, {
+    // cascade: ['insert', 'update'],
+  })
+  meetups: Meetup[];
+
   //**--------------------------------------------------------------------------*/
   //** many-to-many
 
@@ -132,8 +137,11 @@ export class User {
   @OneToMany(() => Match, (match) => match.askedUser)
   public askedMatches!: Match[];
 
-  @ManyToMany(() => Meetup, (meetup) => meetup.users)
-  meetups: Meetup[];
+  @ManyToMany(() => Meetup, (meetup) => meetup.likers)
+  likedMeetups: Meetup[];
+
+  @ManyToMany(() => Meetup, (meetup) => meetup.haters)
+  hatedMeetups: Meetup[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
