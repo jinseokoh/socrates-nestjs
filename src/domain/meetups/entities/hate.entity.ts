@@ -11,9 +11,6 @@ export class Hate {
   @PrimaryColumn({ type: 'bigint' })
   public meetupId: number;
 
-  @Column({ type: 'int', unsigned: true })
-  public order: number;
-
   @Column({ length: 16, nullable: true })
   message: string | null;
 

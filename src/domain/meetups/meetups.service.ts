@@ -111,6 +111,8 @@ export class MeetupsService {
     const queryBuilder = this.repository
       .createQueryBuilder('meetup')
       .innerJoinAndSelect('meetup.venue', 'venue')
+      .leftJoinAndSelect('meetup.usersLiked', 'usersLiked')
+      .leftJoinAndSelect('meetup.usersHated', 'usersHated')
       .innerJoinAndSelect('meetup.user', 'user')
       .innerJoinAndSelect('user.profile', 'profile');
 
