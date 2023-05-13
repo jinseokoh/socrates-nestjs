@@ -33,7 +33,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 만든 모임 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/likemeetups')
+  @Get(':userId/meetups')
   async getMyMeetups(
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
