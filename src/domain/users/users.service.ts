@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   Logger,
+  NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -535,13 +536,20 @@ export class UsersService {
   ): Promise<any> {
     const meetup = await this.meetupRepository.findOneOrFail({
       where: { id: meetupId },
+      relations: ['matches'],
     });
+
     if (meetup.userId == askedUserId) {
-      // 찜한 사람이 방장에게 asking
-      // to make sure if this meetup is on the asking user's favez list
-      await this.attachToLikePivot(askingUserId, meetupId);
+      // 1. 방장에게 asking 하는 경우, 20명 까지로 제한.
+      if (
+        meetup.matches.filter((v) => meetup.userId === v.askedUserId).length >=
+        20
+      ) {
+        throw new NotAcceptableException('has reached max count');
+      }
+      // await this.attachToLikePivot(askingUserId, meetupId);
     } else {
-      // 방장이 찜한 사람에게 asking
+      // 2. 방장이 찜한 사람에게 asking 하는 경우, 갯수 제한 없음.
     }
 
     await this.repository.manager.query(
@@ -561,6 +569,20 @@ export class UsersService {
       'UPDATE `match` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
       [status, askingUserId, askedUserId, meetupId],
     );
+  }
+
+  // 내가 블락한 모임 ID 리스트
+  async getMeetupIdsAskedByMe(userId: number): Promise<AnyData> {
+    const items = await this.repository.manager.query(
+      'SELECT meetupId \
+      FROM `user` INNER JOIN `match` ON `user`.id = `match`.askingUserId \
+      WHERE `user`.id = ?',
+      [userId],
+    );
+
+    return {
+      data: items.map(({ meetupId }) => meetupId),
+    };
   }
 
   // 내에게 만나자고 신청한 호구 리스트

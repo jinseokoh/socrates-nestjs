@@ -7,7 +7,6 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  ParseUUIDPipe,
   Patch,
   Post,
   UseInterceptors,
@@ -233,6 +232,15 @@ export class UserMeetupsController {
     } catch (e) {
       throw new BadRequestException();
     }
+  }
+
+  @ApiOperation({ description: '내가 블락한 모임ID 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/matchmeetupids')
+  async getMeetupIdsAskedByMe(
+    @Param('userId') userId: number,
+  ): Promise<AnyData> {
+    return this.usersService.getMeetupIdsAskedByMe(userId);
   }
 
   @ApiOperation({ description: '내에게 만나자고 신청한 호구 리스트' })
