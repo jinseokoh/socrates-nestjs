@@ -195,18 +195,14 @@ export class UserMeetupsController {
     @Param('askedUserId') askedUserId: number,
     @Param('meetupId') meetupId: number,
   ): Promise<AnyData> {
-    try {
-      await this.usersService.attachToMatchPivot(
-        askingUserId,
-        askedUserId,
-        meetupId,
-      );
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    await this.usersService.attachToMatchPivot(
+      askingUserId,
+      askedUserId,
+      meetupId,
+    );
+    return {
+      data: 'ok',
+    };
   }
 
   // todo. validate asking/asked combo is the other way around

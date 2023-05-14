@@ -545,17 +545,21 @@ export class UsersService {
         meetup.matches.filter((v) => meetup.userId === v.askedUserId).length >=
         20
       ) {
-        throw new NotAcceptableException('has reached max count');
+        throw new NotAcceptableException('has reached maximum count');
       }
       // await this.attachToLikePivot(askingUserId, meetupId);
     } else {
       // 2. 방장이 찜한 사람에게 asking 하는 경우, 갯수 제한 없음.
     }
 
-    await this.repository.manager.query(
-      'INSERT IGNORE INTO `match` (askingUserId, askedUserId, meetupId) VALUES (?, ?, ?)',
-      [askingUserId, askedUserId, meetupId],
-    );
+    try {
+      await this.repository.manager.query(
+        'INSERT IGNORE INTO `match` (askingUserId, askedUserId, meetupId) VALUES (?, ?, ?)',
+        [askingUserId, askedUserId, meetupId],
+      );
+    } catch (e) {
+      throw new BadRequestException('database has gone crazy.');
+    }
   }
 
   // 매치신청 승인
