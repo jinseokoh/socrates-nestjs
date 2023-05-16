@@ -12,15 +12,17 @@ import { UsersController } from 'src/domain/users/users.controller';
 import { UsersService } from 'src/domain/users/users.service';
 import { S3Module } from 'src/services/aws/s3.module';
 import { CrawlerModule } from 'src/services/crawler/crawler.module';
+import { FcmModule } from 'src/services/fcm/fcm.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Profile, Match, Meetup, Like, Hate]),
     S3Module,
     CrawlerModule,
+    FcmModule,
   ],
   exports: [UsersService],
   providers: [UsersService],
-  controllers: [UsersController, UserMeetupsController],
+  controllers: [UsersController, UserMeetupsController, UserFcmController],
 })
 export class UsersModule {}

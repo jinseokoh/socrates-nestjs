@@ -26,7 +26,7 @@ export class UserFcmController {
 
   @ApiOperation({ description: 'topic 으로 FCM 발송' })
   @Post('fcm')
-  async sendToTopic(@Body('dto') dto: FcmTopicDto): Promise<any> {
+  async sendToTopic(@Body() dto: FcmTopicDto): Promise<any> {
     await this.fcmService.sendToTopic(dto.topic, {
       title: dto.title,
       body: dto.body,
@@ -42,7 +42,7 @@ export class UserFcmController {
   @Post(':userId/fcm')
   async sendToTokens(
     @Param('userId') userId: number,
-    @Body('dto') dto: FcmTokenDto,
+    @Body() dto: FcmTokenDto,
   ): Promise<any> {
     const user = await this.usersService.findById(userId, ['profile']);
     await this.fcmService.sendToToken(user.pushToken, {
