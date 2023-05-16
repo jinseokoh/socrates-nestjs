@@ -22,10 +22,24 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Preparation
 
-FleaAuction v2 API (dubbed as *Gangnam* style API) is built upon
-[Nest](https://github.com/nestjs/nest) framework w/ lots of open source packages including [TypeORM](https://typeorm.io/). I've also tried [Prisma](https://www.prisma.io/) which looks nicer and modern, however, the lack of core features like custom entity serialization, soft-deletion led me to a conclusion that it's not the best fit for my use-case.
+### Firebase 콘솔
+
+Firebase Admin SDK account key 는 Firebase 프로젝트 설정 페이지에서 생성후 다운로드 할 수 있다. 이 프로젝트와 연결된 Firebase 프로젝트의 이름은 MeetSocrates 이며, 해당 키파일은 fb-admin-dev.account-key.json 이란 이름으로 이 프로젝트 root 에 위치한다. 이로서, 모든 Firebase Admin 의 기능을 수행할 수 있다. 물론 과금도 해당 프로젝트에 부과된다.
+
+- [Firebase Console](https://console.firebase.google.com/project/meetsocrates-fd76c)
+- Authentication 에서 Google, Apple 을 활성화
+- Functions 카카오 사용자 인증을 위해 활성화 [관련프로젝트](https://github.com/jinseokoh/socrates-firebase-functions)
+
+### Google Cloud 콘솔
+
+생성된 Firebase 프로젝트는 Google Cloud 콘솔에서도 access 가 가능하며, Google Maps 와 같이 필요한 API 서비스의 추가설정이 필요하다. 앱 프로젝트이므로, 안드로이드와 iOS 각각 설정이 필요하며, 현재 활성화시킨 서비스는 아래와 같다.
+
+- API > Maps SDK for Android
+- API > Maps SDK for Android
+- Google Maps Platform > Credentials [API키 발급](https://console.cloud.google.com/google/maps-apis/credentials)
+  - 해당 키 사용은 application 에서.
 
 ## Installation
 

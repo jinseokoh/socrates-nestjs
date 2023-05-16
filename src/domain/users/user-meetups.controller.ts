@@ -236,8 +236,17 @@ export class UserMeetupsController {
   async getMeetupsAskedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<AnyData> {
-    return this.usersService.getMeetupsAskedByMe(userId, query);
+  ): Promise<Paginated<Meetup>> {
+    const { data, meta, links } = await this.usersService.getMeetupsAskedByMe(
+      userId,
+      query,
+    );
+
+    return {
+      data: data.map((v) => v.meetup),
+      meta: meta,
+      links: links,
+    } as Paginated<Meetup>;
   }
 
   @ApiOperation({ description: '내가 신청한 모임ID 리스트' })
