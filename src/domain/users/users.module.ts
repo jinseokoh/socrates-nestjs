@@ -6,6 +6,7 @@ import { Hate } from 'src/domain/meetups/entities/hate.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { User } from 'src/domain/users/entities/user.entity';
+import { UserFcmController } from 'src/domain/users/user-fcm.controller';
 import { UserMeetupsController } from 'src/domain/users/user-meetups.controller';
 import { UsersController } from 'src/domain/users/users.controller';
 import { UsersService } from 'src/domain/users/users.service';

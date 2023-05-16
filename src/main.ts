@@ -4,11 +4,10 @@ import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
-import * as firebaseAdmin from 'firebase-admin';
+import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import helmet from 'helmet';
 import { AppModule } from 'src/app.module';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
-import { IFirebaseConfig } from './common/interfaces/index';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -50,25 +49,24 @@ async function bootstrap() {
   // https://stackoverflow.com/questions/60062318/how-to-inject-service-to-validator-constraint-interface-in-nestjs-using-class-va
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  const firebaseConfig = configService.get<IFirebaseConfig>('firebase');
+  // const firebaseConfig = configService.get<IFirebaseConfig>('firebase');
   // https://dev.to/aswinsanakan/how-to-integrate-firebase-in-nestjs-5gl9
-  const serviceAccount: firebaseAdmin.ServiceAccount = {
-    projectId: firebaseConfig.projectId,
-    privateKey: firebaseConfig.privateKey.replace(/\\n/g, '\n'),
-    clientEmail: firebaseConfig.clientEmail,
-  };
-  firebaseAdmin.initializeApp({
-    credential: firebaseAdmin.credential.cert(serviceAccount),
+  // const serviceAccount: firebaseAdmin.ServiceAccount = {
+  //   projectId: firebaseConfig.projectId,
+  //   privateKey: firebaseConfig.privateKey.replace(/\\n/g, '\n'),
+  //   clientEmail: firebaseConfig.clientEmail,
+  // };
+  initializeApp({
+    credential: applicationDefault(),
     // databaseURL: 'https://flea-auction-dev.firebaseio.com',
   });
 
   app.enableCors();
   app.use(helmet());
-  // app.use(sseMiddleware);
   app.use(helmet.hidePoweredBy());
 
   const config = new DocumentBuilder()
-    .setTitle('Meet Sage v1')
+    .setTitle('Socrates v1')
     .setDescription('An API running on top of NestJS.')
     .setVersion('1.0')
     .addTag('API written by GoK with lots of 💔')

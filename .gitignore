@@ -15,6 +15,9 @@ lerna-debug.log*
 .env
 .env.*
 
+# firebase service account key for FCM
+*.account-key.json
+
 # OS
 .DS_Store
 

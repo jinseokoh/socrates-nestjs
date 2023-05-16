@@ -53,6 +53,11 @@ export class CreateUserDto {
   @IsOptional()
   avatar?: string | null;
 
+  @ApiProperty({ description: '디바이스 타입', required: false })
+  @IsString()
+  @IsOptional()
+  deviceType?: string | null;
+
   @ApiProperty({ description: '푸시토큰', required: false })
   @IsString()
   @IsOptional()
@@ -112,13 +117,4 @@ export class CreateUserDto {
   @IsBoolean()
   @IsOptional()
   isPrivate?: boolean | null;
-
-  @ApiProperty({
-    description: '마지막 닉네임 변경일',
-    required: false,
-    default: false,
-  })
-  @Type(() => Date)
-  @IsOptional()
-  usernamedAt?: string | null;
 }

@@ -1,103 +1,152 @@
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator';
 import * as firebaseAdmin from 'firebase-admin';
+import { MulticastMessage } from 'firebase-admin/lib/messaging/messaging-api';
 
-//** heavily based on https://github.com/costianur95/nestjs-fcm */
+//** reference) https://blog.logrocket.com/implement-in-app-notifications-nestjs-mysql-firebase/
 
 @Injectable()
 export class FcmService {
   private readonly logger = new Logger(FcmService.name);
 
-  async sendNotification(
+  async sendToToken(
     token: string,
-    title: string,
-    body: string,
-    data: any,
-    awake?: boolean,
+    notification: firebaseAdmin.messaging.Notification,
   ) {
-    const payload = {
+    let result = null;
+    const payload: firebaseAdmin.messaging.Message = {
+      token,
       notification: {
-        title: title,
-        body: body,
-      },
-    };
-    const option = {
-      contentAvailable: awake ?? false,
-    };
-    this.logger.log(body);
-    return await firebaseAdmin.messaging().sendToDevice(token, payload, option);
-  }
-
-  async sendNotifications(
-    deviceIds: Array<string>,
-    payload: firebaseAdmin.messaging.MessagingPayload,
-    awake?: boolean,
-    imageUrl?: string,
-  ) {
-    if (deviceIds.length == 0) {
-      throw new Error('No device token is provided.');
-    }
-
-    const body: firebaseAdmin.messaging.MulticastMessage = {
-      tokens: deviceIds,
-      data: payload?.data,
-      notification: {
-        title: payload?.notification?.title,
-        body: payload?.notification?.body,
-        imageUrl,
+        title: notification.title,
+        body: notification.body,
+        imageUrl: notification.imageUrl,
       },
       apns: {
-        payload: {
-          aps: {
-            sound: payload?.notification?.sound,
-            contentAvailable: awake ?? false,
-            mutableContent: true,
-          },
-        },
         fcmOptions: {
-          imageUrl,
+          imageUrl: notification?.imageUrl,
         },
       },
       android: {
         priority: 'high',
         ttl: 60 * 60 * 24,
-        notification: {
-          sound: payload?.notification?.sound,
+      },
+    };
+    try {
+      result = await firebaseAdmin.messaging().send(payload);
+    } catch (error) {
+      this.logger.error(error.message, error.stackTrace, 'sendToToken');
+      throw error;
+    }
+    return result;
+  }
+
+  async sendToTopic(
+    topic: string,
+    notification: firebaseAdmin.messaging.Notification,
+  ) {
+    const payload: firebaseAdmin.messaging.Message = {
+      topic,
+      notification: {
+        title: notification.title,
+        body: notification.body,
+        imageUrl: notification.imageUrl,
+      },
+      apns: {
+        fcmOptions: {
+          imageUrl: notification?.imageUrl,
         },
+      },
+      android: {
+        priority: 'high',
+        ttl: 60 * 60 * 24,
+      },
+    };
+    let result = null;
+    try {
+      result = await firebaseAdmin.messaging().send(payload);
+    } catch (error) {
+      this.logger.error(error.message, error.stackTrace, 'sendToTopic');
+      throw error;
+    }
+    return result;
+  }
+
+  async sendToCondition(
+    condition: string,
+    notification: firebaseAdmin.messaging.Notification,
+  ) {
+    const payload: firebaseAdmin.messaging.Message = {
+      condition,
+      notification: {
+        title: notification.title,
+        body: notification.body,
+        imageUrl: notification.imageUrl,
+      },
+      apns: {
+        fcmOptions: {
+          imageUrl: notification?.imageUrl,
+        },
+      },
+      android: {
+        priority: 'high',
+        ttl: 60 * 60 * 24,
+      },
+    };
+    let result = null;
+    try {
+      result = await firebaseAdmin.messaging().send(payload);
+    } catch (error) {
+      this.logger.error(error.message, error.stackTrace, 'sendToCondition');
+      throw error;
+    }
+    return result;
+  }
+
+  async sendMulticast(
+    tokens: string[],
+    notification: firebaseAdmin.messaging.Notification,
+  ) {
+    if (tokens.length < 1) {
+      throw new BadRequestException('No token is provided.');
+    }
+
+    const payload: firebaseAdmin.messaging.MulticastMessage = {
+      tokens,
+      notification: {
+        title: notification?.title,
+        body: notification?.body,
+        imageUrl: notification?.imageUrl,
+      },
+      apns: {
+        fcmOptions: {
+          imageUrl: notification?.imageUrl,
+        },
+      },
+      android: {
+        priority: 'high',
+        ttl: 60 * 60 * 24,
       },
     };
 
     let result = null;
     let failureCount = 0;
     let successCount = 0;
-    const failedDeviceIds = [];
+    const sendingTokens = [...tokens];
 
-    while (deviceIds.length) {
+    while (sendingTokens.length > 0) {
       try {
-        result = await firebaseAdmin
-          .messaging()
-          .sendMulticast({ ...body, tokens: deviceIds.splice(0, 500) }, false);
-        if (result.failureCount > 0) {
-          const failedTokens = [];
-          result.responses.forEach((resp, id) => {
-            if (!resp.success) {
-              failedTokens.push(deviceIds[id]);
-            }
-          });
-          failedDeviceIds.push(...failedTokens);
-        }
+        result = await firebaseAdmin.messaging().sendEachForMulticast({
+          ...payload,
+          tokens: sendingTokens.splice(0, 500),
+        });
         failureCount += result.failureCount;
         successCount += result.successCount;
       } catch (error) {
-        this.logger.error(error.message, error.stackTrace, 'fcm-service');
+        this.logger.error(error.message, error.stackTrace, 'sendMulticast');
         throw error;
       }
     }
-    this.logger.log(
-      `successCount: ${successCount}, failureCount: ${failureCount}, failedDeviceIds: ${failedDeviceIds.join(
-        ',',
-      )}`,
-    );
-    return { failureCount, successCount, failedDeviceIds };
+    this.logger.log(`success: ${successCount}, failure: ${failureCount}`);
+    return { failureCount, successCount };
   }
 }

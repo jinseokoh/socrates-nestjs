@@ -71,3 +71,19 @@ export interface IAuthor {
   username: string;
   avatar: string | null;
 }
+
+// export interface IFcmTokenPayload {
+//   tokens: string[];
+//   title: string;
+//   body: string;
+//   url: string;
+//   silent: boolean;
+// }
+
+// export interface IFcmTopicPayload {
+//   topic: string;
+//   title: string;
+//   body: string;
+//   url: string;
+//   silent: boolean;
+// }

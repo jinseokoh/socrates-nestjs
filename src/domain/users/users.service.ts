@@ -180,16 +180,6 @@ export class UsersService {
 
   // User 갱신
   async update(id: number, dto: UpdateUserDto): Promise<User> {
-    const dbUser = await this.findById(id);
-    if (dto.usernamedAt && dbUser.usernamedAt) {
-      const oldDate = moment(dbUser.usernamedAt);
-      const newDate = moment(dto.usernamedAt);
-      const diffInDays = newDate.diff(oldDate, 'days');
-      if (diffInDays < 20) {
-        throw new BadRequestException(`${20 - diffInDays} days remain`);
-      }
-    }
-
     const user = await this.repository.preload({ id, ...dto });
     return await this.repository.save(user);
   }
