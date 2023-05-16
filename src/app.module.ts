@@ -15,7 +15,6 @@ import { CategoriesModule } from 'src/domain/categories/categories.module';
 import { ContentsModule } from 'src/domain/contents/contents.module';
 import { MessagesModule } from 'src/domain/chats/messages.module';
 import { MeetupsModule } from 'src/domain/meetups/meetups.module';
-import { NotificationModule } from 'src/domain/notification/notification.module';
 import { RoomsModule } from 'src/domain/rooms/rooms.module';
 import { UsersModule } from 'src/domain/users/users.module';
 
@@ -79,7 +78,6 @@ import { UsersModule } from 'src/domain/users/users.module';
     MeetupsModule,
     UsersModule,
     MessagesModule,
-    NotificationModule,
   ],
   controllers: [AppController],
   providers: [
