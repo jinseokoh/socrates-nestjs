@@ -230,8 +230,17 @@ export class UserMeetupsController {
     }
   }
 
-  @ApiOperation({ description: '내가 블락한 모임ID 리스트' })
+  @ApiOperation({ description: '내가 신청한 모임 리스트' })
   @PaginateQueryOptions()
+  @Get(':userId/matchmeetups')
+  async getMeetupsAskedByMe(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<AnyData> {
+    return this.usersService.getMeetupsAskedByMe(userId, query);
+  }
+
+  @ApiOperation({ description: '내가 신청한 모임ID 리스트' })
   @Get(':userId/matchmeetupids')
   async getMeetupIdsAskedByMe(
     @Param('userId') userId: number,

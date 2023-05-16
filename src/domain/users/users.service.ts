@@ -565,7 +565,33 @@ export class UsersService {
     );
   }
 
-  // 내가 블락한 모임 ID 리스트
+  // 내가 신청한 모임 리스트
+  async getMeetupsAskedByMe(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Match>> {
+    const queryBuilder = this.matchRepository
+      .createQueryBuilder('match')
+      .leftJoinAndSelect('match.meetup', 'meetup')
+      .leftJoinAndSelect('meetup.venue', 'venue')
+      // .leftJoinAndSelect('match.askedUser', 'askedUser')
+      // .leftJoinAndSelect('meetup.user', 'user')
+      .where({
+        askingUserId: userId,
+      });
+
+    const config: PaginateConfig<Match> = {
+      sortableColumns: ['meetupId'],
+      searchableColumns: ['meetup.title'],
+      defaultLimit: 20,
+      defaultSortBy: [['meetupId', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내가 신청한 모임 ID 리스트
   async getMeetupIdsAskedByMe(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId \
