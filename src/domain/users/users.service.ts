@@ -394,24 +394,21 @@ export class UsersService {
   }
 
   // 나의 관심사 리스트에 추가
-  async syncCategories(id: number, ids: number[]): Promise<User> {
+  async syncCategoriesWithIds(id: number, ids: number[]): Promise<User> {
     const user = await this.findById(id, ['categories']);
-    // const currentCategories = await this.repository
-    //   .createQueryBuilder()
-    //   .relation(User, 'categories')
-    //   .of(user)
-    //   .loadMany();
-    // await this.repository
-    //   .createQueryBuilder()
-    //   .relation(User, 'categories')
-    //   .of(user)
-    //   .remove(currentCategories);
-
-    if (ids.length < 1) {
-      return user;
-    }
     const categories = await this.categoryRepository.findBy({
       id: In(ids),
+    });
+    user.categories = categories;
+
+    return await this.repository.save(user);
+  }
+
+  // 나의 관심사 리스트에 추가
+  async syncCategoriesWithSlugs(id: number, slugs: string[]): Promise<User> {
+    const user = await this.findById(id, ['categories']);
+    const categories = await this.categoryRepository.findBy({
+      slug: In(slugs),
     });
     user.categories = categories;
 
