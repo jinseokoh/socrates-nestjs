@@ -53,6 +53,7 @@ export class CategoriesService {
     root.slug = 'root';
     await this.repository.manager.save(root);
 
+    // leisure
     const leisureRoot = new Category();
     leisureRoot.slug = 'leisure';
     leisureRoot.depth = 1;
@@ -301,62 +302,62 @@ export class CategoriesService {
     sports.parent = sportsRoot;
     await this.repository.manager.save(sports);
 
-    // other
-    const otherRoot = new Category();
-    challenge.slug = 'challenge';
-    challenge.depth = 1;
-    challenge.parent = root;
-    await this.repository.manager.save(challenge);
+    // challenge
+    const challengeRoot = new Category();
+    challengeRoot.slug = 'challenge';
+    challengeRoot.depth = 1;
+    challengeRoot.parent = root;
+    await this.repository.manager.save(challengeRoot);
 
     challenge = new Category();
     challenge.slug = SubCategory.STUDY;
     challenge.depth = 2;
-    challenge.parent = otherRoot;
+    challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
     challenge.slug = SubCategory.BOOK;
     challenge.depth = 2;
-    challenge.parent = otherRoot;
+    challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
     challenge.slug = SubCategory.LANGUAGE;
     challenge.depth = 2;
-    challenge.parent = otherRoot;
+    challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
     challenge.slug = SubCategory.CODING;
     challenge.depth = 2;
-    challenge.parent = otherRoot;
+    challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
     challenge.slug = SubCategory.YOUTUBER;
     challenge.depth = 2;
-    challenge.parent = otherRoot;
+    challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
     challenge.slug = SubCategory.ENTREPRENEURSHIP;
     challenge.depth = 2;
-    challenge.parent = otherRoot;
+    challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
     challenge.slug = SubCategory.STOCKS;
     challenge.depth = 2;
-    challenge.parent = otherRoot;
+    challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
     challenge.slug = SubCategory.ONE_DAY_CLASS;
     challenge.depth = 2;
-    challenge.parent = otherRoot;
+    challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
     challenge.slug = SubCategory.VOLUNTARY_ACTIVITY;
     challenge.depth = 2;
-    challenge.parent = otherRoot;
+    challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
     challenge.slug = SubCategory.OTHER_CHALLENGE;
     challenge.depth = 2;
-    challenge.parent = otherRoot;
+    challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
   }
 }

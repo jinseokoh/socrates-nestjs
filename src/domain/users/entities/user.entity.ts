@@ -3,6 +3,7 @@ import { Exclude, Expose } from 'class-transformer';
 import { Role } from 'src/common/enums';
 import { Career } from 'src/common/enums/career';
 import { Gender } from 'src/common/enums/gender';
+import { Category } from 'src/domain/categories/entities/category.entity';
 import { Hate } from 'src/domain/meetups/entities/hate.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Match } from 'src/domain/meetups/entities/match.entity';
@@ -15,6 +16,8 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -103,16 +106,16 @@ export class User {
   @ApiProperty({ description: 'deletedAt' })
   deletedAt: Date | null;
 
-  //**--------------------------------------------------------------------------*/
-  //** 1-to-1 hasOne
+  //*-------------------------------------------------------------------------*/
+  //* 1-to-1 hasOne
 
   @OneToOne(() => Profile, (profile) => profile.user, {
     cascade: ['insert', 'update'],
   })
   profile: Profile;
 
-  //**--------------------------------------------------------------------------*/
-  //** 1-to-many hasMany
+  //*-------------------------------------------------------------------------*/
+  //* 1-to-many hasMany
 
   @OneToMany(() => Report, (report) => report.user, {
     // cascade: ['insert', 'update'],
@@ -129,8 +132,8 @@ export class User {
   })
   meetups: Meetup[];
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-many belongsToMany using one-to-many
+  //*-------------------------------------------------------------------------*/
+  //* many-to-many belongsToMany using one-to-many
 
   @OneToMany(() => Match, (match) => match.askingUser)
   public askingMatches: Match[];
@@ -144,8 +147,19 @@ export class User {
   @OneToMany(() => Hate, (hate) => hate.user)
   public meetupsHated: Hate[];
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //*-------------------------------------------------------------------------*/
+  //* many-to-many belongsToMany
+
+  // @ManyToMany(() => Region, (region) => region.meetups)
+  // @JoinTable({ name: 'meetup_region' }) // owning side
+  // regions: Region[];
+
+  @ManyToMany(() => Category, (category) => category.users)
+  @JoinTable({ name: 'user_category' }) // owning side
+  categories: Category[];
+
+  //?-------------------------------------------------------------------------?/
+  //? constructor
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);

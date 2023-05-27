@@ -35,9 +35,10 @@ import { randomName } from 'src/helpers/random-filename';
 import { getUsername } from 'src/helpers/random-username';
 import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
-import { FindOneOptions } from 'typeorm';
+import { FindOneOptions, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Hate } from 'src/domain/meetups/entities/hate.entity';
+import { Category } from 'src/domain/categories/entities/category.entity';
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
@@ -49,6 +50,8 @@ export class UsersService {
     private readonly profileRepository: Repository<Profile>,
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Hate)
@@ -372,6 +375,56 @@ export class UsersService {
     };
 
     return await paginate(query, queryBuilder, config);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? 관심사 Categories
+  //?-------------------------------------------------------------------------//
+
+  // 나의 관심사 리스트
+  async getCategories(id: number): Promise<Array<Category>> {
+    const user = await this.findById(id);
+    const categories = await this.repository
+      .createQueryBuilder()
+      .relation(User, 'categories')
+      .of(user)
+      .loadMany();
+
+    return categories;
+  }
+
+  // 나의 관심사 리스트에 추가
+  async syncCategories(id: number, ids: number[]): Promise<User> {
+    const user = await this.findById(id, ['categories']);
+    // const currentCategories = await this.repository
+    //   .createQueryBuilder()
+    //   .relation(User, 'categories')
+    //   .of(user)
+    //   .loadMany();
+    // await this.repository
+    //   .createQueryBuilder()
+    //   .relation(User, 'categories')
+    //   .of(user)
+    //   .remove(currentCategories);
+
+    if (ids.length < 1) {
+      return user;
+    }
+    const categories = await this.categoryRepository.findBy({
+      id: In(ids),
+    });
+    user.categories = categories;
+
+    return await this.repository.save(user);
+  }
+
+  // 나의 관심사 리스트에서 삭제
+  async removeCategories(id: number, ids: number[]): Promise<User> {
+    const user = await this.findById(id, ['categories']);
+    const categories = user.categories.filter((v) => !ids.includes(v.id));
+    user.categories = categories;
+
+    return await this.repository.save(user);
   }
 
   //?-------------------------------------------------------------------------//

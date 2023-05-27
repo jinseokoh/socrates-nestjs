@@ -1,4 +1,5 @@
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   Entity,
@@ -27,9 +28,12 @@ export class Category {
   @TreeParent()
   parent: Category;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-many belongsToMany
+  //*-------------------------------------------------------------------------*/
+  //* many-to-many belongsToMany
 
   @ManyToMany(() => Meetup, (meetup) => meetup.categories)
   meetups: Meetup[];
+
+  @ManyToMany(() => User, (user) => user.categories)
+  users: User[];
 }

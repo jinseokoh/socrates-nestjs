@@ -19,7 +19,6 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Status } from 'src/common/enums/status';
 import { Match } from 'src/domain/meetups/entities/match.entity';
-import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
