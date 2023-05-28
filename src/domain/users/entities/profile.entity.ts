@@ -44,7 +44,7 @@ export class Profile {
   notifyKakao: boolean;
 
   @Column('json', { nullable: true })
-  @ApiProperty({ description: '관심키워드' })
+  @ApiProperty({ description: '관심키워드 in Korean' })
   @IsArray()
   keywords: string[] | null;
 

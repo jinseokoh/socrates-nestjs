@@ -157,8 +157,8 @@ export class UsersController {
     return await this.usersService.changePassword(id, dto);
   }
 
-  // Technically, Profile is a different model but, it's tightly coupled
-  // with User model
+  // Technically, `profile` is a different model.
+  // but, it's tightly coupled with `user` model
   @ApiOperation({ description: 'User 와 연계된 Profile 갱신' })
   @Patch(':id/profile')
   async updateProfile(
