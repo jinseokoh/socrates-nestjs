@@ -22,6 +22,11 @@ export class CreateProfileDto {
   @IsOptional()
   career?: string | null;
 
+  @ApiProperty({ description: 'MBTI', required: false })
+  @IsString()
+  @IsOptional()
+  mbti?: string | null;
+
   @ApiProperty({ description: 'keywords', required: false })
   @IsArray()
   @IsOptional()
