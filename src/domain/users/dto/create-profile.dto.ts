@@ -17,10 +17,15 @@ export class CreateProfileDto {
   @IsOptional()
   region?: string | null;
 
-  @ApiProperty({ description: '직군', required: false })
+  @ApiProperty({ description: '학력', required: false })
   @IsString()
   @IsOptional()
-  career?: string | null;
+  education?: string | null;
+
+  @ApiProperty({ description: '직업', required: false })
+  @IsString()
+  @IsOptional()
+  occupation?: string | null;
 
   @ApiProperty({ description: 'MBTI', required: false })
   @IsString()
