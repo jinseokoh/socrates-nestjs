@@ -9,8 +9,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { SES } from 'aws-sdk';
 import * as bcrypt from 'bcrypt';
+import * as moment from 'moment';
 import * as random from 'randomstring';
-
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
 import { AWS_SES_CONNECTION } from 'src/common/constants';
@@ -279,12 +279,13 @@ export class AuthService {
     };
     const accessTokenOptions = {
       secret: process.env.AUTH_TOKEN_SECRET ?? 'AUTH-TOKEN-SECRET',
-      expiresIn: '1d', // todo. change it to '15m' in production
+      expiresIn: '1d', // todo. change it to '30m' in production
     };
     const refreshTokenOptions = {
       secret: process.env.REFRESH_TOKEN_SECRET ?? 'REFRESH-TOKEN-SECRET',
-      expiresIn: '7d',
+      expiresIn: '30d',
     };
+    const now = moment();
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, accessTokenOptions),
       this.jwtService.signAsync(payload, refreshTokenOptions),
@@ -292,7 +293,9 @@ export class AuthService {
 
     return {
       accessToken,
+      accessTokenExpiry: now.clone().add(1, 'd').unix(),
       refreshToken,
+      refreshTokenExpiry: now.clone().add(30, 'd').unix(),
     };
   }
 
