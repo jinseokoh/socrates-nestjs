@@ -57,7 +57,6 @@ export class User {
   @ApiProperty({ description: '직군' })
   career: Career | null;
 
-  @Exclude()
   @Column({ nullable: true })
   @ApiProperty({ description: 'dob' })
   dob: Date;
