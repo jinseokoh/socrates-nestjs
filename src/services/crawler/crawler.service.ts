@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { JSDOM } from 'jsdom';
-import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune-dto';
-import { LoveFortuneDto } from 'src/domain/users/dto/love-fortune-dto';
-import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune-dto';
+import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune.dto';
+import { LoveFortuneDto } from 'src/domain/users/dto/love-fortune.dto';
+import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune.dto';
 @Injectable()
 export class CrawlerService {
   // ref) https://kdexp.com/main.kd

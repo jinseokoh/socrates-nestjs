@@ -7,6 +7,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   Patch,
   Post,
@@ -22,12 +23,12 @@ import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
-import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune-dto';
+import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune.dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
-import { LoveFortuneDto } from 'src/domain/users/dto/love-fortune-dto';
+import { LoveFortuneDto } from 'src/domain/users/dto/love-fortune.dto';
 import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
-import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune-dto';
+import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune.dto';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { AmendUsernamePipe } from 'src/domain/users/pipes/amend-username.pipe';
@@ -39,10 +40,15 @@ import { YearlyFortunePipe } from 'src/domain/users/pipes/yearly-fortune.pipe';
 import { UsersService } from 'src/domain/users/users.service';
 import { multerOptions } from 'src/helpers/multer-options';
 import { AvatarInterceptor } from './interceptors/avatar-interceptor';
+import { SmsMessageDto } from 'src/domain/users/dto/sms-message.dto';
+import { SmsClient } from '@nestjs-packages/ncp-sens';
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject(SmsClient) private readonly smsClient: SmsClient,
+  ) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
@@ -184,4 +190,13 @@ export class UsersController {
   //--------------------------------------------------------------------------//
   // Some extra endpoints
   //--------------------------------------------------------------------------//
+  @ApiOperation({ description: 'OTP 발송' })
+  @HttpCode(HttpStatus.OK)
+  @Post('otp')
+  async(@Body() dto: SmsMessageDto): Promise<any> {
+    await this.smsClient.send({
+      to: dto.phone,
+      content: dto.body,
+    });
+  }
 }

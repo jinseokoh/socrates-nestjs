@@ -15,6 +15,7 @@ import { UsersService } from 'src/domain/users/users.service';
 import { S3Module } from 'src/services/aws/s3.module';
 import { CrawlerModule } from 'src/services/crawler/crawler.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
+import { UserSmsController } from 'src/domain/users/user-sms.controller';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
     UserCategoriesController,
     UserMeetupsController,
     UserFcmController,
+    UserSmsController,
   ],
 })
 export class UsersModule {}

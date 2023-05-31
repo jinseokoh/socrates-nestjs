@@ -17,6 +17,7 @@ import { MessagesModule } from 'src/domain/chats/messages.module';
 import { MeetupsModule } from 'src/domain/meetups/meetups.module';
 import { RoomsModule } from 'src/domain/rooms/rooms.module';
 import { UsersModule } from 'src/domain/users/users.module';
+import { NaverModule } from 'src/services/naver/naver.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { UsersModule } from 'src/domain/users/users.module';
         suffix: '-table',
       },
     }),
+    NaverModule,
     AuthModule,
     RoomsModule,
     CategoriesModule,
