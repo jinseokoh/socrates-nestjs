@@ -18,6 +18,7 @@ import { MeetupsModule } from 'src/domain/meetups/meetups.module';
 import { RoomsModule } from 'src/domain/rooms/rooms.module';
 import { UsersModule } from 'src/domain/users/users.module';
 import { NaverModule } from 'src/services/naver/naver.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { NaverModule } from 'src/services/naver/naver.module';
         suffix: '-table',
       },
     }),
+    CacheModule.register(),
     NaverModule,
     AuthModule,
     RoomsModule,

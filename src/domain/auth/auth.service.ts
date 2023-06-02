@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  CACHE_MANAGER,
   ForbiddenException,
   Inject,
   Injectable,
@@ -12,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import * as moment from 'moment';
 import * as random from 'randomstring';
 import { ConfigService } from '@nestjs/config';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { AWS_SES_CONNECTION } from 'src/common/constants';
 import { Gender } from 'src/common/enums/gender';
@@ -24,6 +24,11 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { ProvidersService } from 'src/domain/users/providers.service';
 import { UsersService } from 'src/domain/users/users.service';
 import { getUsername } from 'src/helpers/random-username';
+import { SecretsService } from 'src/domain/secrets/secrets.service';
+import { CreateSecretDto } from 'src/domain/secrets/dto/create-secret.dto';
+import { UpdateSecretDto } from 'src/domain/secrets/dto/update-secret.dto';
+import { Secret } from 'src/domain/secrets/secret.entity';
+import { SmsClient } from '@nestjs-packages/ncp-sens';
 
 @Injectable()
 export class AuthService {
@@ -31,9 +36,10 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly providersService: ProvidersService,
+    private readonly secretsService: SecretsService,
     private readonly jwtService: JwtService,
-    @Inject(AWS_SES_CONNECTION)
-    private readonly ses: SES,
+    @Inject(SmsClient) private readonly smsClient: SmsClient,
+    @Inject(AWS_SES_CONNECTION) private readonly ses: SES,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @Inject(ConfigService) private configService: ConfigService,
   ) {
@@ -64,7 +70,23 @@ export class AuthService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Public) 가입, 이메일인증, 비번재설정
+  //? Public) 전화번호
+  //?-------------------------------------------------------------------------//
+
+  // 새 전화번호 확인 후 OTP 전송
+  async verifyPhoneNumberWithOtp(phone: string): Promise<string> {
+    const user = await this.usersService.findByUniqueKey({
+      where: { phone },
+    });
+    if (user) {
+      throw new BadRequestException('phone already taken');
+    }
+
+    return await this._generateOtp(phone);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Public) 이메일 (가입/비번)
   //?-------------------------------------------------------------------------//
 
   // 이메일 가입 w/ Credentials
@@ -79,50 +101,38 @@ export class AuthService {
     return tokens;
   }
 
-  // 새이메일 확인 후 OTP 전송
-  async takeNewEmailAndSendOtp(email: string): Promise<void> {
-    const user = await this.usersService.findByUniqueKey({ where: { email } });
+  // 새로운 전화번호/이메일 확인 후 OTP 전송
+  async sendOtpForNonExistingUser(key: string, cache = false): Promise<void> {
+    const user = await this.usersService.findByUniqueKey({ where: { key } });
     if (user) {
-      throw new BadRequestException('email already taken');
+      throw new BadRequestException('Record with the key already exists');
     }
-    const key = `${this.env}:user:${email}:email`;
-    const secret = await this._setOtpWithKey(key);
-    this._sendCodeEmail(email, secret);
+    const otp = cache
+      ? await this._generateOtpWithCache(key)
+      : await this._generateOtp(key);
+
+    if (key === 'phone') {
+      await this._sendSmsTo(key, otp);
+    } else {
+      await this._sendEmailTemplateTo(key, otp);
+    }
   }
 
-  // 기이메일 확인 후 OTP 전송
-  async takeExistingEmailAndSendOtp(email: string): Promise<void> {
-    const user = await this.usersService.findByUniqueKey({ where: { email } });
+  // 기존 전화번호/이메일 확인 후 OTP 전송
+  async sendOtpForExistingUser(key: string, cache = false): Promise<void> {
+    const user = await this.usersService.findByUniqueKey({ where: { key } });
     if (!user) {
-      throw new NotFoundException('email not found');
+      throw new NotFoundException('Record associated with the key not found');
     }
-    const key = `${this.env}:user:${email}:email`;
-    const secret = await this._setOtpWithKey(key);
-    this._sendCodeEmail(email, secret);
-  }
+    const otp = cache
+      ? await this._generateOtpWithCache(key)
+      : await this._generateOtp(key);
 
-  // 이메일 OTP 확인
-  async validateOtp(email: string, code: string): Promise<void> {
-    const key = `${this.env}:user:${email}:email`;
-    const value = await this.cacheManager.get(key);
-    if (!value) {
-      throw new BadRequestException('otp expired');
-    } else if (value !== code) {
-      throw new BadRequestException('otp mismatched');
+    if (key === 'phone') {
+      await this._sendSmsTo(key, otp);
+    } else {
+      await this._sendEmailTemplateTo(key, otp);
     }
-  }
-
-  // OTP 확인하여 이메일 확인
-  async verify(id: number, code: string) {
-    const key = `${this.env}:user:${id}:email`;
-    const value = await this.cacheManager.get(key);
-    if (!value) {
-      throw new BadRequestException('otp expired');
-    }
-    if (code !== value) {
-      throw new BadRequestException('otp mismatched');
-    }
-    await this._updateIsActive(id, true);
   }
 
   //?-------------------------------------------------------------------------//
@@ -259,6 +269,10 @@ export class AuthService {
   //? Privates
   //?-------------------------------------------------------------------------//
 
+  _getCacheKey(key: string): string {
+    return `${this.env}:user:${key}:key`;
+  }
+
   async _updateIsActive(id: number, isActive: boolean) {
     await this.usersService.update(id, { isActive });
   }
@@ -299,18 +313,71 @@ export class AuthService {
     };
   }
 
-  async _setOtpWithKey(key: string) {
-    const randomValue = random.generate({
-      length: 5,
-      charset: 'numeric',
-    });
+  //?-------------------------------------------------------------------------//
+  //? with Database
+  //?-------------------------------------------------------------------------//
 
-    await this.cacheManager.set(key, randomValue, 60 * 10);
-    return randomValue;
+  async _generateOtp(key: string, length = 6): Promise<string> {
+    const otp = random.generate({ length, charset: 'numeric' });
+    try {
+      const dto = { key, otp } as CreateSecretDto;
+      const secret = await this.secretsService.create(dto);
+      return secret.otp;
+    } catch (e) {
+      const dto = { otp } as UpdateSecretDto;
+      const secret = await this.secretsService.updateByKey(key, dto);
+      return secret.otp;
+    }
   }
 
-  // 이메일 발송 w/ 확인코드
-  async _sendCodeEmail(email: string, code: string): Promise<any> {
+  async checkOtp(key: string, otp: string): Promise<void> {
+    const secret = await this.secretsService.findByKey(key);
+    if (!secret) {
+      throw new BadRequestException('otp expired');
+    } else if (secret.otp !== otp) {
+      throw new BadRequestException('otp mismatched');
+    }
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? with Cache
+  //?-------------------------------------------------------------------------//
+
+  async _generateOtpWithCache(key: string, length = 6): Promise<string> {
+    const otp = random.generate({ length, charset: 'numeric' });
+    const cacheKey = this._getCacheKey(key);
+    await this.cacheManager.set(cacheKey, otp, 60 * 10);
+    return otp;
+  }
+
+  async checkOtpWithCache(key: string, otp: string): Promise<void> {
+    const cacheKey = this._getCacheKey(key);
+    const cachedOtp = await this.cacheManager.get(cacheKey);
+    if (!cachedOtp) {
+      throw new BadRequestException('otp expired');
+    } else if (cachedOtp !== otp) {
+      throw new BadRequestException('otp mismatched');
+    }
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? send SMS or email
+  //?-------------------------------------------------------------------------//
+
+  async _sendSmsTo(phone: string, otp: string): Promise<any> {
+    const body = `미소 인증코드 ${otp}`;
+    try {
+      await this.smsClient.send({
+        to: phone,
+        content: body,
+      });
+    } catch (e) {
+      console.log(e);
+      throw new BadRequestException('aws-ses error');
+    }
+  }
+
+  async _sendEmailTemplateTo(email: string, otp: string): Promise<any> {
     const params = {
       Destination: {
         CcAddresses: [],
@@ -318,7 +385,7 @@ export class AuthService {
       },
       Source: 'Flea Auction <no-reply@fleaauction.world>',
       Template: 'EmailCodeTemplate',
-      TemplateData: `{ "code": "${code}" }`,
+      TemplateData: `{ "code": "${otp}" }`,
     };
     try {
       return await this.ses.sendTemplatedEmail(params).promise();
@@ -328,8 +395,7 @@ export class AuthService {
     }
   }
 
-  // 이메일 발송 w/ no template
-  async _sendEmail(email: string, message: string): Promise<any> {
+  async _sendEmailTo(email: string, message: string): Promise<any> {
     const params = {
       Destination: {
         CcAddresses: [],
@@ -375,7 +441,7 @@ export class AuthService {
       throw new BadRequestException('too many attempts');
     }
 
-    const secret = await this._setOtpWithKey(key);
-    this._sendCodeEmail(email, secret);
+    const otp = await this._generateOtpWithCache(key);
+    this._sendEmailTemplateTo(email, otp);
   }
 }

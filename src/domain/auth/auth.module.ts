@@ -1,4 +1,5 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
+import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config/dist/config.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -8,6 +9,7 @@ import { AuthService } from 'src/domain/auth/auth.service';
 import { FirebaseStrategy } from 'src/domain/auth/strategies/firebase.strategy';
 import { JwtAuthStrategy } from 'src/domain/auth/strategies/jwt-auth.strategy';
 import { JwtRefreshStrategy } from 'src/domain/auth/strategies/jwt-refresh.strategy';
+import { SecretsModule } from 'src/domain/secrets/secrets.module';
 import { ProvidersModule } from 'src/domain/users/providers.module';
 import { UsersModule } from 'src/domain/users/users.module';
 import { SesModule } from 'src/services/aws/ses.module';
@@ -16,6 +18,7 @@ import { SesModule } from 'src/services/aws/ses.module';
     UsersModule,
     ProvidersModule,
     PassportModule,
+    SecretsModule,
     SesModule,
     JwtModule.register({}),
     CacheModule.registerAsync({

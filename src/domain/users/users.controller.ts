@@ -193,7 +193,7 @@ export class UsersController {
   @ApiOperation({ description: 'OTP 발송' })
   @HttpCode(HttpStatus.OK)
   @Post('otp')
-  async(@Body() dto: SmsMessageDto): Promise<any> {
+  async sendOtp(@Body() dto: SmsMessageDto): Promise<void> {
     await this.smsClient.send({
       to: dto.phone,
       content: dto.body,

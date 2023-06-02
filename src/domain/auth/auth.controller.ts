@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Patch,
   Post,
   Query,
@@ -44,35 +45,40 @@ export class AuthController {
   }
 
   // any existing emails will NOT be accepted.
-  @ApiOperation({ description: '새이메일 확인 후 OTP 전송' })
+  @ApiOperation({ description: 'non-existing key(phone/email) OTP 발급' })
   @HttpCode(HttpStatus.OK)
   @Public()
   @ApiCreatedResponse({ description: 'validate 성공' })
-  @Post('validate')
-  async validateEmailAndSendOtp(@Body('email') email): Promise<any> {
-    await this.authService.takeNewEmailAndSendOtp(email);
+  @Post('upsert/:key')
+  async validateEmailAndSendOtp(@Param('key') key: string): Promise<any> {
+    await this.authService.sendOtpForNonExistingUser(key);
     return { data: 'ok' };
   }
 
   // any new emails will NOT be accepted.
-  @ApiOperation({ description: '기이메일 확인 후 OTP 전송' })
+  @ApiOperation({ description: 'existing key(phone/email) OTP 발급' })
   @HttpCode(HttpStatus.OK)
   @Public()
-  @Post('forgot')
-  async forgotEmailAndSendOtp(@Body('email') email): Promise<any> {
-    await this.authService.takeExistingEmailAndSendOtp(email);
+  @Post('forgot/:key')
+  async sendOtpForExistingUser(@Param('key') key: string): Promise<any> {
+    await this.authService.sendOtpForExistingUser(key);
     return { data: 'ok' };
   }
 
-  @ApiOperation({ description: '이메일 OTP 확인' })
+  @ApiOperation({ description: '주어긴 key 에 대하여, OTP 코드 확인' })
   @HttpCode(HttpStatus.OK)
   @Public()
   @Get('otp')
-  async validateOtp(
-    @Query('email') email: string,
+  async checkOtp(
+    @Query('key') key: string, // phone or email
     @Query('code') code: string,
+    @Query('cache') cache?: string,
   ): Promise<any> {
-    await this.authService.validateOtp(email, code);
+    if (cache !== null) {
+      await this.authService.checkOtp(key, code);
+    } else {
+      await this.authService.checkOtpWithCache(key, code);
+    }
     return { data: 'ok' };
   }
 
