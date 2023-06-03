@@ -12,7 +12,7 @@ import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { CreateSecretDto } from 'src/domain/secrets/dto/create-secret.dto';
 import { UpdateSecretDto } from 'src/domain/secrets/dto/update-secret.dto';
-import { Secret } from 'src/domain/secrets/secret.entity';
+import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { SecretsService } from 'src/domain/secrets/secrets.service';
 @Controller('secrets')
 export class SecretsController {

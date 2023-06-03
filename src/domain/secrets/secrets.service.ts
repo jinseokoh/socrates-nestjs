@@ -9,7 +9,7 @@ import {
 } from 'nestjs-paginate';
 import { CreateSecretDto } from 'src/domain/secrets/dto/create-secret.dto';
 import { UpdateSecretDto } from 'src/domain/secrets/dto/update-secret.dto';
-import { Secret } from 'src/domain/secrets/secret.entity';
+import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { Repository } from 'typeorm';
 @Injectable()
 export class SecretsService {
@@ -30,7 +30,7 @@ export class SecretsService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  // 공지사항 리스트
+  // 비밀번호 리스트
   async findAll(query: PaginateQuery): Promise<Paginated<Secret>> {
     const config: PaginateConfig<Secret> = {
       sortableColumns: ['key'],
@@ -44,27 +44,16 @@ export class SecretsService {
     return await paginate(query, this.repository, config);
   }
 
-  // 공지사항 상세보기
-  async findByKey(key: string, relations: string[] = []): Promise<Secret> {
-    try {
-      return relations.length > 0
-        ? await this.repository.findOneOrFail({
-            where: { key },
-            relations,
-          })
-        : await this.repository.findOneOrFail({
-            where: { key },
-          });
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
+  // 비밀번호 상세보기
+  async findByKey(key: string): Promise<Secret | null> {
+    return await this.repository.findOne({
+      where: { key },
+    });
   }
 
   async count(key: string): Promise<number> {
     return await this.repository.count({
-      where: {
-        key,
-      },
+      where: { key },
     });
   }
 

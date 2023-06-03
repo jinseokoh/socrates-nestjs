@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SecretsController } from 'src/domain/secrets/secrets.controller';
 import { SecretsService } from 'src/domain/secrets/secrets.service';
-import { Secret } from './secret.entity';
+import { Secret } from './entities/secret.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Secret])],
   exports: [SecretsService],

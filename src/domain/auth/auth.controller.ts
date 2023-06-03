@@ -23,6 +23,7 @@ import { UserCredentialsDto } from 'src/domain/auth/dto/user-credentials.dto';
 import { UserSocialIdDto } from 'src/domain/auth/dto/user-social-id.dto';
 import { JwtRefreshGuard } from 'src/domain/auth/guards/jwt-refresh.guard';
 import { Tokens } from 'src/domain/auth/types/tokens.type';
+import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { HashPasswordPipe } from 'src/domain/users/pipes/hash-password.pipe';
 import { UniqueKeysPipe } from 'src/domain/users/pipes/unique-keys.pipe';
 @UseInterceptors(ClassSerializerInterceptor)
@@ -44,18 +45,31 @@ export class AuthController {
     return await this.authService.register(dto);
   }
 
-  // any existing emails will NOT be accepted.
+  // 본인인증시 OTP 발송
+  // 1) if any user w/ phone or email exists
+  //   throw an exception
+  // 2) if any user w/ phone or email doesn't exist
+  //   - if otp doesn't exist, issue one
+  //   - if otp exists
+  //     - if the otp issued within 2 mins, throw an exception
+  //     - reissue one
   @ApiOperation({ description: 'non-existing key(phone/email) OTP 발급' })
   @HttpCode(HttpStatus.OK)
   @Public()
-  @ApiCreatedResponse({ description: 'validate 성공' })
-  @Post('upsert/:key')
+  @ApiCreatedResponse({ description: 'otp 발송' })
+  @Post(':key/otp')
   async validateEmailAndSendOtp(@Param('key') key: string): Promise<any> {
     await this.authService.sendOtpForNonExistingUser(key);
     return { data: 'ok' };
   }
 
-  // any new emails will NOT be accepted.
+  // 전화번호(이메일) 업데이트
+  // prerequisite)
+  // - 기존정보 확인 (전화번호나 이메일)
+  // - any user associated w/ old phone or email must exist.
+  // - 비번 확인
+  // 1) any user associated w/ new phone or email must not exist.
+  // 2) 바꿀 새로운 phone or email 로 비번 전송
   @ApiOperation({ description: 'existing key(phone/email) OTP 발급' })
   @HttpCode(HttpStatus.OK)
   @Public()
@@ -65,20 +79,25 @@ export class AuthController {
     return { data: 'ok' };
   }
 
-  @ApiOperation({ description: '주어긴 key 에 대하여, OTP 코드 확인' })
+  // validation (is E)
+  @ApiOperation({ description: '발급한 OTP 코드 확인' })
   @HttpCode(HttpStatus.OK)
   @Public()
-  @Get('otp')
+  @Post(':key/otp/:otp')
   async checkOtp(
-    @Query('key') key: string, // phone or email
-    @Query('code') code: string,
-    @Query('cache') cache?: string,
+    @Param('key') key: string,
+    @Param('otp') otp: string,
+    @Query('cache') cache: string | null,
+    @Body() dto: UpdateUserDto,
   ): Promise<any> {
     if (cache !== null) {
-      await this.authService.checkOtp(key, code);
+      await this.authService.checkOtp(key, otp);
     } else {
-      await this.authService.checkOtpWithCache(key, code);
+      await this.authService.checkOtpWithCache(key, otp);
     }
+
+    // update user with dto
+
     return { data: 'ok' };
   }
 

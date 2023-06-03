@@ -27,7 +27,7 @@ import { getUsername } from 'src/helpers/random-username';
 import { SecretsService } from 'src/domain/secrets/secrets.service';
 import { CreateSecretDto } from 'src/domain/secrets/dto/create-secret.dto';
 import { UpdateSecretDto } from 'src/domain/secrets/dto/update-secret.dto';
-import { Secret } from 'src/domain/secrets/secret.entity';
+import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 
 @Injectable()
@@ -103,35 +103,38 @@ export class AuthService {
 
   // 새로운 전화번호/이메일 확인 후 OTP 전송
   async sendOtpForNonExistingUser(key: string, cache = false): Promise<void> {
-    const user = await this.usersService.findByUniqueKey({ where: { key } });
+    const where = key.includes('@') ? { email: key } : { phone: key };
+    const user = await this.usersService.findByUniqueKey({ where });
     if (user) {
-      throw new BadRequestException('Record with the key already exists');
+      throw new BadRequestException('User with the key already exists');
     }
     const otp = cache
       ? await this._generateOtpWithCache(key)
       : await this._generateOtp(key);
 
-    if (key === 'phone') {
-      await this._sendSmsTo(key, otp);
-    } else {
+    if (key.includes('@')) {
+      // @ is email signiture
       await this._sendEmailTemplateTo(key, otp);
+    } else {
+      await this._sendSmsTo(key, otp);
     }
   }
 
   // 기존 전화번호/이메일 확인 후 OTP 전송
   async sendOtpForExistingUser(key: string, cache = false): Promise<void> {
-    const user = await this.usersService.findByUniqueKey({ where: { key } });
+    const where = key.includes('@') ? { email: key } : { phone: key };
+    const user = await this.usersService.findByUniqueKey({ where });
     if (!user) {
-      throw new NotFoundException('Record associated with the key not found');
+      throw new NotFoundException('User associated with the key not found');
     }
     const otp = cache
       ? await this._generateOtpWithCache(key)
       : await this._generateOtp(key);
 
-    if (key === 'phone') {
-      await this._sendSmsTo(key, otp);
-    } else {
+    if (key.includes('@')) {
       await this._sendEmailTemplateTo(key, otp);
+    } else {
+      await this._sendSmsTo(key, otp);
     }
   }
 
@@ -319,22 +322,35 @@ export class AuthService {
 
   async _generateOtp(key: string, length = 6): Promise<string> {
     const otp = random.generate({ length, charset: 'numeric' });
-    try {
-      const dto = { key, otp } as CreateSecretDto;
-      const secret = await this.secretsService.create(dto);
-      return secret.otp;
-    } catch (e) {
+    const threeMinsAgo = moment().subtract(3, 'minutes');
+    const secret = await this.secretsService.findByKey(key);
+
+    if (secret) {
+      const issuedAt = moment(secret.updatedAt);
+      if (issuedAt.isAfter(threeMinsAgo)) {
+        throw new BadRequestException('try again in 3 minutes');
+      }
       const dto = { otp } as UpdateSecretDto;
-      const secret = await this.secretsService.updateByKey(key, dto);
-      return secret.otp;
+      await this.secretsService.updateByKey(key, dto);
+      return otp;
+    } else {
+      const dto = { key, otp } as CreateSecretDto;
+      await this.secretsService.create(dto);
+      return otp;
     }
   }
 
   async checkOtp(key: string, otp: string): Promise<void> {
+    const threeMinsAgo = moment().subtract(3, 'minutes');
     const secret = await this.secretsService.findByKey(key);
     if (!secret) {
+      throw new BadRequestException('otp does not exist');
+    }
+    const issuedAt = moment(secret.updatedAt);
+    if (issuedAt.isBefore(threeMinsAgo)) {
       throw new BadRequestException('otp expired');
-    } else if (secret.otp !== otp) {
+    }
+    if (secret.otp !== otp) {
       throw new BadRequestException('otp mismatched');
     }
   }
@@ -365,7 +381,7 @@ export class AuthService {
   //?-------------------------------------------------------------------------//
 
   async _sendSmsTo(phone: string, otp: string): Promise<any> {
-    const body = `미소 인증코드 ${otp}`;
+    const body = `[미소] 인증코드 ${otp}`;
     try {
       await this.smsClient.send({
         to: phone,
@@ -383,7 +399,7 @@ export class AuthService {
         CcAddresses: [],
         ToAddresses: [email],
       },
-      Source: 'Flea Auction <no-reply@fleaauction.world>',
+      Source: 'MeSo <no-reply@meetsocrates.kr>',
       Template: 'EmailCodeTemplate',
       TemplateData: `{ "code": "${otp}" }`,
     };
@@ -419,7 +435,7 @@ export class AuthService {
           Data: 'Test email',
         },
       },
-      Source: 'Flea Auction <no-reply@fleaauction.world>',
+      Source: 'MeSo <no-reply@meetsocrates.kr>',
       // ReplyToAddresses: ['chuck@fleaauction.co'],
     };
 
