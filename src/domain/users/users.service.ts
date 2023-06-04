@@ -6,6 +6,7 @@ import {
   Logger,
   NotAcceptableException,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -319,64 +320,73 @@ export class UsersService {
 
   // 새회원 본인인증 생성) 전화번호/이메일 확인 후 OTP 전송
   async sendOtpForNonExistingUser(key: string, cache = false): Promise<void> {
-    const where = key.includes('@') ? { email: key } : { phone: key };
+    const val = key.replace(/-/gi, '');
+    const where = val.includes('@') ? { email: val } : { phone: val };
     const user = await this.findByUniqueKey({ where });
     if (user) {
-      throw new NotAcceptableException('User w/ the key already exists');
+      throw new UnprocessableEntityException('already taken');
     }
     const otp = cache
-      ? await this._generateOtpWithCache(key)
-      : await this._generateOtp(key);
+      ? await this._generateOtpWithCache(val)
+      : await this._generateOtp(val);
 
-    if (key.includes('@')) {
-      await this._sendEmailTemplateTo(key, otp);
+    if (val.includes('@')) {
+      await this._sendEmailTemplateTo(val, otp);
     } else {
-      await this._sendSmsTo(key, otp);
+      await this._sendSmsTo(val, otp);
     }
   }
 
   // 기존회원 본인인증정보 수정) 전화번호/이메일 확인 후 OTP 전송
   async sendOtpForExistingUser(key: string, cache = false): Promise<void> {
-    const where = key.includes('@') ? { email: key } : { phone: key };
+    const val = key.replace(/-/gi, '');
+    const where = val.includes('@') ? { email: val } : { phone: val };
     const user = await this.findByUniqueKey({ where });
     if (!user) {
       throw new NotFoundException('User w/ the key not found');
     }
     const otp = cache
-      ? await this._generateOtpWithCache(key)
-      : await this._generateOtp(key);
+      ? await this._generateOtpWithCache(val)
+      : await this._generateOtp(val);
 
-    if (key.includes('@')) {
-      await this._sendEmailTemplateTo(key, otp);
+    if (val.includes('@')) {
+      await this._sendEmailTemplateTo(val, otp);
     } else {
-      await this._sendSmsTo(key, otp);
+      await this._sendSmsTo(val, otp);
     }
   }
 
   // OTP 검증후 사용자정보 수정
   async checkOtp(key: string, otp: string, cache = false): Promise<void> {
+    const val = key.replace(/-/gi, '');
     if (cache) {
+      const cacheKey = this._getCacheKey(val);
+      const cachedOtp = await this.cacheManager.get(cacheKey);
+      if (!cachedOtp) {
+        throw new UnprocessableEntityException('otp expired');
+      } else if (cachedOtp !== otp) {
+        throw new UnprocessableEntityException('otp mismatched');
+      }
+    } else {
       const secret = await this.secretRepository.findOne({
-        where: { key },
+        where: { key: val },
       });
       if (!secret) {
-        throw new BadRequestException("otp doesn't exist");
+        throw new UnprocessableEntityException('otp unavailable');
       }
       const issuedAt = moment(secret.updatedAt);
       const threeMinsAgo = moment().subtract(3, 'minutes');
-      if (issuedAt.isBefore(threeMinsAgo)) {
-        throw new BadRequestException('otp expired');
+
+      console.log(`${issuedAt} < ${threeMinsAgo}`);
+      console.log(`isAfter ${issuedAt.isAfter(threeMinsAgo)}`);
+      console.log(`isBefore ${issuedAt.isBefore(threeMinsAgo)}`);
+      console.log(`${issuedAt} < ${threeMinsAgo}`);
+
+      if (issuedAt.isAfter(threeMinsAgo)) {
+        throw new UnprocessableEntityException(`otp expired`);
       }
       if (secret.otp !== otp) {
-        throw new BadRequestException('otp mismatched');
-      }
-    } else {
-      const cacheKey = this._getCacheKey(key);
-      const cachedOtp = await this.cacheManager.get(cacheKey);
-      if (!cachedOtp) {
-        throw new BadRequestException('otp expired');
-      } else if (cachedOtp !== otp) {
-        throw new BadRequestException('otp mismatched');
+        throw new UnprocessableEntityException('otp mismatched');
       }
     }
   }

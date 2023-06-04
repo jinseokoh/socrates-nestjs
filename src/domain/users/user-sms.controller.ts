@@ -87,6 +87,7 @@ export class UserSmsController {
     @Query('cache') cache: string | null,
     @Body() dto: UpdateUserDto,
   ): Promise<User> {
+    console.log(!!cache);
     await this.usersService.checkOtp(key, otp, !!cache);
     return this.usersService.update(id, dto);
   }
