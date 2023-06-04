@@ -52,6 +52,8 @@ export class UserMeetupsController {
     //? checking if this meetup belongs to the user costs a database access,
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
+
+    console.log(userId, meetupId);
     try {
       await this.usersService.attachToLikePivot(userId, meetupId);
       return {

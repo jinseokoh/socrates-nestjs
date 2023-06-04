@@ -322,7 +322,7 @@ export class UsersService {
     const where = key.includes('@') ? { email: key } : { phone: key };
     const user = await this.findByUniqueKey({ where });
     if (user) {
-      throw new BadRequestException('User w/ the key already exists');
+      throw new NotAcceptableException('User w/ the key already exists');
     }
     const otp = cache
       ? await this._generateOtpWithCache(key)
@@ -589,10 +589,20 @@ export class UsersService {
 
   // 찜 리스트에 추가
   async attachToLikePivot(userId: number, meetupId: number): Promise<any> {
+    const [row] = await this.repository.query(
+      'SELECT COUNT(*) AS cnt FROM `like` WHERE userId = ?',
+      [userId],
+    );
+    const count = row.cnt;
+    if (+count >= 10) {
+      throw new NotAcceptableException('reached maximum count');
+    }
+
     const { affectedRows } = await this.repository.manager.query(
       'INSERT IGNORE INTO `like` (userId, meetupId) VALUES (?, ?)',
       [userId, meetupId],
     );
+
     if (affectedRows > 0) {
       await this.meetupRepository.increment({ id: meetupId }, 'likeCount', 1);
     }
@@ -744,7 +754,7 @@ export class UsersService {
         meetup.matches.filter((v) => meetup.userId === v.askedUserId).length >=
         20
       ) {
-        throw new NotAcceptableException('has reached maximum count');
+        throw new NotAcceptableException('reached maximum count');
       }
       // await this.attachToLikePivot(askingUserId, meetupId);
     } else {
