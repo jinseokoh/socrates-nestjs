@@ -21,17 +21,17 @@ import { SesModule } from 'src/services/aws/ses.module';
     SecretsModule,
     SesModule,
     JwtModule.register({}),
-    CacheModule.registerAsync({
-      isGlobal: true,
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        store: redisStore,
-        host: configService.get('redis.host'),
-        port: configService.get('redis.port'),
-        db: 0,
-        ttl: 60 * 3, // default to 3 mins
-      }),
-    }),
+    // CacheModule.registerAsync({
+    //   isGlobal: true,
+    //   inject: [ConfigService],
+    //   useFactory: async (configService: ConfigService) => ({
+    //     store: redisStore,
+    //     host: configService.get('redis.host'),
+    //     port: configService.get('redis.port'),
+    //     db: 0,
+    //     ttl: 60 * 3, // default to 3 mins
+    //   }),
+    // }),
   ],
   providers: [
     AuthService,

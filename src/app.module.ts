@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from 'src/app.controller';
 import * as path from 'path';
+import * as redisStore from 'cache-manager-ioredis';
 import { DynamooseModule } from 'nestjs-dynamoose';
 import { getAwsDatabaseConfig } from 'src/common/config/aws-database';
 import { configuration } from 'src/common/config/configuration';
@@ -72,7 +73,18 @@ import { CacheModule } from '@nestjs/cache-manager';
         suffix: '-table',
       },
     }),
-    CacheModule.register(),
+    // CacheModule.register(),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        store: redisStore,
+        host: configService.get('redis.host'),
+        port: configService.get('redis.port'),
+        db: 0,
+        ttl: 60 * 3, // default to 3 mins
+      }),
+    }),
     NaverModule,
     AuthModule,
     RoomsModule,

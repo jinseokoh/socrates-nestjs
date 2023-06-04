@@ -6,29 +6,33 @@ import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/meetups/entities/hate.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
+import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { UserFcmController } from 'src/domain/users/user-fcm.controller';
 import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
 import { UserMeetupsController } from 'src/domain/users/user-meetups.controller';
+import { UserSmsController } from 'src/domain/users/user-sms.controller';
 import { UsersController } from 'src/domain/users/users.controller';
 import { UsersService } from 'src/domain/users/users.service';
-import { S3Module } from 'src/services/aws/s3.module';
 import { CrawlerModule } from 'src/services/crawler/crawler.module';
+import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
-import { UserSmsController } from 'src/domain/users/user-sms.controller';
+import { SesModule } from 'src/services/aws/ses.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       User,
+      Secret,
       Profile,
       Meetup,
-      Category,
+      Match,
       Like,
       Hate,
-      Match,
+      Category,
     ]),
     S3Module,
+    SesModule,
     CrawlerModule,
     FcmModule,
   ],

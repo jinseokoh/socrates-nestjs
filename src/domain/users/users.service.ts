@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   Logger,
   NotAcceptableException,
@@ -9,6 +10,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import * as moment from 'moment';
+import * as random from 'randomstring';
 import {
   FilterOperator,
   PaginateConfig,
@@ -16,11 +18,9 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Status } from 'src/common/enums/status';
 import { AnyData } from 'src/common/types';
-import { Match } from 'src/domain/meetups/entities/match.entity';
-import { Like } from 'src/domain/meetups/entities/like.entity';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune.dto';
@@ -29,18 +29,30 @@ import { LoveFortuneDto } from 'src/domain/users/dto/love-fortune.dto';
 import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune.dto';
-import { Profile } from 'src/domain/users/entities/profile.entity';
-import { User } from 'src/domain/users/entities/user.entity';
+import { CreateSecretDto } from 'src/domain/secrets/dto/create-secret.dto';
+import { UpdateSecretDto } from 'src/domain/secrets/dto/update-secret.dto';
 import { randomName } from 'src/helpers/random-filename';
 import { getUsername } from 'src/helpers/random-username';
 import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
 import { FindOneOptions, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
+import { Match } from 'src/domain/meetups/entities/match.entity';
+import { Like } from 'src/domain/meetups/entities/like.entity';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Hate } from 'src/domain/meetups/entities/hate.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
+import { Secret } from 'src/domain/secrets/entities/secret.entity';
+import { Profile } from 'src/domain/users/entities/profile.entity';
+import { User } from 'src/domain/users/entities/user.entity';
+import { ConfigService } from '@nestjs/config';
+import { Cache } from 'cache-manager';
+import { SmsClient } from '@nestjs-packages/ncp-sens';
+import { AWS_SES_CONNECTION } from 'src/common/constants';
+import { SES } from 'aws-sdk';
 @Injectable()
 export class UsersService {
+  private readonly env: any;
   private readonly logger = new Logger(UsersService.name);
 
   constructor(
@@ -58,9 +70,17 @@ export class UsersService {
     private readonly hateRepository: Repository<Hate>,
     @InjectRepository(Match)
     private readonly matchRepository: Repository<Match>,
+    @InjectRepository(Secret)
+    private readonly secretRepository: Repository<Secret>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(AWS_SES_CONNECTION) private readonly ses: SES,
+    @Inject(ConfigService) private configService: ConfigService,
+    @Inject(SmsClient) private readonly smsClient: SmsClient,
     private readonly crawlerService: CrawlerService,
     private readonly s3Service: S3Service,
-  ) {}
+  ) {
+    this.env = this.configService.get('nodeEnv');
+  }
 
   //?-------------------------------------------------------------------------//
   //? CREATE
@@ -294,6 +314,173 @@ export class UsersService {
   }
 
   //?-------------------------------------------------------------------------//
+  //? OTP
+  //?-------------------------------------------------------------------------//
+
+  // 새회원 본인인증 생성) 전화번호/이메일 확인 후 OTP 전송
+  async sendOtpForNonExistingUser(key: string, cache = false): Promise<void> {
+    const where = key.includes('@') ? { email: key } : { phone: key };
+    const user = await this.findByUniqueKey({ where });
+    if (user) {
+      throw new BadRequestException('User w/ the key already exists');
+    }
+    const otp = cache
+      ? await this._generateOtpWithCache(key)
+      : await this._generateOtp(key);
+
+    if (key.includes('@')) {
+      await this._sendEmailTemplateTo(key, otp);
+    } else {
+      await this._sendSmsTo(key, otp);
+    }
+  }
+
+  // 기존회원 본인인증정보 수정) 전화번호/이메일 확인 후 OTP 전송
+  async sendOtpForExistingUser(key: string, cache = false): Promise<void> {
+    const where = key.includes('@') ? { email: key } : { phone: key };
+    const user = await this.findByUniqueKey({ where });
+    if (!user) {
+      throw new NotFoundException('User w/ the key not found');
+    }
+    const otp = cache
+      ? await this._generateOtpWithCache(key)
+      : await this._generateOtp(key);
+
+    if (key.includes('@')) {
+      await this._sendEmailTemplateTo(key, otp);
+    } else {
+      await this._sendSmsTo(key, otp);
+    }
+  }
+
+  // OTP 검증후 사용자정보 수정
+  async checkOtp(key: string, otp: string, cache = false): Promise<void> {
+    if (cache) {
+      const secret = await this.secretRepository.findOne({
+        where: { key },
+      });
+      if (!secret) {
+        throw new BadRequestException("otp doesn't exist");
+      }
+      const issuedAt = moment(secret.updatedAt);
+      const threeMinsAgo = moment().subtract(3, 'minutes');
+      if (issuedAt.isBefore(threeMinsAgo)) {
+        throw new BadRequestException('otp expired');
+      }
+      if (secret.otp !== otp) {
+        throw new BadRequestException('otp mismatched');
+      }
+    } else {
+      const cacheKey = this._getCacheKey(key);
+      const cachedOtp = await this.cacheManager.get(cacheKey);
+      if (!cachedOtp) {
+        throw new BadRequestException('otp expired');
+      } else if (cachedOtp !== otp) {
+        throw new BadRequestException('otp mismatched');
+      }
+    }
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? OTP 관련 privates
+  //?-------------------------------------------------------------------------//
+
+  _getCacheKey(key: string): string {
+    return `${this.env}:user:${key}:key`;
+  }
+
+  async _generateOtp(key: string, length = 6): Promise<string> {
+    const otp = random.generate({ length, charset: 'numeric' });
+    const threeMinsAgo = moment().subtract(3, 'minutes');
+    const secret = await this.secretRepository.findOne({
+      where: { key },
+    });
+
+    if (secret) {
+      const issuedAt = moment(secret.updatedAt);
+      if (issuedAt.isAfter(threeMinsAgo)) {
+        throw new BadRequestException('try again in 3 minutes');
+      }
+      const dto = { otp } as UpdateSecretDto;
+      await this.secretRepository.update(secret.id, dto);
+      return otp;
+    } else {
+      const dto = { key, otp } as CreateSecretDto;
+      await this.secretRepository.save(this.secretRepository.create(dto));
+      return otp;
+    }
+  }
+
+  async _generateOtpWithCache(key: string, length = 6): Promise<string> {
+    const otp = random.generate({ length, charset: 'numeric' });
+    const cacheKey = this._getCacheKey(key);
+    await this.cacheManager.set(cacheKey, otp, 60 * 10);
+    return otp;
+  }
+
+  async _sendSmsTo(phone: string, otp: string): Promise<any> {
+    const body = `[미소] 인증코드 ${otp}`;
+    try {
+      await this.smsClient.send({
+        to: phone,
+        content: body,
+      });
+    } catch (e) {
+      console.log(e);
+      throw new BadRequestException('aws-ses error');
+    }
+  }
+
+  async _sendEmailTemplateTo(email: string, otp: string): Promise<any> {
+    const params = {
+      Destination: {
+        CcAddresses: [],
+        ToAddresses: [email],
+      },
+      Source: 'MeSo <no-reply@meetsocrates.kr>',
+      Template: 'EmailCodeTemplate',
+      TemplateData: `{ "code": "${otp}" }`,
+    };
+    try {
+      return await this.ses.sendTemplatedEmail(params).promise();
+    } catch (e) {
+      console.log(e);
+      throw new BadRequestException('aws-ses error');
+    }
+  }
+
+  async _sendEmailTo(email: string, message: string): Promise<any> {
+    const params = {
+      Destination: {
+        CcAddresses: [],
+        ToAddresses: [email],
+      },
+      Message: {
+        /* required */
+        Body: {
+          /* required */
+          Html: {
+            Charset: 'UTF-8',
+            Data: `<h1>${message}</h1>`,
+          },
+          Text: {
+            Charset: 'UTF-8',
+            Data: `${message}\n`,
+          },
+        },
+        Subject: {
+          Charset: 'UTF-8',
+          Data: 'Test email',
+        },
+      },
+      Source: 'MeSo <no-reply@meetsocrates.kr>',
+      // ReplyToAddresses: ['chuck@fleaauction.co'],
+    };
+
+    return await this.ses.sendEmail(params).promise();
+  }
+
+  //?-------------------------------------------------------------------------//
   //? Some Extra shit
   //?-------------------------------------------------------------------------//
 
@@ -315,34 +502,6 @@ export class UsersService {
       .set({ payCount: () => 'payCount - 1' })
       .where('userId = :id', { id })
       .execute();
-  }
-
-  // 내가 만든 Meetup 리스트
-  async getUserMeetups(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Meetup>> {
-    const queryBuilder = this.meetupRepository
-      .createQueryBuilder('meetup')
-      .leftJoinAndSelect('meetup.venue', 'venue')
-      .where({
-        userId,
-      });
-
-    const config: PaginateConfig<Meetup> = {
-      sortableColumns: ['createdAt', 'expiredAt'],
-      searchableColumns: ['title'],
-      defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
-      filterableColumns: {
-        region: [FilterOperator.EQ, FilterOperator.IN],
-        career: [FilterOperator.EQ, FilterOperator.IN],
-        gender: [FilterOperator.EQ, FilterOperator.IN],
-        expiredAt: [FilterOperator.GTE, FilterOperator.LT],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
   }
 
   //?-------------------------------------------------------------------------//
