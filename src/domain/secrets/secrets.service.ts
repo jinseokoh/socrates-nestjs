@@ -30,7 +30,7 @@ export class SecretsService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  // 비밀번호 리스트
+  // OTP 비밀번호 리스트
   async findAll(query: PaginateQuery): Promise<Paginated<Secret>> {
     const config: PaginateConfig<Secret> = {
       sortableColumns: ['key'],
@@ -44,7 +44,7 @@ export class SecretsService {
     return await paginate(query, this.repository, config);
   }
 
-  // 비밀번호 상세보기
+  // OTP 비밀번호 상세보기
   async findByKey(key: string): Promise<Secret | null> {
     return await this.repository.findOne({
       where: { key },

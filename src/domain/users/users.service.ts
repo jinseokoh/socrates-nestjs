@@ -374,15 +374,15 @@ export class UsersService {
       if (!secret) {
         throw new UnprocessableEntityException('otp unavailable');
       }
-      const issuedAt = moment(secret.updatedAt);
-      const threeMinsAgo = moment().subtract(3, 'minutes');
+      const expiredAt = moment(secret.updatedAt).add(3, 'minutes');
+      const now = moment();
 
-      console.log(`${issuedAt} < ${threeMinsAgo}`);
-      console.log(`isAfter ${issuedAt.isAfter(threeMinsAgo)}`);
-      console.log(`isBefore ${issuedAt.isBefore(threeMinsAgo)}`);
-      console.log(`${issuedAt} < ${threeMinsAgo}`);
+      // console.log(`${now} < ${expiredAt}`);
+      // console.log(`isAfter ${issuedAt.isAfter(threeMinsAgo)}`);
+      // console.log(`isBefore ${issuedAt.isBefore(threeMinsAgo)}`);
+      // console.log(`${issuedAt} < ${threeMinsAgo}`);
 
-      if (issuedAt.isAfter(threeMinsAgo)) {
+      if (now.isAfter(expiredAt)) {
         throw new UnprocessableEntityException(`otp expired`);
       }
       if (secret.otp !== otp) {
