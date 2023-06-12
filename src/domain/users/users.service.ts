@@ -356,7 +356,7 @@ export class UsersService {
     }
   }
 
-  // OTP 검증후 사용자정보 수정
+  // OTP 검사
   async checkOtp(key: string, otp: string, cache = false): Promise<void> {
     const val = key.replace(/-/gi, '');
     if (cache) {
@@ -374,13 +374,8 @@ export class UsersService {
       if (!secret) {
         throw new UnprocessableEntityException('otp unavailable');
       }
-      const expiredAt = moment(secret.updatedAt).add(3, 'minutes');
       const now = moment();
-
-      // console.log(`${now} < ${expiredAt}`);
-      // console.log(`isAfter ${issuedAt.isAfter(threeMinsAgo)}`);
-      // console.log(`isBefore ${issuedAt.isBefore(threeMinsAgo)}`);
-      // console.log(`${issuedAt} < ${threeMinsAgo}`);
+      const expiredAt = moment(secret.updatedAt).add(3, 'minutes');
 
       if (now.isAfter(expiredAt)) {
         throw new UnprocessableEntityException(`otp expired`);
@@ -401,14 +396,14 @@ export class UsersService {
 
   async _generateOtp(key: string, length = 6): Promise<string> {
     const otp = random.generate({ length, charset: 'numeric' });
-    const threeMinsAgo = moment().subtract(3, 'minutes');
     const secret = await this.secretRepository.findOne({
       where: { key },
     });
 
     if (secret) {
-      const issuedAt = moment(secret.updatedAt);
-      if (issuedAt.isAfter(threeMinsAgo)) {
+      const now = moment();
+      const expiredAt = moment(secret.updatedAt).add(3, 'minutes');
+      if (!now.isAfter(expiredAt)) {
         throw new BadRequestException('try again in 3 minutes');
       }
       const dto = { otp } as UpdateSecretDto;

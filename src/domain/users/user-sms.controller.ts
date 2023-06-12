@@ -17,6 +17,7 @@ import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { User } from 'src/domain/users/entities/user.entity';
 import { UsersService } from 'src/domain/users/users.service';
+import { AnyData } from 'src/common/types';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -72,12 +73,12 @@ export class UserSmsController {
   async sendOtpForExistingUser(
     @Param('key') key: string,
     @Query('cache') cache: string | null,
-  ): Promise<any> {
+  ): Promise<AnyData> {
     await this.usersService.sendOtpForExistingUser(key, !!cache);
     return { data: 'ok' };
   }
 
-  @ApiOperation({ description: 'OTP 코드 확인 후 사용자 본인인증 정보 갱신' })
+  @ApiOperation({ description: 'OTP 코드 검사' })
   @HttpCode(HttpStatus.OK)
   @Post(':key/otp/:otp')
   async checkOtp(
@@ -85,10 +86,9 @@ export class UserSmsController {
     @Param('key') key: string,
     @Param('otp') otp: string,
     @Query('cache') cache: string | null,
-    @Body() dto: UpdateUserDto,
-  ): Promise<User> {
-    console.log(!!cache);
+    // @Body() dto: UpdateUserDto,
+  ): Promise<AnyData> {
     await this.usersService.checkOtp(key, otp, !!cache);
-    return this.usersService.update(id, dto);
+    return { data: 'ok' };
   }
 }
