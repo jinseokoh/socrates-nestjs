@@ -14,8 +14,6 @@ import { ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SmsMessageDto } from 'src/domain/users/dto/sms-message.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
-import { User } from 'src/domain/users/entities/user.entity';
 import { UsersService } from 'src/domain/users/users.service';
 import { AnyData } from 'src/common/types';
 

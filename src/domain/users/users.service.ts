@@ -319,48 +319,48 @@ export class UsersService {
   //?-------------------------------------------------------------------------//
 
   // 새회원 본인인증 생성) 전화번호/이메일 확인 후 OTP 전송
-  async sendOtpForNonExistingUser(key: string, cache = false): Promise<void> {
-    const val = key.replace(/-/gi, '');
-    const where = val.includes('@') ? { email: val } : { phone: val };
+  async sendOtpForNonExistingUser(val: string, cache = false): Promise<void> {
+    const phone = val.replace(/-/gi, '');
+    const where = val.includes('@') ? { email: val } : { phone: phone };
     const user = await this.findByUniqueKey({ where });
     if (user) {
       throw new UnprocessableEntityException('already taken');
     }
     const otp = cache
-      ? await this._generateOtpWithCache(val)
-      : await this._generateOtp(val);
+      ? await this._upsertOtpWithCache(phone)
+      : await this._upsertOtp(phone);
 
     if (val.includes('@')) {
-      await this._sendEmailTemplateTo(val, otp);
+      await this._sendEmailTemplateTo(phone, otp);
     } else {
-      await this._sendSmsTo(val, otp);
+      await this._sendSmsTo(phone, otp);
     }
   }
 
   // 기존회원 본인인증정보 수정) 전화번호/이메일 확인 후 OTP 전송
-  async sendOtpForExistingUser(key: string, cache = false): Promise<void> {
-    const val = key.replace(/-/gi, '');
-    const where = val.includes('@') ? { email: val } : { phone: val };
+  async sendOtpForExistingUser(val: string, cache = false): Promise<void> {
+    const phone = val.replace(/-/gi, '');
+    const where = val.includes('@') ? { email: val } : { phone: phone };
     const user = await this.findByUniqueKey({ where });
     if (!user) {
-      throw new NotFoundException('User w/ the key not found');
+      throw new NotFoundException('user not found');
     }
     const otp = cache
-      ? await this._generateOtpWithCache(val)
-      : await this._generateOtp(val);
+      ? await this._upsertOtpWithCache(phone)
+      : await this._upsertOtp(phone);
 
     if (val.includes('@')) {
       await this._sendEmailTemplateTo(val, otp);
     } else {
-      await this._sendSmsTo(val, otp);
+      await this._sendSmsTo(phone, otp);
     }
   }
 
   // OTP 검사
-  async checkOtp(key: string, otp: string, cache = false): Promise<void> {
-    const val = key.replace(/-/gi, '');
+  async checkOtp(val: string, otp: string, cache = false): Promise<void> {
+    const phone = val.replace(/-/gi, '');
     if (cache) {
-      const cacheKey = this._getCacheKey(val);
+      const cacheKey = this._getCacheKey(phone);
       const cachedOtp = await this.cacheManager.get(cacheKey);
       if (!cachedOtp) {
         throw new UnprocessableEntityException('otp expired');
@@ -369,7 +369,7 @@ export class UsersService {
       }
     } else {
       const secret = await this.secretRepository.findOne({
-        where: { key: val },
+        where: { key: phone },
       });
       if (!secret) {
         throw new UnprocessableEntityException('otp unavailable');
@@ -394,10 +394,10 @@ export class UsersService {
     return `${this.env}:user:${key}:key`;
   }
 
-  async _generateOtp(key: string, length = 6): Promise<string> {
+  async _upsertOtp(phone: string, length = 6): Promise<string> {
     const otp = random.generate({ length, charset: 'numeric' });
     const secret = await this.secretRepository.findOne({
-      where: { key },
+      where: { key: phone },
     });
 
     if (secret) {
@@ -410,15 +410,17 @@ export class UsersService {
       await this.secretRepository.update(secret.id, dto);
       return otp;
     } else {
-      const dto = { key, otp } as CreateSecretDto;
+      const dto = new CreateSecretDto();
+      dto.key = phone;
+      dto.otp = otp;
       await this.secretRepository.save(this.secretRepository.create(dto));
       return otp;
     }
   }
 
-  async _generateOtpWithCache(key: string, length = 6): Promise<string> {
+  async _upsertOtpWithCache(phone: string, length = 6): Promise<string> {
     const otp = random.generate({ length, charset: 'numeric' });
-    const cacheKey = this._getCacheKey(key);
+    const cacheKey = this._getCacheKey(phone);
     await this.cacheManager.set(cacheKey, otp, 60 * 10);
     return otp;
   }
