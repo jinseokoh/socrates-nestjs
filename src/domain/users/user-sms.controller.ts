@@ -2,6 +2,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Inject,
@@ -78,7 +79,7 @@ export class UserSmsController {
 
   @ApiOperation({ description: 'OTP 코드 검사' })
   @HttpCode(HttpStatus.OK)
-  @Post(':key/otp/:otp')
+  @Get(':key/otp/:otp')
   async checkOtp(
     @CurrentUserId() id: number,
     @Param('key') key: string,
