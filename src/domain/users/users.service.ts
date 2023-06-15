@@ -335,7 +335,7 @@ export class UsersService {
       await this._sendEmailTemplateTo(phone, otp);
     } else {
       console.log(phone, otp);
-      // await this._sendSmsTo(phone, otp);
+      await this._sendSmsTo(phone, otp);
     }
   }
 
@@ -354,6 +354,7 @@ export class UsersService {
     if (val.includes('@')) {
       await this._sendEmailTemplateTo(val, otp);
     } else {
+      console.log(phone, otp);
       await this._sendSmsTo(phone, otp);
     }
   }
