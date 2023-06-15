@@ -11,8 +11,10 @@ import { UsersService } from 'src/domain/users/users.service';
 import { FcmTokenDto } from 'src/domain/users/dto/fcm-token.dto';
 import { FcmService } from 'src/services/fcm/fcm.service';
 import { FcmTopicDto } from 'src/domain/users/dto/fcm-topic.dto';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @UseInterceptors(ClassSerializerInterceptor)
+@SkipThrottle()
 @Controller('users')
 export class UserFcmController {
   constructor(

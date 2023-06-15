@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
@@ -17,6 +18,8 @@ import { SmsMessageDto } from 'src/domain/users/dto/sms-message.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { UsersService } from 'src/domain/users/users.service';
 import { AnyData } from 'src/common/types';
+import { ThrottlerBehindProxyGuard } from 'src/common/guards/throttler-behind-proxy.guard';
+import { Throttle } from '@nestjs/throttler';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -39,23 +42,19 @@ export class UserSmsController {
     });
   }
 
-  // 본인인증시 OTP 발송
-  // 1) if any user w/ phone or email already exists
-  //   throw an exception
-  // 2) if any user w/ phone or email doesn't exist
-  //   - if secret (otp) doesn't exist, issue one
-  //   - if secret (otp) exists
-  //     - if the otp issued within 2 mins, throw an exception
-  //     - reissue one
+  // 본인인증 OTP SMS 발송
+  // rate limiting 적용
   @ApiOperation({ description: 'non-existing key(phone/email) OTP 발급' })
+  @UseGuards(ThrottlerBehindProxyGuard)
+  @Throttle(1, 60)
   @HttpCode(HttpStatus.OK)
-  @ApiCreatedResponse({ description: 'otp 발송' })
   @Post(':key/otp')
   async validateEmailAndSendOtp(
     @Param('key') key: string,
-    @Query('cache') cache: string | null,
+    // @Query('force') force: string | undefined,
+    // @Query('cache') cache: string | undefined,
   ): Promise<any> {
-    await this.usersService.sendOtpForNonExistingUser(key, !!cache);
+    await this.usersService.sendOtpForNonExistingUser(key);
     return { data: 'ok' };
   }
 

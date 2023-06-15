@@ -64,6 +64,7 @@ async function bootstrap() {
   app.enableCors();
   app.use(helmet());
   app.use(helmet.hidePoweredBy());
+  app.set('trust proxy', true);
 
   const config = new DocumentBuilder()
     .setTitle('Socrates v1')

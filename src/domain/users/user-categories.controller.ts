@@ -11,6 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { AnyData } from 'src/common/types';
 import { Category } from 'src/domain/categories/entities/category.entity';
@@ -18,6 +19,7 @@ import { SyncCategoryDto } from 'src/domain/users/dto/sync-category.dto';
 import { UsersService } from 'src/domain/users/users.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
+@SkipThrottle()
 @Controller('users')
 export class UserCategoriesController {
   constructor(private readonly usersService: UsersService) {}

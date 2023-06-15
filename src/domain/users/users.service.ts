@@ -318,7 +318,8 @@ export class UsersService {
   //? OTP
   //?-------------------------------------------------------------------------//
 
-  // 새회원 본인인증 생성) 전화번호/이메일 확인 후 OTP 전송
+  // 본인인증 OTP SMS 발송
+  // 전화번호/이메일 확인 후 OTP 전송
   async sendOtpForNonExistingUser(val: string, cache = false): Promise<void> {
     const phone = val.replace(/-/gi, '');
     const where = val.includes('@') ? { email: val } : { phone: phone };
@@ -333,7 +334,8 @@ export class UsersService {
     if (val.includes('@')) {
       await this._sendEmailTemplateTo(phone, otp);
     } else {
-      await this._sendSmsTo(phone, otp);
+      console.log(phone, otp);
+      // await this._sendSmsTo(phone, otp);
     }
   }
 
@@ -396,26 +398,8 @@ export class UsersService {
 
   async _upsertOtp(phone: string, length = 6): Promise<string> {
     const otp = random.generate({ length, charset: 'numeric' });
-    const secret = await this.secretRepository.findOne({
-      where: { key: phone },
-    });
-
-    if (secret) {
-      const now = moment();
-      const expiredAt = moment(secret.updatedAt).add(3, 'minutes');
-      if (!now.isAfter(expiredAt)) {
-        throw new BadRequestException('try again in 3 minutes');
-      }
-      const dto = { otp } as UpdateSecretDto;
-      await this.secretRepository.update(secret.id, dto);
-      return otp;
-    } else {
-      const dto = new CreateSecretDto();
-      dto.key = phone;
-      dto.otp = otp;
-      await this.secretRepository.save(this.secretRepository.create(dto));
-      return otp;
-    }
+    await this.secretRepository.upsert([{ key: phone, otp: otp }], ['key']);
+    return otp;
   }
 
   async _upsertOtpWithCache(phone: string, length = 6): Promise<string> {

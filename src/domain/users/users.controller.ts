@@ -42,7 +42,9 @@ import { multerOptions } from 'src/helpers/multer-options';
 import { AvatarInterceptor } from './interceptors/avatar-interceptor';
 import { SmsMessageDto } from 'src/domain/users/dto/sms-message.dto';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
+import { SkipThrottle } from '@nestjs/throttler';
 @UseInterceptors(ClassSerializerInterceptor)
+@SkipThrottle()
 @Controller('users')
 export class UsersController {
   constructor(

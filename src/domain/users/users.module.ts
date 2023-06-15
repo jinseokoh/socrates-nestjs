@@ -18,6 +18,7 @@ import { CrawlerModule } from 'src/services/crawler/crawler.module';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
 import { SesModule } from 'src/services/aws/ses.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -31,6 +32,10 @@ import { SesModule } from 'src/services/aws/ses.module';
       Hate,
       Category,
     ]),
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 2,
+    }),
     S3Module,
     SesModule,
     CrawlerModule,
