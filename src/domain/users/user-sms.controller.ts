@@ -46,7 +46,7 @@ export class UserSmsController {
   // rate limiting 적용
   @ApiOperation({ description: 'non-existing key(phone/email) OTP 발급' })
   @UseGuards(ThrottlerBehindProxyGuard)
-  @Throttle(1, 60)
+  @Throttle(2, 60)
   @HttpCode(HttpStatus.OK)
   @Post(':key/otp')
   async validateEmailAndSendOtp(
