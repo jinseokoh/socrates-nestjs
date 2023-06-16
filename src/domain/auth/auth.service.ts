@@ -138,17 +138,15 @@ export class AuthService {
       return tokens;
     }
     // in case user w/ firebase-email not found
-    const genderEnum: Gender | null = dto.gender
+    const createUserDto = new CreateUserDto();
+    createUserDto.email = dto.email;
+    createUserDto.gender = dto.gender
       ? dto.gender.toLowerCase().startsWith('f')
         ? Gender.FEMALE
         : Gender.MALE
       : null;
-
-    const user = await this.usersService.create({
-      ...dto,
-      gender: genderEnum,
-      isActive: true,
-    });
+    createUserDto.isActive = true;
+    const user = await this.usersService.create(createUserDto);
     await this.providersService.create({ ...dto, userId: user.id });
     const tokens = await this._getTokens(user);
     const username = getUsername(user.id);
