@@ -1,9 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
-import { Day, Expense, Region, Time, Gender } from 'src/common/enums';
-import { Category as CategoryEnum } from 'src/common/enums/category';
-import { SubCategory } from 'src/common/enums/subcategory';
+import {
+  Day,
+  Expense,
+  Region,
+  Time,
+  Gender,
+  Career as CareerEnum,
+  Category as CategoryEnum,
+  SubCategory,
+} from 'src/common/enums';
 import { Match } from 'src/domain/meetups/entities/match.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
@@ -60,9 +67,13 @@ export class Meetup {
   @ApiProperty({ description: 'gender looking for' })
   targetGender: Gender | null;
 
-  @Column({ length: 64, default: 'all' })
+  @Column({
+    type: 'set',
+    enum: CareerEnum,
+    default: [CareerEnum.ALL],
+  })
   @ApiProperty({ description: 'comma separated target career list' })
-  targetCareers: string;
+  targetCareers: CareerEnum[];
 
   @Column({
     type: 'enum',

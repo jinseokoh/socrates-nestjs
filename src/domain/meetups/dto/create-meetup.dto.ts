@@ -10,8 +10,12 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Category, Region, SubCategory } from 'src/common/enums';
-import { Career } from 'src/common/enums/career';
+import {
+  Category,
+  Region,
+  SubCategory,
+  Career as CareerEnum,
+} from 'src/common/enums';
 import { Day } from 'src/common/enums/day';
 import { Expense } from 'src/common/enums/expense';
 import { Gender } from 'src/common/enums/gender';
@@ -41,15 +45,15 @@ export class CreateMeetupDto {
   @IsEnum(SubCategory)
   subCategory: SubCategory;
 
-  @ApiProperty({ description: '노출하는 성별', required: false })
+  @ApiProperty({ description: '상대방 성별', required: false })
   @IsEnum(Gender)
   @IsOptional()
   targetGender: Gender | null;
 
-  @ApiProperty({ description: '노출하는 career', default: 'all' })
-  @IsString()
+  @ApiProperty({ description: '상대방 careers', default: ['all'] })
+  @IsArray()
   @IsOptional()
-  targetCareers: string;
+  targetCareers: CareerEnum[];
 
   @ApiProperty({ description: 'region', default: Region.SEOUL })
   @IsEnum(Region)
