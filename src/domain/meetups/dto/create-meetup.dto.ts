@@ -44,12 +44,12 @@ export class CreateMeetupDto {
   @ApiProperty({ description: '노출하는 성별', required: false })
   @IsEnum(Gender)
   @IsOptional()
-  gender: Gender | null;
+  targetGender: Gender | null;
 
-  @ApiProperty({ description: '노출하는 career', required: false })
-  @IsEnum(Career)
+  @ApiProperty({ description: '노출하는 career', default: 'all' })
+  @IsString()
   @IsOptional()
-  career: Career | null;
+  targetCareers: string;
 
   @ApiProperty({ description: 'region', default: Region.SEOUL })
   @IsEnum(Region)
