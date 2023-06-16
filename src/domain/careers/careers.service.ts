@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Career as CareerEnum } from 'src/common/enums/career';
+import { Career as CareerEnum } from 'src/common/enums';
 import { AnyData } from 'src/common/types';
 import { Career } from 'src/domain/careers/entities/career.entity';
 
@@ -47,7 +47,7 @@ export class CareersService {
     let career;
 
     const root = new Career();
-    root.slug = 'root';
+    root.slug = 'all';
     await this.repository.manager.save(root);
 
     career = new Career();
@@ -112,6 +112,11 @@ export class CareersService {
     await this.repository.manager.save(career);
     career = new Career();
     career.slug = CareerEnum.COMMERCE;
+    career.depth = 1;
+    career.parent = root;
+    await this.repository.manager.save(career);
+    career = new Career();
+    career.slug = CareerEnum.SALES;
     career.depth = 1;
     career.parent = root;
     await this.repository.manager.save(career);

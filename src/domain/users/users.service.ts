@@ -538,8 +538,9 @@ export class UsersService {
       defaultSortBy: [['createdAt', 'DESC']],
       filterableColumns: {
         region: [FilterOperator.EQ, FilterOperator.IN],
-        career: [FilterOperator.EQ, FilterOperator.IN],
-        gender: [FilterOperator.EQ, FilterOperator.IN],
+        category: [FilterOperator.EQ, FilterOperator.IN],
+        subCategory: [FilterOperator.EQ, FilterOperator.IN],
+        targetGender: [FilterOperator.EQ, FilterOperator.IN],
         expiredAt: [FilterOperator.GTE, FilterOperator.LT],
       },
     };

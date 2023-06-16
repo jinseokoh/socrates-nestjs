@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
-import { Day, Expense, Gender, Region, Time } from 'src/common/enums';
-import { Career } from 'src/common/enums/career';
+import { Day, Expense, Region, Time, Gender } from 'src/common/enums';
 import { Category as CategoryEnum } from 'src/common/enums/category';
 import { SubCategory } from 'src/common/enums/subcategory';
 import { Match } from 'src/domain/meetups/entities/match.entity';
@@ -25,6 +24,7 @@ import {
 } from 'typeorm';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/meetups/entities/hate.entity';
+import { Career } from 'src/domain/careers/entities/career.entity';
 
 @Entity() // 작품
 export class Meetup {
@@ -58,11 +58,11 @@ export class Meetup {
 
   @Column({ type: 'enum', enum: Gender, default: null })
   @ApiProperty({ description: 'gender looking for' })
-  gender: Gender | null;
+  targetGender: Gender | null;
 
-  @Column({ type: 'enum', enum: Career, default: null })
-  @ApiProperty({ description: 'career looking career' })
-  career: Career | null;
+  @Column({ length: 64, default: 'all' })
+  @ApiProperty({ description: 'comma separated target career list' })
+  targetCareers: string;
 
   @Column({
     type: 'enum',
@@ -166,9 +166,9 @@ export class Meetup {
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany
 
-  // @ManyToMany(() => Region, (region) => region.meetups)
-  // @JoinTable({ name: 'meetup_region' }) // owning side
-  // regions: Region[];
+  @ManyToMany(() => Career, (career) => career.meetups)
+  @JoinTable({ name: 'meetup_career' }) // owning side
+  careers: Career[];
 
   @ManyToMany(() => Category, (category) => category.meetups)
   @JoinTable({ name: 'meetup_category' }) // owning side

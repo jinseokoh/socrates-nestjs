@@ -1,5 +1,6 @@
 export * from './category';
 export * from './subcategory';
+export * from './career';
 export * from './content-category';
 export * from './content-subcategory';
 export * from './day';

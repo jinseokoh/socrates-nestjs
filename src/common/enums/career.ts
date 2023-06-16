@@ -1,4 +1,5 @@
 export enum Career {
+  ALL = 'all',
   STUDENT = 'student',
   ACCOUNTING = 'accounting',
   HR = 'hr',
@@ -12,6 +13,7 @@ export enum Career {
   BIO = 'bio',
   FINANCE = 'finance',
   COMMERCE = 'commerce',
+  SALES = 'sales',
   MEDIA = 'media',
   ART = 'art',
   FOOD = 'food',

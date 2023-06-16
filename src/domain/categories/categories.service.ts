@@ -50,7 +50,7 @@ export class CategoriesService {
     let challenge: Category;
 
     const root = new Category();
-    root.slug = 'root';
+    root.slug = 'all';
     await this.repository.manager.save(root);
 
     // challenge

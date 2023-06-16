@@ -4,7 +4,7 @@ export enum SubCategory {
   BOOK = 'book', // 독서
   LANGUAGE = 'language', // 외국어,언어교환
   CODING = 'coding', // 코딩
-  YOUTUBER = 'youtuber', // 유튜브창업
+  YOUTUBER = 'youtuber', // 유튜브영상제작
   ENTREPRENEURSHIP = 'entrepreneurship', // 창업
   STOCKS = 'stocks', // 주식,재테크
   ONE_DAY_CLASS = 'oneDayClass', // 일일체험
