@@ -132,6 +132,7 @@ export class MeetupsController {
     if (mimeType) {
       return await this.meetupsService.getSignedUrl(id, mimeType);
     }
-    return { upload: '', image: '' }; // todo. do something meaningful like throwing an exception. idiot!
+    // todo. do something meaningful like throwing an exception here!
+    return { upload: '', image: '' };
   }
 }

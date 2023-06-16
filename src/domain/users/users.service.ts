@@ -21,7 +21,7 @@ import {
 } from 'nestjs-paginate';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Status } from 'src/common/enums/status';
-import { AnyData } from 'src/common/types';
+import { AnyData, SignedUrl } from 'src/common/types';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune.dto';
@@ -208,23 +208,6 @@ export class UsersService {
     return await this.repository.save(user);
   }
 
-  // User 프로필사진 갱신
-  async upload(id: number, file: Express.Multer.File): Promise<User> {
-    // see if id is valid
-    await this.findById(id);
-    const path = `local/users/${id}/${randomName('avatar')}`;
-    try {
-      // image processing using Jimp
-      await this.s3Service.uploadWithResizing(file, path, 640);
-    } catch (e) {
-      console.log(e);
-    }
-    // upload the manipulated image to S3
-    // update users table
-    const avatar = `${process.env.AWS_CLOUDFRONT_URL}/${path}`;
-    return this.update(id, { avatar });
-  }
-
   // User 비밀번호 갱신
   async changePassword(id: number, dto: ChangePasswordDto): Promise<User> {
     const user = await this.findById(id);
@@ -312,6 +295,42 @@ export class UsersService {
     user.email = `${email}.deleted`;
     user.phone = `---${phone.substring(3)}`;
     await this.repository.save(user);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? UPLOAD
+  //?-------------------------------------------------------------------------//
+
+  // User 프로필사진 갱신
+  async upload(id: number, file: Express.Multer.File): Promise<User> {
+    // see if id is valid
+    await this.findById(id);
+    const path = `local/users/${id}/${randomName('avatar')}`;
+    try {
+      // image processing using Jimp
+      await this.s3Service.uploadWithResizing(file, path, 640);
+    } catch (e) {
+      console.log(e);
+    }
+    // upload the manipulated image to S3
+    // update users table
+    const avatar = `${process.env.AWS_CLOUDFRONT_URL}/${path}`;
+    return this.update(id, { avatar });
+  }
+
+  // S3 직접 업로드를 위한 signedUrl 리턴
+  async getSignedUrl(
+    userId: number,
+    mimeType = 'image/jpeg',
+  ): Promise<SignedUrl> {
+    const fileUri = randomName('avatar', mimeType);
+    const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
+    const url = await this.s3Service.generateSignedUrl(path);
+
+    return {
+      upload: url,
+      image: `https://cdn.fleaauction.world/${path}`,
+    };
   }
 
   //?-------------------------------------------------------------------------//

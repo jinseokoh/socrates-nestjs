@@ -43,6 +43,7 @@ import { AvatarInterceptor } from './interceptors/avatar-interceptor';
 import { SmsMessageDto } from 'src/domain/users/dto/sms-message.dto';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SkipThrottle } from '@nestjs/throttler';
+import { SignedUrl } from 'src/common/types';
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
@@ -140,16 +141,6 @@ export class UsersController {
     return await this.usersService.update(id, dto);
   }
 
-  @ApiOperation({ description: 'User 프로필사진 갱신' })
-  @UseInterceptors(FileInterceptor('file', multerOptions))
-  @Post(':id/avatar')
-  async upload(
-    @Param('id') id: number,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return await this.usersService.upload(id, file);
-  }
-
   // A dedicated endpoin to update password only.
   @ApiOperation({ description: 'User 비밀번호 갱신' })
   @Patch(':id/password')
@@ -187,6 +178,33 @@ export class UsersController {
     @Body() dto: DeleteUserDto,
   ): Promise<User> {
     return await this.usersService.quit(id, dto);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? UPLOAD
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: 'User 프로필사진 갱신' })
+  @UseInterceptors(FileInterceptor('file', multerOptions))
+  @Post(':id/avatar')
+  async upload(
+    @Param('id') id: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return await this.usersService.upload(id, file);
+  }
+
+  @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
+  @Post('image/url')
+  async getSignedUrl(
+    @CurrentUserId() id: number,
+    @Body('mimeType') mimeType: string,
+  ): Promise<SignedUrl> {
+    if (mimeType) {
+      return await this.usersService.getSignedUrl(id, mimeType);
+    }
+    // todo. do something meaningful like throwing an exception here!
+    return { upload: '', image: '' };
   }
 
   //--------------------------------------------------------------------------//

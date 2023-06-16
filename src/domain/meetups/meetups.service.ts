@@ -237,7 +237,7 @@ export class MeetupsService {
     userId: number,
     mimeType = 'image/jpeg',
   ): Promise<SignedUrl> {
-    const fileUri = randomName('meso', mimeType);
+    const fileUri = randomName('meetup', mimeType);
     const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
