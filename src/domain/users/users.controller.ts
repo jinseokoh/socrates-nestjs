@@ -31,7 +31,7 @@ import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune.dto';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { AmendUsernamePipe } from 'src/domain/users/pipes/amend-username.pipe';
+import { ValidateUsernamePipe } from 'src/domain/users/pipes/validate-username.pipe';
 import { DailyFortunePipe } from 'src/domain/users/pipes/daily-fortune.pipe';
 import { HashPasswordPipe } from 'src/domain/users/pipes/hash-password.pipe';
 import { LoveFortunePipe } from 'src/domain/users/pipes/love-fortune.pipe';
@@ -44,6 +44,7 @@ import { SmsMessageDto } from 'src/domain/users/dto/sms-message.dto';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SkipThrottle } from '@nestjs/throttler';
 import { SignedUrl } from 'src/common/types';
+import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
@@ -86,9 +87,9 @@ export class UsersController {
   }
 
   @ApiOperation({ description: 'User 상세보기' })
-  @Get(':id')
-  async getUserDetailById(@Param('id') id: number): Promise<User> {
-    return await this.usersService.findUserDetailById(id, [
+  @Get(':userId')
+  async getUserDetailById(@Param('userId') userId: number): Promise<User> {
+    return await this.usersService.findUserDetailById(userId, [
       'profile',
       'provider',
     ]);
@@ -123,27 +124,40 @@ export class UsersController {
 
   // extend functionality to be able to update other related models as well
   @ApiOperation({ description: '[관리자] User 갱신' })
-  @Patch('admin/:id')
+  @Patch('admin/:userId')
   async updateExtended(
-    @Param('id') id: number,
+    @Param('userId') userId: number,
     @Body() body: any,
   ): Promise<User> {
-    return await this.usersService.updateExtended(id, body);
+    return await this.usersService.updateExtended(userId, body);
   }
 
   @ApiOperation({ description: 'User 갱신' })
-  @Patch(':id')
+  @Patch(':userId')
   async update(
-    @Param('id') id: number,
-    @Body(AmendUsernamePipe) dto: UpdateUserDto,
+    @Param('userId') userId: number,
+    @Body(ValidateUsernamePipe) dto: UpdateUserDto,
   ): Promise<User> {
-    console.log(dto);
-    return await this.usersService.update(id, dto);
+    return await this.usersService.update(userId, dto);
+  }
+
+  // A dedicated endpoin to update password only.
+  @ApiOperation({ description: 'User 닉네임 갱신' })
+  @Patch(':userId/username')
+  async changeUsername(
+    @CurrentUserId() id: number,
+    @Param('userId') userId: number,
+    @Body(ValidateUsernamePipe) dto: ChangeUsernameDto,
+  ): Promise<User> {
+    if (id !== userId) {
+      throw new BadRequestException(`doh! mind your id`);
+    }
+    return await this.usersService.changeUsername(userId, dto);
   }
 
   // A dedicated endpoin to update password only.
   @ApiOperation({ description: 'User 비밀번호 갱신' })
-  @Patch(':id/password')
+  @Patch(':userId/password')
   async changePassword(
     @CurrentUserId() id: number,
     @Param('userId') userId: number,
@@ -153,18 +167,18 @@ export class UsersController {
       throw new BadRequestException(`doh! mind your id`);
     }
 
-    return await this.usersService.changePassword(id, dto);
+    return await this.usersService.changePassword(userId, dto);
   }
 
   // Technically, `profile` is a different model.
   // but, it's tightly coupled with `user` model
   @ApiOperation({ description: 'User 와 연계된 Profile 갱신' })
-  @Patch(':id/profile')
+  @Patch(':userId/profile')
   async updateProfile(
-    @Param('id') id: number,
+    @Param('userId') userId: number,
     @Body() dto: UpdateProfileDto,
   ): Promise<Profile> {
-    return await this.usersService.updateProfile(id, dto);
+    return await this.usersService.updateProfile(userId, dto);
   }
 
   //?-------------------------------------------------------------------------//
@@ -172,12 +186,12 @@ export class UsersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'User 탈퇴' })
-  @Delete(':id')
+  @Delete(':userId')
   async remove(
-    @Param('id') id: number,
+    @Param('userId') userId: number,
     @Body() dto: DeleteUserDto,
   ): Promise<User> {
-    return await this.usersService.quit(id, dto);
+    return await this.usersService.quit(userId, dto);
   }
 
   //?-------------------------------------------------------------------------//
@@ -186,12 +200,12 @@ export class UsersController {
 
   @ApiOperation({ description: 'User 프로필사진 갱신' })
   @UseInterceptors(FileInterceptor('file', multerOptions))
-  @Post(':id/avatar')
+  @Post(':userId/avatar')
   async upload(
-    @Param('id') id: number,
+    @Param('userId') userId: number,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return await this.usersService.upload(id, file);
+    return await this.usersService.upload(userId, file);
   }
 
   @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })

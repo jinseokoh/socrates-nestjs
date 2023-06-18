@@ -4,9 +4,9 @@ import {
   Injectable,
   PipeTransform,
 } from '@nestjs/common';
-import * as moment from 'moment';
+
 @Injectable()
-export class AmendUsernamePipe implements PipeTransform {
+export class ValidateUsernamePipe implements PipeTransform {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   transform(value: any, _metadata: ArgumentMetadata) {
     if (value.hasOwnProperty('username')) {
@@ -17,7 +17,6 @@ export class AmendUsernamePipe implements PipeTransform {
 
       return {
         ...value,
-        usernamedAt: moment().toISOString(),
       };
     }
 

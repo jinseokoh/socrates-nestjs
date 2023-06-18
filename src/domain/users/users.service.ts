@@ -30,8 +30,6 @@ import { LoveFortuneDto } from 'src/domain/users/dto/love-fortune.dto';
 import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune.dto';
-import { CreateSecretDto } from 'src/domain/secrets/dto/create-secret.dto';
-import { UpdateSecretDto } from 'src/domain/secrets/dto/update-secret.dto';
 import { randomName } from 'src/helpers/random-filename';
 import { getUsername } from 'src/helpers/random-username';
 import { S3Service } from 'src/services/aws/s3.service';
@@ -51,6 +49,7 @@ import { Cache } from 'cache-manager';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { AWS_SES_CONNECTION } from 'src/common/constants';
 import { SES } from 'aws-sdk';
+import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 @Injectable()
 export class UsersService {
   private readonly env: any;
@@ -205,6 +204,17 @@ export class UsersService {
   // User 갱신
   async update(id: number, dto: UpdateUserDto): Promise<User> {
     const user = await this.repository.preload({ id, ...dto });
+    return await this.repository.save(user);
+  }
+
+  // User 닉네임 갱신
+  async changeUsername(id: number, dto: ChangeUsernameDto): Promise<User> {
+    const assignedUsername = getUsername(id);
+    const user = await this.findById(id);
+    if (assignedUsername != user.username) {
+      throw new ForbiddenException('already updated username');
+    }
+    user.username = dto.username;
     return await this.repository.save(user);
   }
 

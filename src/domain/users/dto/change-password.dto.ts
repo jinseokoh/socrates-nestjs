@@ -6,6 +6,7 @@ export class ChangePasswordDto {
   @IsString()
   @Length(6)
   current: string;
+
   @ApiProperty({ description: '비밀번호' })
   @IsNotEmpty()
   @IsString()
