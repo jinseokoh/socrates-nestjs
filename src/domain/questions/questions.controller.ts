@@ -13,6 +13,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
+import { SignedUrl } from 'src/common/types';
 import { CreateQuestionDto } from 'src/domain/questions/dto/create-question.dto';
 import { UpdateQuestionDto } from 'src/domain/questions/dto/update-question.dto';
 import { Question } from 'src/domain/questions/entities/question.entity';
@@ -75,5 +76,23 @@ export class QuestionsController {
   @Delete(':id')
   async remove(@Param('id') id: number): Promise<Question> {
     return await this.questionsService.softRemove(id);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? UPLOAD
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
+  @Post(':id/url')
+  async getSignedUrl(
+    @CurrentUserId() id: number,
+    @Body('mimeType') mimeType: string,
+  ): Promise<SignedUrl> {
+    if (mimeType) {
+      return await this.questionsService.getSignedUrl(id, mimeType);
+    }
+    // todo. do something meaningful like throwing an exception here!
+    // throw new BadRequestException('mimeType is missing');
+    return { upload: '', image: '' };
   }
 }

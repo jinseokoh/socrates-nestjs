@@ -13,6 +13,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Comment {
@@ -20,7 +21,16 @@ export class Comment {
   id: number;
 
   @Column({ length: 255 })
+  @ApiProperty({ description: '내용' })
   body: string;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'like count' })
+  likeCount: number;
+
+  @Column({ default: false })
+  @ApiProperty({ description: '신고여부' })
+  isFlagged: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

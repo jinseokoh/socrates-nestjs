@@ -12,20 +12,39 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Question {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
+  @Column({ length: 255, nullable: true })
+  @ApiProperty({ description: '제목' })
+  title: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  @ApiProperty({ description: '내용' })
+  body: string | null;
+
+  @Column({ length: 255, nullable: true })
+  @ApiProperty({ description: '이미지' })
+  image: string | null;
+
   @Column({ type: 'enum', enum: QuestionType, default: QuestionType.GENERAL })
   questionType: QuestionType;
 
-  @Column({ length: 255, nullable: true })
-  title: string | null;
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'like count' })
+  likeCount: number;
 
-  @Column({ length: 255, nullable: true })
-  body: string | null;
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'view count' })
+  viewCount: number;
+
+  @Column({ default: false })
+  @ApiProperty({ description: '신고여부' })
+  isFlagged: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
