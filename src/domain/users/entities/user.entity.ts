@@ -9,7 +9,7 @@ import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Match } from 'src/domain/meetups/entities/match.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Question } from 'src/domain/questions/entities/question.entity';
-import { Comment } from 'src/domain/questions/entities/comment.entity';
+import { Comment } from 'src/domain/comments/entities/comment.entity';
 import { Report } from 'src/domain/reports/entities/report.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';

@@ -54,6 +54,7 @@ export class Comment {
 
   //**--------------------------------------------------------------------------*/
   //** one to many (self recursive relations)
+  // data structure ref)
   // https://stackoverflow.com/questions/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
   @Exclude()

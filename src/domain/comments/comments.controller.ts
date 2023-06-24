@@ -12,14 +12,14 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 
-import { Comment } from 'src/domain/questions/entities/comment.entity';
 import { ApiOperation } from '@nestjs/swagger';
+import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { Comment } from 'src/domain/comments/entities/comment.entity';
+import { CommentsService } from 'src/domain/comments/comments.service';
 import { CreateCommentDto } from 'src/domain/comments/dto/create-comment.dto';
 import { UpdateCommentDto } from 'src/domain/comments/dto/update-comment.dto';
-import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { CommentsService } from 'src/domain/comments/comments.service';
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('questions')
 export class CommentsController {
@@ -34,8 +34,8 @@ export class CommentsController {
   @Post(':questionId/comments/:commentId?')
   async create(
     @CurrentUserId() userId: number,
-    @Param('questionId') questionId: number,
     @Param('commentId') commentId: number | null,
+    @Param('questionId') questionId: number,
     @Body() dto: CreateCommentDto,
   ): Promise<any> {
     let parentId = null;

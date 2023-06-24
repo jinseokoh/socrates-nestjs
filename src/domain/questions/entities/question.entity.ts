@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { QuestionType } from 'src/common/enums/question-type';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Comment } from 'src/domain/questions/entities/comment.entity';
+import { Comment } from 'src/domain/comments/entities/comment.entity';
 import {
   Column,
   CreateDateColumn,
