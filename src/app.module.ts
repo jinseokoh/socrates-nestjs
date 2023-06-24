@@ -20,6 +20,7 @@ import { RoomsModule } from 'src/domain/rooms/rooms.module';
 import { UsersModule } from 'src/domain/users/users.module';
 import { NaverModule } from 'src/services/naver/naver.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { QuestionsModule } from 'src/domain/questions/questions.module';
 
 @Module({
   imports: [
@@ -92,8 +93,9 @@ import { CacheModule } from '@nestjs/cache-manager';
     CareersModule,
     ContentsModule,
     MeetupsModule,
-    UsersModule,
     MessagesModule,
+    QuestionsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [
