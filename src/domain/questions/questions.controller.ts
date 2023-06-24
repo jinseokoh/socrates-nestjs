@@ -51,7 +51,7 @@ export class QuestionsController {
   @ApiOperation({ description: '질문 상세보기' })
   @Get(':id')
   async getQuestionById(@Param('id') id: number): Promise<Question> {
-    return await this.questionsService.findById(id, ['user', 'artwork']);
+    return await this.questionsService.findById(id, ['user', 'comments']);
   }
 
   //?-------------------------------------------------------------------------//

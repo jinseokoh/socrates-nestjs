@@ -22,7 +22,7 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { CommentsService } from 'src/domain/comments/comments.service';
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('questions')
-export class CommentsController {
+export class QuestionCommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   //?-------------------------------------------------------------------------//

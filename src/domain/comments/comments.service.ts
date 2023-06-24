@@ -10,7 +10,7 @@ import {
 import { CreateCommentDto } from 'src/domain/comments/dto/create-comment.dto';
 import { UpdateCommentDto } from 'src/domain/comments/dto/update-comment.dto';
 import { Question } from 'src/domain/questions/entities/question.entity';
-import { Comment } from 'src/domain/comments/entities/comment.entity';
+import { Comment } from 'src/domain/questions/entities/comment.entity';
 import { Brackets, FindOneOptions, Repository } from 'typeorm';
 
 @Injectable()
