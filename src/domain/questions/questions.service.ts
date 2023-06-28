@@ -42,7 +42,7 @@ export class QuestionsService {
       filterableColumns: {
         questionType: [FilterOperator.EQ],
       },
-      relations: ['user'], // can be removed.
+      relations: ['user', 'comments'], // can be removed.
     });
   }
 
