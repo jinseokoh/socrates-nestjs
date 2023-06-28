@@ -53,7 +53,6 @@ export class Comment {
   })
   user: User;
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
   questionId: number | null; // to make it available to Repository.
 
