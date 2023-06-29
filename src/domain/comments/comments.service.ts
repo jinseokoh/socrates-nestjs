@@ -85,14 +85,15 @@ export class CommentsService {
       .createQueryBuilder('comment')
       .leftJoinAndSelect('comment.user', 'user')
       .where('comment.question = :questionId', { questionId })
-      .andWhere(
-        new Brackets((qb) => {
-          qb.where('comment.id = :commentId', { commentId }).orWhere(
-            'comment.parentId = :commentId',
-            { commentId },
-          );
-        }),
-      )
+      .andWhere('comment.parentId = :commentId', { commentId })
+      // .andWhere(
+      //   new Brackets((qb) => {
+      //     qb.where('comment.id = :commentId', { commentId }).orWhere(
+      //       'comment.parentId = :commentId',
+      //       { commentId },
+      //     );
+      //   }),
+      // )
       .andWhere('comment.deletedAt IS NULL');
 
     const config: PaginateConfig<Comment> = {
