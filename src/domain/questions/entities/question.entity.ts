@@ -27,9 +27,9 @@ export class Question {
   @ApiProperty({ description: '내용' })
   body: string | null;
 
-  @Column({ length: 255, nullable: true })
-  @ApiProperty({ description: '이미지' })
-  image: string | null;
+  @Column('json', { nullable: true }) // from Artwork
+  @ApiProperty({ description: 'images' })
+  images: string[] | null;
 
   @Column({ type: 'enum', enum: QuestionType, default: QuestionType.GENERAL })
   questionType: QuestionType;
