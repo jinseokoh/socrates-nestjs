@@ -1,7 +1,6 @@
 export enum QuestionType {
   BUG = 'bug',
-  COLLABORATION = 'collaboration',
+  FLAG = 'flag',
+  PAYMENT = 'payment',
   GENERAL = 'general',
-  SUGGESTION = 'suggestion',
-  OTHER = 'other',
 }
