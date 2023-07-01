@@ -83,7 +83,7 @@ export class QuestionsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
-  @Post(':id/url')
+  @Post('image/url')
   async getSignedUrl(
     @CurrentUserId() id: number,
     @Body('mimeType') mimeType: string,

@@ -1,8 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { QuestionType } from 'src/common/enums/question-type';
 
 export class CreateQuestionDto {
+  @ApiProperty({
+    description: '질문유형',
+    default: QuestionType.GENERAL,
+  })
+  @IsEnum(QuestionType)
+  @IsOptional()
+  questionType?: QuestionType = QuestionType.GENERAL;
+
   @ApiProperty({ description: '질문' })
   @IsOptional()
   @IsString()
@@ -13,13 +27,9 @@ export class CreateQuestionDto {
   @IsString()
   body?: string | null;
 
-  @ApiProperty({
-    description: '질문유형',
-    default: QuestionType.GENERAL,
-  })
-  @IsEnum(QuestionType)
-  @IsOptional()
-  questionType?: QuestionType = QuestionType.GENERAL;
+  @ApiProperty({ description: '이미지들 (string[])', required: true })
+  @IsArray()
+  images: string[];
 
   @ApiProperty({ description: '사용자 아이디' })
   @IsNumber()

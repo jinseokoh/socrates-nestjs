@@ -99,11 +99,11 @@ export class QuestionsService {
 
   // S3 직접 업로드를 위한 signedUrl 리턴
   async getSignedUrl(
-    questionId: number,
+    userId: number,
     mimeType = 'image/jpeg',
   ): Promise<SignedUrl> {
     const fileUri = randomName('question', mimeType);
-    const path = `${process.env.NODE_ENV}/filez/${questionId}/${fileUri}`;
+    const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
     return {

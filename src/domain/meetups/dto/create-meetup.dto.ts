@@ -30,7 +30,7 @@ export class CreateMeetupDto {
   @IsString()
   description: string;
 
-  @ApiProperty({ description: '이미지들 (String[])', required: true })
+  @ApiProperty({ description: '이미지들 (string[])', required: true })
   @IsArray()
   images: string[];
 
