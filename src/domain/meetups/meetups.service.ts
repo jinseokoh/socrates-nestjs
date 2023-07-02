@@ -136,6 +136,7 @@ export class MeetupsService {
   // Meetup 상세보기
   async findById(id: number, relations: string[] = []): Promise<Meetup> {
     try {
+      await this.increaseViewCount(id);
       return relations.length > 0
         ? await this.repository.findOneOrFail({
             where: { id },
@@ -161,7 +162,7 @@ export class MeetupsService {
     return await this.repository.save(meetup);
   }
 
-  async increaseViewCount(id: string): Promise<void> {
+  async increaseViewCount(id: number): Promise<void> {
     // in case you need the increased count, use:
     //
     // const meetup = await this.findById(id);
@@ -252,16 +253,57 @@ export class MeetupsService {
   //? 찜했던 모든 사용자 리스트
   //?-------------------------------------------------------------------------//
 
-  async getAllUsersLiked(id: number): Promise<Array<Like>> {
+  async getAllLikers(id: number): Promise<any> {
     try {
       const meetup = await this.repository.findOneOrFail({
         where: {
           id: id,
         },
-        relations: ['usersLiked', 'usersLiked.profile'],
+        relations: ['usersLiked', 'usersLiked.user'],
       });
 
-      return meetup.usersLiked;
+      return meetup.usersLiked.map((v: any) => v.user);
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  async getAllHaters(id: number): Promise<any> {
+    try {
+      const meetup = await this.repository.findOneOrFail({
+        where: {
+          id: id,
+        },
+        relations: ['usersHated', 'usersHated.user'],
+      });
+
+      return meetup.usersHated.map((v: any) => v.user);
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  async getAllLikeIds(id: number): Promise<any> {
+    try {
+      const rows = await this.repository.manager.query(
+        'SELECT userId FROM `like` WHERE meetupId = ?',
+        [id],
+      );
+
+      return rows.map((v: any) => v.userId);
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  async getAllHateIds(id: number): Promise<Array<Like>> {
+    try {
+      const rows = await this.repository.manager.query(
+        'SELECT userId FROM `hate` WHERE meetupId = ?',
+        [id],
+      );
+
+      return rows.map((v: any) => v.userId);
     } catch (e) {
       throw new NotFoundException('entity not found');
     }
