@@ -22,6 +22,7 @@ import { NaverModule } from 'src/services/naver/naver.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { QuestionsModule } from 'src/domain/questions/questions.module';
 import { CommentsModule } from 'src/domain/comments/comments.module';
+import { SseModule } from 'src/services/sse/sse.module';
 
 @Module({
   imports: [
@@ -98,6 +99,7 @@ import { CommentsModule } from 'src/domain/comments/comments.module';
     QuestionsModule,
     CommentsModule,
     UsersModule,
+    SseModule,
   ],
   controllers: [AppController],
   providers: [
