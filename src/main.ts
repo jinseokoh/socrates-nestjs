@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { Transport } from '@nestjs/microservices';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
@@ -14,15 +15,14 @@ async function bootstrap() {
   const { httpAdapter } = app.get(HttpAdapterHost);
 
   const configService = app.get<ConfigService>(ConfigService);
-  // const redisConfig = configService.get<IRedisConfig>('redis');
-  // app.connectMicroservice({
-  //   transport: Transport.REDIS,
-  //   options: {
-  //     host: redisConfig.host,
-  //     port: redisConfig.port,
-  //   },
-  // });
-  // await app.startAllMicroservices();
+  app.connectMicroservice({
+    transport: Transport.REDIS,
+    options: {
+      host: configService.get('redis.host'),
+      port: configService.get('redis.port'),
+    },
+  });
+  await app.startAllMicroservices();
 
   // Create new DynamoDB instance
   // dynamoose.aws.ddb.local();
