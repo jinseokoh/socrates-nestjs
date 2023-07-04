@@ -1,38 +1,26 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { RedisService } from 'src/services/redis/redis.service';
+import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 
-interface IRedisModuleOptions {
-  name: string;
-}
-
+@Global()
 @Module({
-  providers: [RedisService],
-  exports: [RedisService],
-})
-export class RedisModule {
-  static register({ name }: IRedisModuleOptions): DynamicModule {
-    return {
-      module: RedisModule,
-      imports: [
-        ClientsModule.registerAsync([
-          {
-            name,
-            useFactory: async (configService: ConfigService) => {
-              return {
-                transport: Transport.REDIS,
-                options: {
-                  host: configService.get('redis.host'),
-                  port: configService.get('redis.port'),
-                },
-              };
+  imports: [
+    ClientsModule.registerAsync([
+      {
+        name: REDIS_PUBSUB_CLIENT,
+        inject: [ConfigService],
+        useFactory: async (configService: ConfigService) => {
+          return {
+            transport: Transport.REDIS,
+            options: {
+              host: configService.get('redis.host'),
+              port: configService.get('redis.port'),
             },
-            inject: [ConfigService],
-          },
-        ]),
-      ],
-      exports: [ClientsModule],
-    };
-  }
-}
+          };
+        },
+      },
+    ]),
+  ],
+})
+export class RedisModule {}

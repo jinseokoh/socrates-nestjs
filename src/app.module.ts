@@ -23,6 +23,9 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { QuestionsModule } from 'src/domain/questions/questions.module';
 import { CommentsModule } from 'src/domain/comments/comments.module';
 import { SseModule } from 'src/services/sse/sse.module';
+import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
+import { RedisModule } from 'src/services/redis/redis.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -100,6 +103,7 @@ import { SseModule } from 'src/services/sse/sse.module';
     CommentsModule,
     UsersModule,
     SseModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [
