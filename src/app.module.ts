@@ -3,7 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from 'src/app.controller';
-import * as path from 'path';
 import * as redisStore from 'cache-manager-ioredis';
 import { DynamooseModule } from 'nestjs-dynamoose';
 import { getAwsDatabaseConfig } from 'src/common/config/aws-database';
@@ -23,9 +22,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { QuestionsModule } from 'src/domain/questions/questions.module';
 import { CommentsModule } from 'src/domain/comments/comments.module';
 import { SseModule } from 'src/services/sse/sse.module';
-import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { RedisModule } from 'src/services/redis/redis.module';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 
 @Module({
   imports: [
@@ -103,7 +101,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     CommentsModule,
     UsersModule,
     SseModule,
-    RedisModule,
+    RedisModule.register({ name: REDIS_PUBSUB_CLIENT }),
   ],
   controllers: [AppController],
   providers: [

@@ -1,9 +1,11 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -12,6 +14,7 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
+import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { AnyData, SignedUrl } from 'src/common/types';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
@@ -28,6 +31,7 @@ export class MeetupsService {
   private readonly logger = new Logger(MeetupsService.name);
 
   constructor(
+    @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     @InjectRepository(Meetup)
     private readonly repository: Repository<Meetup>,
     @InjectRepository(Venue)
@@ -307,5 +311,15 @@ export class MeetupsService {
     } catch (e) {
       throw new NotFoundException('entity not found');
     }
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? 찜했던 모든 사용자 리스트
+  //?-------------------------------------------------------------------------//
+  async getComments(id: number): Promise<void> {
+    this.redisClient.emit('sse.user_joined_meetup', {
+      meetupId: id,
+      username: 'elantra',
+    });
   }
 }

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RedisContext, RedisOptions, Transport } from '@nestjs/microservices';
-import { IRedisConfig } from 'src/common/interfaces';
+import { RedisContext } from '@nestjs/microservices';
 
 @Injectable()
 export class RedisService {
