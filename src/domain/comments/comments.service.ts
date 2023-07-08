@@ -40,18 +40,22 @@ export class CommentsService {
       throw new NotFoundException('entity not found');
     }
     const comment = await this.repository.save(this.repository.create(dto));
+    const commentWithUser = await this.findById(comment.id, ['user']);
+
+    console.log('commentWithUser', commentWithUser);
+
     this.redisClient.emit('sse.comments', {
       key: 'sse.create',
-      value: dto,
+      value: commentWithUser,
     });
 
     // const questionTitle = question.title.replace(/[\<\>]/g, '');
     // await this.slack.postMessage({
     //   channel: 'major',
-    //   text: `[${process.env.NODE_ENV}-api] 📝 아티클댓글 : <${process.env.ADMIN_URL}/questions/show/${question.id}|${questionTitle}>`,
+    //   text: `[${process.env.NODE_ENV}-api] 📝 댓글 : <${process.env.ADMIN_URL}/questions/show/${question.id}|${questionTitle}>`,
     // });
 
-    return comment;
+    return commentWithUser;
   }
 
   //?-------------------------------------------------------------------------//
