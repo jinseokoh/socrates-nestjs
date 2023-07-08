@@ -51,6 +51,6 @@ export class SseController {
   @Public()
   @Sse('event')
   send(): Observable<IMessageEvent> {
-    return this.sseService.sseMsg$;
+    return this.sseService.sseStream$;
   }
 }

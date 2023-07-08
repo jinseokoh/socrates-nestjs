@@ -21,7 +21,6 @@ import { NaverModule } from 'src/services/naver/naver.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { QuestionsModule } from 'src/domain/questions/questions.module';
 import { CommentsModule } from 'src/domain/comments/comments.module';
-import { SseModule } from 'src/services/sse/sse.module';
 import { RedisModule } from 'src/services/redis/redis.module';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 
@@ -100,7 +99,6 @@ import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
     QuestionsModule,
     CommentsModule,
     UsersModule,
-    SseModule,
     RedisModule.register({ name: REDIS_PUBSUB_CLIENT }),
   ],
   controllers: [AppController],

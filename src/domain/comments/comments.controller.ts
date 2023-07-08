@@ -4,9 +4,11 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
+  Sse,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -20,10 +22,33 @@ import { CreateCommentDto } from 'src/domain/comments/dto/create-comment.dto';
 import { UpdateCommentDto } from 'src/domain/comments/dto/update-comment.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
+import { IMessageEvent } from 'src/common/interfaces';
+import { Observable } from 'rxjs';
+import { SseService } from 'src/services/sse/sse.service';
+import { EventPattern } from '@nestjs/microservices';
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('questions')
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    private readonly commentsService: CommentsService,
+    private readonly sseService: SseService,
+  ) {}
+
+  //?-------------------------------------------------------------------------//
+  //? SSE
+  //?-------------------------------------------------------------------------//
+
+  @EventPattern('sse.comments')
+  handleSseComments(data: any): void {
+    this.sseService.fire(data.key, data.value);
+  }
+
+  @Public()
+  @Sse('comments/stream')
+  sse(): Observable<IMessageEvent> {
+    return this.sseService.sseStream$;
+  }
 
   //?-------------------------------------------------------------------------//
   //? CREATE
@@ -54,7 +79,6 @@ export class CommentsController {
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
-
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':questionId/comments')

@@ -1,7 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  FilterOperator,
   PaginateConfig,
   PaginateQuery,
   Paginated,
@@ -11,12 +10,15 @@ import { CreateCommentDto } from 'src/domain/comments/dto/create-comment.dto';
 import { UpdateCommentDto } from 'src/domain/comments/dto/update-comment.dto';
 import { Question } from 'src/domain/questions/entities/question.entity';
 import { Comment } from 'src/domain/comments/entities/comment.entity';
-import { Brackets, FindOneOptions, Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
+import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class CommentsService {
   constructor(
     // @Inject(SlackService) private readonly slack: SlackService,
+    @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     @InjectRepository(Comment)
     private readonly repository: Repository<Comment>,
     @InjectRepository(Question)
@@ -38,6 +40,10 @@ export class CommentsService {
       throw new NotFoundException('entity not found');
     }
     const comment = await this.repository.save(this.repository.create(dto));
+    this.redisClient.emit('sse.comments', {
+      key: 'sse.create',
+      value: dto,
+    });
 
     // const questionTitle = question.title.replace(/[\<\>]/g, '');
     // await this.slack.postMessage({
