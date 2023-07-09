@@ -45,7 +45,7 @@ export class MeetupsController {
     const userId = dto.userId ? dto.userId : id;
     const expiredAt = dto.expiredAt
       ? dto.expiredAt
-      : moment().add(1, 'week').toDate();
+      : moment().add(1, 'month').toDate();
     const createMeetupDto = { ...dto, userId, expiredAt };
 
     return await this.meetupsService.create(createMeetupDto);
@@ -70,6 +70,7 @@ export class MeetupsController {
     return await this.meetupsService.findById(id, [
       'user',
       'user.profile',
+      'careers',
       'matches',
       'matches.askingUser',
       'venue',

@@ -34,21 +34,21 @@ export class CreateMeetupDto {
   @IsArray()
   images: string[];
 
-  @ApiProperty({ description: 'category', default: Category.LEISURE })
+  @ApiProperty({ description: 'category', default: Category.CHALLENGE })
   @IsEnum(Category)
   category: Category;
 
   @ApiProperty({
     description: 'subCategory',
-    default: SubCategory.OTHER_LEISURE,
+    default: SubCategory.OTHER_CHALLENGE,
   })
   @IsEnum(SubCategory)
   subCategory: SubCategory;
 
-  @ApiProperty({ description: '상대방 성별', required: false })
+  @ApiProperty({ description: '상대방 성별', default: Gender.ALL })
   @IsEnum(Gender)
   @IsOptional()
-  targetGender: Gender | null;
+  targetGender: Gender;
 
   @ApiProperty({ description: '상대방 careers', default: ['all'] })
   @IsArray()

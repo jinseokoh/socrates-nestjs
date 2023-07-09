@@ -56,7 +56,10 @@ export class MeetupsService {
       throw new BadRequestException(`not allowed to create`);
     }
 
-    const meetup = await this.repository.save(this.repository.create(dto));
+    const _meetup = this.repository.create(dto);
+    _meetup.categories = [1,2,3];
+    _meetup.careers = [1,2,3,];
+    const meetup = await this.repository.save(_meetup);
     const venue = await this.venueRepository.save(
       this.venueRepository.create({ ...dto.venue, meetupId: meetup.id }),
     );
@@ -79,14 +82,17 @@ export class MeetupsService {
     const categories = await this.repository.manager
       .getTreeRepository(Category)
       .findAncestors(category);
-    categories
-      .filter((v: Category) => v.depth > 0) // remove root
-      .map(async (v: Category) => {
-        await this.repository.manager.query(
-          'INSERT IGNORE INTO `meetup_category` (meetupId, categoryId) VALUES (?, ?)',
-          [meetupId, v.id],
-        );
-      });
+
+    await Promise.all(
+      categories
+        .filter((v: Category) => v.depth > 0) // remove root
+        .map(async (v: Category) => {
+          await this.repository.manager.query(
+            'INSERT IGNORE INTO `meetup_category` (meetupId, categoryId) VALUES (?, ?)',
+            [meetupId, v.id],
+          );
+        }),
+    );
   }
 
   // async _linkWithRegion(regionSlug: string, meetupId: number) {
@@ -121,16 +127,21 @@ export class MeetupsService {
       .innerJoinAndSelect('user.profile', 'profile');
 
     const config: PaginateConfig<Meetup> = {
+      relations: ['user', 'careers'],
       sortableColumns: ['createdAt'],
       searchableColumns: ['title'],
       defaultSortBy: [['createdAt', 'DESC']],
       filterableColumns: {
-        id: [FilterOperator.IN, FilterOperator.EQ],
+        id: [FilterOperator.EQ, FilterOperator.IN],
         region: [FilterOperator.EQ, FilterOperator.IN],
         category: [FilterOperator.EQ, FilterOperator.IN],
         subCategory: [FilterOperator.EQ, FilterOperator.IN],
         targetGender: [FilterOperator.EQ, FilterOperator.IN],
+        targetCareers: [FilterOperator.EQ, FilterOperator.IN],
         expiredAt: [FilterOperator.GTE, FilterOperator.LT],
+        'user.dob': [FilterOperator.GTE, FilterOperator.LT, FilterOperator.BTW],
+        'user.gender': [FilterOperator.EQ],
+        'careers.slug': [FilterOperator.EQ, FilterOperator.IN],
       },
     };
 

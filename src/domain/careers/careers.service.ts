@@ -131,6 +131,11 @@ export class CareersService {
     career.parent = root;
     await this.repository.manager.save(career);
     career = new Career();
+    career.slug = CareerEnum.ATHLETE;
+    career.depth = 1;
+    career.parent = root;
+    await this.repository.manager.save(career);
+    career = new Career();
     career.slug = CareerEnum.FOOD;
     career.depth = 1;
     career.parent = root;

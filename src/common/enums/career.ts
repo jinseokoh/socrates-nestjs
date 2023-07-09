@@ -16,6 +16,7 @@ export enum Career {
   SALES = 'sales',
   MEDIA = 'media',
   ART = 'art',
+  ATHLETE = 'athlete',
   FOOD = 'food',
   BEAUTY = 'beauty',
   CONSTRUCTION = 'construction',

@@ -51,7 +51,7 @@ export class Meetup {
   @IsArray()
   images: string[] | null;
 
-  @Column({ type: 'enum', enum: CategoryEnum, default: CategoryEnum.LEISURE })
+  @Column({ type: 'enum', enum: CategoryEnum, default: CategoryEnum.CHALLENGE })
   @ApiProperty({ description: 'category' })
   category: CategoryEnum;
 
@@ -63,9 +63,9 @@ export class Meetup {
   @ApiProperty({ description: 'subcategory' })
   subCategory: SubCategory;
 
-  @Column({ type: 'enum', enum: Gender, default: null })
+  @Column({ type: 'enum', enum: Gender, default: Gender.ALL })
   @ApiProperty({ description: 'gender looking for' })
-  targetGender: Gender | null;
+  targetGender: Gender;
 
   @Column({
     type: 'set',
@@ -158,6 +158,7 @@ export class Meetup {
   userId: number | null; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.meetups, {
+    eager: true,
     onDelete: 'CASCADE',
   })
   user?: User;
