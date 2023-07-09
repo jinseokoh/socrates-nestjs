@@ -45,7 +45,7 @@ export class CommentsController {
   }
 
   @Public()
-  @Sse('comments/stream')
+  @Sse(':questionId/comments/stream')
   sse(): Observable<IMessageEvent> {
     return this.sseService.sseStream$;
   }
