@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Career } from 'src/domain/careers/entities/career.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupCommentsController } from 'src/domain/meetups/meetup-comments.controller';
@@ -11,7 +12,7 @@ import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { S3Module } from 'src/services/aws/s3.module';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Meetup, Venue, Category, User]),
+    TypeOrmModule.forFeature([Meetup, Venue, User, Category, Career]),
     S3Module,
   ],
   exports: [MeetupsService], // we need this for what?

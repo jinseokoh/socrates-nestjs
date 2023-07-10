@@ -16,6 +16,7 @@ import {
 } from 'nestjs-paginate';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { AnyData, SignedUrl } from 'src/common/types';
+import { Career } from 'src/domain/careers/entities/career.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
@@ -25,6 +26,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
+import { In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 @Injectable()
 export class MeetupsService {
@@ -38,6 +40,8 @@ export class MeetupsService {
     private readonly venueRepository: Repository<Venue>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Career)
+    private readonly careerRepository: Repository<Career>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly s3Service: S3Service,
@@ -56,17 +60,18 @@ export class MeetupsService {
       throw new BadRequestException(`not allowed to create`);
     }
 
+    const categories = await this._getCategoriesBySlug(dto.subCategory);
+    const careers = await this._getCareersBySlugs(dto.targetCareers);
+    // console.log(categories, careers);
+
     const _meetup = this.repository.create(dto);
-    _meetup.categories = [1,2,3];
-    _meetup.careers = [1,2,3,];
+    _meetup.categories = categories;
+    _meetup.careers = careers;
     const meetup = await this.repository.save(_meetup);
     const venue = await this.venueRepository.save(
       this.venueRepository.create({ ...dto.venue, meetupId: meetup.id }),
     );
     meetup.venue = venue;
-
-    // //await this._linkWithCategory(dto.category, meetup.id);
-    // // await this._linkWithRegion(dto.region, meetup.id);
 
     return meetup;
   }
@@ -75,42 +80,23 @@ export class MeetupsService {
   // set relations
   //--------------------------------------------------------------------------//
 
-  async _linkWithCategory(categorySlug: string, meetupId: number) {
+  async _getCategoriesBySlug(slug: string): Promise<Category[]> {
     const category = await this.categoryRepository.findOne({
-      where: { slug: categorySlug },
+      where: { slug },
     });
     const categories = await this.repository.manager
       .getTreeRepository(Category)
       .findAncestors(category);
-
-    await Promise.all(
-      categories
-        .filter((v: Category) => v.depth > 0) // remove root
-        .map(async (v: Category) => {
-          await this.repository.manager.query(
-            'INSERT IGNORE INTO `meetup_category` (meetupId, categoryId) VALUES (?, ?)',
-            [meetupId, v.id],
-          );
-        }),
-    );
+    return categories
+      .filter((v: Category) => v.depth > 0) // remove root
+      .map((v: Category) => v);
   }
 
-  // async _linkWithRegion(regionSlug: string, meetupId: number) {
-  //   const region = await this.regionRepository.findOne({
-  //     where: { slug: regionSlug },
-  //   });
-  //   const regions = await this.repository.manager
-  //     .getTreeRepository(Region)
-  //     .findAncestors(region);
-  //   regions
-  //     .filter((v: Region) => v.depth > 1) // remove root, korea
-  //     .map(async (v: Region) => {
-  //       await this.repository.manager.query(
-  //         'INSERT IGNORE INTO `meetup_region` (meetupId, regionId) VALUES (?, ?)',
-  //         [meetupId, v.id],
-  //       );
-  //     });
-  // }
+  async _getCareersBySlugs(slugs: string[]): Promise<Career[]> {
+    return await this.careerRepository.find({
+      where: { slug: In(slugs) },
+    });
+  }
 
   //?-------------------------------------------------------------------------//
   //? READ
