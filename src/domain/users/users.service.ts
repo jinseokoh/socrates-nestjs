@@ -60,24 +60,24 @@ export class UsersService {
     private readonly repository: Repository<User>,
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
-    @InjectRepository(Meetup)
-    private readonly meetupRepository: Repository<Meetup>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Secret)
+    private readonly secretRepository: Repository<Secret>,
+    @InjectRepository(Meetup)
+    private readonly meetupRepository: Repository<Meetup>,
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
     @InjectRepository(Match)
     private readonly matchRepository: Repository<Match>,
-    @InjectRepository(Secret)
-    private readonly secretRepository: Repository<Secret>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @Inject(ConfigService) private configService: ConfigService, // global
+    @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
+    @Inject(SmsClient) private readonly smsClient: SmsClient, // naver
     @Inject(AWS_SES_CONNECTION) private readonly ses: SES,
-    @Inject(ConfigService) private configService: ConfigService,
-    @Inject(SmsClient) private readonly smsClient: SmsClient,
-    private readonly crawlerService: CrawlerService,
     private readonly s3Service: S3Service,
+    private readonly crawlerService: CrawlerService,
   ) {
     this.env = this.configService.get('nodeEnv');
   }

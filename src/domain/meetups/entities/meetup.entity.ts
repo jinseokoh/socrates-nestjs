@@ -158,7 +158,6 @@ export class Meetup {
   userId: number | null; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.meetups, {
-    eager: true,
     onDelete: 'CASCADE',
   })
   user?: User;

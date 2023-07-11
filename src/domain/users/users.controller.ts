@@ -9,6 +9,7 @@ import {
   HttpStatus,
   Inject,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   UploadedFile,
@@ -87,12 +88,9 @@ export class UsersController {
   }
 
   @ApiOperation({ description: 'User 상세보기' })
-  @Get(':userId')
-  async getUserDetailById(@Param('userId') userId: number): Promise<User> {
-    return await this.usersService.findUserDetailById(userId, [
-      'profile',
-      'provider',
-    ]);
+  @Get(':id')
+  async getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    return await this.usersService.findById(id, ['profile', 'providers']);
   }
 
   @ApiOperation({ description: '신한사주 올해의 운세' })

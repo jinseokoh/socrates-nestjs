@@ -71,9 +71,10 @@ export class MeetupsController {
       'user',
       'user.profile',
       'careers',
+      'categories',
+      'venue',
       'matches',
       'matches.askingUser',
-      'venue',
     ]);
   }
 
