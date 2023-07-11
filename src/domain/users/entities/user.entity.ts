@@ -176,11 +176,11 @@ export class User {
     Object.assign(this, partial);
   }
 
-  // @Expose()
-  // get age(): number | null {
-  //   if (this.dob === null) return null;
-  //   const today = new Date().getTime();
-  //   const birth = new Date(this.dob).getTime();
-  //   return Math.floor((today - birth) / 3.15576e10);
-  // }
+  @Expose()
+  get age(): number | null {
+    if (this.dob === null) return null;
+    const today = new Date().getTime();
+    const birth = new Date(this.dob).getTime();
+    return Math.floor((today - birth) / 3.15576e10);
+  }
 }
