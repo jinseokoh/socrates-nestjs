@@ -637,7 +637,10 @@ export class UsersService {
       [userId, meetupId],
     );
     if (affectedRows > 0) {
+      // the following doesn't work at times.
       // await this.meetupRrepository.decrement({ meetupId }, 'likeCount', 1);
+      //
+      // we need to make the likeCount always positive.
       await this.repository.manager.query(
         'UPDATE `meetup` SET likeCount = likeCount - 1 WHERE id = ? AND likeCount > 0',
         [meetupId],

@@ -18,6 +18,7 @@ import * as moment from 'moment';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
 import { AnyData, SignedUrl } from 'src/common/types';
 import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
@@ -55,6 +56,7 @@ export class MeetupsController {
   //? READ
   //?-------------------------------------------------------------------------//
 
+  @Public()
   @ApiOperation({ description: 'Meetup 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get()
