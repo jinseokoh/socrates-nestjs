@@ -108,9 +108,7 @@ export class MeetupsService {
       .createQueryBuilder('meetup')
       .leftJoinAndSelect('meetup.user', 'user')
       .leftJoinAndSelect('user.profile', 'profile')
-      .leftJoinAndSelect('meetup.venue', 'venue')
-      .leftJoinAndSelect('meetup.usersLiked', 'usersLiked')
-      .leftJoinAndSelect('meetup.usersHated', 'usersHated');
+      .leftJoinAndSelect('meetup.venue', 'venue');
 
     const config: PaginateConfig<Meetup> = {
       relations: {
