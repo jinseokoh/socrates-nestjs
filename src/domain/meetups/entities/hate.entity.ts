@@ -8,7 +8,7 @@ export class Hate {
   @PrimaryColumn({ type: 'int', unsigned: true })
   public userId: number;
 
-  @PrimaryColumn({ type: 'bigint' })
+  @PrimaryColumn({ type: 'bigint', unsigned: true })
   public meetupId: number;
 
   @Column({ length: 16, nullable: true })

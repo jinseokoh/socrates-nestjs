@@ -11,7 +11,7 @@ import {
   Category as CategoryEnum,
   SubCategory,
 } from 'src/common/enums';
-import { Match } from 'src/domain/meetups/entities/match.entity';
+import { Join } from 'src/domain/meetups/entities/match.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
@@ -33,9 +33,9 @@ import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/meetups/entities/hate.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 
-@Entity() // 작품
+@Entity()
 export class Meetup {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
   id: number;
 
   @Column({ length: 64 }) // from Auction
@@ -154,8 +154,8 @@ export class Meetup {
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  userId: number | null; // to make it available to Repository.
+  @Column({ type: 'int', unsigned: true })
+  userId: number; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.meetups, {
     onDelete: 'CASCADE',
@@ -165,8 +165,8 @@ export class Meetup {
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany using one-to-many
 
-  @OneToMany(() => Match, (match) => match.meetup)
-  public matches: Match[];
+  @OneToMany(() => Join, (match) => match.meetup)
+  public joins: Join[];
 
   @OneToMany(() => Like, (like) => like.meetup)
   public usersLiked: Like[];

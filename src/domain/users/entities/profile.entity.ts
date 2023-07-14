@@ -11,7 +11,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-@Entity() //? 사용자 프로파일 정보
+@Entity()
 export class Profile {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;

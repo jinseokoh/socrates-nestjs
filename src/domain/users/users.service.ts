@@ -36,7 +36,7 @@ import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
 import { FindOneOptions, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
-import { Match } from 'src/domain/meetups/entities/match.entity';
+import { Join } from 'src/domain/meetups/entities/match.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Hate } from 'src/domain/meetups/entities/hate.entity';
@@ -70,8 +70,8 @@ export class UsersService {
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
-    @InjectRepository(Match)
-    private readonly matchRepository: Repository<Match>,
+    @InjectRepository(Join)
+    private readonly matchRepository: Repository<Join>,
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     @Inject(SmsClient) private readonly smsClient: SmsClient, // naver
@@ -759,24 +759,24 @@ export class UsersService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Match Pivot
+  //? Join Pivot
   //?-------------------------------------------------------------------------//
 
   // 신청리스트에 추가
-  async attachToMatchPivot(
+  async attachToJoinPivot(
     askingUserId: number,
     askedUserId: number,
     meetupId: number,
   ): Promise<any> {
     const meetup = await this.meetupRepository.findOneOrFail({
       where: { id: meetupId },
-      relations: ['matches'],
+      relations: ['joins'],
     });
 
     if (meetup.userId == askedUserId) {
       // 1. 방장에게 asking 하는 경우, 20명 까지로 제한.
       if (
-        meetup.matches.filter((v) => meetup.userId === v.askedUserId).length >=
+        meetup.joins.filter((v) => meetup.userId === v.askedUserId).length >=
         20
       ) {
         throw new NotAcceptableException('reached maximum count');
@@ -797,7 +797,7 @@ export class UsersService {
   }
 
   // 매치신청 승인
-  async updateMatchToAcceptOrDeny(
+  async updateJoinToAcceptOrDeny(
     askingUserId: number,
     askedUserId: number,
     meetupId: number,
@@ -813,7 +813,7 @@ export class UsersService {
   async getMeetupsAskedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Match>> {
+  ): Promise<Paginated<Join>> {
     const queryBuilder = this.matchRepository
       .createQueryBuilder('match')
       .leftJoinAndSelect('match.meetup', 'meetup')
@@ -824,7 +824,7 @@ export class UsersService {
         askingUserId: userId,
       });
 
-    const config: PaginateConfig<Match> = {
+    const config: PaginateConfig<Join> = {
       sortableColumns: ['meetupId'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,
@@ -853,7 +853,7 @@ export class UsersService {
   async getUsersAskingMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Match>> {
+  ): Promise<Paginated<Join>> {
     const queryBuilder = this.matchRepository
       .createQueryBuilder('match')
       .leftJoinAndSelect('match.meetup', 'meetup')
@@ -866,7 +866,7 @@ export class UsersService {
         askedUserId: userId,
       });
 
-    const config: PaginateConfig<Match> = {
+    const config: PaginateConfig<Join> = {
       sortableColumns: ['createdAt'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,
@@ -883,7 +883,7 @@ export class UsersService {
   async getUsersAskedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Match>> {
+  ): Promise<Paginated<Join>> {
     const queryBuilder = this.matchRepository
       .createQueryBuilder('match')
       .leftJoinAndSelect('match.meetup', 'meetup')
@@ -894,7 +894,7 @@ export class UsersService {
         askingUserId: userId,
       });
 
-    const config: PaginateConfig<Match> = {
+    const config: PaginateConfig<Join> = {
       sortableColumns: ['createdAt'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,

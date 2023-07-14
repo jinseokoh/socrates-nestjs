@@ -9,9 +9,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-@Entity() //? 배너광고 형태로 보여줄 콘텐츠
+@Entity()
 export class Report {
-  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
+  @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
   id: number;
 
   @Column({
@@ -47,9 +47,9 @@ export class Report {
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  userId: number | null;
-   // to make it available to Repository.
+  @Column({ type: 'int', unsigned: true })
+  userId: number; // to make it available to Repository.
+
   @ManyToOne(() => User, (user) => user.reports, {
     onDelete: 'CASCADE', // SET NULL seems to cause 500 error
   })

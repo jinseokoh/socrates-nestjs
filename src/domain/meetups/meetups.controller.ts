@@ -75,10 +75,10 @@ export class MeetupsController {
       'careers',
       'categories',
       'venue',
-      'matches',
+      'joins',
       'usersLiked',
       'usersHated',
-      'matches.askingUser',
+      'joins.askingUser',
     ]);
   }
 

@@ -6,7 +6,7 @@ import { Gender } from 'src/common/enums/gender';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Hate } from 'src/domain/meetups/entities/hate.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
-import { Match } from 'src/domain/meetups/entities/match.entity';
+import { Join } from 'src/domain/meetups/entities/match.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Question } from 'src/domain/questions/entities/question.entity';
 import { Comment } from 'src/domain/comments/entities/comment.entity';
@@ -25,7 +25,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-@Entity() //? 사용자
+@Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
@@ -146,11 +146,11 @@ export class User {
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany using one-to-many
 
-  @OneToMany(() => Match, (match) => match.askingUser)
-  public askingMatches: Match[];
+  @OneToMany(() => Join, (match) => match.askingUser)
+  public askingJoins: Join[];
 
-  @OneToMany(() => Match, (match) => match.askedUser)
-  public askedMatches: Match[];
+  @OneToMany(() => Join, (match) => match.askedUser)
+  public askedJoins: Join[];
 
   @OneToMany(() => Like, (like) => like.user)
   public meetupsLiked: Like[];

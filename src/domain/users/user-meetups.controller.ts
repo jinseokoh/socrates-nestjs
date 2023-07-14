@@ -18,7 +18,7 @@ import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Status } from 'src/common/enums/status';
-import { Match } from 'src/domain/meetups/entities/match.entity';
+import { Join } from 'src/domain/meetups/entities/match.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -186,19 +186,19 @@ export class UserMeetupsController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Match Pivot
+  //? Join Pivot
   //?-------------------------------------------------------------------------//
 
   // todo. validate this meetup belongs to me
   @ApiOperation({ description: '내가 매치신청 리스트에 추가' })
   @PaginateQueryOptions()
-  @Post(':askingUserId/matches/:askedUserId/meetups/:meetupId')
-  async attachToMatchPivot(
+  @Post(':askingUserId/joins/:askedUserId/meetups/:meetupId')
+  async attachToJoinPivot(
     @Param('askingUserId') askingUserId: number,
     @Param('askedUserId') askedUserId: number,
     @Param('meetupId') meetupId: number,
   ): Promise<AnyData> {
-    await this.usersService.attachToMatchPivot(
+    await this.usersService.attachToJoinPivot(
       askingUserId,
       askedUserId,
       meetupId,
@@ -211,15 +211,15 @@ export class UserMeetupsController {
   // todo. validate asking/asked combo is the other way around
   @ApiOperation({ description: '매치신청 승인/거부' })
   @PaginateQueryOptions()
-  @Patch(':askingUserId/matches/:askedUserId/meetups/:meetupId')
-  async updateMatchToAcceptOrDeny(
+  @Patch(':askingUserId/joins/:askedUserId/meetups/:meetupId')
+  async updateJoinToAcceptOrDeny(
     @Param('askingUserId') askingUserId: number,
     @Param('askedUserId') askedUserId: number,
     @Param('meetupId') meetupId: number,
     @Body('status') status: Status,
   ): Promise<AnyData> {
     try {
-      await this.usersService.updateMatchToAcceptOrDeny(
+      await this.usersService.updateJoinToAcceptOrDeny(
         askingUserId,
         askedUserId,
         meetupId,
@@ -235,7 +235,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 신청한 모임 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/matchmeetups')
+  @Get(':userId/prejoin-meetups')
   async getMeetupsAskedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
@@ -253,7 +253,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '내가 신청한 모임ID 리스트' })
-  @Get(':userId/matchmeetupids')
+  @Get(':userId/prejoin-meetupids')
   async getMeetupIdsAskedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
@@ -262,21 +262,21 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내에게 만나자고 신청한 호구 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/usersasking')
+  @Get(':userId/users-asking-me-to-join')
   async getUsersAskingMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Match>> {
+  ): Promise<Paginated<Join>> {
     return await this.usersService.getUsersAskingMe(userId, query);
   }
 
   @ApiOperation({ description: '내가 만나자고 신청드린 상대방 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/usersasked')
+  @Get(':userId/users-i-asked-to-join')
   async getUsersAskedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Match>> {
+  ): Promise<Paginated<Join>> {
     return await this.usersService.getUsersAskedByMe(userId, query);
   }
 }

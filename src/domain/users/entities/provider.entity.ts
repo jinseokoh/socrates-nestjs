@@ -9,7 +9,7 @@ import {
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
-@Entity() //? 사용자 소셜로그인 정보
+@Entity()
 @Unique('provider_name_provider_id_key', ['providerName', 'providerId'])
 export class Provider {
   @Exclude()
@@ -35,11 +35,11 @@ export class Provider {
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  userId: number | null; // to make it available to Repository.
+  @Column({ type: 'int', unsigned: true })
+  userId: number; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.providers, {
-    // onDelete: 'SET NULL',
+    onDelete: 'CASCADE', // delete this as well when user is being deleted
   })
   user: User;
 

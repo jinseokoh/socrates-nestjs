@@ -14,7 +14,7 @@ import {
 
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-export class Match {
+export class Join {
   @Column({ type: 'enum', enum: Status, nullable: true })
   @ApiProperty({ description: 'ACCEPTED|DENIED' })
   status: Status;
@@ -49,7 +49,7 @@ export class Match {
   @JoinColumn({ name: 'askedUserId' })
   public askedUser!: User;
 
-  @PrimaryColumn({ type: 'bigint' })
+  @PrimaryColumn({ type: 'bigint', unsigned: true })
   public meetupId!: number;
   @ManyToOne(() => Meetup, (meetup) => meetup.id, {
     nullable: false,

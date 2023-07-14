@@ -16,7 +16,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Question {
-  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
+  @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
   id: number;
 
   @Column({ length: 255, nullable: true })

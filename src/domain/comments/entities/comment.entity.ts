@@ -17,7 +17,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Comment {
-  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
+  @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
   id: number;
 
   @Column({ length: 255 })
@@ -45,19 +45,19 @@ export class Comment {
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  userId: number | null; // to make it available to Repository.
+  @Column({ type: 'bigint', unsigned: true })
+  userId: number; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.comments, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   user: User;
 
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  questionId: number | null; // to make it available to Repository.
+  @Column({ type: 'bigint', unsigned: true })
+  questionId: number; // to make it available to Repository.
 
   @ManyToOne(() => Question, (question) => question.comments, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   question: Question;
 
@@ -67,7 +67,7 @@ export class Comment {
   // https://stackoverflow.com/questions/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
   @Exclude()
-  @Column({ type: 'int', unsigned: true, nullable: true })
+  @Column({ type: 'bigint', unsigned: true, nullable: true })
   parentId: number | null;
 
   @OneToMany(() => Comment, (comment) => comment.parent)
