@@ -86,15 +86,15 @@ export class CreateMeetupDto {
   @IsNumber()
   skill: number;
 
-  @ApiProperty({ description: 'match count', default: 0 })
+  @ApiProperty({ description: 'like count', default: 0 })
   @IsNumber()
   @IsOptional()
-  matchCount: number;
+  likeCount: number;
 
-  @ApiProperty({ description: 'keep count', default: 0 })
+  @ApiProperty({ description: 'hate count', default: 0 })
   @IsNumber()
   @IsOptional()
-  keepCount: number;
+  hateCount: number;
 
   @ApiProperty({ description: 'view count', default: 0 })
   @IsNumber()
