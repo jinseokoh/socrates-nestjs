@@ -1,14 +1,15 @@
 export enum SubCategory {
   // CHALLENGE 도전
-  STUDY = 'study', // 공부
-  BOOK = 'book', // 독서
+  IT_PROJECT = 'itProject', // IT프로젝트,해커톤 팀원모집
+  YOUTUBE_PROJECT = 'youtubeProject', // 유튜브 프로젝트 팀원모집
+  ENTREPRENEURSHIP = 'entrepreneurship', // 공동창업 모집
+  STUDY = 'study', // 스터디
   LANGUAGE = 'language', // 외국어,언어교환
   CODING = 'coding', // 코딩
-  YOUTUBER = 'youtuber', // 유튜브영상제작
-  ENTREPRENEURSHIP = 'entrepreneurship', // 창업
+  BOOK = 'book', // 독서
   STOCKS = 'stocks', // 주식,재테크
-  ONE_DAY_CLASS = 'oneDayClass', // 일일체험
-  VOLUNTARY_ACTIVITY = 'voluntaryActivity', // 봉사
+  ONE_DAY_CLASS = 'oneDayClass', // 원데이클래스,일일체험
+  VOLUNTARY_ACTIVITY = 'voluntaryActivity', // 봉사활동
   OTHER_CHALLENGE = 'otherChallenge', // 기타
   // SPORTS
   BASKETBALL = 'basketball', // 농구

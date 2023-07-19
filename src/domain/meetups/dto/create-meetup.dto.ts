@@ -67,7 +67,7 @@ export class CreateMeetupDto {
   @IsEnum(Time)
   time: Time;
 
-  @ApiProperty({ description: '비용', default: Expense.BILLS_ON_ME })
+  @ApiProperty({ description: '비용', default: Expense.FREE })
   @IsEnum(Expense)
   expense: Expense;
 

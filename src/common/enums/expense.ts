@@ -1,5 +1,6 @@
 export enum Expense {
-  SPLIT_EVEN = 'splitEven',
-  BILLS_ON_ME = 'billsOnMe',
-  WAGER = 'wager',
+  FREE = 'free',
+  INEXPENSIVE = 'inexpensive',
+  MODERATE = 'moderate',
+  EXPENSIVE = 'expensive',
 }

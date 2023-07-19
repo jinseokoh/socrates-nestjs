@@ -91,8 +91,8 @@ export class Meetup {
   @ApiProperty({ description: '시간대' })
   time: Time;
 
-  @Column({ type: 'enum', enum: Expense, default: Expense.SPLIT_EVEN })
-  @ApiProperty({ description: '비용부담' })
+  @Column({ type: 'enum', enum: Expense, default: Expense.FREE })
+  @ApiProperty({ description: '참가비' })
   expense: Expense;
 
   @Column({ type: 'tinyint', unsigned: true, default: 2 })

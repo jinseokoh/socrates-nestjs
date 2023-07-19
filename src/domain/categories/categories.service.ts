@@ -61,12 +61,22 @@ export class CategoriesService {
     await this.repository.manager.save(challengeRoot);
 
     challenge = new Category();
-    challenge.slug = SubCategory.STUDY;
+    challenge.slug = SubCategory.IT_PROJECT;
     challenge.depth = 2;
     challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
-    challenge.slug = SubCategory.BOOK;
+    challenge.slug = SubCategory.YOUTUBE_PROJECT;
+    challenge.depth = 2;
+    challenge.parent = challengeRoot;
+    await this.repository.manager.save(challenge);
+    challenge = new Category();
+    challenge.slug = SubCategory.ENTREPRENEURSHIP;
+    challenge.depth = 2;
+    challenge.parent = challengeRoot;
+    await this.repository.manager.save(challenge);
+    challenge = new Category();
+    challenge.slug = SubCategory.STUDY;
     challenge.depth = 2;
     challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
@@ -81,12 +91,7 @@ export class CategoriesService {
     challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
-    challenge.slug = SubCategory.YOUTUBER;
-    challenge.depth = 2;
-    challenge.parent = challengeRoot;
-    await this.repository.manager.save(challenge);
-    challenge = new Category();
-    challenge.slug = SubCategory.ENTREPRENEURSHIP;
+    challenge.slug = SubCategory.BOOK;
     challenge.depth = 2;
     challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
