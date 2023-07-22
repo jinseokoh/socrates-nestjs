@@ -106,7 +106,7 @@ export class CategoriesService {
     challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);
     challenge = new Category();
-    challenge.slug = SubCategory.VOLUNTARY_ACTIVITY;
+    challenge.slug = SubCategory.VOLUNTEERING;
     challenge.depth = 2;
     challenge.parent = challengeRoot;
     await this.repository.manager.save(challenge);

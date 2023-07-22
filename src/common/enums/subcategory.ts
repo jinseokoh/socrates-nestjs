@@ -9,7 +9,7 @@ export enum SubCategory {
   BOOK = 'book', // 독서
   STOCKS = 'stocks', // 주식,재테크
   ONE_DAY_CLASS = 'oneDayClass', // 원데이클래스,일일체험
-  VOLUNTARY_ACTIVITY = 'voluntaryActivity', // 봉사활동
+  VOLUNTEERING = 'volunteering', // 봉사활동
   OTHER_CHALLENGE = 'otherChallenge', // 기타
   // SPORTS
   BASKETBALL = 'basketball', // 농구
