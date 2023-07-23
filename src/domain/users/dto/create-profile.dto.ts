@@ -62,10 +62,10 @@ export class CreateProfileDto {
   @IsOptional()
   postCount: number;
 
-  @ApiProperty({ description: 'match수', required: false, default: 0 })
+  @ApiProperty({ description: 'join수', required: false, default: 0 })
   @IsNumber()
   @IsOptional()
-  matchCount: number;
+  joinCount: number;
 
   @ApiProperty({ description: 'pay수', required: false, default: 0 })
   @IsNumber()

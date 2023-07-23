@@ -18,7 +18,7 @@ import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Status } from 'src/common/enums/status';
-import { Join } from 'src/domain/meetups/entities/match.entity';
+import { Join } from 'src/domain/meetups/entities/join.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 
 @UseInterceptors(ClassSerializerInterceptor)

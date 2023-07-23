@@ -55,7 +55,7 @@ export class Profile {
   postCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  matchCount: number;
+  joinCount: number;
 
   @Exclude()
   @Column({ type: 'int', unsigned: true, default: 0 })

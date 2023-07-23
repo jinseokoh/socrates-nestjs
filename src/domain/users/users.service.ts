@@ -36,7 +36,7 @@ import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
 import { FindOneOptions, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
-import { Join } from 'src/domain/meetups/entities/match.entity';
+import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Hate } from 'src/domain/meetups/entities/hate.entity';
@@ -71,7 +71,7 @@ export class UsersService {
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
     @InjectRepository(Join)
-    private readonly matchRepository: Repository<Join>,
+    private readonly joinRepository: Repository<Join>,
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     @Inject(SmsClient) private readonly smsClient: SmsClient, // naver
@@ -776,8 +776,7 @@ export class UsersService {
     if (meetup.userId == askedUserId) {
       // 1. 방장에게 asking 하는 경우, 20명 까지로 제한.
       if (
-        meetup.joins.filter((v) => meetup.userId === v.askedUserId).length >=
-        20
+        meetup.joins.filter((v) => meetup.userId === v.askedUserId).length >= 20
       ) {
         throw new NotAcceptableException('reached maximum count');
       }
@@ -788,7 +787,7 @@ export class UsersService {
 
     try {
       await this.repository.manager.query(
-        'INSERT IGNORE INTO `match` (askingUserId, askedUserId, meetupId) VALUES (?, ?, ?)',
+        'INSERT IGNORE INTO `join` (askingUserId, askedUserId, meetupId) VALUES (?, ?, ?)',
         [askingUserId, askedUserId, meetupId],
       );
     } catch (e) {
@@ -804,7 +803,7 @@ export class UsersService {
     status: Status,
   ): Promise<any> {
     await this.repository.manager.query(
-      'UPDATE `match` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
+      'UPDATE `join` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
       [status, askingUserId, askedUserId, meetupId],
     );
   }
@@ -814,11 +813,11 @@ export class UsersService {
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Join>> {
-    const queryBuilder = this.matchRepository
-      .createQueryBuilder('match')
-      .leftJoinAndSelect('match.meetup', 'meetup')
+    const queryBuilder = this.joinRepository
+      .createQueryBuilder('join')
+      .leftJoinAndSelect('join.meetup', 'meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
-      // .leftJoinAndSelect('match.askedUser', 'askedUser')
+      // .leftJoinAndSelect('join.askedUser', 'askedUser')
       // .leftJoinAndSelect('meetup.user', 'user')
       .where({
         askingUserId: userId,
@@ -839,7 +838,7 @@ export class UsersService {
   async getMeetupIdsAskedByMe(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId \
-      FROM `user` INNER JOIN `match` ON `user`.id = `match`.askingUserId \
+      FROM `user` INNER JOIN `join` ON `user`.id = `join`.askingUserId \
       WHERE `user`.id = ?',
       [userId],
     );
@@ -854,13 +853,13 @@ export class UsersService {
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Join>> {
-    const queryBuilder = this.matchRepository
-      .createQueryBuilder('match')
-      .leftJoinAndSelect('match.meetup', 'meetup')
+    const queryBuilder = this.joinRepository
+      .createQueryBuilder('join')
+      .leftJoinAndSelect('join.meetup', 'meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
-      .leftJoinAndSelect('match.askingUser', 'askingUser')
+      .leftJoinAndSelect('join.askingUser', 'askingUser')
       .leftJoinAndSelect('askingUser.profile', 'askingUserProfile')
-      // .leftJoinAndSelect('match.askedUser', 'askedUser')
+      // .leftJoinAndSelect('join.askedUser', 'askedUser')
       // .leftJoinAndSelect('askedUser.profile', 'askedUserProfile')
       .where({
         askedUserId: userId,
@@ -884,11 +883,11 @@ export class UsersService {
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Join>> {
-    const queryBuilder = this.matchRepository
-      .createQueryBuilder('match')
-      .leftJoinAndSelect('match.meetup', 'meetup')
+    const queryBuilder = this.joinRepository
+      .createQueryBuilder('join')
+      .leftJoinAndSelect('join.meetup', 'meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
-      .leftJoinAndSelect('match.askedUser', 'askedUser')
+      .leftJoinAndSelect('join.askedUser', 'askedUser')
       .leftJoinAndSelect('askedUser.profile', 'profile')
       .where({
         askingUserId: userId,

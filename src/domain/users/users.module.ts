@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Category } from 'src/domain/categories/entities/category.entity';
-import { Join } from 'src/domain/meetups/entities/match.entity';
+import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/meetups/entities/hate.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';

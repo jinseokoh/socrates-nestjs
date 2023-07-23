@@ -11,7 +11,7 @@ import {
   Category as CategoryEnum,
   SubCategory,
 } from 'src/common/enums';
-import { Join } from 'src/domain/meetups/entities/match.entity';
+import { Join } from 'src/domain/meetups/entities/join.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
@@ -165,7 +165,7 @@ export class Meetup {
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany using one-to-many
 
-  @OneToMany(() => Join, (match) => match.meetup)
+  @OneToMany(() => Join, (join) => join.meetup)
   public joins: Join[];
 
   @OneToMany(() => Like, (like) => like.meetup)
