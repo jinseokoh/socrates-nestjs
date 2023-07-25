@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { Keyword } from 'src/common/enums/keyword';
 export class CreateProfileDto {
   @ApiProperty({ description: '소개글', required: false })
   @IsString()
@@ -35,7 +36,7 @@ export class CreateProfileDto {
   @ApiProperty({ description: 'keywords', required: false })
   @IsArray()
   @IsOptional()
-  keywords?: string[] | null;
+  keywords?: Keyword[];
 
   @ApiProperty({ description: '푸시알림', required: false, default: true })
   @IsBoolean()

@@ -44,13 +44,18 @@ export class Profile {
   @Column({ default: true })
   notifyKakao: boolean;
 
-  @Column({
-    type: 'set',
-    enum: Keyword,
-    default: [],
-  })
-  @ApiProperty({ description: 'comma separated keyword list' })
-  keywords: Keyword[];
+  // @Column({
+  //   type: 'set',
+  //   enum: Keyword,
+  //   default: [],
+  // })
+  // @ApiProperty({ description: 'comma separated keyword list' })
+  // keywords: Keyword[];
+
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: 'FYI in Korean' })
+  @IsArray()
+  keywords: string[] | null;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   viewCount: number;
