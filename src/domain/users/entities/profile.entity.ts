@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
+import { SubCategory } from 'src/common/enums';
 import { Keyword } from 'src/common/enums/keyword';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -44,18 +45,22 @@ export class Profile {
   @Column({ default: true })
   notifyKakao: boolean;
 
-  // @Column({
-  //   type: 'set',
-  //   enum: Keyword,
-  //   default: [],
-  // })
-  // @ApiProperty({ description: 'comma separated keyword list' })
-  // keywords: Keyword[];
+  @Column({
+    type: 'set',
+    enum: SubCategory,
+    default: [],
+  })
+  @ApiProperty({ description: 'comma separated interest list' })
+  interests: SubCategory[];
+  // @Column('json', { nullable: true })
+  // @ApiProperty({ description: 'FYI in Korean' })
+  // @IsArray()
+  // interests: string[] | null;
 
   @Column('json', { nullable: true })
   @ApiProperty({ description: 'FYI in Korean' })
   @IsArray()
-  keywords: string[] | null;
+  fyis: string[] | null;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   viewCount: number;
