@@ -79,6 +79,7 @@ export class MeetupsController {
       'usersLiked',
       'usersHated',
       'joins.askingUser',
+      'joins.askingUser.profile',
     ]);
   }
 
