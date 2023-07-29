@@ -606,6 +606,33 @@ export class UsersService {
   }
 
   //?-------------------------------------------------------------------------//
+  //? 차단 (Hate)
+  //?-------------------------------------------------------------------------//
+
+  // 사용자 블락 리스트에 추가
+  async attachToHatePivot(
+    hatingUserId: number,
+    hatedUserId: number,
+    message: string,
+  ): Promise<any> {
+    const { affectedRows } = await this.repository.manager.query(
+      'INSERT IGNORE INTO `hate` (hatingUserId, hatedUserId, message) VALUES (?, ?, ?)',
+      [hatingUserId, hatedUserId, message],
+    );
+  }
+
+  // 사용자 블락 리스트에서 삭제
+  async detachFromHatePivot(
+    hatingUserId: number,
+    hatedUserId: number,
+  ): Promise<any> {
+    const { affectedRows } = await this.repository.manager.query(
+      'DELETE FROM `hate` WHERE hatingUserId = ? AND hatedUserId = ?',
+      [hatingUserId, hatedUserId],
+    );
+  }
+
+  //?-------------------------------------------------------------------------//
   //? Like Pivot
   //?-------------------------------------------------------------------------//
 
@@ -684,33 +711,6 @@ export class UsersService {
     return {
       data: items.map(({ meetupId }) => meetupId),
     };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? Hate User
-  //?-------------------------------------------------------------------------//
-
-  // 사용자 블락 리스트에 추가
-  async attachToHatePivot(
-    hatingUserId: number,
-    hatedUserId: number,
-    message: string,
-  ): Promise<any> {
-    const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `hate` (hatingUserId, hatedUserId, message) VALUES (?, ?, ?)',
-      [hatingUserId, hatedUserId, message],
-    );
-  }
-
-  // 사용자 블락 리스트에서 삭제
-  async detachFromHatePivot(
-    hatingUserId: number,
-    hatedUserId: number,
-  ): Promise<any> {
-    const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `hate` WHERE hatingUserId = ? AND hatedUserId = ?',
-      [hatingUserId, hatedUserId],
-    );
   }
 
   //?-------------------------------------------------------------------------//

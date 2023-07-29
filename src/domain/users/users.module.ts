@@ -19,6 +19,7 @@ import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
 import { SesModule } from 'src/services/aws/ses.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { UserUsersController } from 'src/domain/users/user-users.controller';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     UsersController,
     UserCategoriesController,
     UserMeetupsController,
+    UserUsersController,
     UserFcmController,
     UserSmsController,
   ],
