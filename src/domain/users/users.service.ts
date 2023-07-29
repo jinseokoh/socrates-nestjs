@@ -690,7 +690,7 @@ export class UsersService {
   //? Hate User
   //?-------------------------------------------------------------------------//
 
-  // 블락 리스트에 추가
+  // 사용자 블락 리스트에 추가
   async attachToHatePivot(
     hatingUserId: number,
     hatedUserId: number,
@@ -702,11 +702,22 @@ export class UsersService {
     );
   }
 
+  // 사용자 블락 리스트에서 삭제
+  async detachFromHatePivot(
+    hatingUserId: number,
+    hatedUserId: number,
+  ): Promise<any> {
+    const { affectedRows } = await this.repository.manager.query(
+      'DELETE FROM `hate` WHERE hatingUserId = ? AND hatedUserId = ?',
+      [hatingUserId, hatedUserId],
+    );
+  }
+
   //?-------------------------------------------------------------------------//
   //? Dislike Pivot
   //?-------------------------------------------------------------------------//
 
-  // 블락 리스트에 추가
+  // 모임 블락 리스트에 추가
   async attachToDislikePivot(
     userId: number,
     meetupId: number,
@@ -725,7 +736,7 @@ export class UsersService {
     }
   }
 
-  // 블락 리스트에서 삭제
+  // 모임 블락 리스트에서 삭제
   async detachFromDislikePivot(userId: number, meetupId: number): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
       'DELETE FROM `dislike` WHERE userId = ? AND meetupId = ?',
