@@ -687,6 +687,22 @@ export class UsersService {
   }
 
   //?-------------------------------------------------------------------------//
+  //? Hate User
+  //?-------------------------------------------------------------------------//
+
+  // 블락 리스트에 추가
+  async attachToHatePivot(
+    hatingUserId: number,
+    hatedUserId: number,
+    message: string,
+  ): Promise<any> {
+    const { affectedRows } = await this.repository.manager.query(
+      'INSERT IGNORE INTO `hate` (hatingUserId, hatedUserId, message) VALUES (?, ?, ?)',
+      [hatingUserId, hatedUserId, message],
+    );
+  }
+
+  //?-------------------------------------------------------------------------//
   //? Dislike Pivot
   //?-------------------------------------------------------------------------//
 

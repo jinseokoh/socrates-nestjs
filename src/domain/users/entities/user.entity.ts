@@ -159,10 +159,10 @@ export class User {
   @OneToMany(() => Dislike, (dislike) => dislike.user)
   public meetupsDisliked: Dislike[];
 
-  @OneToMany(() => Hate, (hate) => hate.hating)
+  @OneToMany(() => Hate, (hate) => hate.hatingUser)
   public usersHating: Hate[];
 
-  @OneToMany(() => Hate, (hate) => hate.hated)
+  @OneToMany(() => Hate, (hate) => hate.hatedUser)
   public usersHated: Hate[];
 
   //*-------------------------------------------------------------------------*/

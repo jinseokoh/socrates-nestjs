@@ -7,19 +7,19 @@ import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 @Entity()
 export class Hate {
   @PrimaryColumn({ type: 'int', unsigned: true })
-  public hatingId: number;
+  public hatingUserId: number;
 
   @PrimaryColumn({ type: 'int', unsigned: true })
-  public hatedId: number;
+  public hatedUserId: number;
 
   @Column({ length: 16, nullable: true })
   message: string | null;
 
   @ManyToOne(() => User, (user) => user.usersHating)
-  public hating: User;
+  public hatingUser: User;
 
   @ManyToOne(() => User, (user) => user.usersHated)
-  public hated: User;
+  public hatedUser: User;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
