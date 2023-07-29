@@ -2,9 +2,10 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 
+// a user can dislike meetup
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-export class Hate {
+export class Dislike {
   @PrimaryColumn({ type: 'int', unsigned: true })
   public userId: number;
 
@@ -14,9 +15,9 @@ export class Hate {
   @Column({ length: 16, nullable: true })
   message: string | null;
 
-  @ManyToOne(() => User, (user) => user.meetupsLiked)
+  @ManyToOne(() => User, (user) => user.meetupsDisliked)
   public user: User;
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.usersLiked)
+  @ManyToOne(() => Meetup, (meetup) => meetup.usersDisliked)
   public meetup: Meetup;
 }

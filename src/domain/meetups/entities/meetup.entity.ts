@@ -30,7 +30,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Like } from 'src/domain/meetups/entities/like.entity';
-import { Hate } from 'src/domain/meetups/entities/hate.entity';
+import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 
 @Entity()
@@ -116,8 +116,8 @@ export class Meetup {
   likeCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'hate count' })
-  hateCount: number;
+  @ApiProperty({ description: 'dislike count' })
+  dislikeCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'view count' })
@@ -171,8 +171,8 @@ export class Meetup {
   @OneToMany(() => Like, (like) => like.meetup)
   public usersLiked: Like[];
 
-  @OneToMany(() => Hate, (hate) => hate.meetup)
-  public usersHated: Hate[];
+  @OneToMany(() => Dislike, (hate) => hate.meetup)
+  public usersDisliked: Dislike[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany

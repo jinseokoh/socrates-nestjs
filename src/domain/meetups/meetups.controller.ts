@@ -77,7 +77,7 @@ export class MeetupsController {
       'venue',
       'joins',
       'usersLiked',
-      'usersHated',
+      'usersDisliked',
       'joins.askingUser',
       'joins.askingUser.profile',
     ]);

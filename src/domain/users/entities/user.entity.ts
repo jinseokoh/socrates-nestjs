@@ -4,8 +4,9 @@ import { Role } from 'src/common/enums';
 import { Career } from 'src/common/enums/career';
 import { Gender } from 'src/common/enums/gender';
 import { Category } from 'src/domain/categories/entities/category.entity';
-import { Hate } from 'src/domain/meetups/entities/hate.entity';
+import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
+import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Question } from 'src/domain/questions/entities/question.entity';
@@ -155,8 +156,14 @@ export class User {
   @OneToMany(() => Like, (like) => like.user)
   public meetupsLiked: Like[];
 
-  @OneToMany(() => Hate, (hate) => hate.user)
-  public meetupsHated: Hate[];
+  @OneToMany(() => Dislike, (dislike) => dislike.user)
+  public meetupsDisliked: Dislike[];
+
+  @OneToMany(() => Hate, (hate) => hate.hating)
+  public usersHating: Hate[];
+
+  @OneToMany(() => Hate, (hate) => hate.hated)
+  public usersHated: Hate[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany

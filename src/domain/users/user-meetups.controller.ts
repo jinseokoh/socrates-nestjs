@@ -114,12 +114,12 @@ export class UserMeetupsController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Hate Pivot
+  //? Dislike Pivot
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '나의 블락 리스트에 추가' })
-  @Post(':userId/hatemeetups/:meetupId')
-  async attachToHatePivot(
+  @Post(':userId/dislikemeetups/:meetupId')
+  async attachToDislikePivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body('message') message: string,
@@ -128,7 +128,7 @@ export class UserMeetupsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.attachToHatePivot(userId, meetupId, message);
+      await this.usersService.attachToDislikePivot(userId, meetupId, message);
 
       return {
         data: 'ok',
@@ -139,8 +139,8 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '나의 블락 리스트에서 삭제' })
-  @Delete(':userId/hatemeetups/:meetupId')
-  async detachFromHatePivot(
+  @Delete(':userId/dislikemeetups/:meetupId')
+  async detachFromDislikePivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<any> {
@@ -148,7 +148,7 @@ export class UserMeetupsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.detachFromHatePivot(userId, meetupId);
+      await this.usersService.detachFromDislikePivot(userId, meetupId);
       return {
         data: 'ok',
       };
@@ -159,15 +159,13 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 블락한 모임 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/hatemeetups')
-  async getMeetupsHatedByMe(
+  @Get(':userId/dislikemeetups')
+  async getMeetupsDislikedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Meetup>> {
-    const { data, meta, links } = await this.usersService.getMeetupsHatedByMe(
-      userId,
-      query,
-    );
+    const { data, meta, links } =
+      await this.usersService.getMeetupsDislikedByMe(userId, query);
 
     return {
       data: data.map((v) => v.meetup),
@@ -178,11 +176,11 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 블락한 모임ID 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/hatemeetupids')
-  async getMeetupIdsHatedByMe(
+  @Get(':userId/dislikemeetupids')
+  async getMeetupIdsDislikedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
-    return this.usersService.getMeetupIdsHatedByMe(userId);
+    return this.usersService.getMeetupIdsDislikedByMe(userId);
   }
 
   //?-------------------------------------------------------------------------//

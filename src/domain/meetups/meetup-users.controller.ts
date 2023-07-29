@@ -38,19 +38,23 @@ export class MeetupUsersController {
     };
   }
 
-  @ApiOperation({ description: '이 모임을 신고한 모든 haters' })
-  @Get(':id/haters')
-  async getAllHaters(@Param('id', ParseIntPipe) id: number): Promise<AnyData> {
-    const haters = await this.meetupsService.getAllHaters(id);
+  @ApiOperation({ description: '이 모임을 신고한 사용자ID 리스트' })
+  @Get(':id/dislikers')
+  async getAllDislikers(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<AnyData> {
+    const dislikers = await this.meetupsService.getAllDislikers(id);
     return {
-      data: haters,
+      data: dislikers,
     };
   }
 
   @ApiOperation({ description: '이 모임을 신고한 사용자ID 리스트' })
-  @Get(':id/hate_ids')
-  async getAllHateIds(@Param('id', ParseIntPipe) id: number): Promise<AnyData> {
-    const ids = await this.meetupsService.getAllHateIds(id);
+  @Get(':id/dislike_ids')
+  async getAllDislikeIds(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<AnyData> {
+    const ids = await this.meetupsService.getAllDislikeIds(id);
     return {
       data: ids,
     };

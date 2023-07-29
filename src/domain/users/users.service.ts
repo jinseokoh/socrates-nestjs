@@ -39,7 +39,7 @@ import { Repository } from 'typeorm/repository/Repository';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Hate } from 'src/domain/meetups/entities/hate.entity';
+import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
@@ -68,8 +68,8 @@ export class UsersService {
     private readonly meetupRepository: Repository<Meetup>,
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
-    @InjectRepository(Hate)
-    private readonly hateRepository: Repository<Hate>,
+    @InjectRepository(Dislike)
+    private readonly dislikeRepository: Repository<Dislike>,
     @InjectRepository(Join)
     private readonly joinRepository: Repository<Join>,
     @Inject(ConfigService) private configService: ConfigService, // global
@@ -687,53 +687,57 @@ export class UsersService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Hate Pivot
+  //? Dislike Pivot
   //?-------------------------------------------------------------------------//
 
   // 블락 리스트에 추가
-  async attachToHatePivot(
+  async attachToDislikePivot(
     userId: number,
     meetupId: number,
     message: string,
   ): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `hate` (userId, meetupId, message) VALUES (?, ?, ?)',
+      'INSERT IGNORE INTO `dislike` (userId, meetupId, message) VALUES (?, ?, ?)',
       [userId, meetupId, message],
     );
     if (affectedRows > 0) {
-      await this.meetupRepository.increment({ id: meetupId }, 'hateCount', 1);
+      await this.meetupRepository.increment(
+        { id: meetupId },
+        'dislikeCount',
+        1,
+      );
     }
   }
 
   // 블락 리스트에서 삭제
-  async detachFromHatePivot(userId: number, meetupId: number): Promise<any> {
+  async detachFromDislikePivot(userId: number, meetupId: number): Promise<any> {
     const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `hate` WHERE userId = ? AND meetupId = ?',
+      'DELETE FROM `dislike` WHERE userId = ? AND meetupId = ?',
       [userId, meetupId],
     );
     if (affectedRows > 0) {
-      // await this.meetupRrepository.decrement({ meetupId }, 'hateCount', 1);
+      // await this.meetupRrepository.decrement({ meetupId }, 'dislikeCount', 1);
       await this.repository.manager.query(
-        'UPDATE `meetup` SET hateCount = hateCount - 1 WHERE id = ? AND hateCount > 0',
+        'UPDATE `meetup` SET dislikeCount = dislikeCount - 1 WHERE id = ? AND dislikeCount > 0',
         [meetupId],
       );
     }
   }
 
   // 내가 블락한 모임 리스트
-  async getMeetupsHatedByMe(
+  async getMeetupsDislikedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Hate>> {
-    const queryBuilder = this.hateRepository
-      .createQueryBuilder('hate')
-      .leftJoinAndSelect('hate.meetup', 'meetup')
+  ): Promise<Paginated<Dislike>> {
+    const queryBuilder = this.dislikeRepository
+      .createQueryBuilder('dislike')
+      .leftJoinAndSelect('dislike.meetup', 'meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
       .where({
         userId,
       });
 
-    const config: PaginateConfig<Hate> = {
+    const config: PaginateConfig<Dislike> = {
       sortableColumns: ['meetupId'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,
@@ -745,10 +749,10 @@ export class UsersService {
   }
 
   // 내가 블락한 모임 ID 리스트
-  async getMeetupIdsHatedByMe(userId: number): Promise<AnyData> {
+  async getMeetupIdsDislikedByMe(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId \
-      FROM `user` INNER JOIN `hate` ON `user`.id = `hate`.userId \
+      FROM `user` INNER JOIN `dislike` ON `user`.id = `dislike`.userId \
       WHERE `user`.id = ?',
       [userId],
     );

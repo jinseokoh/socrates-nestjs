@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
-import { Hate } from 'src/domain/meetups/entities/hate.entity';
+import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
@@ -29,7 +29,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
       Secret,
       Meetup,
       Like,
-      Hate,
+      Dislike,
       Join,
     ]),
     ThrottlerModule.forRoot({
