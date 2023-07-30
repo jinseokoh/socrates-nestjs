@@ -622,7 +622,7 @@ export class UsersService {
 
     if (affectedRows > 0) {
       //
-      // 대상회원이 만든 모든 모임을 차단처리
+      // 대상회원이 만든 모임의 차단처리
       //
       const meetups = await this.meetupRepository.find({
         select: {
@@ -655,7 +655,7 @@ export class UsersService {
 
     if (affectedRows > 0) {
       //
-      // 대상회원이 만든 모든 모임을 차단처리
+      // 대상회원이 만든 모임의 차단처리 취소
       //
       const meetups = await this.meetupRepository.find({
         select: {

@@ -60,10 +60,9 @@ export class MeetupsService {
       throw new BadRequestException(`not allowed to create`);
     }
 
+    // 1) create model and the relationship
     const categories = await this._getCategoriesBySlug(dto.subCategory);
     const careers = await this._getCareersBySlugs(dto.targetCareers);
-    // console.log(categories, careers);
-
     const _meetup = this.repository.create(dto);
     _meetup.categories = categories;
     _meetup.careers = careers;
@@ -72,6 +71,20 @@ export class MeetupsService {
       this.venueRepository.create({ ...dto.venue, meetupId: meetup.id }),
     );
     meetup.venue = venue;
+
+    // 2) prevent users blocked this poster from seeing this new post.
+    const blockedUsers = await this.repository.manager.query(
+      'SELECT hatingUserId AS id FROM `hate` WHERE hatedUserId = ?',
+      [dto.userId],
+    );
+    await Promise.all(
+      blockedUsers.map(async (user) => {
+        await this.repository.manager.query(
+          'INSERT IGNORE INTO `dislike` (userId, meetupId, message) VALUES (?, ?, ?)',
+          [user.id, meetup.id, `${user.id} hates ${dto.userId}`],
+        );
+      }),
+    );
 
     return meetup;
   }
