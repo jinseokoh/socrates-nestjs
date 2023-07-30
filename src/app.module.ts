@@ -23,6 +23,7 @@ import { QuestionsModule } from 'src/domain/questions/questions.module';
 import { CommentsModule } from 'src/domain/comments/comments.module';
 import { RedisModule } from 'src/services/redis/redis.module';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
+import { ReportsModule } from 'src/domain/reports/reports.module';
 
 @Module({
   imports: [
@@ -99,6 +100,7 @@ import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
     QuestionsModule,
     CommentsModule,
     UsersModule,
+    ReportsModule,
     RedisModule.register({ name: REDIS_PUBSUB_CLIENT }),
   ],
   controllers: [AppController],

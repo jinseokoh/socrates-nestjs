@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Delete,
+  Get,
   Param,
   ParseIntPipe,
   Post,
@@ -11,6 +12,7 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { UsersService } from 'src/domain/users/users.service';
 import { SkipThrottle } from '@nestjs/throttler';
+import { AnyData } from 'src/common/types';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -60,5 +62,11 @@ export class UserUsersController {
     } catch (e) {
       throw new BadRequestException();
     }
+  }
+
+  @ApiOperation({ description: '내가 찜한 모임ID 리스트' })
+  @Get(':userId/hateids')
+  async getUserIdsHatedByMe(@Param('userId') userId: number): Promise<AnyData> {
+    return this.usersService.getUserIdsHatedByMe(userId);
   }
 }

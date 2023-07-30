@@ -632,6 +632,22 @@ export class UsersService {
     );
   }
 
+  // 내가 블락하거나 나를 블락한 ids
+  async getUserIdsHatedByMe(userId: number): Promise<AnyData> {
+    const rows = await this.repository.manager.query(
+      'SELECT hatingUserId, hatedUserId \
+      FROM `hate` \
+      WHERE hatingUserId = ? OR hatedUserId = ?',
+      [userId, userId],
+    );
+
+    const data = rows.map((v) => {
+      return v.hatingUserId === userId ? v.hatedUserId : v.hatingUserId;
+    });
+
+    return { data: [...new Set(data)] };
+  }
+
   //?-------------------------------------------------------------------------//
   //? Like Pivot
   //?-------------------------------------------------------------------------//

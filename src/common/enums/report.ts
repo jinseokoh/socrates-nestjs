@@ -1,9 +1,9 @@
 export enum ReportStatus {
-  PENDING = 'PENDING',
-  RESOLVED = 'RESOLVED',
+  PENDING = 'pending',
+  RESOLVED = 'resolved',
 }
 
 export enum ReportTarget {
-  USER = 'USER',
-  MEETUP = 'MEETUP',
+  USER = 'user',
+  MEETUP = 'meetup',
 }

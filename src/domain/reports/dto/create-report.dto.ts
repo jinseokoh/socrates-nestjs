@@ -11,8 +11,8 @@ export class CreateReportDto {
   target?: ReportTarget;
 
   @ApiProperty({ description: '신고대상 아이디', required: false })
-  @IsString()
-  targetId?: string;
+  @IsNumber()
+  targetId: number; // bigint
 
   @ApiProperty({ description: '신고이유' })
   @IsString()

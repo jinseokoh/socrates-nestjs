@@ -21,8 +21,8 @@ export class Report {
   })
   target: ReportTarget;
 
-  @Column({ length: 36, nullable: true })
-  targetId: string | null;
+  @Column({ type: 'bigint', unsigned: true })
+  targetId: number;
 
   @Column({ length: 255 })
   reason: string;
