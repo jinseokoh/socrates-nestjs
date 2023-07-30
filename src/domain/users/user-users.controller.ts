@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Delete,
@@ -29,6 +30,7 @@ export class UserUsersController {
   async attachToLikePivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('otherId', ParseIntPipe) otherId: number,
+    @Body('message') message: string | null,
   ): Promise<any> {
     //? checking if this meetup belongs to the user costs a database access,
     //? which you can get around if you design your application carefully.
@@ -36,7 +38,7 @@ export class UserUsersController {
 
     console.log(userId, otherId);
     try {
-      await this.usersService.attachToHatePivot(userId, otherId, null);
+      await this.usersService.attachToHatePivot(userId, otherId, message);
       return {
         data: 'ok',
       };

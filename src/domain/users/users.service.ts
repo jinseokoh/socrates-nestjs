@@ -614,22 +614,64 @@ export class UsersService {
     hatingUserId: number,
     hatedUserId: number,
     message: string,
-  ): Promise<any> {
+  ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
       'INSERT IGNORE INTO `hate` (hatingUserId, hatedUserId, message) VALUES (?, ?, ?)',
       [hatingUserId, hatedUserId, message],
     );
+
+    if (affectedRows > 0) {
+      //
+      // 대상회원이 만든 모든 모임을 차단처리
+      //
+      const meetups = await this.meetupRepository.find({
+        select: {
+          id: true,
+        },
+        where: {
+          userId: hatedUserId,
+        },
+      });
+      await Promise.all(
+        meetups.map(async (v) => {
+          await this.repository.manager.query(
+            'INSERT IGNORE INTO `dislike` (userId, meetupId, message) VALUES (?, ?, ?)',
+            [hatingUserId, v.id, `${hatingUserId} hates ${hatedUserId}`],
+          );
+        }),
+      );
+    }
   }
 
   // 사용자 블락 리스트에서 삭제
   async detachFromHatePivot(
     hatingUserId: number,
     hatedUserId: number,
-  ): Promise<any> {
+  ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
       'DELETE FROM `hate` WHERE hatingUserId = ? AND hatedUserId = ?',
       [hatingUserId, hatedUserId],
     );
+
+    if (affectedRows > 0) {
+      //
+      // 대상회원이 만든 모든 모임을 차단처리
+      //
+      const meetups = await this.meetupRepository.find({
+        select: {
+          id: true,
+        },
+        where: {
+          userId: hatedUserId,
+        },
+      });
+
+      const ids = meetups.map((v) => v.id);
+      await this.repository.manager.query(
+        'DELETE FROM `dislike` WHERE userId = ? AND meetupId IN (?)',
+        [hatingUserId, ids],
+      );
+    }
   }
 
   // 내가 블락하거나 나를 블락한 ids
