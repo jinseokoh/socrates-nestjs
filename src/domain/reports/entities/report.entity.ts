@@ -7,9 +7,11 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 @Entity()
+@Unique('target_target_id_user_id_key', ['target', 'targetId', 'userId'])
 export class Report {
   @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
   id: number;
