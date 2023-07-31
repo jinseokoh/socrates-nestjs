@@ -63,10 +63,6 @@ export class Meetup {
   @ApiProperty({ description: 'subcategory' })
   subCategory: SubCategory;
 
-  @Column({ type: 'enum', enum: Gender, default: Gender.ALL })
-  @ApiProperty({ description: 'gender looking for' })
-  targetGender: Gender;
-
   @Column({
     type: 'set',
     enum: CareerEnum,
@@ -74,6 +70,15 @@ export class Meetup {
   })
   @ApiProperty({ description: 'comma separated target career list' })
   targetCareers: CareerEnum[];
+
+  @Column({ type: 'enum', enum: Gender, default: Gender.ALL })
+  @ApiProperty({ description: 'gender looking for' })
+  targetGender: Gender;
+
+  @Exclude()
+  @Column({ length: 8, nullable: true })
+  @ApiProperty({ description: 'age range' })
+  targetAge: string | null;
 
   @Column({
     type: 'enum',
@@ -124,7 +129,11 @@ export class Meetup {
   viewCount: number;
 
   @Column({ default: false })
-  @ApiProperty({ description: '신고여부' })
+  @ApiProperty({ description: 'is full' })
+  isFull: boolean;
+
+  @Column({ default: false })
+  @ApiProperty({ description: 'is flagged' })
   isFlagged: boolean;
 
   @Column({ type: 'datetime' })

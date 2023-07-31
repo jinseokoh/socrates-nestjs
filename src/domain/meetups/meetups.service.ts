@@ -126,7 +126,7 @@ export class MeetupsService {
     const config: PaginateConfig<Meetup> = {
       relations: {
         user: { profile: true },
-        careers: true,
+        careers: true, // needed for filtering
       },
       sortableColumns: ['createdAt'],
       searchableColumns: ['title'],
