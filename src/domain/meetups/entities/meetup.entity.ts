@@ -75,7 +75,6 @@ export class Meetup {
   @ApiProperty({ description: 'gender looking for' })
   targetGender: Gender;
 
-  @Exclude()
   @Column({ length: 8, nullable: true })
   @ApiProperty({ description: 'age range' })
   targetAge: string | null;
