@@ -537,6 +537,10 @@ export class UsersService {
     const queryBuilder = this.meetupRepository
       .createQueryBuilder('meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
+      .leftJoinAndSelect('meetup.joins', 'join')
+      .leftJoinAndSelect('meetup.user', 'user')
+      .leftJoinAndSelect('join.askingUser', 'askingUser')
+      .leftJoinAndSelect('join.askedUser', 'askedUser')
       .where({
         userId,
       });
