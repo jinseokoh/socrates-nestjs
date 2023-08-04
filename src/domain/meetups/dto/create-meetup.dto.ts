@@ -45,15 +45,20 @@ export class CreateMeetupDto {
   @IsEnum(SubCategory)
   subCategory: SubCategory;
 
+  @ApiProperty({ description: '상대방 careers', default: ['all'] })
+  @IsArray()
+  @IsOptional()
+  targetCareers: CareerEnum[];
+
   @ApiProperty({ description: '상대방 성별', default: Gender.ALL })
   @IsEnum(Gender)
   @IsOptional()
   targetGender: Gender;
 
-  @ApiProperty({ description: '상대방 careers', default: ['all'] })
-  @IsArray()
+  @ApiProperty({ description: '상대방 나이', default: null })
+  @IsString()
   @IsOptional()
-  targetCareers: CareerEnum[];
+  targetAge: string | null;
 
   @ApiProperty({ description: 'region', default: Region.SEOUL })
   @IsEnum(Region)
