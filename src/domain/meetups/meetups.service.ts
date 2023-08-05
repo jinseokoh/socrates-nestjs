@@ -266,37 +266,6 @@ export class MeetupsService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? 참가신청한 모든 사용자 리스트
-  //?-------------------------------------------------------------------------//
-
-  async getAllJoins(id: number): Promise<Join[]> {
-    try {
-      const meetup = await this.repository.findOneOrFail({
-        where: {
-          id: id,
-        },
-        relations: ['joins', 'joins.askingUser', 'joins.askedUser'],
-      });
-      return meetup.joins;
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
-  }
-
-  async getAllJoinerIds(id: number): Promise<any> {
-    try {
-      const rows = await this.repository.manager.query(
-        'SELECT userId FROM `join` WHERE meetupId = ?',
-        [id],
-      );
-
-      return rows.map((v: any) => v.userId);
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
-  }
-
-  //?-------------------------------------------------------------------------//
   //? 찜한 모든 사용자 리스트
   //?-------------------------------------------------------------------------//
 

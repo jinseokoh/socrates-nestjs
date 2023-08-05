@@ -911,7 +911,7 @@ export class UsersService {
       .leftJoinAndSelect('join.meetup', 'meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
       // .leftJoinAndSelect('join.askedUser', 'askedUser')
-      // .leftJoinAndSelect('meetup.user', 'user')
+      .leftJoinAndSelect('meetup.user', 'user')
       .where({
         askingUserId: userId,
       });
