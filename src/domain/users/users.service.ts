@@ -867,9 +867,9 @@ export class UsersService {
     });
 
     if (meetup.userId == askedUserId) {
-      // 1. 방장에게 asking 하는 경우, 20명 까지로 제한.
+      // 1. 방장에게 asking 하는 경우, 30명 까지로 제한.
       if (
-        meetup.joins.filter((v) => meetup.userId === v.askedUserId).length >= 20
+        meetup.joins.filter((v) => meetup.userId === v.askedUserId).length > 30
       ) {
         throw new NotAcceptableException('reached maximum count');
       }

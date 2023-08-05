@@ -266,6 +266,43 @@ export class MeetupsService {
   }
 
   //?-------------------------------------------------------------------------//
+  //? 참가신청한 모든 사용자 리스트
+  //?-------------------------------------------------------------------------//
+
+  async getAllJoiners(id: number): Promise<any> {
+    try {
+      const meetup = await this.repository.findOneOrFail({
+        where: {
+          id: id,
+        },
+        relations: ['joins', 'joins.askingUser', 'joins.askedUser'],
+      });
+      return meetup.joins
+        .filter((v) => v.askedUser.id === meetup.userId)
+        .map((v) => v.askingUser);
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  async getAllInvitees(id: number): Promise<any> {
+    try {
+      const meetup = await this.repository.findOneOrFail({
+        where: {
+          id: id,
+        },
+        relations: ['joins', 'joins.askingUser', 'joins.askedUser'],
+      });
+
+      return meetup.joins
+        .filter((v) => v.askingUser.id === meetup.userId)
+        .map((v) => v.askedUser);
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  //?-------------------------------------------------------------------------//
   //? 찜한 모든 사용자 리스트
   //?-------------------------------------------------------------------------//
 
