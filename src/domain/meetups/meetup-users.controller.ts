@@ -17,6 +17,30 @@ export class MeetupUsersController {
   constructor(private readonly meetupsService: MeetupsService) {}
 
   //?-------------------------------------------------------------------------//
+  //? 참가신청 리스트
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '이 모임 참가신청한 모든 likers' })
+  @Get(':id/joins')
+  async getAllJoiners(@Param('id', ParseIntPipe) id: number): Promise<AnyData> {
+    const joins = await this.meetupsService.getAllJoins(id);
+    return {
+      data: joins,
+    };
+  }
+
+  @ApiOperation({ description: '이 모임 참가신청한 사용자ID 리스트' })
+  @Get(':id/join_ids')
+  async getAllJoinerIds(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<AnyData> {
+    const ids = await this.meetupsService.getAllJoinerIds(id);
+    return {
+      data: ids,
+    };
+  }
+
+  //?-------------------------------------------------------------------------//
   //? 찜 리스트
   //?-------------------------------------------------------------------------//
 
@@ -37,6 +61,10 @@ export class MeetupUsersController {
       data: ids,
     };
   }
+
+  //?-------------------------------------------------------------------------//
+  //? 블락 리스트
+  //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '이 모임을 신고한 사용자ID 리스트' })
   @Get(':id/dislikers')
