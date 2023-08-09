@@ -72,9 +72,15 @@ export class CreateMeetupDto {
   @IsEnum(Time)
   time: Time;
 
-  @ApiProperty({ description: '비용', default: Expense.FREE })
-  @IsEnum(Expense)
-  expense: Expense;
+  @ApiProperty({ description: '비용 details', default: ['free'] })
+  @IsArray()
+  @IsOptional()
+  expenses: Expense[];
+
+  @ApiProperty({ description: '비용', required: true })
+  @Type(() => Number)
+  @IsNumber()
+  amount: number;
 
   @ApiProperty({ description: 'max 인원', required: true })
   @Type(() => Number)

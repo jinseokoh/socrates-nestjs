@@ -95,13 +95,21 @@ export class Meetup {
   @ApiProperty({ description: '시간대' })
   time: Time;
 
-  @Column({ type: 'enum', enum: Expense, default: Expense.FREE })
-  @ApiProperty({ description: '참가비' })
-  expense: Expense;
-
   @Column({ type: 'tinyint', unsigned: true, default: 2 })
   @ApiProperty({ description: 'max # of participants' })
   max: number;
+
+  @Column({ type: 'int', unsigned: true })
+  @ApiProperty({ description: '참가비' })
+  amount: number;
+
+  @Column({
+    type: 'set',
+    enum: Expense,
+    default: [Expense.FREE],
+  })
+  @ApiProperty({ description: 'comma separated expense hashtag' })
+  expenses: Expense[];
 
   @Column({ type: 'tinyint', unsigned: true, default: 2 })
   @ApiProperty({ description: 'patron level' })
