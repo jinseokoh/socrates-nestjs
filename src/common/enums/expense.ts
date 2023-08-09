@@ -11,5 +11,5 @@ export enum Expense {
   SOUVENIR = 'souvenir', // 기념품비
   DONATION = 'donation', // 기부금
   TIP = 'tip', // 봉사료
-  FREE = 'free', // 무료
+  // FREE = 'free', // 무료
 }

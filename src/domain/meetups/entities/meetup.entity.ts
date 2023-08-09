@@ -106,7 +106,7 @@ export class Meetup {
   @Column({
     type: 'set',
     enum: Expense,
-    default: [Expense.FREE],
+    default: [],
   })
   @ApiProperty({ description: 'comma separated expense hashtag' })
   expenses: Expense[];
