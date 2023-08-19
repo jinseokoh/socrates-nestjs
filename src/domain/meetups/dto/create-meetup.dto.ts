@@ -68,10 +68,6 @@ export class CreateMeetupDto {
   @IsEnum(Day)
   day: Day;
 
-  @ApiProperty({ description: '시간', default: Time.AFTERNOON })
-  @IsEnum(Time)
-  time: Time;
-
   @ApiProperty({ description: '원하는 시간대', default: [] })
   @IsArray()
   @IsOptional()

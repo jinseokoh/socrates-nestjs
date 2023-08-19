@@ -140,6 +140,14 @@ export class Meetup {
   viewCount: number;
 
   @Column({ default: false })
+  @ApiProperty({ description: 'is pro' })
+  isPro: boolean;
+
+  @Column({ default: false })
+  @ApiProperty({ description: 'has qa forum' })
+  hasQa: boolean;
+
+  @Column({ default: false })
   @ApiProperty({ description: 'is full' })
   isFull: boolean;
 
