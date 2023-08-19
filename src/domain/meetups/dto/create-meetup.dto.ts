@@ -64,13 +64,18 @@ export class CreateMeetupDto {
   @IsEnum(Region)
   region: Region;
 
-  @ApiProperty({ description: '요일', default: Day.ANYDAY })
+  @ApiProperty({ description: '원하는 요일', default: Day.ANYDAY })
   @IsEnum(Day)
   day: Day;
 
   @ApiProperty({ description: '시간', default: Time.AFTERNOON })
   @IsEnum(Time)
   time: Time;
+
+  @ApiProperty({ description: '원하는 시간대', default: [] })
+  @IsArray()
+  @IsOptional()
+  times: Time[];
 
   @ApiProperty({ description: '비용 details', default: [] })
   @IsArray()

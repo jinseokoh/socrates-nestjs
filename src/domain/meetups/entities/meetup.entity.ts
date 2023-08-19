@@ -91,9 +91,13 @@ export class Meetup {
   @ApiProperty({ description: '요일' })
   day: Day;
 
-  @Column({ type: 'enum', enum: Time, default: Time.DINNER })
-  @ApiProperty({ description: '시간대' })
-  time: Time;
+  @Column({
+    type: 'set',
+    enum: Time,
+    default: [],
+  })
+  @ApiProperty({ description: 'comma separated time list' })
+  times: Time[];
 
   @Column({ type: 'tinyint', unsigned: true, default: 2 })
   @ApiProperty({ description: 'max # of participants' })
