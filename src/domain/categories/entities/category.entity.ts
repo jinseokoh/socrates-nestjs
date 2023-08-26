@@ -1,9 +1,10 @@
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { User } from 'src/domain/users/entities/user.entity';
+import { Interest } from 'src/domain/meetups/entities/interest.entity';
 import {
   Column,
   Entity,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   Tree,
   TreeChildren,
@@ -29,11 +30,24 @@ export class Category {
   parent: Category;
 
   //*-------------------------------------------------------------------------*/
+  //* many-to-many belongsToMany using one-to-many
+
+  @OneToMany(() => Interest, (interest) => interest.category)
+  public usersInterested: Interest[];
+
+  //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany
 
   @ManyToMany(() => Meetup, (meetup) => meetup.categories)
   meetups: Meetup[];
 
-  @ManyToMany(() => User, (user) => user.categories)
-  users: User[];
+  // used to have this many to many relationship.
+  // @ManyToMany(() => User, (user) => user.categories)
+  // users: User[];
+  //?-------------------------------------------------------------------------?/
+  //? constructor
+
+  constructor(partial: Partial<Category>) {
+    Object.assign(this, partial);
+  }
 }

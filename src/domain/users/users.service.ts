@@ -51,6 +51,7 @@ import { AWS_SES_CONNECTION } from 'src/common/constants';
 import { SES } from 'aws-sdk';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
+import { Interest } from 'src/domain/meetups/entities/interest.entity';
 @Injectable()
 export class UsersService {
   private readonly env: any;
@@ -569,45 +570,67 @@ export class UsersService {
 
   // 나의 관심사 리스트
   async getCategories(id: number): Promise<Array<Category>> {
-    const user = await this.findById(id);
-    const categories = await this.repository
-      .createQueryBuilder()
-      .relation(User, 'categories')
-      .of(user)
-      .loadMany();
-
-    return categories;
-  }
-
-  // 나의 관심사 리스트에 추가
-  async syncCategoriesWithIds(id: number, ids: number[]): Promise<User> {
-    const user = await this.findById(id, ['categories']);
-    const categories = await this.categoryRepository.findBy({
-      id: In(ids),
+    const user = await this.repository.findOneOrFail({
+      where: {
+        id: id,
+      },
+      relations: ['categoriesInteresting', 'categoriesInteresting.category'],
     });
-    user.categories = categories;
 
-    return await this.repository.save(user);
+    return user.categoriesInteresting.map(
+      (v) =>
+        new Category({
+          id: v.category.id,
+          slug: v.category.slug,
+          depth: v.skill,
+        }),
+    );
   }
 
   // 나의 관심사 리스트에 추가
-  async syncCategoriesWithSlugs(id: number, slugs: string[]): Promise<User> {
-    const user = await this.findById(id, ['categories']);
+  async syncCategoriesWithIds(
+    id: number,
+    ids: number[],
+  ): Promise<Array<Category>> {
+    await Promise.all(
+      ids.map(async (v: number) => {
+        await this.repository.manager.query(
+          'INSERT IGNORE INTO `interest` (userId, categoryId) VALUES (?, ?)',
+          [id, v],
+        );
+      }),
+    );
+    return await this.getCategories(id);
+  }
+
+  // 나의 관심사 리스트에 추가
+  async syncCategoriesWithSlugs(
+    id: number,
+    slugs: string[],
+  ): Promise<Array<Category>> {
     const categories = await this.categoryRepository.findBy({
       slug: In(slugs),
     });
-    user.categories = categories;
-
-    return await this.repository.save(user);
+    await Promise.all(
+      categories.map(async (v: Category) => {
+        await this.repository.manager.query(
+          'INSERT IGNORE INTO `interest` (userId, categoryId) VALUES (?, ?)',
+          [id, v.id],
+        );
+      }),
+    );
+    return await this.getCategories(id);
   }
 
   // 나의 관심사 리스트에서 삭제
-  async removeCategories(id: number, ids: number[]): Promise<User> {
-    const user = await this.findById(id, ['categories']);
-    const categories = user.categories.filter((v) => !ids.includes(v.id));
-    user.categories = categories;
+  async removeCategories(id: number, ids: number[]): Promise<Array<Category>> {
+    // const user = await this.findById(id, ['categories']);
+    await this.repository.manager.query(
+      'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
+      [id, ids],
+    );
 
-    return await this.repository.save(user);
+    return await this.getCategories(id);
   }
 
   //?-------------------------------------------------------------------------//
@@ -885,6 +908,8 @@ export class UsersService {
         'INSERT IGNORE INTO `join` (askingUserId, askedUserId, meetupId, message, skill) VALUES (?, ?, ?, ?, ?)',
         [askingUserId, askedUserId, meetupId, dto.message, dto.skill],
       );
+
+      // todo. interest table update
     } catch (e) {
       throw new BadRequestException('database has gone crazy.');
     }

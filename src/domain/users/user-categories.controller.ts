@@ -36,12 +36,12 @@ export class UserCategoriesController {
   ): Promise<AnyData> {
     if (dto.ids) {
       try {
-        const user = await this.usersService.syncCategoriesWithIds(
+        const items = await this.usersService.syncCategoriesWithIds(
           userId,
           dto.ids,
         );
         return {
-          data: user.categories,
+          data: items,
         };
       } catch (e) {
         throw new BadRequestException();
@@ -49,12 +49,12 @@ export class UserCategoriesController {
     }
     if (dto.slugs) {
       try {
-        const user = await this.usersService.syncCategoriesWithSlugs(
+        const items = await this.usersService.syncCategoriesWithSlugs(
           userId,
           dto.slugs,
         );
         return {
-          data: user.categories,
+          data: items,
         };
       } catch (e) {
         throw new BadRequestException();
@@ -72,6 +72,7 @@ export class UserCategoriesController {
   async getCategories(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Array<Category>> {
+    console.log(`ctroller`, userId);
     return await this.usersService.getCategories(userId);
   }
 
@@ -87,9 +88,9 @@ export class UserCategoriesController {
     @Body('ids') ids: number[],
   ): Promise<AnyData> {
     try {
-      const user = await this.usersService.removeCategories(userId, ids);
+      const items = await this.usersService.removeCategories(userId, ids);
       return {
-        data: user.categories,
+        data: items,
       };
     } catch (e) {
       throw new BadRequestException();

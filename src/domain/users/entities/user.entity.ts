@@ -3,7 +3,6 @@ import { Exclude, Expose } from 'class-transformer';
 import { Role } from 'src/common/enums';
 import { Career } from 'src/common/enums/career';
 import { Gender } from 'src/common/enums/gender';
-import { Category } from 'src/domain/categories/entities/category.entity';
 import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
@@ -14,13 +13,12 @@ import { Comment } from 'src/domain/comments/entities/comment.entity';
 import { Report } from 'src/domain/reports/entities/report.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
+import { Interest } from 'src/domain/meetups/entities/interest.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -165,6 +163,9 @@ export class User {
   @OneToMany(() => Hate, (hate) => hate.hatedUser)
   public usersHated: Hate[];
 
+  @OneToMany(() => Interest, (interest) => interest.user)
+  public categoriesInteresting: Interest[];
+
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany
 
@@ -172,9 +173,10 @@ export class User {
   // @JoinTable({ name: 'meetup_region' }) // owning side
   // regions: Region[];
 
-  @ManyToMany(() => Category, (category) => category.users)
-  @JoinTable({ name: 'user_category' }) // owning side
-  categories: Category[];
+  // used to have this many to many relationship.
+  // @ManyToMany(() => Category, (category) => category.users)
+  // @JoinTable({ name: 'user_category' }) // owning side
+  // categories: Category[];
 
   //?-------------------------------------------------------------------------?/
   //? constructor
