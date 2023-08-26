@@ -50,6 +50,7 @@ import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { AWS_SES_CONNECTION } from 'src/common/constants';
 import { SES } from 'aws-sdk';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
+import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 @Injectable()
 export class UsersService {
   private readonly env: any;
@@ -860,6 +861,7 @@ export class UsersService {
     askingUserId: number,
     askedUserId: number,
     meetupId: number,
+    dto: CreateJoinDto,
   ): Promise<any> {
     const meetup = await this.meetupRepository.findOneOrFail({
       where: { id: meetupId },
@@ -880,8 +882,8 @@ export class UsersService {
 
     try {
       await this.repository.manager.query(
-        'INSERT IGNORE INTO `join` (askingUserId, askedUserId, meetupId) VALUES (?, ?, ?)',
-        [askingUserId, askedUserId, meetupId],
+        'INSERT IGNORE INTO `join` (askingUserId, askedUserId, meetupId, message, skill) VALUES (?, ?, ?, ?, ?)',
+        [askingUserId, askedUserId, meetupId, dto.message, dto.skill],
       );
     } catch (e) {
       throw new BadRequestException('database has gone crazy.');

@@ -23,6 +23,10 @@ export class Join {
   @ApiProperty({ description: 'message' })
   message: string | null;
 
+  @Column({ type: 'tinyint', unsigned: true, nullable: true })
+  @ApiProperty({ description: 'skill level' })
+  skill: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

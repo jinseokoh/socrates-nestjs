@@ -20,6 +20,7 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Status } from 'src/common/enums/status';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { SkipThrottle } from '@nestjs/throttler';
+import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -195,11 +196,13 @@ export class UserMeetupsController {
     @Param('askingUserId') askingUserId: number,
     @Param('askedUserId') askedUserId: number,
     @Param('meetupId') meetupId: number,
+    @Body() dto: CreateJoinDto,
   ): Promise<AnyData> {
     await this.usersService.attachToJoinPivot(
       askingUserId,
       askedUserId,
       meetupId,
+      dto,
     );
     return {
       data: 'ok',
