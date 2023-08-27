@@ -53,6 +53,7 @@ import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
+import { ImpressionDto } from 'src/domain/users/dto/impression.dto';
 @Injectable()
 export class UsersService {
   private readonly env: any;
@@ -100,22 +101,34 @@ export class UsersService {
   }
 
   async createImpression(id: number, dto: CreateImpressionDto): Promise<any> {
-    const data = await this.repository.manager.query(
-      'INSERT IGNORE INTO `impression` (apprearance, knowledge, confidence, humor, manner, guestId, meetupId, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [
-        dto.appearance,
-        dto.knowledge,
-        dto.confidence,
-        dto.humor,
-        dto.manner,
-        dto.guestId,
-        dto.meetupId,
-        id, // userId
-      ],
-    );
+    try {
+      const data = await this.repository.manager.query(
+        'INSERT IGNORE INTO `impression` (appearance, knowledge, confidence, humor, manner, note, posterId, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          dto.appearance,
+          dto.knowledge,
+          dto.confidence,
+          dto.humor,
+          dto.manner,
+          dto.note,
+          dto.posterId,
+          id, // userId
+        ],
+      );
 
-    console.log(`data => `, data);
-    return data;
+      const user = await this.findById(id, ['impressions']);
+      if (user.impressions && user.impressions.length > 1) {
+        const impressions = await this.findUserImpressionsById(id);
+
+        console.log(`impressions`, impressions);
+        const dto = new UpdateProfileDto();
+        dto.impressions = impressions;
+        console.log(`dto`, dto);
+        await this.updateProfile(id, dto);
+      }
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   //?-------------------------------------------------------------------------//
@@ -191,7 +204,7 @@ export class UsersService {
   }
 
   // User 상세보기 (w/ id)
-  async findUserImpressionsById(id: number): Promise<any> {
+  async findUserImpressionsById(id: number): Promise<number[]> {
     try {
       const [row] = await this.repository.manager.query(
         'SELECT \
@@ -205,7 +218,17 @@ GROUP BY userId HAVING userId = ?',
         [id],
       );
 
-      return row;
+      const data = [
+        parseFloat(row['appearance']),
+        parseFloat(row['knowledge']),
+        parseFloat(row['confidence']),
+        parseFloat(row['humor']),
+        parseFloat(row['manner']),
+      ];
+
+      console.log(data);
+
+      return data;
     } catch (e) {
       throw new NotFoundException('entity not found');
     }

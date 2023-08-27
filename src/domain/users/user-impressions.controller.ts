@@ -3,18 +3,15 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  Delete,
   Get,
   Param,
   ParseIntPipe,
   Post,
-  Put,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { AnyData } from 'src/common/types';
-import { Category } from 'src/domain/categories/entities/category.entity';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
 import { UsersService } from 'src/domain/users/users.service';
 
@@ -52,7 +49,7 @@ export class UserImpressionsController {
   @Get(':userId/impressions')
   async getUserImpressionsById(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<Array<Category>> {
+  ): Promise<number[]> {
     return await this.usersService.findUserImpressionsById(userId);
   }
 }

@@ -56,7 +56,7 @@ export class Profile {
   @Column('json', { nullable: true })
   @ApiProperty({ description: '첫인상 평균' })
   @IsArray()
-  impressions: string[] | null;
+  impressions: number[] | null;
 
   @Column('json', { nullable: true })
   @ApiProperty({ description: 'FYI in Korean' })

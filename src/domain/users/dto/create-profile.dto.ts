@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { SubCategory } from 'src/common/enums';
+// import { SubCategory } from 'src/common/enums';
 export class CreateProfileDto {
   @ApiProperty({ description: '소개글', required: false })
   @IsString()
@@ -33,10 +33,10 @@ export class CreateProfileDto {
   @IsOptional()
   mbti?: string | null;
 
-  @ApiProperty({ description: 'interests', required: false })
+  @ApiProperty({ description: 'impressions', required: false })
   @IsArray()
   @IsOptional()
-  interests?: SubCategory[];
+  impressions?: number[];
 
   @ApiProperty({ description: 'fyis', required: false })
   @IsArray()

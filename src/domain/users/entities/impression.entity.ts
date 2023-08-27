@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 @Entity()
-@Unique('guest_id_meetup_id_user_id_key', ['meetupId', 'guestId', 'userId'])
+@Unique('poster_id_meetup_id_user_id_key', ['posterId', 'userId'])
 export class Impression {
   @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
   id: number;
@@ -30,6 +30,9 @@ export class Impression {
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
   manner: number;
 
+  @Column({ length: 32, nullable: true })
+  note: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -37,10 +40,7 @@ export class Impression {
   updatedAt: Date;
 
   @Column({ type: 'int', unsigned: true, nullable: true })
-  meetupId: number | null; // to make it available to Repository.
-
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  guestId: number | null; // to make it available to Repository.
+  posterId: number | null; // to make it available to Repository.
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
