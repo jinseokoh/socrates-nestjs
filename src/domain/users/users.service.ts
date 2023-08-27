@@ -622,6 +622,24 @@ export class UsersService {
     return await this.getCategories(id);
   }
 
+  // 나의 관심사 리스트 UPSERT
+  async addCategoryWithSkill(
+    id: number,
+    slug: string,
+    skill: number,
+  ): Promise<Array<Category>> {
+    const category = await this.categoryRepository.findOneBy({
+      slug: slug,
+    });
+    if (category !== null) {
+      await this.repository.manager.query(
+        'INSERT INTO `interest` (userId, categoryId, skill) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(`userId`), categoryId = VALUES(`categoryId`), skill = VALUES(`skill`)',
+        [id, category.id, skill],
+      );
+    }
+    return await this.getCategories(id);
+  }
+
   // 나의 관심사 리스트에서 삭제
   async removeCategories(id: number, ids: number[]): Promise<Array<Category>> {
     // const user = await this.findById(id, ['categories']);

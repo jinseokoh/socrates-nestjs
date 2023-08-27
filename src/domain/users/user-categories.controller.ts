@@ -8,6 +8,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -61,6 +62,27 @@ export class UserCategoriesController {
       }
     }
     throw new BadRequestException(`required fields is missing`);
+  }
+
+  @ApiOperation({ description: '나의 관심사 리스트에 추가' })
+  @Put(':userId/categories/:slug')
+  async addCategoryWithSkill(
+    @Param('userId') userId: number,
+    @Param('slug') slug: string,
+    @Body('skill') skill: number | null,
+  ): Promise<AnyData> {
+    try {
+      const items = await this.usersService.addCategoryWithSkill(
+        userId,
+        slug,
+        skill,
+      );
+      return {
+        data: items,
+      };
+    } catch (e) {
+      throw new BadRequestException();
+    }
   }
 
   //?-------------------------------------------------------------------------//
