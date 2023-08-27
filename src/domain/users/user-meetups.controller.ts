@@ -193,9 +193,9 @@ export class UserMeetupsController {
   @PaginateQueryOptions()
   @Post(':askingUserId/joins/:askedUserId/meetups/:meetupId')
   async attachToJoinPivot(
-    @Param('askingUserId') askingUserId: number,
-    @Param('askedUserId') askedUserId: number,
-    @Param('meetupId') meetupId: number,
+    @Param('askingUserId', ParseIntPipe) askingUserId: number,
+    @Param('askedUserId', ParseIntPipe) askedUserId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() dto: CreateJoinDto,
   ): Promise<AnyData> {
     await this.usersService.attachToJoinPivot(
@@ -214,9 +214,9 @@ export class UserMeetupsController {
   @PaginateQueryOptions()
   @Patch(':askingUserId/joins/:askedUserId/meetups/:meetupId')
   async updateJoinToAcceptOrDeny(
-    @Param('askingUserId') askingUserId: number,
-    @Param('askedUserId') askedUserId: number,
-    @Param('meetupId') meetupId: number,
+    @Param('askingUserId', ParseIntPipe) askingUserId: number,
+    @Param('askedUserId', ParseIntPipe) askedUserId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body('status') status: Status,
   ): Promise<AnyData> {
     try {

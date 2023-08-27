@@ -51,7 +51,8 @@ import { AWS_SES_CONNECTION } from 'src/common/constants';
 import { SES } from 'aws-sdk';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
-import { Interest } from 'src/domain/meetups/entities/interest.entity';
+import { Interest } from 'src/domain/users/entities/interest.entity';
+import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
 @Injectable()
 export class UsersService {
   private readonly env: any;
@@ -96,6 +97,25 @@ export class UsersService {
     }
     const username = getUsername(user.id);
     return this.update(user.id, { username });
+  }
+
+  async createImpression(id: number, dto: CreateImpressionDto): Promise<any> {
+    const data = await this.repository.manager.query(
+      'INSERT IGNORE INTO `impression` (apprearance, knowledge, confidence, humor, manner, guestId, meetupId, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        dto.appearance,
+        dto.knowledge,
+        dto.confidence,
+        dto.humor,
+        dto.manner,
+        dto.guestId,
+        dto.meetupId,
+        id, // userId
+      ],
+    );
+
+    console.log(`data => `, data);
+    return data;
   }
 
   //?-------------------------------------------------------------------------//
@@ -168,6 +188,27 @@ export class UsersService {
   // User 상세보기 (w/ unique key)
   async findByUniqueKey(params: FindOneOptions): Promise<User> {
     return await this.repository.findOne(params);
+  }
+
+  // User 상세보기 (w/ id)
+  async findUserImpressionsById(id: number): Promise<any> {
+    try {
+      const [row] = await this.repository.manager.query(
+        'SELECT \
+AVG(appearance) AS appearance, \
+AVG(knowledge) AS knowledge, \
+AVG(confidence) AS confidence, \
+AVG(humor) AS humor, \
+AVG(manner) AS manner \
+FROM impression \
+GROUP BY userId HAVING userId = ?',
+        [id],
+      );
+
+      return row;
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
   }
 
   //?-------------------------------------------------------------------------//
@@ -574,10 +615,10 @@ export class UsersService {
       where: {
         id: id,
       },
-      relations: ['categoriesInteresting', 'categoriesInteresting.category'],
+      relations: ['categoriesInterested', 'categoriesInterested.category'],
     });
 
-    return user.categoriesInteresting.map(
+    return user.categoriesInterested.map(
       (v) =>
         new Category({
           id: v.category.id,
@@ -633,8 +674,8 @@ export class UsersService {
     });
     if (category !== null) {
       await this.repository.manager.query(
-        'INSERT INTO `interest` (userId, categoryId, skill) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(`userId`), categoryId = VALUES(`categoryId`), skill = VALUES(`skill`)',
-        [id, category.id, skill],
+        'INSERT INTO `interest` (userId, categoryId, slug, skill) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(`userId`), categoryId = VALUES(`categoryId`), skill = VALUES(`skill`)',
+        [id, category.id, slug, skill],
       );
     }
     return await this.getCategories(id);

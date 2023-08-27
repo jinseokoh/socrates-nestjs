@@ -45,17 +45,18 @@ export class Profile {
   @Column({ default: true })
   notifyKakao: boolean;
 
-  @Column({
-    type: 'set',
-    enum: SubCategory,
-    default: [],
-  })
-  @ApiProperty({ description: 'comma separated interest list' })
-  interests: SubCategory[];
-  // @Column('json', { nullable: true })
-  // @ApiProperty({ description: 'FYI in Korean' })
-  // @IsArray()
-  // interests: string[] | null;
+  // @Column({
+  //   type: 'set',
+  //   enum: SubCategory,
+  //   default: [],
+  // })
+  // @ApiProperty({ description: 'comma separated interest list' })
+  // interests: SubCategory[];
+
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: '첫인상 평균' })
+  @IsArray()
+  impressions: string[] | null;
 
   @Column('json', { nullable: true })
   @ApiProperty({ description: 'FYI in Korean' })

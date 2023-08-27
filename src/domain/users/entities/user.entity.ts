@@ -13,7 +13,7 @@ import { Comment } from 'src/domain/comments/entities/comment.entity';
 import { Report } from 'src/domain/reports/entities/report.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
-import { Interest } from 'src/domain/meetups/entities/interest.entity';
+import { Interest } from 'src/domain/users/entities/interest.entity';
 import {
   Column,
   CreateDateColumn,
@@ -24,6 +24,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Impression } from 'src/domain/users/entities/impression.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -145,6 +146,9 @@ export class User {
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany using one-to-many
 
+  @OneToMany(() => Impression, (impression) => impression.user)
+  public impressions: Impression[];
+
   @OneToMany(() => Join, (join) => join.askingUser)
   public askingJoins: Join[];
 
@@ -164,7 +168,7 @@ export class User {
   public usersHated: Hate[];
 
   @OneToMany(() => Interest, (interest) => interest.user)
-  public categoriesInteresting: Interest[];
+  public categoriesInterested: Interest[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany

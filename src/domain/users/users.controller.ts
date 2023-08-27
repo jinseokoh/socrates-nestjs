@@ -90,7 +90,11 @@ export class UsersController {
   @ApiOperation({ description: 'User 상세보기' })
   @Get(':id')
   async getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return await this.usersService.findById(id, ['profile', 'providers']);
+    return await this.usersService.findById(id, [
+      'profile',
+      'providers',
+      'categoriesInterested',
+    ]);
   }
 
   @ApiOperation({ description: '신한사주 올해의 운세' })

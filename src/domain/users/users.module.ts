@@ -20,6 +20,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
 import { SesModule } from 'src/services/aws/ses.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { UserUsersController } from 'src/domain/users/user-users.controller';
+import { UserImpressionsController } from 'src/domain/users/user-impressions.controller';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { UserUsersController } from 'src/domain/users/user-users.controller';
   controllers: [
     UsersController,
     UserCategoriesController,
+    UserImpressionsController,
     UserMeetupsController,
     UserUsersController,
     UserFcmController,

@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
@@ -12,10 +13,14 @@ export class Interest {
   @PrimaryColumn({ type: 'int', unsigned: true })
   public categoryId: number;
 
+  @Column({ length: 16, nullable: true })
+  @ApiProperty({ description: 'message' })
+  slug: string | null;
+
   @Column({ type: 'tinyint', unsigned: true, nullable: true })
   skill: number | null;
 
-  @ManyToOne(() => User, (user) => user.categoriesInteresting)
+  @ManyToOne(() => User, (user) => user.categoriesInterested)
   public user: User;
 
   @ManyToOne(() => Category, (category) => category.usersInterested)

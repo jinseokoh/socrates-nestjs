@@ -1,5 +1,5 @@
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Interest } from 'src/domain/meetups/entities/interest.entity';
+import { Interest } from 'src/domain/users/entities/interest.entity';
 import {
   Column,
   Entity,
