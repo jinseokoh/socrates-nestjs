@@ -32,6 +32,7 @@ import {
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
+import { MeetupType } from 'src/common/enums/meetup-type';
 
 @Entity()
 export class Meetup {
@@ -139,9 +140,9 @@ export class Meetup {
   @ApiProperty({ description: 'view count' })
   viewCount: number;
 
-  @Column({ default: false })
-  @ApiProperty({ description: 'is pro' })
-  isPro: boolean;
+  @Column({ type: 'enum', enum: MeetupType, default: MeetupType.NORMAL })
+  @ApiProperty({ description: 'meetup type' })
+  meetupType: MeetupType;
 
   @Column({ default: false })
   @ApiProperty({ description: 'has qa forum' })
