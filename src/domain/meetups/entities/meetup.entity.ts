@@ -140,10 +140,6 @@ export class Meetup {
   @ApiProperty({ description: 'view count' })
   viewCount: number;
 
-  @Column({ type: 'enum', enum: MeetupType, default: MeetupType.NORMAL })
-  @ApiProperty({ description: 'meetup type' })
-  meetupType: MeetupType;
-
   @Column({ default: false })
   @ApiProperty({ description: 'has qa forum' })
   hasQa: boolean;
@@ -155,6 +151,10 @@ export class Meetup {
   @Column({ default: false })
   @ApiProperty({ description: 'is flagged' })
   isFlagged: boolean;
+
+  @Column({ type: 'enum', enum: MeetupType, default: MeetupType.NORMAL })
+  @ApiProperty({ description: 'meetup type' })
+  meetupType: MeetupType;
 
   @Column({ type: 'datetime' })
   @ApiProperty({ description: 'expiration' })
