@@ -94,6 +94,7 @@ export class UsersController {
       'profile',
       'providers',
       'categoriesInterested',
+      'categoriesInterested.category',
     ]);
   }
 

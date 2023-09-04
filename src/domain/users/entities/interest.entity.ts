@@ -12,11 +12,6 @@ export class Interest {
 
   @PrimaryColumn({ type: 'int', unsigned: true })
   public categoryId: number;
-
-  @Column({ length: 16, nullable: true })
-  @ApiProperty({ description: 'message' })
-  slug: string | null;
-
   @Column({ type: 'tinyint', unsigned: true, nullable: true })
   skill: number | null;
 
