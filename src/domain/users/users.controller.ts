@@ -84,7 +84,12 @@ export class UsersController {
   @ApiOperation({ description: '본인 User 상세보기' })
   @Get('mine')
   async getMine(@CurrentUserId() id: number): Promise<User> {
-    return await this.usersService.findById(id, ['profile']);
+    return await this.usersService.findById(id, [
+      'profile',
+      //'providers',
+      'categoriesInterested',
+      'categoriesInterested.category',
+    ]);
   }
 
   @ApiOperation({ description: 'User 상세보기' })
@@ -92,7 +97,7 @@ export class UsersController {
   async getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return await this.usersService.findById(id, [
       'profile',
-      'providers',
+      //'providers',
       'categoriesInterested',
       'categoriesInterested.category',
     ]);

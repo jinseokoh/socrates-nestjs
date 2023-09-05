@@ -12,6 +12,7 @@ export class Interest {
 
   @PrimaryColumn({ type: 'int', unsigned: true })
   public categoryId: number;
+
   @Column({ type: 'tinyint', unsigned: true, nullable: true })
   skill: number | null;
 
