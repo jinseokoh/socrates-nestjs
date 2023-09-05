@@ -1039,9 +1039,10 @@ GROUP BY userId HAVING userId = ?',
   // 내가 신청한 모임 ID 리스트
   async getMeetupIdsAskedByMe(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
-      'SELECT meetupId \
-      FROM `user` INNER JOIN `join` ON `user`.id = `join`.askingUserId \
-      WHERE `user`.id = ?',
+      'SELECT meetupId FROM `join` \
+INNER JOIN `user` ON `user`.id = `join`.askingUserId \
+INNER JOIN `meetup` ON `meetup`.id = `join`.meetupId \
+WHERE `meetup`.userId <> user.id AND `user`.id = ?',
       [userId],
     );
 
