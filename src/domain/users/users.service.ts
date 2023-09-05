@@ -687,7 +687,7 @@ GROUP BY userId HAVING userId = ?',
   }
 
   // 나의 관심사 리스트 UPSERT
-  async addCategoryWithSkill(
+  async upsertCategoryWithSkill(
     id: number,
     slug: string,
     skill: number,
@@ -697,8 +697,8 @@ GROUP BY userId HAVING userId = ?',
     });
     if (category !== null) {
       await this.repository.manager.query(
-        'INSERT INTO `interest` (userId, categoryId, slug, skill) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(`userId`), categoryId = VALUES(`categoryId`), skill = VALUES(`skill`)',
-        [id, category.id, slug, skill],
+        'INSERT IGNORE INTO `interest` (userId, categoryId, skill) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(`userId`), categoryId = VALUES(`categoryId`), skill = VALUES(`skill`)',
+        [id, category.id, skill],
       );
     }
     return await this.getCategories(id);
@@ -967,7 +967,7 @@ GROUP BY userId HAVING userId = ?',
     askedUserId: number,
     meetupId: number,
     dto: CreateJoinDto,
-  ): Promise<any> {
+  ): Promise<Meetup> {
     const meetup = await this.meetupRepository.findOneOrFail({
       where: { id: meetupId },
       relations: ['joins'],
@@ -991,7 +991,7 @@ GROUP BY userId HAVING userId = ?',
         [askingUserId, askedUserId, meetupId, dto.message, dto.skill],
       );
 
-      // todo. interest table update
+      return meetup;
     } catch (e) {
       throw new BadRequestException('database has gone crazy.');
     }

@@ -72,7 +72,7 @@ export class UserCategoriesController {
     @Body('skill') skill: number | null,
   ): Promise<AnyData> {
     try {
-      const items = await this.usersService.addCategoryWithSkill(
+      const items = await this.usersService.upsertCategoryWithSkill(
         userId,
         slug,
         skill,

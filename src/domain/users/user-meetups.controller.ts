@@ -189,7 +189,7 @@ export class UserMeetupsController {
   //?-------------------------------------------------------------------------//
 
   // todo. validate this meetup belongs to me
-  @ApiOperation({ description: '내가 매치신청 리스트에 추가' })
+  @ApiOperation({ description: '나를 참가신청 리스트에 추가' })
   @PaginateQueryOptions()
   @Post(':askingUserId/joins/:askedUserId/meetups/:meetupId')
   async attachToJoinPivot(
@@ -198,11 +198,16 @@ export class UserMeetupsController {
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() dto: CreateJoinDto,
   ): Promise<AnyData> {
-    await this.usersService.attachToJoinPivot(
+    const meetup = await this.usersService.attachToJoinPivot(
       askingUserId,
       askedUserId,
       meetupId,
       dto,
+    );
+    await this.usersService.upsertCategoryWithSkill(
+      askingUserId,
+      meetup.subCategory,
+      dto.skill,
     );
     return {
       data: 'ok',
