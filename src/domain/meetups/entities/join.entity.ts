@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { Status } from 'src/common/enums/status';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -33,8 +34,10 @@ export class Join {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })
   askingUserId: number | null; // to make it available to Repository.
+
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'CASCADE',
@@ -43,8 +46,10 @@ export class Join {
   @JoinColumn({ name: 'askingUserId' })
   public askingUser!: User;
 
+  @Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })
   askedUserId: number | null; // to make it available to Repository.
+
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'CASCADE',
@@ -55,6 +60,7 @@ export class Join {
 
   @PrimaryColumn({ type: 'bigint', unsigned: true })
   public meetupId!: number;
+
   @ManyToOne(() => Meetup, (meetup) => meetup.id, {
     nullable: false,
     onUpdate: 'CASCADE',
