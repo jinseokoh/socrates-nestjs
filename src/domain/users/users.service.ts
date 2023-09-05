@@ -656,6 +656,8 @@ GROUP BY userId HAVING userId = ?',
     id: number,
     ids: number[],
   ): Promise<Array<Category>> {
+    // todo. 1. delete only removed ones
+    // 2. add only newly added ones
     await Promise.all(
       ids.map(async (v: number) => {
         await this.repository.manager.query(

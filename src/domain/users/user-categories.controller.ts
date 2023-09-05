@@ -94,7 +94,7 @@ export class UserCategoriesController {
   async getCategories(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Array<Category>> {
-    console.log(`ctroller`, userId);
+    console.log(`userId`, userId);
     return await this.usersService.getCategories(userId);
   }
 
