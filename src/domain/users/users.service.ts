@@ -642,12 +642,12 @@ GROUP BY userId HAVING userId = ?',
     });
 
     return user.categoriesInterested.map(
-      (v) =>
-        new Category({
-          id: v.category.id,
-          slug: v.category.slug,
-          depth: v.skill,
-        }),
+      (v) => v.category,
+      // new Category({
+      //   id: v.category.id,
+      //   slug: v.category.slug,
+      //   depth: v.skill,
+      // }),
     );
   }
 
