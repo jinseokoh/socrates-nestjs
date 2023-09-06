@@ -632,8 +632,8 @@ GROUP BY userId HAVING userId = ?',
   //? 관심사 Categories
   //?-------------------------------------------------------------------------//
 
-  // 나의 관심사 리스트
-  async getCategories(id: number): Promise<Array<Category>> {
+  // 사용자 관심사 리스트
+  async getCategories(id: number): Promise<Array<Interest>> {
     const user = await this.repository.findOneOrFail({
       where: {
         id: id,
@@ -641,21 +641,14 @@ GROUP BY userId HAVING userId = ?',
       relations: ['categoriesInterested', 'categoriesInterested.category'],
     });
 
-    return user.categoriesInterested.map(
-      (v) => v.category,
-      // new Category({
-      //   id: v.category.id,
-      //   slug: v.category.slug,
-      //   depth: v.skill,
-      // }),
-    );
+    return user.categoriesInterested;
   }
 
   // 나의 관심사 리스트에 추가 (w/ ids)
   async syncCategoriesWithIds(
     id: number,
     ids: number[],
-  ): Promise<Array<Category>> {
+  ): Promise<Array<Interest>> {
     // 1. delete only removed ones
     const user = await this.repository.findOneOrFail({
       where: {
@@ -688,7 +681,7 @@ GROUP BY userId HAVING userId = ?',
   async syncCategoriesWithSlugs(
     id: number,
     slugs: string[],
-  ): Promise<Array<Category>> {
+  ): Promise<Array<Interest>> {
     // preparation to extract categoryIds
     const categories = await this.categoryRepository.findBy({
       slug: In(slugs),
@@ -727,7 +720,7 @@ GROUP BY userId HAVING userId = ?',
     id: number,
     slug: string,
     skill: number,
-  ): Promise<Array<Category>> {
+  ): Promise<Array<Interest>> {
     const category = await this.categoryRepository.findOneBy({
       slug: slug,
     });
@@ -741,7 +734,7 @@ GROUP BY userId HAVING userId = ?',
   }
 
   // 나의 관심사 리스트에서 삭제
-  async removeCategories(id: number, ids: number[]): Promise<Array<Category>> {
+  async removeCategories(id: number, ids: number[]): Promise<Array<Interest>> {
     // const user = await this.findById(id, ['categories']);
     await this.repository.manager.query(
       'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
