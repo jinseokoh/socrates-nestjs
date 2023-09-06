@@ -665,10 +665,12 @@ GROUP BY userId HAVING userId = ?',
     });
     const previousIds = user.categoriesInterested.map((v) => v.categoryId);
     const removedIds = previousIds.filter((v) => !ids.includes(v));
-    await this.repository.manager.query(
-      'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
-      [id, removedIds],
-    );
+    if (removedIds.length > 0) {
+      await this.repository.manager.query(
+        'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
+        [id, removedIds],
+      );
+    }
 
     // 2. upsert newly added ones
     await Promise.all(
@@ -702,11 +704,12 @@ GROUP BY userId HAVING userId = ?',
     });
     const previousIds = user.categoriesInterested.map((v) => v.categoryId);
     const removedIds = previousIds.filter((v) => !newIds.includes(v));
-    await this.repository.manager.query(
-      'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
-      [id, removedIds],
-    );
-
+    if (removedIds.length > 0) {
+      await this.repository.manager.query(
+        'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
+        [id, removedIds],
+      );
+    }
     // 2. upsert newly added ones
     await Promise.all(
       categories.map(async (v: Category) => {
