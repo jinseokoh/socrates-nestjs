@@ -651,13 +651,26 @@ GROUP BY userId HAVING userId = ?',
     );
   }
 
-  // 나의 관심사 리스트에 추가
+  // 나의 관심사 리스트에 추가 (w/ ids)
   async syncCategoriesWithIds(
     id: number,
     ids: number[],
   ): Promise<Array<Category>> {
-    // todo. 1. delete only removed ones
-    // 2. add only newly added ones
+    // 1. delete only removed ones
+    const user = await this.repository.findOneOrFail({
+      where: {
+        id: id,
+      },
+      relations: ['categoriesInterested'],
+    });
+    const previousIds = user.categoriesInterested.map((v) => v.categoryId);
+    const removedIds = previousIds.filter((v) => !ids.includes(v));
+    await this.repository.manager.query(
+      'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
+      [id, removedIds],
+    );
+
+    // 2. upsert newly added ones
     await Promise.all(
       ids.map(async (v: number) => {
         await this.repository.manager.query(
@@ -669,14 +682,32 @@ GROUP BY userId HAVING userId = ?',
     return await this.getCategories(id);
   }
 
-  // 나의 관심사 리스트에 추가
+  // 나의 관심사 리스트에 추가 (w/ slugs)
   async syncCategoriesWithSlugs(
     id: number,
     slugs: string[],
   ): Promise<Array<Category>> {
+    // preparation to extract categoryIds
     const categories = await this.categoryRepository.findBy({
       slug: In(slugs),
     });
+    const newIds = categories.map((v) => v.id);
+
+    // 1. delete only removed ones
+    const user = await this.repository.findOneOrFail({
+      where: {
+        id: id,
+      },
+      relations: ['categoriesInterested'],
+    });
+    const previousIds = user.categoriesInterested.map((v) => v.categoryId);
+    const removedIds = previousIds.filter((v) => !newIds.includes(v));
+    await this.repository.manager.query(
+      'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
+      [id, removedIds],
+    );
+
+    // 2. upsert newly added ones
     await Promise.all(
       categories.map(async (v: Category) => {
         await this.repository.manager.query(
