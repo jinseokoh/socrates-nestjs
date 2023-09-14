@@ -1,9 +1,6 @@
-import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config/dist/config.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import * as redisStore from 'cache-manager-ioredis';
 import { AuthController } from 'src/domain/auth/auth.controller';
 import { AuthService } from 'src/domain/auth/auth.service';
 import { FirebaseStrategy } from 'src/domain/auth/strategies/firebase.strategy';
@@ -20,18 +17,9 @@ import { SesModule } from 'src/services/aws/ses.module';
     PassportModule,
     SecretsModule,
     SesModule,
+    // configured the details in auth service instead of configuring within this auth module
+    // ref) https://medium.com/a-layman/jwt-authentication-in-nestjs-refresh-jwt-with-cookie-based-token-2f6b860f7d67
     JwtModule.register({}),
-    // CacheModule.registerAsync({
-    //   isGlobal: true,
-    //   inject: [ConfigService],
-    //   useFactory: async (configService: ConfigService) => ({
-    //     store: redisStore,
-    //     host: configService.get('redis.host'),
-    //     port: configService.get('redis.port'),
-    //     db: 0,
-    //     ttl: 60 * 3, // default to 3 mins
-    //   }),
-    // }),
   ],
   providers: [
     AuthService,

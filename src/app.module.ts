@@ -77,7 +77,6 @@ import { ReportsModule } from 'src/domain/reports/reports.module';
         suffix: '-table',
       },
     }),
-    // CacheModule.register(),
     CacheModule.registerAsync({
       isGlobal: true,
       inject: [ConfigService],

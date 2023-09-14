@@ -7206,7 +7206,7 @@ const nouns = [
   '헤이즐',
 ];
 
-export const getUsername = (id: number): string => {
+export const nameUserRandomly = (id: number): string => {
   const adverb = _getAdverb(id);
   const adjective = _getAdjective(id);
   const noun = _getNoun(id);

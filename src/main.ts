@@ -7,6 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
 import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import helmet from 'helmet';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from 'src/app.module';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
 
@@ -64,6 +65,8 @@ async function bootstrap() {
   app.enableCors();
   app.use(helmet());
   app.use(helmet.hidePoweredBy());
+  app.use(cookieParser());
+  // see https://expressjs.com/en/guide/behind-proxies.html
   app.set('trust proxy', true);
 
   const config = new DocumentBuilder()

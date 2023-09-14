@@ -5,7 +5,7 @@ export class AppController {
   @Public()
   @Get()
   index(): string {
-    return `Welcome to MeetSage v1 API ${process.env.APP_TYPE}, a work of GoK (v${process.env.APP_VERSION})`;
+    return `Welcome to MeetSocrates v1 API ${process.env.APP_TYPE}, a work of GoK (v${process.env.APP_VERSION})`;
   }
 
   @Public()

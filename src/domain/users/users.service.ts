@@ -31,7 +31,6 @@ import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune.dto';
 import { randomName } from 'src/helpers/random-filename';
-import { getUsername } from 'src/helpers/random-username';
 import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
 import { FindOneOptions, In } from 'typeorm';
@@ -53,7 +52,7 @@ import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
-import { ImpressionDto } from 'src/domain/users/dto/impression.dto';
+import { nameUserRandomly } from 'src/helpers/random-username';
 @Injectable()
 export class UsersService {
   private readonly env: any;
@@ -96,7 +95,7 @@ export class UsersService {
     if (user.username) {
       return user;
     }
-    const username = getUsername(user.id);
+    const username = nameUserRandomly(user.id);
     return this.update(user.id, { username });
   }
 
@@ -275,7 +274,7 @@ GROUP BY userId HAVING userId = ?',
 
   // User 닉네임 갱신
   async changeUsername(id: number, dto: ChangeUsernameDto): Promise<User> {
-    const assignedUsername = getUsername(id);
+    const assignedUsername = nameUserRandomly(id);
     const user = await this.findById(id);
     if (assignedUsername != user.username) {
       throw new ForbiddenException('already updated username');

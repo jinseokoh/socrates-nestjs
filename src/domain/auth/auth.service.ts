@@ -1,12 +1,10 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import * as moment from 'moment';
 import { JwtService } from '@nestjs/jwt';
 import { SES } from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
@@ -15,16 +13,15 @@ import { Gender } from 'src/common/enums/gender';
 import { ResetPasswordDto } from 'src/domain/auth/dto/reset-password.dto';
 import { UserCredentialsDto } from 'src/domain/auth/dto/user-credentials.dto';
 import { UserSocialIdDto } from 'src/domain/auth/dto/user-social-id.dto';
-import { Tokens } from 'src/domain/auth/types/tokens.type';
+import { Tokens } from 'src/common/types';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { User } from 'src/domain/users/entities/user.entity';
 import { ProvidersService } from 'src/domain/users/providers.service';
 import { UsersService } from 'src/domain/users/users.service';
-import { getUsername } from 'src/helpers/random-username';
+import { nameUserRandomly } from 'src/helpers/random-username';
 import { SecretsService } from 'src/domain/secrets/secrets.service';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
-import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
-
+import { Response as ExpressResponse } from 'express';
 @Injectable()
 export class AuthService {
   private readonly env: any;
@@ -83,13 +80,18 @@ export class AuthService {
   //?-------------------------------------------------------------------------//
 
   // 이메일 가입 w/ Credentials
-  async register(dto: UserCredentialsDto) {
+  async register(dto: UserCredentialsDto): Promise<Tokens> {
     const user = await this.usersService.create(<CreateUserDto>dto);
     const tokens = await this._getTokens(user);
-    const username = getUsername(user.id);
+    const refreshTokenHash = tokens.refreshToken
+      ? await bcrypt.hash(tokens.refreshToken, 10)
+      : null;
+    const username = nameUserRandomly(user.id);
 
-    await this._updateUserName(user.id, username);
-    await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
+    await this.usersService.update(user.id, {
+      username,
+      refreshTokenHash,
+    });
 
     return tokens;
   }
@@ -99,7 +101,7 @@ export class AuthService {
   //?-------------------------------------------------------------------------//
 
   // Firebase Auth 소셜인증
-  async socialize(dto: UserSocialIdDto) {
+  async socialize(dto: UserSocialIdDto): Promise<Tokens> {
     const { email, providerName, providerId, name, phone, photo, gender, dob } =
       dto;
 
@@ -114,10 +116,13 @@ export class AuthService {
     // in case user w/ firebase-id found
     if (provider != null) {
       const tokens = await this._getTokens(provider.user);
-      await this._updateUserRefreshTokenHash(
-        provider.user.id,
-        tokens.refreshToken,
-      );
+      const refreshTokenHash = tokens.refreshToken
+        ? await bcrypt.hash(tokens.refreshToken, 10)
+        : null;
+      await this.usersService.update(provider.user.id, {
+        refreshTokenHash,
+      });
+
       return tokens;
     }
 
@@ -130,11 +135,14 @@ export class AuthService {
     if (registeredUser != null) {
       await this.providersService.create({ ...dto, userId: registeredUser.id });
       const tokens = await this._getTokens(registeredUser);
-      await this._updateUserRefreshTokenHash(
-        registeredUser.id,
-        tokens.refreshToken,
-      );
-      await this._updateIsActive(registeredUser.id, true);
+      const refreshTokenHash = tokens.refreshToken
+        ? await bcrypt.hash(tokens.refreshToken, 10)
+        : null;
+      await this.usersService.update(registeredUser.id, {
+        refreshTokenHash,
+        isActive: true,
+      });
+
       return tokens;
     }
     // in case user w/ firebase-email not found
@@ -149,10 +157,15 @@ export class AuthService {
     const user = await this.usersService.create(createUserDto);
     await this.providersService.create({ ...dto, userId: user.id });
     const tokens = await this._getTokens(user);
-    const username = getUsername(user.id);
+    const refreshTokenHash = tokens.refreshToken
+      ? await bcrypt.hash(tokens.refreshToken, 10)
+      : null;
+    const username = nameUserRandomly(user.id);
 
-    await this._updateUserName(user.id, username);
-    await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
+    await this.usersService.update(user.id, {
+      username,
+      refreshTokenHash,
+    });
     return tokens;
   }
 
@@ -164,7 +177,12 @@ export class AuthService {
   async login(dto: UserCredentialsDto): Promise<Tokens> {
     const user = await this.validateUser(dto);
     const tokens = await this._getTokens(user);
-    await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
+    const refreshTokenHash = tokens.refreshToken
+      ? await bcrypt.hash(tokens.refreshToken, 10)
+      : null;
+    await this.usersService.update(user.id, {
+      refreshTokenHash,
+    });
 
     return tokens;
   }
@@ -173,15 +191,17 @@ export class AuthService {
   //? Private) 로그아웃
   //?-------------------------------------------------------------------------//
 
-  async logout(id: number) {
-    return this._updateUserRefreshTokenHash(id, null);
+  async logout(id: number): Promise<void> {
+    await this.usersService.update(id, {
+      refreshTokenHash: null,
+    });
   }
 
   //?-------------------------------------------------------------------------//
   //? Public) 토큰 refresh
   //?-------------------------------------------------------------------------//
 
-  async refreshToken(id: number, token: string | null) {
+  async refreshToken(id: number, refreshToken: string | null): Promise<Tokens> {
     const user = await this.usersService.findById(id);
     if (!user) {
       throw new ForbiddenException('access denied');
@@ -190,19 +210,24 @@ export class AuthService {
       throw new ForbiddenException('authentication required');
     }
     const refreshTokenMatches = await bcrypt.compare(
-      token,
+      refreshToken,
       user.refreshTokenHash,
     );
     if (!refreshTokenMatches) {
       throw new ForbiddenException('invalid refresh token');
     }
     const tokens = await this._getTokens(user);
-    await this._updateUserRefreshTokenHash(user.id, tokens.refreshToken);
+    const refreshTokenHash = tokens.refreshToken
+      ? await bcrypt.hash(tokens.refreshToken, 10)
+      : null;
+    await this.usersService.update(user.id, {
+      refreshTokenHash,
+    });
 
     return tokens;
   }
 
-  // ✅ 이메일 확인코드 확인 후 비밀번호 갱신
+  // 이메일 확인코드 확인 후 비밀번호 갱신
   async resetPassword(dto: ResetPasswordDto): Promise<User> {
     const user = await this.usersService.findByUniqueKey({
       where: { email: dto.email },
@@ -223,21 +248,26 @@ export class AuthService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Privates
+  //? Cookies
   //?-------------------------------------------------------------------------//
 
-  async _updateIsActive(id: number, isActive: boolean) {
-    await this.usersService.update(id, { isActive });
+  storeTokensInCookie(res: ExpressResponse, authToken: Tokens) {
+    const ONE_MIN = 1000 * 60;
+    const ONE_HOUR = 1000 * 60 * 60;
+    const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
+    res.cookie('access_token', authToken.accessToken, {
+      maxAge: ONE_HOUR,
+      httpOnly: true,
+    });
+    res.cookie('refresh_token', authToken.refreshToken, {
+      maxAge: THIRTY_DAYS,
+      httpOnly: true,
+    });
   }
 
-  async _updateUserName(id: number, username: string | null) {
-    await this.usersService.update(id, { username });
-  }
-
-  async _updateUserRefreshTokenHash(id: number, token: string | null) {
-    const refreshTokenHash = token ? await bcrypt.hash(token, 10) : null;
-    await this.usersService.update(id, { refreshTokenHash });
-  }
+  //?-------------------------------------------------------------------------//
+  //? Privates
+  //?-------------------------------------------------------------------------//
 
   async _getTokens(user: User): Promise<Tokens> {
     const payload = {
@@ -245,30 +275,26 @@ export class AuthService {
       sub: user.id,
     };
     const accessTokenOptions = {
-      secret: process.env.AUTH_TOKEN_SECRET ?? 'AUTH-TOKEN-SECRET',
-      expiresIn: '1d', // todo. change it to '30m' in production
+      secret: this.configService.get('jwt.authSecret'),
+      expiresIn: '1h', // change this window to '1h' if you want
     };
     const refreshTokenOptions = {
-      secret: process.env.REFRESH_TOKEN_SECRET ?? 'REFRESH-TOKEN-SECRET',
+      secret: this.configService.get('jwt.refreshSecret'),
       expiresIn: '30d',
     };
-    const now = moment();
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, accessTokenOptions),
       this.jwtService.signAsync(payload, refreshTokenOptions),
     ]);
 
+    // const now = moment();
     return {
       accessToken,
-      accessTokenExpiry: now.clone().add(1, 'd').unix(),
       refreshToken,
-      refreshTokenExpiry: now.clone().add(30, 'd').unix(),
+      // accessTokenExpiry: now.clone().add(1, 'd').unix(),
+      // refreshTokenExpiry: now.clone().add(30, 'd').unix(),
     };
   }
-
-  //?-------------------------------------------------------------------------//
-  //? with Database
-  //?-------------------------------------------------------------------------//
 
   //--------------------------------------------------------------------------//
   // @deprecated

@@ -46,3 +46,10 @@ export type Where = {
   msid?: string | null;
   size?: number | null;
 };
+
+export type Tokens = {
+  accessToken: string;
+  refreshToken: string;
+  // accessTokenExpiry: number;
+  // refreshTokenExpiry: number;
+};

@@ -2,13 +2,11 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
-  Param,
   Patch,
   Post,
-  Query,
+  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -22,11 +20,10 @@ import { ResetPasswordDto } from 'src/domain/auth/dto/reset-password.dto';
 import { UserCredentialsDto } from 'src/domain/auth/dto/user-credentials.dto';
 import { UserSocialIdDto } from 'src/domain/auth/dto/user-social-id.dto';
 import { JwtRefreshGuard } from 'src/domain/auth/guards/jwt-refresh.guard';
-import { Tokens } from 'src/domain/auth/types/tokens.type';
-import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
-import { User } from 'src/domain/users/entities/user.entity';
+import { Tokens } from 'src/common/types';
 import { HashPasswordPipe } from 'src/domain/users/pipes/hash-password.pipe';
 import { UniqueKeysPipe } from 'src/domain/users/pipes/unique-keys.pipe';
+import { Response as ExpressResponse } from 'express';
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')
 export class AuthController {
@@ -38,11 +35,11 @@ export class AuthController {
 
   @ApiOperation({ description: '이메일 가입 w/ Credentials' })
   @Public()
-  @ApiCreatedResponse({ description: 'register 성공' })
+  @ApiCreatedResponse({ description: 'register' })
   @Post('register')
   async register(
     @Body(UniqueKeysPipe, HashPasswordPipe) dto: UserCredentialsDto,
-  ): Promise<any> {
+  ): Promise<Tokens> {
     return await this.authService.register(dto);
   }
 
@@ -68,7 +65,10 @@ export class AuthController {
     description: 'firebase 애플/구글/카카오 로그인 후 FleaAuction 로그인',
   })
   @Post('firebase')
-  async firebaseAuth(@Body() dto: FirebaseUserDto): Promise<any> {
+  async firebaseAuth(
+    @Body() dto: FirebaseUserDto,
+    @Res({ passthrough: true }) response: ExpressResponse,
+  ): Promise<Tokens> {
     const userSocialIdDto = {
       providerName: 'firebase',
       email: dto.email,
@@ -76,7 +76,10 @@ export class AuthController {
       phone: dto.phoneNumber,
       photo: dto.photoURL,
     } as UserSocialIdDto;
-    return await this.authService.socialize(userSocialIdDto);
+    const authTokens = await this.authService.socialize(userSocialIdDto);
+    this.authService.storeTokensInCookie(response, authTokens);
+
+    return authTokens;
   }
 
   // @ApiOperation({ description: 'Firebase Auth 소셜인증' })
@@ -108,25 +111,35 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({ description: 'login 성공' })
   @Post('login')
-  async login(@Body() dto: UserCredentialsDto): Promise<Tokens> {
-    return await this.authService.login(dto);
+  async login(
+    @Body() dto: UserCredentialsDto,
+    @Res({ passthrough: true }) response: ExpressResponse,
+  ): Promise<Tokens> {
+    const authTokens = await this.authService.login(dto);
+    this.authService.storeTokensInCookie(response, authTokens);
+
+    return authTokens;
   }
 
   //?-------------------------------------------------------------------------//
   //? Public) 토큰 refresh
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '✅ 사용자 Refresh 토큰 갱신' })
+  @ApiOperation({ description: '사용자 Refresh 토큰 갱신' })
   @Public()
   @UseGuards(JwtRefreshGuard)
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({ description: 'refresh 성공' })
   @Post('refresh')
-  refresh(
+  async refresh(
     @CurrentUserId() id: number,
     @GetCurrentRefreshToken() token: string,
-  ): any {
-    return this.authService.refreshToken(id, token);
+    @Res({ passthrough: true }) response: ExpressResponse,
+  ): Promise<Tokens> {
+    const authTokens = await this.authService.refreshToken(id, token);
+    this.authService.storeTokensInCookie(response, authTokens);
+
+    return authTokens;
   }
 
   //?-------------------------------------------------------------------------//
@@ -137,7 +150,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({ description: '성공' })
   @Post('logout')
-  logout(@CurrentUserId() id: number): any {
+  logout(@CurrentUserId() id: number): Promise<void> {
     return this.authService.logout(id);
   }
 
