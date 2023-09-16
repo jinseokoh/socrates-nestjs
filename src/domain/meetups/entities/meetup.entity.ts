@@ -39,6 +39,18 @@ export class Meetup {
   @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
   id: number;
 
+  @Column({ type: 'enum', enum: CategoryEnum, default: CategoryEnum.CHALLENGE })
+  @ApiProperty({ description: 'category' })
+  category: CategoryEnum;
+
+  @Column({
+    type: 'enum',
+    enum: SubCategory,
+    default: SubCategory.OTHER_LEISURE,
+  })
+  @ApiProperty({ description: 'subcategory' })
+  subCategory: SubCategory;
+
   @Column({ length: 64 }) // from Auction
   @ApiProperty({ description: '제목' })
   title: string;
@@ -52,17 +64,9 @@ export class Meetup {
   @IsArray()
   images: string[] | null;
 
-  @Column({ type: 'enum', enum: CategoryEnum, default: CategoryEnum.CHALLENGE })
-  @ApiProperty({ description: 'category' })
-  category: CategoryEnum;
-
-  @Column({
-    type: 'enum',
-    enum: SubCategory,
-    default: SubCategory.OTHER_LEISURE,
-  })
-  @ApiProperty({ description: 'subcategory' })
-  subCategory: SubCategory;
+  @Column({ type: 'enum', enum: Gender, default: Gender.ALL })
+  @ApiProperty({ description: 'gender looking for' })
+  targetGender: Gender;
 
   @Column({
     type: 'set',
@@ -71,10 +75,6 @@ export class Meetup {
   })
   @ApiProperty({ description: 'comma separated target career list' })
   targetCareers: CareerEnum[];
-
-  @Column({ type: 'enum', enum: Gender, default: Gender.ALL })
-  @ApiProperty({ description: 'gender looking for' })
-  targetGender: Gender;
 
   @Column({ length: 8, nullable: true })
   @ApiProperty({ description: 'age range' })
@@ -88,6 +88,10 @@ export class Meetup {
   @ApiProperty({ description: 'region' })
   region: Region;
 
+  @Column({ type: 'tinyint', unsigned: true, default: 2 })
+  @ApiProperty({ description: 'max # of participants' })
+  max: number;
+
   @Column({ type: 'enum', enum: Day, default: Day.WEEKDAYS })
   @ApiProperty({ description: '요일' })
   day: Day;
@@ -99,10 +103,6 @@ export class Meetup {
   })
   @ApiProperty({ description: 'comma separated time list' })
   times: Time[];
-
-  @Column({ type: 'tinyint', unsigned: true, default: 2 })
-  @ApiProperty({ description: 'max # of participants' })
-  max: number;
 
   @Column({ type: 'int', unsigned: true })
   @ApiProperty({ description: '참가비' })
@@ -141,8 +141,12 @@ export class Meetup {
   viewCount: number;
 
   @Column({ default: false })
-  @ApiProperty({ description: 'has qa forum' })
+  @ApiProperty({ description: 'has qa board?' })
   hasQa: boolean;
+
+  @Column({ default: false })
+  @ApiProperty({ description: 'is pro meetup?' })
+  isPro: boolean;
 
   @Column({ default: false })
   @ApiProperty({ description: 'is full' })
@@ -151,10 +155,6 @@ export class Meetup {
   @Column({ default: false })
   @ApiProperty({ description: 'is flagged' })
   isFlagged: boolean;
-
-  @Column({ type: 'enum', enum: MeetupType, default: MeetupType.NORMAL })
-  @ApiProperty({ description: 'meetup type' })
-  meetupType: MeetupType;
 
   @Column({ type: 'datetime' })
   @ApiProperty({ description: 'expiration' })
