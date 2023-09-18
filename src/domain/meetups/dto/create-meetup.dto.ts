@@ -22,6 +22,22 @@ import { Gender } from 'src/common/enums/gender';
 import { Time } from 'src/common/enums/time';
 import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
 export class CreateMeetupDto {
+  @ApiProperty({ description: 'category', default: Category.CHALLENGE })
+  @IsEnum(Category)
+  category: Category;
+
+  @ApiProperty({
+    description: 'subCategory',
+    default: SubCategory.OTHER_CHALLENGE,
+  })
+  @IsEnum(SubCategory)
+  subCategory: SubCategory;
+
+  @ApiProperty({ description: '기술/레벨', required: true })
+  @Type(() => Number)
+  @IsNumber()
+  skill: number;
+
   @ApiProperty({ description: '제목', required: true })
   @IsString()
   title: string;
@@ -34,35 +50,49 @@ export class CreateMeetupDto {
   @IsArray()
   images: string[];
 
-  @ApiProperty({ description: 'category', default: Category.CHALLENGE })
-  @IsEnum(Category)
-  category: Category;
-
-  @ApiProperty({
-    description: 'subCategory',
-    default: SubCategory.OTHER_CHALLENGE,
-  })
-  @IsEnum(SubCategory)
-  subCategory: SubCategory;
+  @ApiProperty({ description: '상대방 성별', default: Gender.ALL })
+  @IsEnum(Gender)
+  @IsOptional()
+  targetGender: Gender;
 
   @ApiProperty({ description: '상대방 careers', default: ['all'] })
   @IsArray()
   @IsOptional()
   targetCareers: CareerEnum[];
 
-  @ApiProperty({ description: '상대방 성별', default: Gender.ALL })
-  @IsEnum(Gender)
-  @IsOptional()
-  targetGender: Gender;
-
   @ApiProperty({ description: '상대방 나이', default: null })
   @IsString()
   @IsOptional()
   targetAge: string | null;
 
+  @ApiProperty({ description: 'CreateVenueDto' })
+  @ValidateNested()
+  @Type(() => CreateVenueDto)
+  venue: CreateVenueDto;
+
   @ApiProperty({ description: 'region', default: Region.SEOUL })
   @IsEnum(Region)
   region: Region;
+
+  @ApiProperty({ description: '장소에 대한 경험치', required: true })
+  @Type(() => Number)
+  @IsNumber()
+  patron: number;
+
+  @ApiProperty({ description: 'max 인원', required: true })
+  @Type(() => Number)
+  @IsNumber()
+  max: number;
+
+  @ApiProperty({ description: '비용', required: true })
+  @Type(() => Number)
+  @IsNumber()
+  amount: number;
+
+  @ApiProperty({ description: '비용 details', default: [] })
+  @IsArray()
+  @IsOptional()
+  expenses: Expense[];
 
   @ApiProperty({ description: '원하는 요일', default: Day.ANYDAY })
   @IsEnum(Day)
@@ -73,30 +103,10 @@ export class CreateMeetupDto {
   @IsOptional()
   times: Time[];
 
-  @ApiProperty({ description: '비용 details', default: [] })
-  @IsArray()
+  @ApiProperty({ description: 'like count', default: 0 })
+  @IsNumber()
   @IsOptional()
-  expenses: Expense[];
-
-  @ApiProperty({ description: '비용', required: true })
-  @Type(() => Number)
-  @IsNumber()
-  amount: number;
-
-  @ApiProperty({ description: 'max 인원', required: true })
-  @Type(() => Number)
-  @IsNumber()
-  max: number;
-
-  @ApiProperty({ description: '장소에 대한 경험치', required: true })
-  @Type(() => Number)
-  @IsNumber()
-  patron: number;
-
-  @ApiProperty({ description: '기술/레벨', required: true })
-  @Type(() => Number)
-  @IsNumber()
-  skill: number;
+  joinCount: number;
 
   @ApiProperty({ description: 'like count', default: 0 })
   @IsNumber()
@@ -113,15 +123,25 @@ export class CreateMeetupDto {
   @IsOptional()
   viewCount: number;
 
+  @ApiProperty({ description: '게시판 여부', default: false })
+  @IsBoolean()
+  @IsOptional()
+  hasQa: boolean;
+
+  @ApiProperty({ description: '영리 모임 여부', default: false })
+  @IsBoolean()
+  @IsOptional()
+  isPro: boolean;
+
+  @ApiProperty({ description: '빈자리 여부', default: false })
+  @IsBoolean()
+  @IsOptional()
+  isFull: boolean;
+
   @ApiProperty({ description: '신고여부', default: false })
   @IsBoolean()
   @IsOptional()
   isFlagged: boolean;
-
-  @ApiProperty({ description: 'CreateVenueDto' })
-  @ValidateNested()
-  @Type(() => CreateVenueDto)
-  venue: CreateVenueDto;
 
   @ApiProperty({ description: '종료시각' })
   @Type(() => Date)
