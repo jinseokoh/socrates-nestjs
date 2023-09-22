@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
-import { QuestionType } from 'src/common/enums/inquiry-type';
+import { InquiryType } from 'src/common/enums/inquiry-type';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Answer } from 'src/domain/answers/entities/answer.entity';
+import { Comment } from 'src/domain/comments/entities/comment.entity';
 import {
   Column,
   CreateDateColumn,
@@ -13,10 +13,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 
 @Entity()
-export class Question {
+export class Inquiry {
   @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
   id: number;
 
@@ -32,8 +31,8 @@ export class Question {
   @ApiProperty({ description: 'images' })
   images: string[] | null;
 
-  @Column({ type: 'enum', enum: QuestionType, default: QuestionType.GENERAL })
-  questionType: QuestionType;
+  @Column({ type: 'enum', enum: InquiryType, default: InquiryType.GENERAL })
+  questionType: InquiryType;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'like count' })
@@ -60,26 +59,26 @@ export class Question {
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'bigint', unsigned: true, nullable: true })
-  meetupId: number | null; // to make it available to Repository.
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  userId: number | null; // to make it available to Repository.
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.questions, {
+  @ManyToOne(() => User, (user) => user.inquiries, {
     onDelete: 'SET NULL',
   })
-  meetup: Meetup;
+  user: User;
 
   //*-------------------------------------------------------------------------*/
   //* 1-to-many hasMany
 
-  @OneToMany(() => Answer, (answer) => answer.question, {
+  @OneToMany(() => Comment, (comment) => comment.question, {
     // cascade: ['insert', 'update'],
   })
-  answers: Answer[];
+  comments: Comment[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  constructor(partial: Partial<Question>) {
+  constructor(partial: Partial<Inquiry>) {
     Object.assign(this, partial);
   }
 }

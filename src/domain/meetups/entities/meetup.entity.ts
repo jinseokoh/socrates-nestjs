@@ -33,6 +33,7 @@ import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { MeetupType } from 'src/common/enums/meetup-type';
+import { Question } from 'src/domain/questions/entities/question.entity';
 
 @Entity()
 export class Meetup {
@@ -193,6 +194,9 @@ export class Meetup {
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany using one-to-many
+
+  @OneToMany(() => Question, (question) => question.meetup)
+  public questions: Question[];
 
   @OneToMany(() => Join, (join) => join.meetup)
   public joins: Join[];

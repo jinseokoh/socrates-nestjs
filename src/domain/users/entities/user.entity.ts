@@ -8,7 +8,6 @@ import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Question } from 'src/domain/questions/entities/question.entity';
 import { Comment } from 'src/domain/comments/entities/comment.entity';
 import { Report } from 'src/domain/reports/entities/report.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
@@ -25,6 +24,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Impression } from 'src/domain/users/entities/impression.entity';
+import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -123,10 +123,10 @@ export class User {
   })
   reports: Report[];
 
-  @OneToMany(() => Question, (question) => question.user, {
+  @OneToMany(() => Inquiry, (inquiry) => inquiry.user, {
     // cascade: ['insert', 'update'],
   })
-  questions: Question[];
+  inquiries: Inquiry[];
 
   @OneToMany(() => Comment, (comment) => comment.user, {
     // cascade: ['insert', 'update'],
