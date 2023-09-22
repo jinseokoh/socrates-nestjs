@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { SES } from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
 import { AWS_SES_CONNECTION } from 'src/common/constants';
 import { Gender } from 'src/common/enums/gender';
@@ -22,6 +21,11 @@ import { nameUserRandomly } from 'src/helpers/random-username';
 import { SecretsService } from 'src/domain/secrets/secrets.service';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { Response as ExpressResponse } from 'express';
+//import { SesService } from 'src/services/aws/ses.service';
+
+const ONE_HOUR = 1000 * 60 * 60; // access token and cookie expiry window
+const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30; // refresh token expiry window
+
 @Injectable()
 export class AuthService {
   private readonly env: any;
@@ -31,7 +35,7 @@ export class AuthService {
     private readonly secretsService: SecretsService,
     private readonly jwtService: JwtService,
 
-    @Inject(AWS_SES_CONNECTION) private readonly ses: SES,
+    // @Inject(AWS_SES_CONNECTION) private readonly ses: SesService,
     @Inject(ConfigService) private configService: ConfigService,
   ) {
     this.env = this.configService.get('nodeEnv');
@@ -227,7 +231,10 @@ export class AuthService {
     return tokens;
   }
 
-  // 이메일 확인코드 확인 후 비밀번호 갱신
+  //?-------------------------------------------------------------------------//
+  //? Public) 이메일 확인코드 확인 후 비밀번호 갱신
+  //?-------------------------------------------------------------------------//
+
   async resetPassword(dto: ResetPasswordDto): Promise<User> {
     const user = await this.usersService.findByUniqueKey({
       where: { email: dto.email },
@@ -252,9 +259,7 @@ export class AuthService {
   //?-------------------------------------------------------------------------//
 
   storeTokensInCookie(res: ExpressResponse, authToken: Tokens) {
-    const ONE_MIN = 1000 * 60;
-    const ONE_HOUR = 1000 * 60 * 60;
-    const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30;
+    // const ONE_MIN = 1000 * 60;
     res.cookie('access_token', authToken.accessToken, {
       maxAge: ONE_HOUR,
       httpOnly: true,
@@ -286,13 +291,13 @@ export class AuthService {
       this.jwtService.signAsync(payload, accessTokenOptions),
       this.jwtService.signAsync(payload, refreshTokenOptions),
     ]);
+    const expiresIn = new Date().setTime(new Date().getTime() + ONE_HOUR);
 
     // const now = moment();
     return {
       accessToken,
       refreshToken,
-      // accessTokenExpiry: now.clone().add(1, 'd').unix(),
-      // refreshTokenExpiry: now.clone().add(30, 'd').unix(),
+      expiresIn,
     };
   }
 

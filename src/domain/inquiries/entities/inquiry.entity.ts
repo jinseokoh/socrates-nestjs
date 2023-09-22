@@ -32,7 +32,7 @@ export class Inquiry {
   images: string[] | null;
 
   @Column({ type: 'enum', enum: InquiryType, default: InquiryType.GENERAL })
-  questionType: InquiryType;
+  InquiryType: InquiryType;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'like count' })

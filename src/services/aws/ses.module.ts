@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { SesProvider } from 'src/services/aws/ses.provider';
+import { SesService } from 'src/services/aws/ses.service';
 @Module({
-  providers: [...SesProvider],
-  exports: [...SesProvider],
+  providers: [SesService],
+  exports: [SesService],
 })
 export class SesModule {}

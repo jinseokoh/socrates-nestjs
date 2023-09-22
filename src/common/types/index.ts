@@ -50,6 +50,6 @@ export type Where = {
 export type Tokens = {
   accessToken: string;
   refreshToken: string;
-  // accessTokenExpiry: number;
+  expiresIn: number;
   // refreshTokenExpiry: number;
 };

@@ -17,7 +17,7 @@ import { SesModule } from 'src/services/aws/ses.module';
     PassportModule,
     SecretsModule,
     SesModule,
-    // configured the details in auth service instead of configuring within this auth module
+    // configured the details in auth service instead of configuring 'em here
     // ref) https://medium.com/a-layman/jwt-authentication-in-nestjs-refresh-jwt-with-cookie-based-token-2f6b860f7d67
     JwtModule.register({}),
   ],

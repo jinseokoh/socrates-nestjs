@@ -16,8 +16,9 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { SignedUrl } from 'src/common/types';
 import { CreateInquiryDto } from 'src/domain/inquiries/dto/create-inquiry.dto';
 import { UpdateInquiryDto } from 'src/domain/inquiries/dto/update-inquiry.dto';
-import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { InquiriesService } from 'src/domain/inquiries/inquiries.service';
+import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
+
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('inquiries')
 export class InquiriesController {

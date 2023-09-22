@@ -6,16 +6,16 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { QuestionType } from 'src/common/enums/inquiry-type';
+import { InquiryType } from 'src/common/enums/inquiry-type';
 
 export class CreateQuestionDto {
   @ApiProperty({
     description: '질문유형',
-    default: QuestionType.GENERAL,
+    default: InquiryType.GENERAL,
   })
-  @IsEnum(QuestionType)
+  @IsEnum(InquiryType)
   @IsOptional()
-  questionType?: QuestionType = QuestionType.GENERAL;
+  InquiryType?: InquiryType = InquiryType.GENERAL;
 
   @ApiProperty({ description: '질문' })
   @IsOptional()

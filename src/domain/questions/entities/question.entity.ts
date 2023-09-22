@@ -1,6 +1,4 @@
 import { Exclude } from 'class-transformer';
-import { QuestionType } from 'src/common/enums/inquiry-type';
-import { User } from 'src/domain/users/entities/user.entity';
 import { Answer } from 'src/domain/answers/entities/answer.entity';
 import {
   Column,
@@ -31,9 +29,6 @@ export class Question {
   @Column('json', { nullable: true }) // from Artwork
   @ApiProperty({ description: 'images' })
   images: string[] | null;
-
-  @Column({ type: 'enum', enum: QuestionType, default: QuestionType.GENERAL })
-  questionType: QuestionType;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'like count' })

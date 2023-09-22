@@ -56,7 +56,7 @@ export class Comment {
   @Column({ type: 'bigint', unsigned: true })
   questionId: number; // to make it available to Repository.
 
-  @ManyToOne(() => Question, (question) => question.comments, {
+  @ManyToOne(() => Question, (question) => question.answers, {
     onDelete: 'CASCADE',
   })
   question: Question;

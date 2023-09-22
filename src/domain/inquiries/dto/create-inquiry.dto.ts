@@ -15,7 +15,7 @@ export class CreateInquiryDto {
   })
   @IsEnum(InquiryType)
   @IsOptional()
-  questionType?: InquiryType = InquiryType.GENERAL;
+  inquiryType?: InquiryType = InquiryType.GENERAL;
 
   @ApiProperty({ description: '질문' })
   @IsOptional()

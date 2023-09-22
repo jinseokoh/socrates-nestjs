@@ -4,7 +4,6 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Credentials } from '@aws-sdk/types';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Jimp from 'jimp';
@@ -12,24 +11,18 @@ import * as Jimp from 'jimp';
 @Injectable()
 export class S3Service {
   private readonly s3: S3Client;
-  private readonly credentials: Credentials;
   private readonly bucket: string;
   private readonly region: string;
 
   constructor(@Inject(ConfigService) private configService: ConfigService) {
     this.bucket = this.configService.get('aws.bucketName');
     this.region = configService.get('aws.defaultRegion');
-    this.credentials = {
-      accessKeyId: configService.get('aws.accessKey'),
-      secretAccessKey: configService.get('aws.secretAccessKey'),
-    };
     // note that we don't, in fact, have to embed the credentials the way i did
     // in the following line. AWS library will pick them up from environment
-    // variables automatically.
+    // variables automatically. (edit: removed the credentials part)
     // refer @https://stackoverflow.com/questions/68264237/how-to-set-credentials-in-aws-sdk-v3-javascript
     this.s3 = new S3Client({
       region: this.region,
-      credentials: this.credentials,
     });
   }
 

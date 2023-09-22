@@ -40,7 +40,7 @@ export class InquiriesService {
       searchableColumns: ['title'],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
-        questionType: [FilterOperator.EQ],
+        InquiryType: [FilterOperator.EQ],
       },
       relations: ['user', 'comments'], // can be removed.
     });

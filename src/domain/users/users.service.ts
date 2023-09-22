@@ -47,12 +47,12 @@ import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { AWS_SES_CONNECTION } from 'src/common/constants';
-import { SES } from 'aws-sdk';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
 import { nameUserRandomly } from 'src/helpers/random-username';
+import { SesService } from 'src/services/aws/ses.service';
 @Injectable()
 export class UsersService {
   private readonly env: any;
@@ -78,7 +78,7 @@ export class UsersService {
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     @Inject(SmsClient) private readonly smsClient: SmsClient, // naver
-    @Inject(AWS_SES_CONNECTION) private readonly ses: SES,
+    private readonly sesService: SesService,
     private readonly s3Service: S3Service,
     private readonly crawlerService: CrawlerService,
   ) {
@@ -426,7 +426,7 @@ GROUP BY userId HAVING userId = ?',
       : await this._upsertOtp(phone);
 
     if (val.includes('@')) {
-      await this._sendEmailTemplateTo(phone, otp);
+      await this.sesService.sendOtpEmail(val, otp);
     } else {
       console.log(phone, otp);
       await this._sendSmsTo(phone, otp);
@@ -446,7 +446,7 @@ GROUP BY userId HAVING userId = ?',
       : await this._upsertOtp(phone);
 
     if (val.includes('@')) {
-      await this._sendEmailTemplateTo(val, otp);
+      await this.sesService.sendOtpEmail(val, otp);
     } else {
       console.log(phone, otp);
       await this._sendSmsTo(phone, otp);
@@ -515,55 +515,6 @@ GROUP BY userId HAVING userId = ?',
       console.log(e);
       throw new BadRequestException('aws-ses error');
     }
-  }
-
-  async _sendEmailTemplateTo(email: string, otp: string): Promise<any> {
-    const params = {
-      Destination: {
-        CcAddresses: [],
-        ToAddresses: [email],
-      },
-      Source: 'MeSo <no-reply@meetsocrates.kr>',
-      Template: 'EmailCodeTemplate',
-      TemplateData: `{ "code": "${otp}" }`,
-    };
-    try {
-      return await this.ses.sendTemplatedEmail(params).promise();
-    } catch (e) {
-      console.log(e);
-      throw new BadRequestException('aws-ses error');
-    }
-  }
-
-  async _sendEmailTo(email: string, message: string): Promise<any> {
-    const params = {
-      Destination: {
-        CcAddresses: [],
-        ToAddresses: [email],
-      },
-      Message: {
-        /* required */
-        Body: {
-          /* required */
-          Html: {
-            Charset: 'UTF-8',
-            Data: `<h1>${message}</h1>`,
-          },
-          Text: {
-            Charset: 'UTF-8',
-            Data: `${message}\n`,
-          },
-        },
-        Subject: {
-          Charset: 'UTF-8',
-          Data: 'Test email',
-        },
-      },
-      Source: 'MeSo <no-reply@meetsocrates.kr>',
-      // ReplyToAddresses: ['chuck@fleaauction.co'],
-    };
-
-    return await this.ses.sendEmail(params).promise();
   }
 
   //?-------------------------------------------------------------------------//

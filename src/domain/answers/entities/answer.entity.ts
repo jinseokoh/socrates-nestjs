@@ -48,7 +48,7 @@ export class Answer {
   @Column({ type: 'bigint', unsigned: true })
   userId: number; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.answers, {
+  @ManyToOne(() => User, (user) => user.comments, {
     onDelete: 'CASCADE',
   })
   user: User;
