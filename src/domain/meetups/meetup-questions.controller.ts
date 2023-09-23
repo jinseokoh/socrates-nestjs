@@ -68,7 +68,8 @@ export class MeetupQuestionsController {
   ): Promise<Question> {
     return await this.questionsService.findById(questionId, [
       'user',
-      'comments',
+      'meetup',
+      'answers',
     ]);
   }
 
@@ -80,9 +81,10 @@ export class MeetupQuestionsController {
   @Patch(':meetupId/questions/:questionId')
   async update(
     @Param('meetupId', ParseIntPipe) meetupId: number,
-    @Param('questionId', ParseIntPipe) questionId: number,
+    @Param('questionId') questionId: number,
     @Body() dto: UpdateQuestionDto,
   ): Promise<Question> {
+    console.log(meetupId, questionId, dto);
     return await this.questionsService.update(questionId, dto);
   }
 
