@@ -1,38 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { InquiryType } from 'src/common/enums/inquiry-type';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateQuestionDto {
-  @ApiProperty({
-    description: '질문유형',
-    default: InquiryType.GENERAL,
-  })
-  @IsEnum(InquiryType)
-  @IsOptional()
-  InquiryType?: InquiryType = InquiryType.GENERAL;
-
-  @ApiProperty({ description: '질문' })
-  @IsOptional()
+  @ApiProperty({ description: '질문내용' })
   @IsString()
-  title?: string | null;
-
-  @ApiProperty({ description: '답변' })
-  @IsOptional()
-  @IsString()
-  body?: string | null;
-
-  @ApiProperty({ description: '이미지들 (string[])', required: true })
-  @IsArray()
-  images: string[];
+  body: string;
 
   @ApiProperty({ description: '사용자 아이디' })
   @IsNumber()
   @IsOptional()
   userId: number | null;
+
+  @ApiProperty({ description: 'meetup 아이디' })
+  @IsNumber()
+  @IsOptional()
+  meetupId: number | null;
 }

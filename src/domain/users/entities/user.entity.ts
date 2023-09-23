@@ -25,6 +25,7 @@ import {
 } from 'typeorm';
 import { Impression } from 'src/domain/users/entities/impression.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
+import { Question } from 'src/domain/questions/entities/question.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -127,6 +128,11 @@ export class User {
     // cascade: ['insert', 'update'],
   })
   inquiries: Inquiry[];
+
+  @OneToMany(() => Question, (question) => question.user, {
+    // cascade: ['insert', 'update'],
+  })
+  questions: Question[];
 
   @OneToMany(() => Comment, (comment) => comment.user, {
     // cascade: ['insert', 'update'],

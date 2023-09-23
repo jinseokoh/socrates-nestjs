@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
-import { SubCategory } from 'src/common/enums';
-import { Keyword } from 'src/common/enums/keyword';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,

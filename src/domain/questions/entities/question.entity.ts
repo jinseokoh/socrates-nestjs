@@ -12,27 +12,16 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 
 @Entity()
 export class Question {
   @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
   id: number;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255, nullable: false })
   @ApiProperty({ description: '제목' })
-  title: string | null;
-
-  @Column({ type: 'text', nullable: true })
-  @ApiProperty({ description: '내용' })
-  body: string | null;
-
-  @Column('json', { nullable: true }) // from Artwork
-  @ApiProperty({ description: 'images' })
-  images: string[] | null;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'like count' })
-  likeCount: number;
+  body: string;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'view count' })
@@ -42,6 +31,10 @@ export class Question {
   @ApiProperty({ description: '신고여부' })
   isFlagged: boolean;
 
+  @Column({ type: 'datetime', nullable: true })
+  @ApiProperty({ description: '모임장이 언제 읽었는지' })
+  readAt: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -50,6 +43,18 @@ export class Question {
 
   @DeleteDateColumn()
   deletedAt: Date | null;
+
+  //**--------------------------------------------------------------------------*/
+  //** many-to-1 belongsTo
+
+  @Exclude()
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  userId: number | null; // to make it available to Repository.
+
+  @ManyToOne(() => User, (user) => user.questions, {
+    onDelete: 'SET NULL',
+  })
+  user: User;
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo

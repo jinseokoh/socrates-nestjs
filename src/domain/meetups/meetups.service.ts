@@ -61,9 +61,9 @@ export class MeetupsService {
     }
 
     // 1) create model and the relationship
+    const _meetup = this.repository.create(dto);
     const categories = await this._getCategoriesBySlug(dto.subCategory);
     const careers = await this._getCareersBySlugs(dto.targetCareers);
-    const _meetup = this.repository.create(dto);
     _meetup.categories = categories;
     _meetup.careers = careers;
     const meetup = await this.repository.save(_meetup);
@@ -178,7 +178,7 @@ export class MeetupsService {
   }
 
   async increaseViewCount(id: number): Promise<void> {
-    // in case you need the increased count, use:
+    // in case you need to return the increased viewCount, use:
     //
     // const meetup = await this.findById(id);
     // const count = meetup.viewCount + 1;
@@ -186,7 +186,7 @@ export class MeetupsService {
     // await this.repository.save(meetup);
     // return count;
     //
-    // otherwise, the following is atomic
+    // otherwise, it's better to use the followings, which is atomic
     //
     await this.repository
       .createQueryBuilder()
@@ -366,8 +366,9 @@ export class MeetupsService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? 찜했던 모든 사용자 리스트
+  //? test
   //?-------------------------------------------------------------------------//
+
   async getComments(id: number): Promise<void> {
     this.redisClient.emit('sse.user_joined_meetup', {
       meetupId: id,

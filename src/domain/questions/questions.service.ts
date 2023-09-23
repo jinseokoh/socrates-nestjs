@@ -37,7 +37,7 @@ export class QuestionsService {
   async findAll(query: PaginateQuery): Promise<Paginated<Question>> {
     return await paginate(query, this.repository, {
       sortableColumns: ['id'],
-      searchableColumns: ['title'],
+      searchableColumns: ['body'],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         InquiryType: [FilterOperator.EQ],
@@ -61,9 +61,10 @@ export class QuestionsService {
     }
   }
 
-  async count(title: string): Promise<number> {
+  // reserved.
+  async count(body: string): Promise<number> {
     return await this.repository.countBy({
-      title: title,
+      body: body,
     });
   }
 
