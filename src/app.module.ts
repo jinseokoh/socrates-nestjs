@@ -24,6 +24,7 @@ import { CommentsModule } from 'src/domain/comments/comments.module';
 import { RedisModule } from 'src/services/redis/redis.module';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ReportsModule } from 'src/domain/reports/reports.module';
+import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
 
 @Module({
   imports: [
@@ -96,6 +97,7 @@ import { ReportsModule } from 'src/domain/reports/reports.module';
     ContentsModule,
     MeetupsModule,
     MessagesModule,
+    InquiriesModule,
     QuestionsModule,
     CommentsModule,
     UsersModule,
