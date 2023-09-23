@@ -19,6 +19,9 @@ export class Inquiry {
   @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
   id: number;
 
+  @Column({ type: 'enum', enum: InquiryType, default: InquiryType.OTHER })
+  inquiryType: InquiryType;
+
   @Column({ length: 255, nullable: true })
   @ApiProperty({ description: '제목' })
   title: string | null;
@@ -30,9 +33,6 @@ export class Inquiry {
   @Column('json', { nullable: true }) // from Artwork
   @ApiProperty({ description: 'images' })
   images: string[] | null;
-
-  @Column({ type: 'enum', enum: InquiryType, default: InquiryType.GENERAL })
-  InquiryType: InquiryType;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'like count' })

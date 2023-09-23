@@ -11,24 +11,25 @@ import { InquiryType } from 'src/common/enums/inquiry-type';
 export class CreateInquiryDto {
   @ApiProperty({
     description: '질문유형',
-    default: InquiryType.GENERAL,
+    default: InquiryType.OTHER,
   })
   @IsEnum(InquiryType)
   @IsOptional()
-  inquiryType?: InquiryType = InquiryType.GENERAL;
+  inquiryType?: InquiryType = InquiryType.OTHER;
 
   @ApiProperty({ description: '질문' })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   title?: string | null;
 
   @ApiProperty({ description: '답변' })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   body?: string | null;
 
   @ApiProperty({ description: '이미지들 (string[])', required: true })
   @IsArray()
+  @IsOptional()
   images: string[];
 
   @ApiProperty({ description: '사용자 아이디' })

@@ -40,7 +40,7 @@ export class QuestionsService {
       searchableColumns: ['body'],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
-        InquiryType: [FilterOperator.EQ],
+        meetupId: [FilterOperator.EQ],
       },
       relations: ['meetup', 'answers'], // can be removed.
     });
