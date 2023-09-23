@@ -8,7 +8,7 @@ import {
 } from 'nestjs-paginate';
 import { CreateCommentDto } from 'src/domain/comments/dto/create-comment.dto';
 import { UpdateCommentDto } from 'src/domain/comments/dto/update-comment.dto';
-import { Question } from 'src/domain/questions/entities/question.entity';
+import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { Comment } from 'src/domain/comments/entities/comment.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
@@ -21,8 +21,8 @@ export class CommentsService {
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     @InjectRepository(Comment)
     private readonly repository: Repository<Comment>,
-    @InjectRepository(Question)
-    private readonly questionRepository: Repository<Question>,
+    @InjectRepository(Inquiry)
+    private readonly inquiryRepository: Repository<Inquiry>,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -31,9 +31,9 @@ export class CommentsService {
 
   async create(dto: CreateCommentDto): Promise<Comment> {
     try {
-      const question = await this.questionRepository.findOneOrFail({
+      const inquiry = await this.inquiryRepository.findOneOrFail({
         where: {
-          id: dto.questionId,
+          id: dto.inquiryId,
         },
       });
     } catch (e) {
@@ -49,10 +49,10 @@ export class CommentsService {
       value: commentWithUser,
     });
 
-    // const questionTitle = question.title.replace(/[\<\>]/g, '');
+    // const inquiryTitle = inquiry.title.replace(/[\<\>]/g, '');
     // await this.slack.postMessage({
     //   channel: 'major',
-    //   text: `[${process.env.NODE_ENV}-api] 📝 댓글 : <${process.env.ADMIN_URL}/questions/show/${question.id}|${questionTitle}>`,
+    //   text: `[${process.env.NODE_ENV}-api] 📝 댓글 : <${process.env.ADMIN_URL}/inquirys/show/${inquiry.id}|${inquiryTitle}>`,
     // });
 
     return commentWithUser;
@@ -68,7 +68,7 @@ export class CommentsService {
       .leftJoinAndSelect('comment.user', 'user')
       .leftJoinAndSelect('comment.children', 'children')
       .leftJoinAndSelect('children.user', 'childrenUser')
-      .where('comment.question = :questionId', { questionId: id })
+      .where('comment.inquiry = :inquiryId', { inquiryId: id })
       .andWhere('comment.parentId IS NULL')
       .andWhere('childrenUser.deletedAt IS NULL')
       .andWhere('comment.deletedAt IS NULL');
@@ -87,14 +87,14 @@ export class CommentsService {
   }
 
   async findAllById(
-    questionId: number,
+    inquiryId: number,
     commentId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Comment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('comment')
       .leftJoinAndSelect('comment.user', 'user')
-      .where('comment.question = :questionId', { questionId })
+      .where('comment.inquiry = :inquiryId', { inquiryId })
       .andWhere('comment.parentId = :commentId', { commentId })
       // .andWhere(
       //   new Brackets((qb) => {

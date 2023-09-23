@@ -4,7 +4,6 @@ import {
   Controller,
   Delete,
   Get,
-  Inject,
   Param,
   Patch,
   Post,
@@ -28,7 +27,7 @@ import { Observable } from 'rxjs';
 import { SseService } from 'src/services/sse/sse.service';
 import { EventPattern } from '@nestjs/microservices';
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('questions')
+@Controller('inquiries')
 export class CommentsController {
   constructor(
     private readonly commentsService: CommentsService,
@@ -45,7 +44,7 @@ export class CommentsController {
   }
 
   @Public()
-  @Sse(':questionId/comments/stream')
+  @Sse(':inquiryId/comments/stream')
   sse(): Observable<IMessageEvent> {
     return this.sseService.sseStream$;
   }
@@ -56,11 +55,11 @@ export class CommentsController {
 
   @ApiOperation({ description: '댓글 등록' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':questionId/comments/:commentId?')
+  @Post(':inquiryId/comments/:commentId?')
   async create(
     @CurrentUserId() userId: number,
     @Param('commentId') commentId: number | null,
-    @Param('questionId') questionId: number,
+    @Param('inquiryId') inquiryId: number,
     @Body() dto: CreateCommentDto,
   ): Promise<any> {
     let parentId = null;
@@ -71,7 +70,7 @@ export class CommentsController {
     return await this.commentsService.create({
       ...dto,
       userId,
-      questionId,
+      inquiryId,
       parentId,
     });
   }
@@ -81,23 +80,23 @@ export class CommentsController {
   //?-------------------------------------------------------------------------//
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':questionId/comments')
+  @Get(':inquiryId/comments')
   async getComments(
-    @Param('questionId') questionId: number,
+    @Param('inquiryId') inquiryId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Comment>> {
-    return await this.commentsService.findAll(questionId, query);
+    return await this.commentsService.findAll(inquiryId, query);
   }
 
   @ApiOperation({ description: '대댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':questionId/comments/:commentId')
+  @Get(':inquiryId/comments/:commentId')
   async getCommentsById(
-    @Param('questionId') questionId: number,
+    @Param('inquiryId') inquiryId: number,
     @Param('commentId') commentId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Comment>> {
-    return await this.commentsService.findAllById(questionId, commentId, query);
+    return await this.commentsService.findAllById(inquiryId, commentId, query);
   }
 
   // [admin] specific logic for Report
@@ -106,7 +105,7 @@ export class CommentsController {
   async getCommentById(
     @Param('commentId') commentId: number,
   ): Promise<Comment> {
-    return await this.commentsService.findById(commentId, ['question']);
+    return await this.commentsService.findById(commentId, ['inquiry']);
   }
 
   //?-------------------------------------------------------------------------//
@@ -114,7 +113,7 @@ export class CommentsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '댓글 수정' })
-  @Patch(':questionId/comments/:commentId')
+  @Patch(':inquiryId/comments/:commentId')
   async update(
     @Param('commentId') id: number,
     @Body() dto: UpdateCommentDto,
@@ -127,7 +126,7 @@ export class CommentsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '관리자) 댓글 soft 삭제' })
-  @Delete(':questionId/comments/:commentId')
+  @Delete(':inquiryId/comments/:commentId')
   async remove(@Param('commentId') id: number): Promise<Comment> {
     const comment = await this.commentsService.findByUniqueKey({
       where: { parentId: id },
