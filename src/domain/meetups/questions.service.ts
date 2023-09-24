@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
   paginate,
+  PaginateConfig,
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
@@ -35,17 +36,26 @@ export class QuestionsService {
   //?-------------------------------------------------------------------------//
 
   async findAll(query: PaginateQuery): Promise<Paginated<Question>> {
-    return await paginate(query, this.repository, {
+    const queryBuilder = this.repository
+      .createQueryBuilder('question')
+      .leftJoinAndSelect('question.answers', 'answer')
+      .leftJoinAndSelect('answer.user', 'userAnswered')
+      .leftJoinAndSelect('question.meetup', 'meetup')
+      .leftJoinAndSelect('question.user', 'userQuestioned');
+
+    const config: PaginateConfig<Question> = {
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         meetupId: [FilterOperator.EQ],
       },
-      relations: ['meetup', 'answers'], // can be removed.
-    });
+    };
+
+    return await paginate(query, queryBuilder, config);
   }
 
+  // reserved. no use cases as of yet.
   async findById(id: number, relations: string[] = []): Promise<Question> {
     try {
       return relations.length > 0
@@ -61,7 +71,7 @@ export class QuestionsService {
     }
   }
 
-  // reserved.
+  // reserved. no use cases as of yet.
   async count(body: string): Promise<number> {
     return await this.repository.countBy({
       body: body,

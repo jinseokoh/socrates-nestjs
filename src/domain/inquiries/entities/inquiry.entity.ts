@@ -70,7 +70,7 @@ export class Inquiry {
   //*-------------------------------------------------------------------------*/
   //* 1-to-many hasMany
 
-  @OneToMany(() => Comment, (comment) => comment.question, {
+  @OneToMany(() => Comment, (comment) => comment.inquiry, {
     // cascade: ['insert', 'update'],
   })
   comments: Comment[];

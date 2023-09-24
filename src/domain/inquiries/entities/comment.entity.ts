@@ -1,6 +1,5 @@
 import { Exclude } from 'class-transformer';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Question } from 'src/domain/meetups/entities/question.entity';
 
 import {
   Column,
@@ -14,6 +13,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 
 @Entity()
 export class Comment {
@@ -54,12 +54,12 @@ export class Comment {
   user: User;
 
   @Column({ type: 'int', unsigned: true })
-  questionId: number; // to make it available to Repository.
+  inquiryId: number; // to make it available to Repository.
 
-  @ManyToOne(() => Question, (question) => question.answers, {
+  @ManyToOne(() => Inquiry, (inquiry) => inquiry.comments, {
     onDelete: 'CASCADE',
   })
-  question: Question;
+  inquiry: Inquiry;
 
   //**--------------------------------------------------------------------------*/
   //** one to many (self recursive relations)

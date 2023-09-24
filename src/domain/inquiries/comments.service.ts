@@ -95,7 +95,7 @@ export class CommentsService {
     const queryBuilder = this.repository
       .createQueryBuilder('comment')
       .leftJoinAndSelect('comment.user', 'user')
-      .where('comment.inquiry = :inquiryId', { inquiryId })
+      .where('comment.inquiryId = :inquiryId', { inquiryId })
       .andWhere('comment.parentId = :commentId', { commentId })
       // .andWhere(
       //   new Brackets((qb) => {

@@ -28,7 +28,7 @@ export class MeetupQuestionsController {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '질문 생성' })
+  @ApiOperation({ description: '댓글(질문) 생성' })
   @Post(':meetupId/questions')
   async create(
     @CurrentUserId() userId: number,
@@ -42,7 +42,8 @@ export class MeetupQuestionsController {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '질문 리스트 w/ Pagination' })
+  //? 댓글리스트, 답글은 sorting 되지 않고 id 역순으로 나열
+  @ApiOperation({ description: '댓글(질문) 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':meetupId/questions')
   async getQuestions(
@@ -59,19 +60,6 @@ export class MeetupQuestionsController {
     };
 
     return await this.questionsService.findAll(queryParams);
-  }
-
-  @ApiOperation({ description: '질문 상세보기' })
-  @Get(':meetupId/questions/:questionId')
-  async getQuestionById(
-    @Param('meetupId', ParseIntPipe) meetupId: number,
-    @Param('questionId', ParseIntPipe) questionId: number,
-  ): Promise<Question> {
-    return await this.questionsService.findById(questionId, [
-      'user',
-      'meetup',
-      'answers',
-    ]);
   }
 
   //?-------------------------------------------------------------------------//

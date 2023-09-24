@@ -8,7 +8,7 @@ import {
 } from 'nestjs-paginate';
 import { Question } from 'src/domain/meetups/entities/question.entity';
 import { Answer } from 'src/domain/meetups/entities/answer.entity';
-import { FindOneOptions, Repository } from 'typeorm';
+import { Brackets, FindOneOptions, Repository } from 'typeorm';
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateAnswerDto } from 'src/domain/meetups/dto/create-answer.dto';
 import { UpdateAnswerDto } from 'src/domain/meetups/dto/update-answer.dto';
@@ -41,7 +41,6 @@ export class AnswersService {
     }
     const answer = await this.repository.save(this.repository.create(dto));
     const answerWithUser = await this.findById(answer.id, ['user']);
-
     console.log('answerWithUser', answerWithUser);
 
     this.redisClient.emit('sse.answers', {
@@ -62,13 +61,19 @@ export class AnswersService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  async findAll(id: number, query: PaginateQuery): Promise<Paginated<Answer>> {
+  //! not being used anymore.
+  async findAll(
+    meetupId: number,
+    questionId: number,
+    answerId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Answer>> {
     const queryBuilder = this.repository
       .createQueryBuilder('answer')
       .leftJoinAndSelect('answer.user', 'user')
       .leftJoinAndSelect('answer.children', 'children')
       .leftJoinAndSelect('children.user', 'childrenUser')
-      .where('answer.question = :questionId', { questionId: id })
+      .where('answer = :answerId', { answerId: answerId })
       .andWhere('answer.parentId IS NULL')
       .andWhere('childrenUser.deletedAt IS NULL')
       .andWhere('answer.deletedAt IS NULL');
@@ -86,24 +91,20 @@ export class AnswersService {
     return await paginate<Answer>(query, queryBuilder, config);
   }
 
+  // 답글만 paginate 되어 출력. (parentId 가 null 인 record 는 포함되지 않는다.)
+  // deleted user will also be excluded by innerJoinAndSelect
   async findAllById(
+    meetupId: number,
     questionId: number,
     answerId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Answer>> {
     const queryBuilder = this.repository
       .createQueryBuilder('answer')
-      .leftJoinAndSelect('answer.user', 'user')
-      .where('answer.question = :questionId', { questionId })
+      .innerJoinAndSelect('answer.user', 'user')
+      .where('answer.questionId = :questionId', { questionId })
       .andWhere('answer.parentId = :answerId', { answerId })
-      // .andWhere(
-      //   new Brackets((qb) => {
-      //     qb.where('answer.id = :answerId', { answerId }).orWhere(
-      //       'answer.parentId = :answerId',
-      //       { answerId },
-      //     );
-      //   }),
-      // )
+      .andWhere('answer.isFlagged = :isFlagged', { isFlagged: false })
       .andWhere('answer.deletedAt IS NULL');
 
     const config: PaginateConfig<Answer> = {

@@ -6,15 +6,25 @@ export class CreateAnswerDto {
   @IsString()
   body: string;
 
-  @ApiProperty({ description: '사용자 아이디' })
+  @ApiProperty({ description: 'userId 아이디' })
   @IsNumber()
   @IsOptional()
   userId: number | null;
 
-  @ApiProperty({ description: '관련 질문 아이디' })
+  @ApiProperty({ description: 'meetupId 아이디' })
+  @IsNumber()
+  @IsOptional()
+  meetupId: number | null;
+
+  @ApiProperty({ description: 'questionId 아이디' })
   @IsNumber()
   @IsOptional()
   questionId: number | null;
+
+  @ApiProperty({ description: 'answerId 아이디' })
+  @IsNumber()
+  @IsOptional()
+  answerId: number | null;
 
   @ApiProperty({ description: '상위 댓글 아이디', required: false })
   @IsNumber()

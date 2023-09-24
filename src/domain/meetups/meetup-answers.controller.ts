@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Sse,
@@ -44,7 +45,7 @@ export class MeetupAnswersController {
   }
 
   @Public()
-  @Sse(':meetupId/quesitons/:questionId/answers/stream')
+  @Sse(':meetupId/questions/:questionId/answers/stream')
   sse(): Observable<IMessageEvent> {
     return this.sseService.sseStream$;
   }
@@ -53,23 +54,24 @@ export class MeetupAnswersController {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '댓글 등록' })
+  @ApiOperation({ description: '답글 생성' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':meetupId/quesitons/:questionId/answers/:answerId?')
+  @Post(':meetupId/questions/:questionId/answers')
   async create(
     @CurrentUserId() userId: number,
-    @Param('answerId') answerId: number | null,
-    @Param('questionId') questionId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+    @Param('questionId', ParseIntPipe) questionId: number,
     @Body() dto: CreateAnswerDto,
   ): Promise<any> {
     let parentId = null;
-    if (answerId) {
-      const answer = await this.answersService.findById(answerId);
-      parentId = answer.parentId ? answer.parentId : answerId;
+    if (dto.answerId) {
+      const answer = await this.answersService.findById(dto.answerId);
+      parentId = answer.parentId ? answer.parentId : answer.id;
     }
     return await this.answersService.create({
       ...dto,
       userId,
+      meetupId,
       questionId,
       parentId,
     });
@@ -78,32 +80,21 @@ export class MeetupAnswersController {
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
-  @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
+  @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':meetupId/quesitons/:questionId/answers')
+  @Get(':meetupId/questions/:questionId/answers/:answerId')
   async getAnswers(
-    @Param('questionId') questionId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+    @Param('questionId', ParseIntPipe) questionId: number,
+    @Param('answerId', ParseIntPipe) answerId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Answer>> {
-    return await this.answersService.findAll(questionId, query);
-  }
-
-  @ApiOperation({ description: '대댓글 리스트 w/ Pagination' })
-  @PaginateQueryOptions()
-  @Get(':meetupId/quesitons/:questionId/answers/:answerId')
-  async getAnswersById(
-    @Param('questionId') questionId: number,
-    @Param('answerId') answerId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Answer>> {
-    return await this.answersService.findAllById(questionId, answerId, query);
-  }
-
-  // [admin] specific logic for Report
-  @ApiOperation({ description: '[관리자] 댓글 상세보기' })
-  @Get(':meetupId/quesitons/answers/:answerId')
-  async getAnswerById(@Param('answerId') answerId: number): Promise<Answer> {
-    return await this.answersService.findById(answerId, ['question']);
+    return await this.answersService.findAllById(
+      meetupId,
+      questionId,
+      answerId,
+      query,
+    );
   }
 
   //?-------------------------------------------------------------------------//
@@ -111,9 +102,9 @@ export class MeetupAnswersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '댓글 수정' })
-  @Patch(':meetupId/quesitons/:questionId/answers/:answerId')
+  @Patch(':meetupId/questions/:questionId/answers/:answerId')
   async update(
-    @Param('answerId') id: number,
+    @Param('answerId', ParseIntPipe) id: number,
     @Body() dto: UpdateAnswerDto,
   ): Promise<Answer> {
     return await this.answersService.update(id, dto);
@@ -124,8 +115,8 @@ export class MeetupAnswersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '관리자) 댓글 soft 삭제' })
-  @Delete(':meetupId/quesitons/:questionId/answers/:answerId')
-  async remove(@Param('answerId') id: number): Promise<Answer> {
+  @Delete(':meetupId/questions/:questionId/answers/:answerId')
+  async remove(@Param('answerId', ParseIntPipe) id: number): Promise<Answer> {
     const answer = await this.answersService.findByUniqueKey({
       where: { parentId: id },
     });

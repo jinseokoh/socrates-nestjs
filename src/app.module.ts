@@ -25,6 +25,7 @@ import { RedisModule } from 'src/services/redis/redis.module';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ReportsModule } from 'src/domain/reports/reports.module';
 import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
+import { AnswersModule } from 'src/domain/meetups/answers.module';
 
 @Module({
   imports: [
@@ -97,6 +98,8 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
     CareersModule,
     ContentsModule,
     MeetupsModule,
+    // QuestionsModule,
+    // AnswersModule,
     MessagesModule,
     UsersModule,
     ReportsModule,
