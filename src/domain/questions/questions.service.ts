@@ -73,18 +73,10 @@ export class QuestionsService {
   //?-------------------------------------------------------------------------//
 
   async update(id: number, dto: UpdateQuestionDto): Promise<Question> {
-    const question = await this.repository.findOneBy({ id });
-
-    console.log('1', question);
-
-    const q = await this.repository.preload({ id });
-
-    console.log('2', q);
-
-    if (!q) {
+    const question = await this.repository.preload({ id, ...dto });
+    if (!question) {
       throw new NotFoundException(`entity not found`);
     }
-
     return await this.repository.save(question);
   }
 

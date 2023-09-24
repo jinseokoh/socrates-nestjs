@@ -36,7 +36,7 @@ import { Question } from 'src/domain/questions/entities/question.entity';
 
 @Entity()
 export class Meetup {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
   @Column({ type: 'enum', enum: CategoryEnum, default: CategoryEnum.CHALLENGE })

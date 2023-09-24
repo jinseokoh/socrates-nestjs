@@ -57,6 +57,7 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
           synchronize: true,
           timezone: 'Z',
           bigNumberStrings: true,
+          supportBigNumbers: true,
           logging: true,
           migrations: ['dist/migrations/**/*{.ts,.js}'],
           cli: {

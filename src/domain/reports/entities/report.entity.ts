@@ -13,7 +13,7 @@ import {
 @Entity()
 @Unique('target_target_id_user_id_key', ['target', 'targetId', 'userId'])
 export class Report {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
   @Column({
@@ -23,7 +23,7 @@ export class Report {
   })
   target: ReportTarget;
 
-  @Column({ type: 'bigint', unsigned: true })
+  @Column({ type: 'int', unsigned: true })
   targetId: number;
 
   @Column({ length: 255 })

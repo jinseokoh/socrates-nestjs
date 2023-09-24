@@ -11,7 +11,7 @@ import {
 
 @Entity()
 export class Venue {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
   @Column({ length: 64 })
@@ -70,7 +70,7 @@ export class Venue {
   //** 1-to-1 belongsToOne
 
   @Exclude()
-  @Column({ type: 'bigint', unsigned: true })
+  @Column({ type: 'int', unsigned: true })
   meetupId: number; // to make it available to Repository.
 
   @OneToOne(() => Meetup, (meetup) => meetup.venue)

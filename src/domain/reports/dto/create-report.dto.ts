@@ -12,7 +12,7 @@ export class CreateReportDto {
 
   @ApiProperty({ description: '신고대상 아이디', required: false })
   @IsNumber()
-  targetId: number; // bigint
+  targetId: number;
 
   @ApiProperty({ description: '신고이유' })
   @IsString()

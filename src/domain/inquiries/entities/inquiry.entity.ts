@@ -16,7 +16,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Inquiry {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
   @Column({ type: 'enum', enum: InquiryType, default: InquiryType.OTHER })

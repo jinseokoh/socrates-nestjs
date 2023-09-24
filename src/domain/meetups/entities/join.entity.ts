@@ -58,7 +58,7 @@ export class Join {
   @JoinColumn({ name: 'askedUserId' })
   public askedUser!: User;
 
-  @PrimaryColumn({ type: 'bigint', unsigned: true })
+  @PrimaryColumn({ type: 'int', unsigned: true })
   public meetupId!: number;
 
   @ManyToOne(() => Meetup, (meetup) => meetup.id, {

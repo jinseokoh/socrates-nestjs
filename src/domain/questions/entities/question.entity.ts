@@ -1,4 +1,4 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import { Answer } from 'src/domain/answers/entities/answer.entity';
 import {
   Column,
@@ -16,7 +16,10 @@ import { User } from 'src/domain/users/entities/user.entity';
 
 @Entity()
 export class Question {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn('increment', {
+    type: 'int',
+    unsigned: true,
+  })
   id: number;
 
   @Column({ length: 255, nullable: false })
@@ -60,7 +63,7 @@ export class Question {
   //** many-to-1 belongsTo
 
   @Exclude()
-  @Column({ type: 'bigint', unsigned: true, nullable: true })
+  @Column({ type: 'int', unsigned: true, nullable: true })
   meetupId: number | null; // to make it available to Repository.
 
   @ManyToOne(() => Meetup, (meetup) => meetup.questions, {

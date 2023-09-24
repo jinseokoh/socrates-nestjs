@@ -12,7 +12,7 @@ import {
 @Entity()
 @Unique('poster_id_meetup_id_user_id_key', ['posterId', 'userId'])
 export class Impression {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
   @Column({ type: 'tinyint', unsigned: true, default: 1 })

@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 @Entity()
 export class Room {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint', unsigned: true })
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
   @Column({ length: 255, nullable: false })
