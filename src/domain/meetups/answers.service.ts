@@ -6,23 +6,23 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CreateAnswerDto } from 'src/domain/answers/dto/create-answer.dto';
-import { UpdateAnswerDto } from 'src/domain/answers/dto/update-answer.dto';
-import { Question } from 'src/domain/questions/entities/question.entity';
-import { Answer } from 'src/domain/answers/entities/answer.entity';
+import { Question } from 'src/domain/meetups/entities/question.entity';
+import { Answer } from 'src/domain/meetups/entities/answer.entity';
 import { FindOneOptions, Repository } from 'typeorm';
-import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ClientProxy } from '@nestjs/microservices';
+import { CreateAnswerDto } from 'src/domain/meetups/dto/create-answer.dto';
+import { UpdateAnswerDto } from 'src/domain/meetups/dto/update-answer.dto';
+import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 
 @Injectable()
 export class AnswersService {
   constructor(
     // @Inject(SlackService) private readonly slack: SlackService,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
-    @InjectRepository(Answer)
-    private readonly repository: Repository<Answer>,
     @InjectRepository(Question)
     private readonly questionRepository: Repository<Question>,
+    @InjectRepository(Answer)
+    private readonly repository: Repository<Answer>,
   ) {}
 
   //?-------------------------------------------------------------------------//

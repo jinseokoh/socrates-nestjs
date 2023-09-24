@@ -7,9 +7,9 @@ import {
   PaginateQuery,
 } from 'nestjs-paginate';
 import { SignedUrl } from 'src/common/types';
-import { CreateQuestionDto } from 'src/domain/questions/dto/create-question.dto';
-import { UpdateQuestionDto } from 'src/domain/questions/dto/update-question.dto';
-import { Question } from 'src/domain/questions/entities/question.entity';
+import { CreateQuestionDto } from 'src/domain/meetups/dto/create-question.dto';
+import { UpdateQuestionDto } from 'src/domain/meetups/dto/update-question.dto';
+import { Question } from 'src/domain/meetups/entities/question.entity';
 import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { Repository } from 'typeorm';

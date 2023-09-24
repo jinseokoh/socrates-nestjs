@@ -6,13 +6,14 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CreateCommentDto } from 'src/domain/comments/dto/create-comment.dto';
-import { UpdateCommentDto } from 'src/domain/comments/dto/update-comment.dto';
+import { CreateCommentDto } from 'src/domain/inquiries/dto/create-comment.dto';
+
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
-import { Comment } from 'src/domain/comments/entities/comment.entity';
+import { Comment } from 'src/domain/inquiries/entities/comment.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ClientProxy } from '@nestjs/microservices';
+import { UpdateCommentDto } from 'src/domain/inquiries/dto/update-comment.dto';
 
 @Injectable()
 export class CommentsService {

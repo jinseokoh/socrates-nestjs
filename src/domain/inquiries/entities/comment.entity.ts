@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Question } from 'src/domain/questions/entities/question.entity';
+import { Question } from 'src/domain/meetups/entities/question.entity';
 
 import {
   Column,

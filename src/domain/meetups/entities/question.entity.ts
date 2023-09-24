@@ -1,5 +1,5 @@
 import { Exclude, Transform } from 'class-transformer';
-import { Answer } from 'src/domain/answers/entities/answer.entity';
+import { Answer } from 'src/domain/meetups/entities/answer.entity';
 import {
   Column,
   CreateDateColumn,

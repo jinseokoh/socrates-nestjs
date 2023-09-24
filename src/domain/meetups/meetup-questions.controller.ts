@@ -14,10 +14,11 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { CreateQuestionDto } from 'src/domain/questions/dto/create-question.dto';
-import { UpdateQuestionDto } from 'src/domain/questions/dto/update-question.dto';
-import { Question } from 'src/domain/questions/entities/question.entity';
-import { QuestionsService } from 'src/domain/questions/questions.service';
+import { CreateQuestionDto } from 'src/domain/meetups/dto/create-question.dto';
+import { UpdateQuestionDto } from 'src/domain/meetups/dto/update-question.dto';
+import { Question } from 'src/domain/meetups/entities/question.entity';
+import { QuestionsService } from 'src/domain/meetups/questions.service';
+
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
 export class MeetupQuestionsController {
@@ -84,7 +85,6 @@ export class MeetupQuestionsController {
     @Param('questionId', ParseIntPipe) questionId: number,
     @Body() dto: UpdateQuestionDto,
   ): Promise<Question> {
-    console.log(meetupId, questionId, dto);
     return await this.questionsService.update(questionId, dto);
   }
 

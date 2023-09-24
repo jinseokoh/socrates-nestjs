@@ -6,7 +6,7 @@ import {
   PipeTransform,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Question } from 'src/domain/questions/entities/question.entity';
+import { Question } from 'src/domain/meetups/entities/question.entity';
 import { Repository } from 'typeorm';
 @Injectable()
 export class ValidateQuestionIdPipe implements PipeTransform {

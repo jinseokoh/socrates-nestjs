@@ -8,7 +8,7 @@ import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Comment } from 'src/domain/comments/entities/comment.entity';
+import { Comment } from 'src/domain/inquiries/entities/comment.entity';
 import { Report } from 'src/domain/reports/entities/report.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
@@ -25,7 +25,7 @@ import {
 } from 'typeorm';
 import { Impression } from 'src/domain/users/entities/impression.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
-import { Question } from 'src/domain/questions/entities/question.entity';
+import { Question } from 'src/domain/meetups/entities/question.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })

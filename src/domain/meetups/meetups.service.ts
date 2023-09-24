@@ -17,13 +17,14 @@ import {
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { AnyData, SignedUrl } from 'src/common/types';
 import { Career } from 'src/domain/careers/entities/career.entity';
+import { Like } from 'src/domain/meetups/entities/like.entity';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { Question } from 'src/domain/meetups/entities/question.entity';
+import { User } from 'src/domain/users/entities/user.entity';
+import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
-import { Like } from 'src/domain/meetups/entities/like.entity';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { User } from 'src/domain/users/entities/user.entity';
-import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { In } from 'typeorm';
@@ -44,6 +45,8 @@ export class MeetupsService {
     private readonly careerRepository: Repository<Career>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Question)
+    private readonly questionRepository: Repository<Question>,
     private readonly s3Service: S3Service,
   ) {}
 

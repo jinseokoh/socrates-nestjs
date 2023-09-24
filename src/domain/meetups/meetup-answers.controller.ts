@@ -15,10 +15,7 @@ import {
 
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { Answer } from 'src/domain/answers/entities/answer.entity';
-import { AnswersService } from 'src/domain/answers/answers.service';
-import { CreateAnswerDto } from 'src/domain/answers/dto/create-answer.dto';
-import { UpdateAnswerDto } from 'src/domain/answers/dto/update-answer.dto';
+import { Answer } from 'src/domain/meetups/entities/answer.entity';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -26,9 +23,12 @@ import { IMessageEvent } from 'src/common/interfaces';
 import { Observable } from 'rxjs';
 import { SseService } from 'src/services/sse/sse.service';
 import { EventPattern } from '@nestjs/microservices';
+import { AnswersService } from 'src/domain/meetups/answers.service';
+import { CreateAnswerDto } from 'src/domain/meetups/dto/create-answer.dto';
+import { UpdateAnswerDto } from 'src/domain/meetups/dto/update-answer.dto';
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('questions')
-export class AnswersController {
+@Controller('meetups')
+export class MeetupAnswersController {
   constructor(
     private readonly answersService: AnswersService,
     private readonly sseService: SseService,
@@ -44,7 +44,7 @@ export class AnswersController {
   }
 
   @Public()
-  @Sse(':questionId/answers/stream')
+  @Sse(':meetupId/quesitons/:questionId/answers/stream')
   sse(): Observable<IMessageEvent> {
     return this.sseService.sseStream$;
   }
@@ -55,7 +55,7 @@ export class AnswersController {
 
   @ApiOperation({ description: '댓글 등록' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':questionId/answers/:answerId?')
+  @Post(':meetupId/quesitons/:questionId/answers/:answerId?')
   async create(
     @CurrentUserId() userId: number,
     @Param('answerId') answerId: number | null,
@@ -80,7 +80,7 @@ export class AnswersController {
   //?-------------------------------------------------------------------------//
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':questionId/answers')
+  @Get(':meetupId/quesitons/:questionId/answers')
   async getAnswers(
     @Param('questionId') questionId: number,
     @Paginate() query: PaginateQuery,
@@ -90,7 +90,7 @@ export class AnswersController {
 
   @ApiOperation({ description: '대댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':questionId/answers/:answerId')
+  @Get(':meetupId/quesitons/:questionId/answers/:answerId')
   async getAnswersById(
     @Param('questionId') questionId: number,
     @Param('answerId') answerId: number,
@@ -101,7 +101,7 @@ export class AnswersController {
 
   // [admin] specific logic for Report
   @ApiOperation({ description: '[관리자] 댓글 상세보기' })
-  @Get('answers/:answerId')
+  @Get(':meetupId/quesitons/answers/:answerId')
   async getAnswerById(@Param('answerId') answerId: number): Promise<Answer> {
     return await this.answersService.findById(answerId, ['question']);
   }
@@ -111,7 +111,7 @@ export class AnswersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '댓글 수정' })
-  @Patch(':questionId/answers/:answerId')
+  @Patch(':meetupId/quesitons/:questionId/answers/:answerId')
   async update(
     @Param('answerId') id: number,
     @Body() dto: UpdateAnswerDto,
@@ -124,7 +124,7 @@ export class AnswersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '관리자) 댓글 soft 삭제' })
-  @Delete(':questionId/answers/:answerId')
+  @Delete(':meetupId/quesitons/:questionId/answers/:answerId')
   async remove(@Param('answerId') id: number): Promise<Answer> {
     const answer = await this.answersService.findByUniqueKey({
       where: { parentId: id },

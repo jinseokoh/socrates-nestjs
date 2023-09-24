@@ -19,8 +19,8 @@ import { RoomsModule } from 'src/domain/rooms/rooms.module';
 import { UsersModule } from 'src/domain/users/users.module';
 import { NaverModule } from 'src/services/naver/naver.module';
 import { CacheModule } from '@nestjs/cache-manager';
-import { QuestionsModule } from 'src/domain/questions/questions.module';
-import { CommentsModule } from 'src/domain/comments/comments.module';
+import { QuestionsModule } from 'src/domain/meetups/questions.module';
+import { CommentsModule } from 'src/domain/inquiries/comments.module';
 import { RedisModule } from 'src/services/redis/redis.module';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ReportsModule } from 'src/domain/reports/reports.module';
@@ -98,11 +98,9 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
     ContentsModule,
     MeetupsModule,
     MessagesModule,
-    InquiriesModule,
-    QuestionsModule,
-    CommentsModule,
     UsersModule,
     ReportsModule,
+    InquiriesModule,
     RedisModule.register({ name: REDIS_PUBSUB_CLIENT }),
   ],
   controllers: [AppController],

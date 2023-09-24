@@ -15,10 +15,10 @@ import {
 
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { Comment } from 'src/domain/comments/entities/comment.entity';
-import { CommentsService } from 'src/domain/comments/comments.service';
-import { CreateCommentDto } from 'src/domain/comments/dto/create-comment.dto';
-import { UpdateCommentDto } from 'src/domain/comments/dto/update-comment.dto';
+import { Comment } from 'src/domain/inquiries/entities/comment.entity';
+import { CommentsService } from 'src/domain/inquiries/comments.service';
+import { CreateCommentDto } from 'src/domain/inquiries/dto/create-comment.dto';
+import { UpdateCommentDto } from 'src/domain/inquiries/dto/update-comment.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -26,9 +26,10 @@ import { IMessageEvent } from 'src/common/interfaces';
 import { Observable } from 'rxjs';
 import { SseService } from 'src/services/sse/sse.service';
 import { EventPattern } from '@nestjs/microservices';
+
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('inquiries')
-export class CommentsController {
+export class InquiryCommentsController {
   constructor(
     private readonly commentsService: CommentsService,
     private readonly sseService: SseService,
@@ -55,7 +56,7 @@ export class CommentsController {
 
   @ApiOperation({ description: '댓글 등록' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':inquiryId/comments/:commentId?')
+  @Post(':inquiryId/comments/:commentId')
   async create(
     @CurrentUserId() userId: number,
     @Param('commentId') commentId: number | null,
@@ -101,7 +102,7 @@ export class CommentsController {
 
   // [admin] specific logic for Report
   @ApiOperation({ description: '[관리자] 댓글 상세보기' })
-  @Get('comments/:commentId')
+  @Get(':inquiryId/comments/:commentId')
   async getCommentById(
     @Param('commentId') commentId: number,
   ): Promise<Comment> {

@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { InquiryType } from 'src/common/enums/inquiry-type';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Comment } from 'src/domain/comments/entities/comment.entity';
+import { Comment } from 'src/domain/inquiries/entities/comment.entity';
 import {
   Column,
   CreateDateColumn,
