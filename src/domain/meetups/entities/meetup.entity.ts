@@ -32,7 +32,7 @@ import {
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
-import { Question } from 'src/domain/meetups/entities/question.entity';
+import { Thread } from 'src/domain/meetups/entities/thread.entity';
 
 @Entity()
 export class Meetup {
@@ -194,8 +194,8 @@ export class Meetup {
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany using one-to-many
 
-  @OneToMany(() => Question, (question) => question.meetup)
-  public questions: Question[];
+  @OneToMany(() => Thread, (thread) => thread.meetup)
+  public threads: Thread[];
 
   @OneToMany(() => Join, (join) => join.meetup)
   public joins: Join[];

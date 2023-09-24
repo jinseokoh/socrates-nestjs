@@ -1,10 +1,10 @@
-import { Exclude, Transform } from 'class-transformer';
-import { Answer } from 'src/domain/meetups/entities/answer.entity';
+import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -15,7 +15,7 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 
 @Entity()
-export class Question {
+export class Thread {
   @PrimaryGeneratedColumn('increment', {
     type: 'int',
     unsigned: true,
@@ -27,8 +27,8 @@ export class Question {
   body: string;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'view count' })
-  viewCount: number;
+  @ApiProperty({ description: 'like count' })
+  likeCount: number;
 
   @Column({ default: false })
   @ApiProperty({ description: '신고여부' })
@@ -54,7 +54,7 @@ export class Question {
   @Column({ type: 'int', unsigned: true, nullable: true })
   userId: number | null; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.questions, {
+  @ManyToOne(() => User, (user) => user.threads, {
     onDelete: 'SET NULL',
   })
   user: User;
@@ -66,23 +66,33 @@ export class Question {
   @Column({ type: 'int', unsigned: true, nullable: true })
   meetupId: number | null; // to make it available to Repository.
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.questions, {
+  @ManyToOne(() => Meetup, (meetup) => meetup.threads, {
     onDelete: 'SET NULL',
   })
   meetup: Meetup;
 
-  //*-------------------------------------------------------------------------*/
-  //* 1-to-many hasMany
+  //**--------------------------------------------------------------------------*/
+  //** one to many (self recursive relations)
+  // data structure ref)
+  // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
-  @OneToMany(() => Answer, (answer) => answer.question, {
-    // cascade: ['insert', 'update'],
+  @Exclude()
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  parentId: number | null;
+
+  @OneToMany(() => Thread, (thread) => thread.parent)
+  children: Thread[];
+
+  @ManyToOne(() => Thread, (Thread) => Thread.children, {
+    onDelete: 'SET NULL',
   })
-  answers: Answer[];
+  @JoinColumn({ name: 'parentId' })
+  parent: Thread;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  constructor(partial: Partial<Question>) {
+  constructor(partial: Partial<Thread>) {
     Object.assign(this, partial);
   }
 }

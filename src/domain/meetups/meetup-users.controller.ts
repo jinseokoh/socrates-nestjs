@@ -33,7 +33,9 @@ export class MeetupUsersController {
 
   @ApiOperation({ description: '이 모임에 초대한 사용자 리스트 (최대30명)' })
   @Get(':id/invitees')
-  async getAllInvitees(@Param('id', ParseIntPipe) id: number): Promise<AnyData> {
+  async getAllInvitees(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<AnyData> {
     const users = await this.meetupsService.getAllInvitees(id);
     return {
       data: users,

@@ -6,13 +6,13 @@ import {
   PipeTransform,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Question } from 'src/domain/meetups/entities/question.entity';
+import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { Repository } from 'typeorm';
 @Injectable()
-export class ValidateQuestionIdPipe implements PipeTransform {
+export class ValidateInquiryIdPipe implements PipeTransform {
   constructor(
-    @InjectRepository(Question)
-    private readonly articlesRepository: Repository<Question>,
+    @InjectRepository(Inquiry)
+    private readonly articlesRepository: Repository<Inquiry>,
   ) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

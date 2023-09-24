@@ -25,7 +25,7 @@ import {
 } from 'typeorm';
 import { Impression } from 'src/domain/users/entities/impression.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
-import { Question } from 'src/domain/meetups/entities/question.entity';
+import { Thread } from 'src/domain/meetups/entities/thread.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -129,10 +129,10 @@ export class User {
   })
   inquiries: Inquiry[];
 
-  @OneToMany(() => Question, (question) => question.user, {
+  @OneToMany(() => Thread, (thread) => thread.user, {
     // cascade: ['insert', 'update'],
   })
-  questions: Question[];
+  threads: Thread[];
 
   @OneToMany(() => Comment, (comment) => comment.user, {
     // cascade: ['insert', 'update'],

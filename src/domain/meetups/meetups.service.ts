@@ -19,7 +19,7 @@ import { AnyData, SignedUrl } from 'src/common/types';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Question } from 'src/domain/meetups/entities/question.entity';
+import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
@@ -45,8 +45,8 @@ export class MeetupsService {
     private readonly careerRepository: Repository<Career>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Question)
-    private readonly questionRepository: Repository<Question>,
+    @InjectRepository(Thread)
+    private readonly threadRepository: Repository<Thread>,
     private readonly s3Service: S3Service,
   ) {}
 
