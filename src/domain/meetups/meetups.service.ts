@@ -122,9 +122,9 @@ export class MeetupsService {
   async findAll(query: PaginateQuery): Promise<Paginated<Meetup>> {
     const queryBuilder = this.repository
       .createQueryBuilder('meetup')
+      .leftJoinAndSelect('meetup.venue', 'venue')
       .leftJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('user.profile', 'profile')
-      .leftJoinAndSelect('meetup.venue', 'venue');
+      .leftJoinAndSelect('user.profile', 'profile');
 
     const config: PaginateConfig<Meetup> = {
       relations: {

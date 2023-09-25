@@ -70,13 +70,12 @@ export class MeetupsController {
   @Get(':id')
   async getMeetupById(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
     return await this.meetupsService.findById(id, [
+      'venue',
       'user',
       'user.profile',
       'careers',
       'categories',
-      'venue',
-      'questions',
-      'questions.answers',
+      'threads',
       'usersLiked',
       'usersLiked.user',
       'usersLiked.user.profile',

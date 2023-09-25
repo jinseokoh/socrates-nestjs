@@ -16,7 +16,7 @@ export class S3Service {
 
   constructor(@Inject(ConfigService) private configService: ConfigService) {
     this.bucket = this.configService.get('aws.bucketName');
-    this.region = configService.get('aws.defaultRegion');
+    this.region = this.configService.get('aws.defaultRegion');
     // note that we don't, in fact, have to embed the credentials the way i did
     // in the following line. AWS library will pick them up from environment
     // variables automatically. (edit: removed the credentials part)
