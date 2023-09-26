@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
   paginate,
+  PaginateConfig,
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
 import { SignedUrl } from 'src/common/types';
 import { CreateInquiryDto } from 'src/domain/inquiries/dto/create-inquiry.dto';
 import { UpdateInquiryDto } from 'src/domain/inquiries/dto/update-inquiry.dto';
+import { Comment } from 'src/domain/inquiries/entities/comment.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
@@ -18,6 +20,8 @@ export class InquiriesService {
   constructor(
     @InjectRepository(Inquiry)
     private readonly repository: Repository<Inquiry>,
+    @InjectRepository(Comment)
+    private readonly commentRepository: Repository<Comment>,
     private readonly s3Service: S3Service,
   ) {}
 
@@ -38,7 +42,7 @@ export class InquiriesService {
     return await paginate(query, this.repository, {
       sortableColumns: ['id'],
       searchableColumns: ['title'],
-      defaultSortBy: [['id', 'DESC']],
+      defaultSortBy: [['id', 'ASC']],
       filterableColumns: {
         inquiryType: [FilterOperator.EQ],
       },
@@ -102,7 +106,7 @@ export class InquiriesService {
     userId: number,
     mimeType = 'image/jpeg',
   ): Promise<SignedUrl> {
-    const fileUri = randomName('question', mimeType);
+    const fileUri = randomName('inquiry', mimeType);
     const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 

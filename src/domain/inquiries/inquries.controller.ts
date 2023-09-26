@@ -44,16 +44,17 @@ export class InquiriesController {
   @ApiOperation({ description: '질문 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get()
-  async getInquiries(
+  async getInquries(
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Inquiry>> {
     return await this.inquiriesService.findAll(query);
   }
 
-  @ApiOperation({ description: '질문 상세보기' })
+  //! not being used anymore
+  @ApiOperation({ description: '질문 상세보기 w/ Pagination' })
   @Get(':id')
-  async getInquiryById(@Param('id') id: number): Promise<Inquiry> {
-    return await this.inquiriesService.findById(id, ['user', 'comments']);
+  async getCommentsById(@Param('id') inquiryId: number): Promise<Inquiry> {
+    return await this.inquiriesService.findById(inquiryId, ['user']);
   }
 
   //?-------------------------------------------------------------------------//

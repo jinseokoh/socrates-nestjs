@@ -56,23 +56,16 @@ export class InquiryCommentsController {
 
   @ApiOperation({ description: '댓글 등록' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':inquiryId/comments/:commentId')
+  @Post(':inquiryId/comments')
   async create(
     @CurrentUserId() userId: number,
-    @Param('commentId') commentId: number | null,
     @Param('inquiryId') inquiryId: number,
     @Body() dto: CreateCommentDto,
   ): Promise<any> {
-    let parentId = null;
-    if (commentId) {
-      const comment = await this.commentsService.findById(commentId);
-      parentId = comment.parentId ? comment.parentId : commentId;
-    }
     return await this.commentsService.create({
       ...dto,
       userId,
       inquiryId,
-      parentId,
     });
   }
 

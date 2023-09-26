@@ -218,7 +218,7 @@ export class MeetupsService {
   //?-------------------------------------------------------------------------//
 
   // 단일 이미지 저장후 URL (string) 리턴
-  // todo. wtf?! remove anydata from services
+  // todo. remove anydata from services
   async uploadImage(
     userId: number,
     file: Express.Multer.File,
@@ -233,7 +233,7 @@ export class MeetupsService {
   }
 
   // 다중 이미지 저장후 URL (string) 리턴
-  // todo. wtf?! remove anydata from services
+  // todo. remove anydata from services
   async uploadImages(
     userId: number,
     files: Array<Express.Multer.File>,

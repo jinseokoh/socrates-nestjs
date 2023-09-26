@@ -1,6 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  FilterOperator,
   PaginateConfig,
   PaginateQuery,
   Paginated,
@@ -63,24 +64,21 @@ export class CommentsService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  async findAll(id: number, query: PaginateQuery): Promise<Paginated<Comment>> {
+  async findAll(
+    inquiryId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Comment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('comment')
-      .leftJoinAndSelect('comment.user', 'user')
-      .leftJoinAndSelect('comment.children', 'children')
-      .leftJoinAndSelect('children.user', 'childrenUser')
-      .where('comment.inquiry = :inquiryId', { inquiryId: id })
-      .andWhere('comment.parentId IS NULL')
-      .andWhere('childrenUser.deletedAt IS NULL')
-      .andWhere('comment.deletedAt IS NULL');
-    // .andWhere('comment.parentId IS NULL');
+      .innerJoinAndSelect('comment.user', 'user')
+      .where('comment.inquiry = :inquiryId', { inquiryId });
 
     const config: PaginateConfig<Comment> = {
       sortableColumns: ['id'],
       defaultLimit: 20,
-      defaultSortBy: [['id', 'DESC']],
+      defaultSortBy: [['id', 'ASC']],
       filterableColumns: {
-        // userId: [FilterOperator.EQ, FilterOperator.IN],
+        isFlagged: [FilterOperator.EQ],
       },
     };
 

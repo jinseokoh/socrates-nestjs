@@ -61,24 +61,6 @@ export class Comment {
   })
   inquiry: Inquiry;
 
-  //**--------------------------------------------------------------------------*/
-  //** one to many (self recursive relations)
-  // data structure ref)
-  // https://stackoverflow.com/questions/67385016/getting-data-in-self-referencing-relation-with-typeorm
-
-  @Exclude()
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  parentId: number | null;
-
-  @OneToMany(() => Comment, (comment) => comment.parent)
-  children: Comment[];
-
-  @ManyToOne(() => Comment, (comment) => comment.children, {
-    onDelete: 'SET NULL',
-  })
-  @JoinColumn({ name: 'parentId' })
-  parent: Comment;
-
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
