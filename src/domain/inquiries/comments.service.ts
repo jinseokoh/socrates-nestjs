@@ -19,12 +19,12 @@ import { UpdateCommentDto } from 'src/domain/inquiries/dto/update-comment.dto';
 @Injectable()
 export class CommentsService {
   constructor(
-    // @Inject(SlackService) private readonly slack: SlackService,
-    @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     @InjectRepository(Comment)
     private readonly repository: Repository<Comment>,
     @InjectRepository(Inquiry)
     private readonly inquiryRepository: Repository<Inquiry>,
+    // @Inject(SlackService) private readonly slack: SlackService,
+    @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -32,6 +32,7 @@ export class CommentsService {
   //?-------------------------------------------------------------------------//
 
   async create(dto: CreateCommentDto): Promise<Comment> {
+    // validation
     try {
       const inquiry = await this.inquiryRepository.findOneOrFail({
         where: {
@@ -41,11 +42,12 @@ export class CommentsService {
     } catch (e) {
       throw new NotFoundException('entity not found');
     }
+    // creation
     const comment = await this.repository.save(this.repository.create(dto));
+    // fetch comment w/ user to emit SSE
     const commentWithUser = await this.findById(comment.id, ['user']);
-
     console.log('commentWithUser', commentWithUser);
-
+    // emit SSE
     this.redisClient.emit('sse.comments', {
       key: 'sse.create',
       value: commentWithUser,
@@ -56,7 +58,6 @@ export class CommentsService {
     //   channel: 'major',
     //   text: `[${process.env.NODE_ENV}-api] 📝 댓글 : <${process.env.ADMIN_URL}/inquirys/show/${inquiry.id}|${inquiryTitle}>`,
     // });
-
     return commentWithUser;
   }
 

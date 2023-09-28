@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -7,6 +8,7 @@ import {
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
+import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { SignedUrl } from 'src/common/types';
 import { CreateThreadDto } from 'src/domain/meetups/dto/create-thread.dto';
 import { UpdateThreadDto } from 'src/domain/meetups/dto/update-thread.dto';
@@ -19,6 +21,7 @@ export class ThreadsService {
   constructor(
     @InjectRepository(Thread)
     private readonly repository: Repository<Thread>,
+    @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     private readonly s3Service: S3Service,
   ) {}
 
@@ -27,8 +30,19 @@ export class ThreadsService {
   //?-------------------------------------------------------------------------//
 
   async create(dto: CreateThreadDto): Promise<Thread> {
-    const thread = this.repository.create(dto);
-    return await this.repository.save(thread);
+    // creation
+    const thread = await this.repository.save(this.repository.create(dto));
+    // fetch thread w/ user to emit SSE
+    const threadWithUser = await this.findById(thread.id, ['user']);
+    console.log('threadWithUser', threadWithUser);
+    // emit SSE
+    this.redisClient.emit('sse.threads', {
+      key: 'sse.create',
+      value: threadWithUser,
+    });
+
+    // notify slack
+    return threadWithUser;
   }
 
   //?-------------------------------------------------------------------------//
