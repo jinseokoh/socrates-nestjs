@@ -76,7 +76,7 @@ export class Thread {
   // data structure ref)
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
-  @Exclude()
+  // @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
   parentId: number | null;
 
