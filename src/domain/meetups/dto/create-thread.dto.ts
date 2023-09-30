@@ -16,6 +16,11 @@ export class CreateThreadDto {
   @IsOptional()
   meetupId: number | null;
 
+  // @ApiProperty({ description: 'thread 아이디' })
+  // @IsNumber()
+  // @IsOptional()
+  // threadId: number | null;
+
   @ApiProperty({ description: '상위 댓글 아이디', required: false })
   @IsNumber()
   @IsOptional()
