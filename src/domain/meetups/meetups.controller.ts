@@ -76,6 +76,7 @@ export class MeetupsController {
       'careers',
       'categories',
       'threads',
+      'threads.user',
       'usersLiked',
       'usersLiked.user',
       'usersLiked.user.profile',
