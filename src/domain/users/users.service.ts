@@ -99,34 +99,44 @@ export class UsersService {
     return this.update(user.id, { username });
   }
 
-  async createImpression(id: number, dto: CreateImpressionDto): Promise<any> {
+  async createImpression(dto: CreateImpressionDto): Promise<number[]> {
+    const id = dto.userId;
     try {
-      const data = await this.repository.manager.query(
-        'INSERT IGNORE INTO `impression` (appearance, knowledge, confidence, humor, manner, note, posterId, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      await this.repository.manager.query(
+        'INSERT IGNORE INTO `impression` \
+  (appearance, knowledge, confidence, humor, manner, posterId, userId) VALUES (?, ?, ?, ?, ?, ?, ?) \
+  ON DUPLICATE KEY UPDATE \
+  appearance = VALUES(`appearance`), \
+  knowledge = VALUES(`knowledge`), \
+  confidence = VALUES(`confidence`), \
+  humor = VALUES(`humor`), \
+  manner = VALUES(`manner`), \
+  posterId = VALUES(`posterId`), \
+  userId = VALUES(`userId`)',
         [
           dto.appearance,
           dto.knowledge,
           dto.confidence,
           dto.humor,
           dto.manner,
-          dto.note,
-          dto.posterId,
-          id, // userId
+          dto.posterId, // 평가하는 사용자
+          dto.userId, // 평가받는 사용자
         ],
       );
 
       const user = await this.findById(id, ['impressions']);
       if (user.impressions && user.impressions.length > 1) {
-        const impressions = await this.findUserImpressionsById(id);
-
-        console.log(`impressions`, impressions);
+        const impressions = await this.getImpressionAverageById(id);
         const dto = new UpdateProfileDto();
         dto.impressions = impressions;
-        console.log(`dto`, dto);
         await this.updateProfile(id, dto);
+        return impressions;
+      } else {
+        return [];
       }
     } catch (e) {
       console.log(e);
+      throw new BadRequestException();
     }
   }
 
@@ -203,7 +213,7 @@ export class UsersService {
   }
 
   // User 상세보기 (w/ id)
-  async findUserImpressionsById(id: number): Promise<number[]> {
+  async getImpressionAverageById(id: number): Promise<number[]> {
     try {
       const [row] = await this.repository.manager.query(
         'SELECT \
@@ -218,11 +228,11 @@ GROUP BY userId HAVING userId = ?',
       );
 
       const data = [
-        parseFloat(row['appearance']),
-        parseFloat(row['knowledge']),
-        parseFloat(row['confidence']),
-        parseFloat(row['humor']),
-        parseFloat(row['manner']),
+        +parseFloat(row['appearance']).toFixed(2),
+        +parseFloat(row['knowledge']).toFixed(2),
+        +parseFloat(row['confidence']).toFixed(2),
+        +parseFloat(row['humor']).toFixed(2),
+        +parseFloat(row['manner']).toFixed(2),
       ];
 
       console.log(data);
@@ -676,7 +686,12 @@ GROUP BY userId HAVING userId = ?',
     });
     if (category !== null) {
       await this.repository.manager.query(
-        'INSERT IGNORE INTO `interest` (userId, categoryId, skill) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(`userId`), categoryId = VALUES(`categoryId`), skill = VALUES(`skill`)',
+        'INSERT IGNORE INTO `interest` \
+  (userId, categoryId, skill) VALUES (?, ?, ?) \
+  ON DUPLICATE KEY UPDATE \
+  userId = VALUES(`userId`), \
+  categoryId = VALUES(`categoryId`), \
+  skill = VALUES(`skill`)',
         [id, category.id, skill],
       );
     }

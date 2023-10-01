@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
+import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { AnyData } from 'src/common/types';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
 import { UsersService } from 'src/domain/users/users.service';
@@ -25,16 +26,22 @@ export class UserImpressionsController {
   //? Create
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '나의 관심사 리스트에 추가' })
+  @ApiOperation({ description: '첫인상 평가 데이터 추가' })
   @Post(':userId/impressions')
   async create(
+    @CurrentUserId() posterId: number,
     @Param('userId') userId: number,
     @Body() dto: CreateImpressionDto,
   ): Promise<AnyData> {
     try {
-      const data = await this.usersService.createImpression(userId, dto);
+      const res = await this.usersService.createImpression({
+        ...dto,
+        posterId,
+        userId,
+      });
+
       return {
-        data: data,
+        data: res,
       };
     } catch (e) {
       throw new BadRequestException();
@@ -45,11 +52,11 @@ export class UserImpressionsController {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '나의 관심사 리스트' })
+  @ApiOperation({ description: '첫인상 평가 데이터' })
   @Get(':userId/impressions')
   async getUserImpressionsById(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
-    return await this.usersService.findUserImpressionsById(userId);
+    return await this.usersService.getImpressionAverageById(userId);
   }
 }
