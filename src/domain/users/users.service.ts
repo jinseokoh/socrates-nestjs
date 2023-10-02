@@ -51,7 +51,7 @@ import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
-import { nameUserRandomly } from 'src/helpers/random-username';
+import { initialUsername } from 'src/helpers/random-username';
 import { SesService } from 'src/services/aws/ses.service';
 @Injectable()
 export class UsersService {
@@ -95,7 +95,7 @@ export class UsersService {
     if (user.username) {
       return user;
     }
-    const username = nameUserRandomly(user.id);
+    const username = initialUsername(user.id);
     return this.update(user.id, { username });
   }
 
@@ -243,6 +243,10 @@ GROUP BY userId HAVING userId = ?',
     }
   }
 
+  getInitialUsername(id: number): string {
+    return initialUsername(id);
+  }
+
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//
@@ -284,7 +288,7 @@ GROUP BY userId HAVING userId = ?',
 
   // User 닉네임 갱신
   async changeUsername(id: number, dto: ChangeUsernameDto): Promise<User> {
-    const assignedUsername = nameUserRandomly(id);
+    const assignedUsername = initialUsername(id);
     const user = await this.findById(id);
     if (assignedUsername != user.username) {
       throw new ForbiddenException('already updated username');

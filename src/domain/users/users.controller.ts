@@ -44,7 +44,7 @@ import { AvatarInterceptor } from './interceptors/avatar-interceptor';
 import { SmsMessageDto } from 'src/domain/users/dto/sms-message.dto';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SkipThrottle } from '@nestjs/throttler';
-import { SignedUrl } from 'src/common/types';
+import { SignedUrl, AnyData } from 'src/common/types';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -101,6 +101,14 @@ export class UsersController {
       'categoriesInterested',
       'categoriesInterested.category',
     ]);
+  }
+
+  @ApiOperation({ description: 'initial username' })
+  @Get(':id/username')
+  getInitialUsername(@Param('id', ParseIntPipe) id: number): AnyData {
+    return {
+      data: this.usersService.getInitialUsername(id),
+    };
   }
 
   @ApiOperation({ description: '신한사주 올해의 운세' })

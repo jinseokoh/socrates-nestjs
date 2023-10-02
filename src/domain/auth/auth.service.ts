@@ -17,7 +17,7 @@ import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { User } from 'src/domain/users/entities/user.entity';
 import { ProvidersService } from 'src/domain/users/providers.service';
 import { UsersService } from 'src/domain/users/users.service';
-import { nameUserRandomly } from 'src/helpers/random-username';
+import { initialUsername } from 'src/helpers/random-username';
 import { SecretsService } from 'src/domain/secrets/secrets.service';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { Response as ExpressResponse } from 'express';
@@ -90,7 +90,7 @@ export class AuthService {
     const refreshTokenHash = tokens.refreshToken
       ? await bcrypt.hash(tokens.refreshToken, 10)
       : null;
-    const username = nameUserRandomly(user.id);
+    const username = initialUsername(user.id);
 
     await this.usersService.update(user.id, {
       username,
@@ -164,7 +164,7 @@ export class AuthService {
     const refreshTokenHash = tokens.refreshToken
       ? await bcrypt.hash(tokens.refreshToken, 10)
       : null;
-    const username = nameUserRandomly(user.id);
+    const username = initialUsername(user.id);
 
     await this.usersService.update(user.id, {
       username,
