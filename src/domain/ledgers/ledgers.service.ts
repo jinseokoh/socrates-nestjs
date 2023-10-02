@@ -36,6 +36,30 @@ export class LedgersService {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
+  // 차변 Ledger 생성
+  async debit(dto: CreateLedgerDto): Promise<Ledger> {
+    // const user = await this.userRepository.findOne({
+    //   where: { id: dto.userId },
+    // });
+    // if (!user || user?.isBanned) {
+    //   throw new BadRequestException(`not allowed to create`);
+    // }
+    console.log(dto);
+    return await this.repository.save(this.repository.create(dto));
+  }
+
+  // 대변 Ledger 생성
+  async credit(dto: CreateLedgerDto): Promise<Ledger> {
+    // const user = await this.userRepository.findOne({
+    //   where: { id: dto.userId },
+    // });
+    // if (!user || user?.isBanned) {
+    //   throw new BadRequestException(`not allowed to create`);
+    // }
+
+    return await this.repository.save(this.repository.create(dto));
+  }
+
   // Ledger 생성
   async create(dto: CreateLedgerDto): Promise<Ledger> {
     // const user = await this.userRepository.findOne({
@@ -117,5 +141,4 @@ export class LedgersService {
     const Ledger = await this.findById(id);
     return await this.repository.remove(Ledger);
   }
-
 }

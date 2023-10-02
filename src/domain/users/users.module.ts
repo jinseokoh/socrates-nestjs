@@ -21,6 +21,7 @@ import { SesModule } from 'src/services/aws/ses.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { UserUsersController } from 'src/domain/users/user-users.controller';
 import { UserImpressionsController } from 'src/domain/users/user-impressions.controller';
+import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 
 @Module({
   imports: [
@@ -44,7 +45,7 @@ import { UserImpressionsController } from 'src/domain/users/user-impressions.con
     FcmModule,
   ],
   exports: [UsersService],
-  providers: [UsersService],
+  providers: [UsersService, UserSubscriber],
   controllers: [
     UsersController,
     UserCategoriesController,

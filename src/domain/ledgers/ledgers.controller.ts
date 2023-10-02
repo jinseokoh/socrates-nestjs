@@ -39,8 +39,11 @@ export class LedgersController {
 
     const userId = dto.userId ? dto.userId : id;
     const createLedgerDto = { ...dto, userId };
-
-    return await this.ledgersService.create(createLedgerDto);
+    if (dto.debit) {
+      return await this.ledgersService.debit(createLedgerDto);
+    } else {
+      return await this.ledgersService.credit(createLedgerDto);
+    }
   }
 
   //?-------------------------------------------------------------------------//

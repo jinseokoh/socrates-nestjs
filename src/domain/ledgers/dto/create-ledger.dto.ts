@@ -1,35 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
-  IsArray,
-  IsBoolean,
   IsDate,
   IsEnum,
   IsNumber,
   IsOptional,
   IsString,
-  ValidateNested,
 } from 'class-validator';
 import { Ledger as LedgerType } from 'src/common/enums';
-import { Day } from 'src/common/enums/day';
-import { Expense } from 'src/common/enums/expense';
-import { Gender } from 'src/common/enums/gender';
-import { Time } from 'src/common/enums/time';
-import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
 export class CreateLedgerDto {
-  @ApiProperty({ description: '기술/레벨', required: true })
+  @ApiProperty({ description: '증가', required: true })
   @Type(() => Number)
+  @IsOptional()
   @IsNumber()
   debit: number;
 
-  @ApiProperty({ description: '기술/레벨', required: true })
+  @ApiProperty({ description: '감소', required: true })
   @Type(() => Number)
+  @IsOptional()
   @IsNumber()
   credit: number;
 
-  @ApiProperty({ description: '기술/레벨', required: true })
+  @ApiProperty({ description: '잔고', required: true })
   @Type(() => Number)
   @IsNumber()
+  @IsOptional()
   balance: number;
 
   @ApiProperty({ description: 'ledger type', default: LedgerType.CREDIT_SPEND })

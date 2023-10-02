@@ -91,12 +91,7 @@ export class UsersService {
 
   // [관리자] User 생성
   async create(dto: CreateUserDto): Promise<User> {
-    const user = await this.repository.save(this.repository.create(dto));
-    if (user.username) {
-      return user;
-    }
-    const username = initialUsername(user.id);
-    return this.update(user.id, { username });
+    return await this.repository.save(this.repository.create(dto));
   }
 
   async createImpression(dto: CreateImpressionDto): Promise<number[]> {

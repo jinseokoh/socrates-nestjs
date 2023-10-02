@@ -20,9 +20,8 @@ import { UsersService } from 'src/domain/users/users.service';
 import { initialUsername } from 'src/helpers/random-username';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { Response as ExpressResponse } from 'express';
-import { LedgersService } from 'src/domain/ledgers/ledgers.service';
 import { CreateLedgerDto } from 'src/domain/ledgers/dto/create-ledger.dto';
-import { Ledger as LedgerType } from 'src/common/enums';
+
 //import { SesService } from 'src/services/aws/ses.service';
 
 const ONE_HOUR = 1000 * 60 * 60; // access token and cookie expiry window
@@ -34,7 +33,6 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly providersService: ProvidersService,
-    private readonly ledgersService: LedgersService,
     private readonly jwtService: JwtService,
 
     // @Inject(AWS_SES_CONNECTION) private readonly ses: SesService,
@@ -162,14 +160,7 @@ export class AuthService {
       : null;
     createUserDto.isActive = true;
     const user = await this.usersService.create(createUserDto);
-
-    const createLedgerDto = new CreateLedgerDto();
-    createLedgerDto.debit = 10;
-    createLedgerDto.balance = 10;
-    createLedgerDto.ledgerType = LedgerType.DEBIT_REWARD;
-    createLedgerDto.note = '10 coins granted';
-    const ledger = await this.ledgersService.create(createLedgerDto);
-
+    console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~ user created');
     await this.providersService.create({ ...dto, userId: user.id });
     const tokens = await this._getTokens(user);
     const refreshTokenHash = tokens.refreshToken
