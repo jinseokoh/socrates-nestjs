@@ -16,6 +16,10 @@ export class Profile {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: '현재보유액' })
+  balance: number;
+
   @Column({ length: 255, nullable: true })
   bio: string | null;
 

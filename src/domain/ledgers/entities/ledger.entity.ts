@@ -25,7 +25,7 @@ export class Ledger {
   @ApiProperty({ description: '코인감소' })
   credit: number;
 
-  @Column({ type: 'int', unsigned: true })
+  @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: '현재보유액' })
   balance: number;
 
