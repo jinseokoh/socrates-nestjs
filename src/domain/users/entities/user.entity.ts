@@ -26,6 +26,7 @@ import {
 import { Impression } from 'src/domain/users/entities/impression.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
+import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -118,6 +119,11 @@ export class User {
 
   //*-------------------------------------------------------------------------*/
   //* 1-to-many hasMany
+
+  @OneToMany(() => Ledger, (ledger) => ledger.user, {
+    // cascade: ['insert', 'update'],
+  })
+  ledgers: Ledger[];
 
   @OneToMany(() => Report, (report) => report.user, {
     // cascade: ['insert', 'update'],

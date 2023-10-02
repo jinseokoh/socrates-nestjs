@@ -286,7 +286,8 @@ GROUP BY userId HAVING userId = ?',
     return await this.repository.save(user);
   }
 
-  // User 닉네임 갱신
+  //? User 닉네임 갱신
+  //? 코인 비용이 발생할 수 있음.
   async changeUsername(id: number, dto: ChangeUsernameDto): Promise<User> {
     const assignedUsername = initialUsername(id);
     const user = await this.findById(id);

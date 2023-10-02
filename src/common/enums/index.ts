@@ -7,6 +7,7 @@ export * from './day';
 export * from './expense';
 export * from './gender';
 export * from './interest';
+export * from './ledger';
 export * from './message-type';
 export * from './personality';
 export * from './rate';

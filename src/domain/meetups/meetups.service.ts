@@ -131,9 +131,9 @@ export class MeetupsService {
         user: { profile: true },
         careers: true, // needed for filtering
       },
-      sortableColumns: ['createdAt'],
+      sortableColumns: ['id'],
       searchableColumns: ['title'],
-      defaultSortBy: [['createdAt', 'DESC']],
+      defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         id: [FilterOperator.EQ, FilterOperator.IN],
         region: [FilterOperator.EQ, FilterOperator.IN],
