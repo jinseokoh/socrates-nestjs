@@ -37,17 +37,15 @@ export class LedgersService {
   //?-------------------------------------------------------------------------//
 
   // Ledger 생성
-  async create(dto: CreateLedgerDto): Promise<any> {
-    const user = await this.userRepository.findOne({
-      where: { id: dto.userId },
-    });
-    if (!user || user?.isBanned) {
-      throw new BadRequestException(`not allowed to create`);
-    }
+  async create(dto: CreateLedgerDto): Promise<Ledger> {
+    // const user = await this.userRepository.findOne({
+    //   where: { id: dto.userId },
+    // });
+    // if (!user || user?.isBanned) {
+    //   throw new BadRequestException(`not allowed to create`);
+    // }
 
-    const ledger = await this.repository.save(this.repository.create(dto));
-
-    return ledger;
+    return await this.repository.save(this.repository.create(dto));
   }
 
   //?-------------------------------------------------------------------------//

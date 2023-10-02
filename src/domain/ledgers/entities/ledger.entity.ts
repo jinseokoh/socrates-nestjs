@@ -5,7 +5,6 @@ import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -17,11 +16,11 @@ export class Ledger {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
-  @Column({ type: 'int', unsigned: true })
+  @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: '코인증가' })
   debit: number;
 
-  @Column({ type: 'int', unsigned: true })
+  @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: '코인감소' })
   credit: number;
 

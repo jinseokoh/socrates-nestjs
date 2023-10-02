@@ -6,7 +6,7 @@ import { LedgersController } from 'src/domain/ledgers/ledgers.controller';
 import { LedgersService } from 'src/domain/ledgers/ledgers.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Ledger, User])],
-  // exports: [LedgersService], // we need this for what?
+  exports: [LedgersService], // it's required when using LedgersService within other services
   providers: [LedgersService],
   controllers: [LedgersController],
 })
