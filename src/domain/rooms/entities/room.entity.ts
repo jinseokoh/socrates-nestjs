@@ -25,14 +25,13 @@ export class Room {
   @ApiProperty({ description: 'is Flagged?' })
   isFlagged: boolean;
 
+  @Column({ default: false })
+  @ApiProperty({ description: 'is Flagged?' })
+  isPaid: boolean;
+
   @Column({ length: 128, nullable: true })
   @ApiProperty({ description: 'message' })
   note: string | null;
-
-  @Column('json', { nullable: true })
-  @ApiProperty({ description: '결제 상태' })
-  @IsArray()
-  charges: number[] | null;
 
   @Column({ type: 'datetime', nullable: true })
   @ApiProperty({ description: 'appointment' })
