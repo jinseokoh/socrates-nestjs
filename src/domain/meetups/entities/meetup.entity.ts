@@ -11,10 +11,6 @@ import {
   Category as CategoryEnum,
   SubCategory,
 } from 'src/common/enums';
-import { Join } from 'src/domain/meetups/entities/join.entity';
-import { User } from 'src/domain/users/entities/user.entity';
-import { Category } from 'src/domain/categories/entities/category.entity';
-import { Venue } from 'src/domain/venues/entities/venue.entity';
 import {
   Column,
   CreateDateColumn,
@@ -29,11 +25,15 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Join } from 'src/domain/meetups/entities/join.entity';
+import { User } from 'src/domain/users/entities/user.entity';
+import { Category } from 'src/domain/categories/entities/category.entity';
+import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
-import { Room } from 'src/domain/meetups/entities/room.entity';
+import { Room } from 'src/domain/rooms/entities/room.entity';
 
 @Entity()
 export class Meetup {

@@ -1,18 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { Role } from 'src/common/enums';
-import { Career } from 'src/common/enums/career';
-import { Gender } from 'src/common/enums/gender';
-import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
-import { Like } from 'src/domain/meetups/entities/like.entity';
-import { Hate } from 'src/domain/users/entities/hate.entity';
-import { Join } from 'src/domain/meetups/entities/join.entity';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Comment } from 'src/domain/inquiries/entities/comment.entity';
-import { Report } from 'src/domain/reports/entities/report.entity';
-import { Profile } from 'src/domain/users/entities/profile.entity';
-import { Provider } from 'src/domain/users/entities/provider.entity';
-import { Interest } from 'src/domain/users/entities/interest.entity';
+import { Gender, Role, Career } from 'src/common/enums';
 import {
   Column,
   CreateDateColumn,
@@ -23,11 +11,21 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
+import { Like } from 'src/domain/meetups/entities/like.entity';
+import { Hate } from 'src/domain/users/entities/hate.entity';
+import { Join } from 'src/domain/meetups/entities/join.entity';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { Comment } from 'src/domain/inquiries/entities/comment.entity';
+import { Report } from 'src/domain/reports/entities/report.entity';
+import { Profile } from 'src/domain/users/entities/profile.entity';
+import { Provider } from 'src/domain/users/entities/provider.entity';
+import { Interest } from 'src/domain/users/entities/interest.entity';
 import { Impression } from 'src/domain/users/entities/impression.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
-import { Room } from 'src/domain/meetups/entities/room.entity';
+import { Room } from 'src/domain/rooms/entities/room.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })

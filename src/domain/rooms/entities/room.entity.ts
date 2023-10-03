@@ -8,6 +8,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
@@ -33,10 +34,11 @@ export class Room {
   @IsArray()
   charges: number[] | null;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'datetime', nullable: true })
   @ApiProperty({ description: 'appointment' })
   appointedAt: Date | null;
 
+  @Index('created-at-index')
   @CreateDateColumn()
   createdAt: Date;
 
