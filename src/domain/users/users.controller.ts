@@ -157,21 +157,24 @@ export class UsersController {
     return await this.usersService.update(userId, dto);
   }
 
-  // A dedicated endpoin to update password only.
+  // A dedicated endpoint to update username.
   @ApiOperation({ description: 'User 닉네임 갱신' })
   @Patch(':userId/username')
   async changeUsername(
     @CurrentUserId() id: number,
     @Param('userId') userId: number,
     @Body(ValidateUsernamePipe) dto: ChangeUsernameDto,
-  ): Promise<User> {
+  ): Promise<AnyData> {
     if (id !== userId) {
       throw new BadRequestException(`doh! mind your id`);
     }
-    return await this.usersService.changeUsername(userId, dto);
+    const balance = await this.usersService.changeUsername(userId, dto);
+    return {
+      data: balance,
+    };
   }
 
-  // A dedicated endpoin to update password only.
+  // A dedicated endpoint to update password.
   @ApiOperation({ description: 'User 비밀번호 갱신' })
   @Patch(':userId/password')
   async changePassword(

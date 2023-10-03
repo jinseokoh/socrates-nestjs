@@ -287,8 +287,9 @@ GROUP BY userId HAVING userId = ?',
 
   //? User 닉네임 갱신
   //? 코인 비용이 발생할 수 있음.
-  async changeUsername(id: number, dto: ChangeUsernameDto): Promise<User> {
+  async changeUsername(id: number, dto: ChangeUsernameDto): Promise<number> {
     const user = await this.findById(id, ['profile']);
+    const balance = user.profile.balance - dto.costToUpdate;
     console.log(dto);
     if (dto.costToUpdate > 0) {
       if (user.profile.balance < 1) {
@@ -296,14 +297,15 @@ GROUP BY userId HAVING userId = ?',
       }
       const createLedgerDto = new CreateLedgerDto();
       createLedgerDto.credit = dto.costToUpdate;
-      createLedgerDto.balance = user.profile.balance - dto.costToUpdate;
+      createLedgerDto.balance = balance;
       createLedgerDto.ledgerType = LedgerType.CREDIT_SPEND;
       createLedgerDto.note = LedgerType.CREDIT_SPEND;
       createLedgerDto.userId = id;
       this.ledgersService.credit(createLedgerDto);
     }
     user.username = dto.username;
-    return await this.repository.save(user);
+    await this.repository.save(user);
+    return balance;
   }
 
   // User 비밀번호 갱신
