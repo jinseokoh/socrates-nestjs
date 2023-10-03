@@ -15,7 +15,7 @@ import { CategoriesModule } from 'src/domain/categories/categories.module';
 import { ContentsModule } from 'src/domain/contents/contents.module';
 import { MessagesModule } from 'src/domain/chats/messages.module';
 import { MeetupsModule } from 'src/domain/meetups/meetups.module';
-import { RoomsModule } from 'src/domain/rooms/rooms.module';
+// import { RoomsModule } from 'src/domain/rooms/rooms.module';
 import { UsersModule } from 'src/domain/users/users.module';
 import { NaverModule } from 'src/services/naver/naver.module';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -90,7 +90,6 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
     }),
     NaverModule,
     AuthModule,
-    RoomsModule,
     CategoriesModule,
     CareersModule,
     ContentsModule,

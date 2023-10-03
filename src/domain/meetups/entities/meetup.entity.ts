@@ -33,6 +33,7 @@ import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
+import { Room } from 'src/domain/meetups/entities/room.entity';
 
 @Entity()
 export class Meetup {
@@ -196,6 +197,9 @@ export class Meetup {
 
   @OneToMany(() => Thread, (thread) => thread.meetup)
   public threads: Thread[];
+
+  @OneToMany(() => Room, (room) => room.meetup)
+  public rooms: Room[];
 
   @OneToMany(() => Join, (join) => join.meetup)
   public joins: Join[];

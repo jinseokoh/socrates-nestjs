@@ -27,6 +27,7 @@ import { Impression } from 'src/domain/users/entities/impression.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
+import { Room } from 'src/domain/meetups/entities/room.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -160,6 +161,9 @@ export class User {
 
   @OneToMany(() => Impression, (impression) => impression.user)
   public impressions: Impression[];
+
+  @OneToMany(() => Room, (room) => room.user)
+  public rooms: Room[];
 
   @OneToMany(() => Join, (join) => join.askingUser)
   public askingJoins: Join[];
