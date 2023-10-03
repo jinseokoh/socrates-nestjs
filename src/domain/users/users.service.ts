@@ -53,7 +53,10 @@ import { Interest } from 'src/domain/users/entities/interest.entity';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
 import { initialUsername } from 'src/helpers/random-username';
 import { SesService } from 'src/services/aws/ses.service';
-@Injectable()
+import { CreateLedgerDto } from 'src/domain/ledgers/dto/create-ledger.dto';
+import { Ledger as LedgerType } from 'src/common/enums';
+import { LedgersService } from 'src/domain/ledgers/ledgers.service';
+
 export class UsersService {
   private readonly env: any;
   private readonly logger = new Logger(UsersService.name);
@@ -78,6 +81,7 @@ export class UsersService {
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     @Inject(SmsClient) private readonly smsClient: SmsClient, // naver
+    private readonly ledgersService: LedgersService,
     private readonly sesService: SesService,
     private readonly s3Service: S3Service,
     private readonly crawlerService: CrawlerService,
@@ -284,10 +288,19 @@ GROUP BY userId HAVING userId = ?',
   //? User 닉네임 갱신
   //? 코인 비용이 발생할 수 있음.
   async changeUsername(id: number, dto: ChangeUsernameDto): Promise<User> {
-    const assignedUsername = initialUsername(id);
-    const user = await this.findById(id);
-    if (assignedUsername != user.username) {
-      throw new ForbiddenException('already updated username');
+    const user = await this.findById(id, ['profile']);
+    console.log(dto);
+    if (dto.costToUpdate > 0) {
+      if (user.profile.balance < 1) {
+        throw new NotAcceptableException(`not enough coin`); //? 406
+      }
+      const createLedgerDto = new CreateLedgerDto();
+      createLedgerDto.credit = dto.costToUpdate;
+      createLedgerDto.balance = user.profile.balance - dto.costToUpdate;
+      createLedgerDto.ledgerType = LedgerType.CREDIT_SPEND;
+      createLedgerDto.note = LedgerType.CREDIT_SPEND;
+      createLedgerDto.userId = id;
+      this.ledgersService.credit(createLedgerDto);
     }
     user.username = dto.username;
     return await this.repository.save(user);

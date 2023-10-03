@@ -22,6 +22,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { UserUsersController } from 'src/domain/users/user-users.controller';
 import { UserImpressionsController } from 'src/domain/users/user-impressions.controller';
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
+import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
       ttl: 60,
       limit: 2,
     }),
+    LedgersModule,
     SesModule,
     S3Module,
     CrawlerModule,
