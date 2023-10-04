@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
+import { PartyType } from 'src/common/enums';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -20,6 +21,10 @@ export class Room {
   @Column({ type: 'tinyint', unsigned: true, default: 2 })
   @ApiProperty({ description: '# of maximum participants' })
   max: number;
+
+  @Column({ type: 'enum', enum: PartyType, default: PartyType.HOST })
+  @ApiProperty({ description: 'host or guest' })
+  partyType: PartyType;
 
   @Column({ default: false })
   @ApiProperty({ description: 'is Flagged?' })
