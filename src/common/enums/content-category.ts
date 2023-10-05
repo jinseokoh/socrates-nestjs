@@ -1,6 +1,8 @@
 export enum ContentCategory {
-  EVENT = 'event',
+  ANNOUNCEMENTS = 'announcements',
+  CAMPAIGNS = 'campaigns',
+  EVENTS = 'events',
+  FAQS = 'faqs',
   NEWS = 'news',
-  FAQ = 'faqs',
   OTHER = 'other',
 }

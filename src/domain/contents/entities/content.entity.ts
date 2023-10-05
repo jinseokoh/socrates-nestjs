@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ContentCategory } from 'src/common/enums';
-import { ContentSubCategory } from 'src/common/enums';
 import {
   Column,
   CreateDateColumn,
@@ -28,23 +27,19 @@ export class Content {
   @Column({
     type: 'enum',
     enum: ContentCategory,
-    default: ContentCategory.NEWS,
+    default: ContentCategory.ANNOUNCEMENTS,
   })
   category: ContentCategory;
 
-  @Column({
-    type: 'enum',
-    enum: ContentSubCategory,
-    default: ContentSubCategory.CAMPAIGN,
+  @Column({ default: false })
+  @ApiProperty({
+    description: "whether or not it's going to be on the home banner",
   })
-  subCategory: ContentSubCategory;
+  isPublished: boolean;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'view count' })
   viewCount: number;
-
-  @Column({ default: true })
-  isPublished: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -42,6 +42,7 @@ export class ContentsService {
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         id: [FilterOperator.IN, FilterOperator.EQ],
+        slug: [FilterOperator.EQ],
         category: [FilterOperator.EQ],
         isPublished: [FilterOperator.EQ],
       },
