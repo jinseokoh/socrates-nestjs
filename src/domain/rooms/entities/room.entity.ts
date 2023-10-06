@@ -18,29 +18,25 @@ import {
 
 @Entity()
 export class Room {
-  @Column({ type: 'tinyint', unsigned: true, default: 2 })
-  @ApiProperty({ description: '# of maximum participants' })
-  max: number;
+  @Column({ type: 'uuid', length: 36, nullable: true })
+  @ApiProperty({ description: 'UUID v4 for lastReadMessageId' })
+  lastReadMessageId: string | null;
 
   @Column({ type: 'enum', enum: PartyType, default: PartyType.HOST })
   @ApiProperty({ description: 'host or guest' })
   partyType: PartyType;
 
   @Column({ default: false })
-  @ApiProperty({ description: 'is Flagged?' })
-  isFlagged: boolean;
+  @ApiProperty({ description: 'is Paid?' })
+  isPaid: boolean;
 
   @Column({ default: false })
-  @ApiProperty({ description: 'is Flagged?' })
-  isPaid: boolean;
+  @ApiProperty({ description: 'is Excluded?' })
+  isExcluded: boolean;
 
   @Column({ length: 128, nullable: true })
   @ApiProperty({ description: 'message' })
   note: string | null;
-
-  @Column({ type: 'datetime', nullable: true })
-  @ApiProperty({ description: 'appointment' })
-  appointedAt: Date | null;
 
   @Index('created-at-index')
   @CreateDateColumn()
@@ -48,9 +44,6 @@ export class Room {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @DeleteDateColumn()
-  deletedAt: Date | null;
 
   //@Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })

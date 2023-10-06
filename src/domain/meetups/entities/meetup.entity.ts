@@ -157,9 +157,13 @@ export class Meetup {
   @ApiProperty({ description: 'is flagged' })
   isFlagged: boolean;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'datetime', nullable: true })
   @ApiProperty({ description: 'expiration' })
   expiredAt: Date;
+
+  @Column({ type: 'datetime', nullable: true })
+  @ApiProperty({ description: 'appointment' })
+  appointedAt: Date | null;
 
   @Index('created-at-index')
   @CreateDateColumn()
