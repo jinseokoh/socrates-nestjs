@@ -3,7 +3,7 @@ import { DynamooseModule } from 'nestjs-dynamoose';
 import { MessagesController } from 'src/domain/chats/messages.controller';
 import { MessagesGateway } from 'src/domain/chats/messages.gateway';
 import { MessagesService } from 'src/domain/chats/messages.service';
-import { MessageSchema } from 'src/domain/chats/schemas/message.schema';
+import { MessageSchema } from 'src/domain/chats/entities/message.schema';
 
 @Module({
   imports: [
@@ -11,6 +11,9 @@ import { MessageSchema } from 'src/domain/chats/schemas/message.schema';
       {
         name: 'Message',
         schema: MessageSchema,
+        options: {
+          tableName: 'message',
+        },
       },
     ]),
   ],

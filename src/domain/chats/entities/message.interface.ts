@@ -1,23 +1,14 @@
-export interface IUser {
-  id: string;
-  username: string;
-  avatar: string;
-}
-
-// to query only
-export interface IMessageParams {
-  room: string;
-  msid: string | null;
-}
+import { MessageType } from 'src/common/enums';
 
 export interface IMessageKey {
-  room: string;
-  msid: string;
+  meetupId: number; // partition key
+  id: string | null; // sort key
 }
 
 export interface IMessage extends IMessageKey {
-  user: IUser;
-  text: string;
-  type: string;
-  createdAt?: string;
+  userId: number;
+  messageType: MessageType;
+  message: string;
+  createdAt?: number;
+  updatedAt?: number;
 }

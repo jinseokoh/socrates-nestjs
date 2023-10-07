@@ -1,25 +1,38 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { MessageType } from 'src/common/enums';
-import { IAuthor } from 'src/common/interfaces';
 export class CreateMessageDto {
   @ApiProperty({ description: 'Message', required: true })
-  @IsString()
-  room: string;
+  @IsNumber()
+  meetupId: number;
 
-  @ApiProperty({ description: 'Message', required: true })
+  @ApiProperty({ description: 'msg_unix-timestamp_userId', required: true })
   @IsString()
-  text: string;
+  @IsOptional()
+  id: string;
 
   @ApiProperty({
     description: 'type',
     default: MessageType.TEXT,
   })
   @IsEnum(MessageType)
-  type: MessageType;
+  messageType: MessageType;
 
-  @ApiProperty({ description: '사용자' })
-  @IsObject()
+  @ApiProperty({ description: 'Message', required: true })
+  @IsString()
+  message: string;
+
+  @ApiProperty({ description: '사용자 id' })
+  @IsNumber()
+  userId: number;
+
+  @ApiProperty({ description: '사용자 id' })
+  @IsNumber()
   @IsOptional()
-  user: IAuthor;
+  createdAt: number;
+
+  @ApiProperty({ description: '사용자 id' })
+  @IsNumber()
+  @IsOptional()
+  updatedAt: number;
 }

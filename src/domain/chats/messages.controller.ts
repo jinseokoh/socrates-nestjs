@@ -1,10 +1,19 @@
-import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { CreateMessageDto } from 'src/domain/chats/dto/create-message.dto';
 import {
+  IMessage,
   IMessageKey,
-  IMessageParams,
 } from 'src/domain/chats/entities/message.interface';
 import { MessagesService } from 'src/domain/chats/messages.service';
 
@@ -21,34 +30,38 @@ export class MessagesController {
   async create(
     @CurrentUserId() id: string,
     @Body() createMessageDto: CreateMessageDto,
-  ): Promise<any> {
+  ): Promise<IMessage> {
     return await this.messagesService.create(createMessageDto);
   }
 
   @ApiOperation({ description: 'Message 리스트' })
-  @Get()
-  async fetch(@Query() query: IMessageParams): Promise<any> {
-    const lastKey = query.msid
+  @Get(':id')
+  async fetch(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('lastId') lastId: string | undefined,
+  ): Promise<any> {
+    const lastKey = lastId
       ? {
-          room: query.room,
-          msid: query.msid,
+          meetupId: id,
+          id: lastId,
         }
       : null;
-    const response = await this.messagesService.fetch(query.room, lastKey);
+    const res = await this.messagesService.fetch(id, lastKey);
+    console.log(`res`, res);
 
     return {
-      lastKey: response.lastKey,
-      count: response.count,
-      items: response,
+      lastKey: res.lastKey,
+      count: res.count,
+      items: res,
     };
   }
 
   @ApiOperation({ description: 'Message 삭제' })
   @Delete()
   async delete(@Body() body: IMessageKey): Promise<any> {
-    await this.messagesService.delete(body);
+    const res = await this.messagesService.delete(body);
     return {
-      data: false,
+      data: res,
     };
   }
 }

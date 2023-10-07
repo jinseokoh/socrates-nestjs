@@ -9,8 +9,9 @@ import {
 import { Server, Socket } from 'socket.io';
 import { CreateMessageDto } from 'src/domain/chats/dto/create-message.dto';
 import { MessagesService } from 'src/domain/chats/messages.service';
-import { IMessageParams } from './entities/message.interface';
+import { IMessageKey } from './entities/message.interface';
 
+//! unused at least for now.
 // reference) https://www.youtube.com/watch?v=atbdpX4CViM
 @WebSocketGateway({
   cors: {
@@ -39,10 +40,10 @@ export class MessagesGateway {
     return message;
   }
 
-  @SubscribeMessage('findAllMessages')
-  findAll(@MessageBody() params: IMessageParams) {
-    return this.messagesService.fetchWithParams(params);
-  }
+  // @SubscribeMessage('findAllMessages')
+  // findAll(@MessageBody() key: IMessageKey) {
+  //   return this.messagesService.fetch(key);
+  // }
 
   // @SubscribeMessage('join')
   // joinRoom(

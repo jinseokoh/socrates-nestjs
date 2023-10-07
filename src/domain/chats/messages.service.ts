@@ -1,14 +1,15 @@
 import { CreateMessageDto } from './dto/create-message.dto';
-// src/user/user.service.ts
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { SortOrder } from 'dynamoose/dist/General';
 import * as moment from 'moment';
 import { InjectModel, Model } from 'nestjs-dynamoose';
+import { UpdateMessageDto } from 'src/domain/chats/dto/update-message.dto';
 import {
   IMessage,
   IMessageKey,
-  IMessageParams,
 } from 'src/domain/chats/entities/message.interface';
+
+const LIMIT = 10;
 
 @Injectable()
 export class MessagesService {
@@ -17,58 +18,64 @@ export class MessagesService {
     private readonly model: Model<IMessage, IMessageKey>,
   ) {}
 
-  async create(dto: CreateMessageDto): Promise<any> {
-    const message = this.model.create({
-      ...dto,
-      msid: `${moment().valueOf()}`,
-    });
-
-    return message;
-  }
-
-  async fetch(room: string, lastKey: IMessageKey | null): Promise<any> {
+  async create(dto: CreateMessageDto): Promise<IMessage> {
     try {
-      return await this.model
-        .query('room')
-        .eq(room)
-        .sort(SortOrder.descending)
-        .startAt(lastKey)
-        .limit(10)
-        .exec();
+      return this.model.create({
+        ...dto,
+        id: `msg_${moment().valueOf()}_${dto.userId}`,
+      });
     } catch (error) {
-      console.error(error);
-      throw new InternalServerErrorException(error);
+      console.error(`[dynamodb] error`, error);
+      throw new BadRequestException(error);
     }
   }
 
-  async fetchWithParams(params: IMessageParams): Promise<any> {
+  async fetch(meetupId: number, lastKey: IMessageKey | null): Promise<any> {
     try {
-      return await this.model
-        .query('room')
-        .eq(params.room)
-        .sort(SortOrder.descending)
-        .startAt(null)
-        .limit(10)
-        .exec();
+      return lastKey
+        ? await this.model
+            .query('meetupId')
+            .eq(meetupId)
+            .sort(SortOrder.descending)
+            .startAt(lastKey)
+            .limit(LIMIT)
+            .exec()
+        : await this.model
+            .query('meetupId')
+            .eq(meetupId)
+            .sort(SortOrder.descending)
+            .limit(LIMIT)
+            .exec();
     } catch (error) {
-      console.error(error);
-      // throw new InternalServerErrorException(error);
+      console.error(`[dynamodb] error`, error);
+      throw new BadRequestException(error);
     }
   }
 
-  async delete(body: any): Promise<any> {
-    try {
-      return this.model.delete(body);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
-
-  async findById(key: IMessageKey): Promise<any> {
+  async findById(key: IMessageKey): Promise<IMessage> {
     try {
       return this.model.get(key);
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      console.error(`[dynamodb] error`, error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async update(key: IMessageKey, dto: UpdateMessageDto): Promise<IMessage> {
+    try {
+      return this.model.update(key, dto);
+    } catch (error) {
+      console.error(`[dynamodb] error`, error);
+      throw new BadRequestException(error);
+    }
+  }
+
+  async delete(key: IMessageKey): Promise<any> {
+    try {
+      return this.model.delete(key);
+    } catch (error) {
+      console.error(`[dynamodb] error`, error);
+      throw new BadRequestException(error);
     }
   }
 }

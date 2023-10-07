@@ -66,12 +66,6 @@ export interface IPackCompositeIds {
   artworkIds: number[];
 }
 
-export interface IAuthor {
-  id: string;
-  username: string;
-  avatar: string | null;
-}
-
 // export interface IFcmTokenPayload {
 //   tokens: string[];
 //   title: string;

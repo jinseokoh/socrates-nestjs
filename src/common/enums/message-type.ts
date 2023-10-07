@@ -1,7 +1,10 @@
 export enum MessageType {
-  TEXT = 'TEXT',
-  IMAGE = 'IMAGE',
-  CHATBOT = 'CHATBOT',
-  GAME = 'GAME',
-  INPUT = 'INPUT',
+  AUDIO = 'audio',
+  CUSTOM = 'custom',
+  FILE = 'file',
+  IMAGE = 'image',
+  SYSTEM = 'system',
+  TEXT = 'text',
+  UNSUPPORTED = 'unsupported',
+  VIDEO = 'video',
 }
