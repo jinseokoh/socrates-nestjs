@@ -66,6 +66,12 @@ export class MeetupsController {
     return await this.meetupsService.findAll(query);
   }
 
+  @ApiOperation({ description: 'Meetup room 정보보기' })
+  @Get(':id/rooms')
+  async fetchRoomsById(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
+    return await this.meetupsService.fetchRoomsById(id);
+  }
+
   @ApiOperation({ description: 'Meetup 상세보기' })
   @Get(':id')
   async getMeetupById(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
@@ -81,6 +87,7 @@ export class MeetupsController {
       'usersLiked.user',
       'usersLiked.user.profile',
       'usersDisliked',
+      // 'rooms',
       'joins',
       'joins.askingUser',
       'joins.askingUser.profile',

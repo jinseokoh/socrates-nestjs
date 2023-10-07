@@ -151,6 +151,14 @@ export class MeetupsService {
     return await paginate(query, queryBuilder, config);
   }
 
+  // Meetup 리스트 w/ Pagination
+  async fetchRoomsById(id: number): Promise<Meetup> {
+    return await this.repository.findOneOrFail({
+      where: { id },
+      relations: ['rooms', 'rooms.user', 'rooms.user.profile'],
+    });
+  }
+
   // Meetup 상세보기
   async findById(id: number, relations: string[] = []): Promise<Meetup> {
     try {

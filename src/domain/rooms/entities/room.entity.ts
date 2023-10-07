@@ -1,13 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
-import { IsArray } from 'class-validator';
 import { PartyType } from 'src/common/enums';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   Index,
   JoinColumn,
@@ -52,7 +49,7 @@ export class Room {
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'CASCADE',
-    onDelete: 'RESTRICT',
+    // onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'userId' })
   public user!: User;
@@ -64,7 +61,7 @@ export class Room {
   @ManyToOne(() => Meetup, (meetup) => meetup.id, {
     nullable: false,
     onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
+    // onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'meetupId' })
   public meetup!: Meetup;

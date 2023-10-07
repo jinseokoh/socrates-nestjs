@@ -26,10 +26,6 @@ export class RoomsService {
   constructor(
     @InjectRepository(Room)
     private readonly repository: Repository<Room>,
-    @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
-    @InjectRepository(Meetup)
-    private readonly meetupsRepository: Repository<Meetup>,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -52,8 +48,7 @@ export class RoomsService {
       .createQueryBuilder('room')
       .innerJoinAndSelect('room.user', 'user')
       .innerJoinAndSelect('room.meetup', 'meetup')
-      .where('room.userId = :userId', { userId })
-      .andWhere('room.deletedAt IS NULL');
+      .where('room.userId = :userId', { userId });
 
     const config: PaginateConfig<Room> = {
       sortableColumns: ['createdAt'],
