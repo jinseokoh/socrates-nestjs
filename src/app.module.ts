@@ -72,7 +72,7 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       },
       table: {
-        create: process.env.NODE_ENV === 'local',
+        create: true, // process.env.NODE_ENV === 'local',
         prefix: `${process.env.NODE_ENV}-`,
         suffix: '-table',
       },

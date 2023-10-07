@@ -15,8 +15,8 @@ import {
 
 @Entity()
 export class Room {
-  @Column({ type: 'uuid', length: 36, nullable: true })
-  @ApiProperty({ description: 'UUID v4 for lastReadMessageId' })
+  @Column({ length: 36, nullable: true })
+  @ApiProperty({ description: 'ex) msg_1696663997213_##########' })
   lastReadMessageId: string | null;
 
   @Column({ type: 'enum', enum: PartyType, default: PartyType.HOST })
