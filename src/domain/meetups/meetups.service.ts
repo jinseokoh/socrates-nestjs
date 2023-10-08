@@ -29,6 +29,7 @@ import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
+import { Room } from 'src/domain/rooms/entities/room.entity';
 @Injectable()
 export class MeetupsService {
   private readonly logger = new Logger(MeetupsService.name);
@@ -152,11 +153,13 @@ export class MeetupsService {
   }
 
   // Meetup 리스트 w/ Pagination
-  async fetchRoomsById(id: number): Promise<Meetup> {
-    return await this.repository.findOneOrFail({
+  async fetchRoomsByMeetupId(id: number): Promise<Room[]> {
+    const meetup = await this.repository.findOneOrFail({
       where: { id },
       relations: ['rooms', 'rooms.user', 'rooms.user.profile'],
     });
+
+    return meetup.rooms;
   }
 
   // Meetup 상세보기

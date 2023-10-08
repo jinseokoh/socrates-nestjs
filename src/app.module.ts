@@ -67,7 +67,7 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
     DynamooseModule.forRoot({
       local: process.env.NODE_ENV === 'local',
       aws: {
-        region: process.env.AWS_DEFAULT_REGION,
+        region: process.env.AWS_DEFAULT_REGION ?? 'ap-northeast-2',
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       },

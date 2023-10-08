@@ -46,6 +46,8 @@ export class MessagesController {
           id: lastId,
         }
       : null;
+
+    console.log(`lastId`, lastId, `lastKey`, lastKey);
     const res = await this.messagesService.fetch(id, lastKey);
     console.log(`res`, res);
 

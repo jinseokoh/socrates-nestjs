@@ -24,6 +24,7 @@ import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
+import { Room } from 'src/domain/rooms/entities/room.entity';
 import { multerOptions } from 'src/helpers/multer-options';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -68,8 +69,10 @@ export class MeetupsController {
 
   @ApiOperation({ description: 'Meetup room 정보보기' })
   @Get(':id/rooms')
-  async fetchRoomsById(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
-    return await this.meetupsService.fetchRoomsById(id);
+  async fetchRoomsByMeetupId(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Room[]> {
+    return await this.meetupsService.fetchRoomsByMeetupId(id);
   }
 
   @ApiOperation({ description: 'Meetup 상세보기' })

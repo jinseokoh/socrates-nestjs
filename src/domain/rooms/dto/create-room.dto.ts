@@ -1,37 +1,39 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import {
   IsBoolean,
-  IsDate,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { PartyType } from 'src/common/enums';
 export class CreateRoomDto {
-  @ApiProperty({ description: 'max 인원', required: true })
-  @Type(() => Number)
-  @IsNumber()
-  max: number;
-
-  @ApiProperty({ description: '신고여부', default: false })
-  @IsBoolean()
+  @ApiProperty({ description: 'last read message id', required: true })
+  @IsString()
   @IsOptional()
-  isFlagged: boolean;
+  lastReadMessageId: string | null;
+
+  @ApiProperty({
+    description: 'party type',
+    default: PartyType.GUEST,
+  })
+  @IsEnum(PartyType)
+  partyType: PartyType;
 
   @ApiProperty({ description: '신고여부', default: false })
   @IsBoolean()
   @IsOptional()
   isPaid: boolean;
 
+  @ApiProperty({ description: '신고여부', default: false })
+  @IsBoolean()
+  @IsOptional()
+  isExcluded: boolean;
+
   @ApiProperty({ description: '제목', required: false })
   @IsString()
   @IsOptional()
   note: string;
-
-  @ApiProperty({ description: 'appointment' })
-  @Type(() => Date)
-  @IsDate()
-  appointedAt: Date;
 
   @ApiProperty({ description: '사용자 아이디' })
   @IsNumber()

@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -13,7 +8,6 @@ import {
   PaginateQuery,
 } from 'nestjs-paginate';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { User } from 'src/domain/users/entities/user.entity';
 import { Room } from 'src/domain/rooms/entities/room.entity';
 import { CreateRoomDto } from 'src/domain/rooms/dto/create-room.dto';
 import { UpdateRoomDto } from 'src/domain/rooms/dto/update-room.dto';
@@ -26,6 +20,8 @@ export class RoomsService {
   constructor(
     @InjectRepository(Room)
     private readonly repository: Repository<Room>,
+    @InjectRepository(Meetup)
+    private readonly meetupRepository: Repository<Meetup>,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -62,7 +58,20 @@ export class RoomsService {
     return await paginate<Room>(query, queryBuilder, config);
   }
 
-  async findByIds(
+  async fetchRoomsByMeetupId(meetupId: number): Promise<Room[]> {
+    try {
+      const meetup = await this.meetupRepository.findOneOrFail({
+        where: { id: meetupId },
+        relations: ['rooms', 'rooms.user', 'rooms.user.profile'],
+      });
+
+      return meetup.rooms;
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  async findOneByIds(
     userId: number,
     meetupId: number,
     relations: string[] = [],
@@ -91,7 +100,7 @@ export class RoomsService {
     meetupId: number,
     dto: UpdateRoomDto,
   ): Promise<Room> {
-    const room = await this.findByIds(dto.userId, dto.meetupId);
+    const room = await this.findOneByIds(dto.userId, dto.meetupId);
     if (!room) {
       throw new NotFoundException(`entity not found`);
     }
@@ -103,12 +112,12 @@ export class RoomsService {
   //?-------------------------------------------------------------------------//
 
   async softRemove(userId: number, meetupId: number): Promise<Room> {
-    const room = await this.findByIds(userId, meetupId);
+    const room = await this.findOneByIds(userId, meetupId);
     return await this.repository.softRemove(room);
   }
 
   async remove(userId: number, meetupId: number): Promise<Room> {
-    const room = await this.findByIds(userId, meetupId);
+    const room = await this.findOneByIds(userId, meetupId);
     return await this.repository.remove(room);
   }
 }

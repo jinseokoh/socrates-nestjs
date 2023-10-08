@@ -33,7 +33,9 @@ export class RoomsController {
     @CurrentUserId() userId: number,
     @Body() dto: CreateRoomDto,
   ): Promise<Room> {
-    return await this.roomsService.create({ ...dto, userId });
+    return await this.roomsService.create(
+      dto.userId === undefined ? { ...dto, userId } : dto,
+    );
   }
 
   //?-------------------------------------------------------------------------//
@@ -51,11 +53,20 @@ export class RoomsController {
     return await this.roomsService.findAllByUserId(userId, query);
   }
 
+  @ApiOperation({ description: 'Room 리스트' })
+  @Get('meetup/:id')
+  async fetchRoomsByMeetupId(@Param('id') id: number): Promise<Room[]> {
+    return await this.roomsService.fetchRoomsByMeetupId(id);
+  }
+
   @ApiOperation({ description: 'Room 상세보기' })
   @Get(':ids')
   async getRoomById(@Param('ids') ids: string): Promise<Room> {
     const [userId, meetupId] = ids.split(',');
-    return this.roomsService.findByIds(+userId, +meetupId, ['user', 'meetup']);
+    return this.roomsService.findOneByIds(+userId, +meetupId, [
+      'user',
+      'meetup',
+    ]);
   }
 
   //?-------------------------------------------------------------------------//
