@@ -27,8 +27,6 @@ export class MessagesService {
       createdAt,
     };
 
-    console.log(payload);
-
     try {
       return await this.model.create(payload);
     } catch (error) {
