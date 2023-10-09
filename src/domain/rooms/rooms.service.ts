@@ -44,6 +44,8 @@ export class RoomsService {
       .createQueryBuilder('room')
       .innerJoinAndSelect('room.user', 'user')
       .innerJoinAndSelect('room.meetup', 'meetup')
+      .innerJoinAndSelect('meetup.rooms', 'rooms')
+      .innerJoinAndSelect('rooms.user', 'participant')
       .where('room.userId = :userId', { userId });
 
     const config: PaginateConfig<Room> = {

@@ -37,18 +37,18 @@ export class MessagesController {
   @ApiOperation({ description: 'Message 리스트' })
   @Get(':id')
   async fetch(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) meetupId: number, // meetupId
     @Query('lastId') lastId: string | undefined,
   ): Promise<any> {
     const lastKey = lastId
       ? {
-          meetupId: id,
+          meetupId,
           id: lastId,
         }
       : null;
 
     console.log(`lastId`, lastId, `lastKey`, lastKey);
-    const res = await this.messagesService.fetch(id, lastKey);
+    const res = await this.messagesService.fetch(meetupId, lastKey);
     console.log(`res`, res);
 
     return {

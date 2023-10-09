@@ -6,7 +6,11 @@ export class CreateMessageDto {
   @IsNumber()
   meetupId: number;
 
-  @ApiProperty({ description: 'msg_unix-timestamp_userId', required: true })
+  @ApiProperty({ description: '사용자 id', required: true })
+  @IsNumber()
+  userId: number;
+
+  @ApiProperty({ description: 'msg_createdAt_userId', required: true })
   @IsString()
   @IsOptional()
   id: string;
@@ -14,6 +18,7 @@ export class CreateMessageDto {
   @ApiProperty({
     description: 'type',
     default: MessageType.TEXT,
+    required: true,
   })
   @IsEnum(MessageType)
   messageType: MessageType;
@@ -22,16 +27,12 @@ export class CreateMessageDto {
   @IsString()
   message: string;
 
-  @ApiProperty({ description: '사용자 id' })
+  @ApiProperty({ description: 'createdAt', required: true })
   @IsNumber()
-  userId: number;
-
-  @ApiProperty({ description: '사용자 id' })
-  @IsNumber()
-  @IsOptional()
+  // @IsOptional()
   createdAt: number;
 
-  @ApiProperty({ description: '사용자 id' })
+  @ApiProperty({ description: 'updatedAt' })
   @IsNumber()
   @IsOptional()
   updatedAt: number;
