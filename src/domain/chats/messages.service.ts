@@ -21,12 +21,16 @@ export class MessagesService {
   async create(dto: CreateMessageDto): Promise<IMessage> {
     const createdAt = !dto.createdAt ? moment().valueOf() : dto.createdAt;
     const id = !dto.id ? `msg_${createdAt}_${dto.userId}` : dto.id;
+    const payload = {
+      ...dto,
+      id,
+      createdAt,
+    };
+
+    console.log(payload);
+
     try {
-      return await this.model.create({
-        ...dto,
-        id,
-        createdAt,
-      });
+      return await this.model.create(payload);
     } catch (error) {
       console.error(`[dynamodb] error`, error);
       throw new BadRequestException(error);

@@ -31,6 +31,7 @@ export class MessagesController {
     @CurrentUserId() id: string,
     @Body() createMessageDto: CreateMessageDto,
   ): Promise<IMessage> {
+    console.log(createMessageDto);
     return await this.messagesService.create(createMessageDto);
   }
 
