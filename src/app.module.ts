@@ -73,8 +73,8 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
       },
       table: {
         create: true, // process.env.NODE_ENV === 'local',
-        prefix: `${process.env.NODE_ENV}-`,
-        suffix: '-table',
+        prefix: `${process.env.NODE_ENV}_`,
+        suffix: '_table',
       },
     }),
     CacheModule.registerAsync({

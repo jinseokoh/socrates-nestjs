@@ -36,21 +36,21 @@ export const MessageSchema = new Schema(
   {
     timestamps: {
       createdAt: {
-        created_at: {
+        createdAt: {
           type: {
             value: Number,
             settings: {
-              storage: 'seconds',
+              storage: 'milliseconds',
             },
           },
         },
       },
       updatedAt: {
-        updated: {
+        updatedAt: {
           type: {
             value: Number,
             settings: {
-              storage: 'seconds',
+              storage: 'milliseconds',
             },
           },
         },

@@ -48,9 +48,9 @@ export class MessagesController {
         }
       : null;
 
-    console.log(`lastId`, lastId, `lastKey`, lastKey);
+    console.log(`lastId`, lastId, `lastKey`, lastKey); // todo. remove this log
     const res = await this.messagesService.fetch(meetupId, lastKey);
-    console.log(`res`, res);
+    console.log(`res`, res); // todo. remove this log
 
     return {
       lastKey: res.lastKey,
@@ -61,10 +61,10 @@ export class MessagesController {
 
   @ApiOperation({ description: 'Message 삭제' })
   @Delete()
-  async delete(@Body() body: IMessageKey): Promise<any> {
-    const res = await this.messagesService.delete(body);
+  async delete(@Body() dto: IMessageKey): Promise<any> {
+    await this.messagesService.delete(dto);
     return {
-      data: res,
+      data: 'ok',
     };
   }
 }

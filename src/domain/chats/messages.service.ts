@@ -18,23 +18,25 @@ export class MessagesService {
     private readonly model: Model<IMessage, IMessageKey>,
   ) {}
 
+  //?
+  //? notice that even if you provide createdAt and/or updatedAt in the payload
+  //? dynamodb will ignore them and timestamp the record with its own value.
+  //?
   async create(dto: CreateMessageDto): Promise<IMessage> {
     const createdAt = !dto.createdAt ? moment().valueOf() : dto.createdAt;
     const id = !dto.id ? `msg_${createdAt}_${dto.userId}` : dto.id;
-    const payload = {
-      ...dto,
-      id,
-      createdAt,
-    };
-
     try {
-      return await this.model.create(payload);
+      return await this.model.create({ ...dto, id });
     } catch (error) {
       console.error(`[dynamodb] error`, error);
       throw new BadRequestException(error);
     }
   }
 
+  //?
+  //? notice that records will be sorted by range key, which, in this case, is
+  //? id, the string value.
+  //?
   async fetch(meetupId: number, lastKey: IMessageKey | null): Promise<any> {
     try {
       return lastKey
