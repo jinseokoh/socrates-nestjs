@@ -7,10 +7,9 @@ import {
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Room } from 'src/domain/rooms/entities/room.entity';
-import { CreateRoomDto } from 'src/domain/rooms/dto/create-room.dto';
-import { UpdateRoomDto } from 'src/domain/rooms/dto/update-room.dto';
+import { Room } from 'src/domain/chats/entities/room.entity';
+import { CreateRoomDto } from 'src/domain/chats/dto/create-room.dto';
+import { UpdateRoomDto } from 'src/domain/chats/dto/update-room.dto';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -20,8 +19,6 @@ export class RoomsService {
   constructor(
     @InjectRepository(Room)
     private readonly repository: Repository<Room>,
-    @InjectRepository(Meetup)
-    private readonly meetupRepository: Repository<Meetup>,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -60,19 +57,6 @@ export class RoomsService {
     return await paginate<Room>(query, queryBuilder, config);
   }
 
-  async fetchRoomsByMeetupId(meetupId: number): Promise<Room[]> {
-    try {
-      const meetup = await this.meetupRepository.findOneOrFail({
-        where: { id: meetupId },
-        relations: ['rooms', 'rooms.user', 'rooms.user.profile'],
-      });
-
-      return meetup.rooms;
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
-  }
-
   async findOneByIds(
     userId: number,
     meetupId: number,
@@ -96,15 +80,22 @@ export class RoomsService {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  //! todo. this need to be taken care of later.
-  async update(
-    userId: number,
-    meetupId: number,
-    dto: UpdateRoomDto,
-  ): Promise<Room> {
+  async update(dto: UpdateRoomDto): Promise<Room> {
     const room = await this.findOneByIds(dto.userId, dto.meetupId);
     if (!room) {
       throw new NotFoundException(`entity not found`);
+    }
+    if (dto.hasOwnProperty('lastReadMessageId')) {
+      room.lastReadMessageId = dto.lastReadMessageId;
+    }
+    if (dto.hasOwnProperty('isExcluded')) {
+      room.isExcluded = dto.isExcluded;
+    }
+    if (dto.hasOwnProperty('isPaid')) {
+      room.isPaid = dto.isPaid;
+    }
+    if (dto.hasOwnProperty('note')) {
+      room.note = dto.note;
     }
     return await this.repository.save(room);
   }
