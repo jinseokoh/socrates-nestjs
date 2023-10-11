@@ -7,6 +7,7 @@ import { IMessageEvent } from 'src/common/interfaces';
 //   type: 'ping', // event name
 // });
 export class SseService {
+  //? Subject is required to broadcast message out to all the clients
   private subject = new Subject<IMessageEvent>();
   public sseStream$: Observable<IMessageEvent> = this.subject.asObservable();
 

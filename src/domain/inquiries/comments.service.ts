@@ -48,10 +48,7 @@ export class CommentsService {
     const commentWithUser = await this.findById(comment.id, ['user']);
     console.log('commentWithUser', commentWithUser);
     // emit SSE
-    this.redisClient.emit('sse.comments', {
-      key: 'sse.create',
-      value: commentWithUser,
-    });
+    this.redisClient.emit('sse.add_inquiry', commentWithUser);
 
     // const inquiryTitle = inquiry.title.replace(/[\<\>]/g, '');
     // await this.slack.postMessage({

@@ -44,6 +44,7 @@ export class RoomsService {
       .innerJoinAndSelect('meetup.rooms', 'rooms')
       .innerJoinAndSelect('rooms.user', 'participant')
       .where('room.userId = :userId', { userId });
+    // andWhere('room.isExcluded', false)
 
     const config: PaginateConfig<Room> = {
       sortableColumns: ['createdAt'],
@@ -104,13 +105,13 @@ export class RoomsService {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async softRemove(userId: number, meetupId: number): Promise<Room> {
-    const room = await this.findOneByIds(userId, meetupId);
-    return await this.repository.softRemove(room);
-  }
-
-  async remove(userId: number, meetupId: number): Promise<Room> {
-    const room = await this.findOneByIds(userId, meetupId);
+  async remove(
+    dto: Omit<
+      CreateRoomDto,
+      'lastReadMessageId' | 'partyType' | 'isPaid' | 'isExcluded' | 'note'
+    >,
+  ): Promise<Room> {
+    const room = await this.findOneByIds(dto.userId, dto.meetupId);
     return await this.repository.remove(room);
   }
 }

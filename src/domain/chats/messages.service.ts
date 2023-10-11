@@ -1,8 +1,10 @@
 import { CreateMessageDto } from './dto/create-message.dto';
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { SortOrder } from 'dynamoose/dist/General';
 import * as moment from 'moment';
 import { InjectModel, Model } from 'nestjs-dynamoose';
+import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { UpdateMessageDto } from 'src/domain/chats/dto/update-message.dto';
 import {
   IMessage,
@@ -16,6 +18,7 @@ export class MessagesService {
   constructor(
     @InjectModel('Message')
     private readonly model: Model<IMessage, IMessageKey>,
+    @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
   ) {}
 
   //?
@@ -26,7 +29,12 @@ export class MessagesService {
     const createdAt = !dto.createdAt ? moment().valueOf() : dto.createdAt;
     const id = !dto.id ? `msg_${createdAt}_${dto.userId}` : dto.id;
     try {
-      return await this.model.create({ ...dto, id });
+      const message = await this.model.create({ ...dto, id });
+
+      // emit SSE
+      this.redisClient.emit('sse.add_chat', message);
+
+      return message;
     } catch (error) {
       console.error(`[dynamodb] error`, error);
       throw new BadRequestException(error);

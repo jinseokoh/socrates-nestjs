@@ -24,7 +24,7 @@ import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
-import { Room } from 'src/domain/rooms/entities/room.entity';
+import { Room } from 'src/domain/chats/entities/room.entity';
 import { multerOptions } from 'src/helpers/multer-options';
 
 @UseInterceptors(ClassSerializerInterceptor)

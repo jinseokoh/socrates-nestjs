@@ -39,13 +39,13 @@ export class InquiryCommentsController {
   //? SSE
   //?-------------------------------------------------------------------------//
 
-  @EventPattern('sse.comments')
+  @EventPattern('sse.add_inquiry')
   handleSseComments(data: any): void {
-    this.sseService.fire(data.key, data.value);
+    this.sseService.fire('sse.add_inquiry', data);
   }
 
   @Public()
-  @Sse(':inquiryId/comments/stream')
+  @Sse(':id/comments/stream')
   sse(): Observable<IMessageEvent> {
     return this.sseService.sseStream$;
   }

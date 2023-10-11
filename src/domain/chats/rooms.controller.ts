@@ -4,7 +4,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
   Post,
   UseInterceptors,
@@ -42,7 +41,9 @@ export class RoomsController {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '모든 Room 리스트 w/ Pagination' })
+  @ApiOperation({
+    description: '사용자가 참여 중인 모든 Room 리스트 w/ Pagination',
+  })
   @PaginateQueryOptions()
   @Get()
   async getRooms(
@@ -52,16 +53,6 @@ export class RoomsController {
     console.log(query);
     return await this.roomsService.findAllByUserId(userId, query);
   }
-
-  // @ApiOperation({ description: 'Room 상세보기' })
-  // @Get(':ids')
-  // async getRoomById(@Param('ids') ids: string): Promise<Room> {
-  //   const [userId, meetupId] = ids.split(',');
-  //   return this.roomsService.findOneByIds(+userId, +meetupId, [
-  //     'user',
-  //     'meetup',
-  //   ]);
-  // }
 
   //?-------------------------------------------------------------------------//
   //? UPDATE
@@ -78,7 +69,7 @@ export class RoomsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'Room soft 삭제' })
-  @Delete(':ids')
+  @Delete()
   async remove(
     @Body()
     dto: Omit<
@@ -86,6 +77,6 @@ export class RoomsController {
       'lastReadMessageId' | 'partyType' | 'isPaid' | 'isExcluded' | 'note'
     >,
   ): Promise<Room> {
-    return await this.roomsService.softRemove(+dto.userId, +dto.meetupId);
+    return await this.roomsService.remove(dto);
   }
 }

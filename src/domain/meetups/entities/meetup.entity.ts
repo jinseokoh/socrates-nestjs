@@ -33,7 +33,7 @@ import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
-import { Room } from 'src/domain/rooms/entities/room.entity';
+import { Room } from 'src/domain/chats/entities/room.entity';
 
 @Entity()
 export class Meetup {

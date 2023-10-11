@@ -23,7 +23,7 @@ import {
 import { MessagesService } from 'src/domain/chats/messages.service';
 import { SseService } from 'src/services/sse/sse.service';
 
-@Controller('rooms')
+@Controller('chats')
 export class MessagesController {
   constructor(
     private readonly messagesService: MessagesService,
@@ -34,9 +34,9 @@ export class MessagesController {
   //? SSE
   //?-------------------------------------------------------------------------//
 
-  @EventPattern('sse.chat')
+  @EventPattern('sse.add_chat')
   handleSseComments(data: any): void {
-    this.sseService.fire(data.key, data.value);
+    this.sseService.fire('sse.add_chat', data);
   }
 
   @Public()
@@ -60,7 +60,7 @@ export class MessagesController {
   }
 
   @ApiOperation({ description: 'Message 리스트' })
-  @Get(':id')
+  @Get(':id/messages')
   async fetch(
     @Param('id', ParseIntPipe) meetupId: number, // meetupId
     @Query('lastId') lastId: string | undefined,
@@ -84,7 +84,7 @@ export class MessagesController {
   }
 
   @ApiOperation({ description: 'Message 삭제' })
-  @Delete(':id')
+  @Delete(':id/messages')
   async delete(@Body() dto: IMessageKey): Promise<any> {
     await this.messagesService.delete(dto);
     return {

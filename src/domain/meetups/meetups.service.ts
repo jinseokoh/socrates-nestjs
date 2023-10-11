@@ -29,7 +29,7 @@ import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
-import { Room } from 'src/domain/rooms/entities/room.entity';
+import { Room } from 'src/domain/chats/entities/room.entity';
 @Injectable()
 export class MeetupsService {
   private readonly logger = new Logger(MeetupsService.name);
