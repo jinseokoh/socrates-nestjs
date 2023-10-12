@@ -13,42 +13,19 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { EventPattern } from '@nestjs/microservices';
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { Observable } from 'rxjs';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { Public } from 'src/common/decorators/public.decorator';
-import { IMessageEvent } from 'src/common/interfaces';
 import { CreateThreadDto } from 'src/domain/meetups/dto/create-thread.dto';
 import { UpdateThreadDto } from 'src/domain/meetups/dto/update-thread.dto';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { ThreadsService } from 'src/domain/meetups/threads.service';
-import { SseService } from 'src/services/sse/sse.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
 export class MeetupThreadsController {
-  constructor(
-    private readonly threadsService: ThreadsService,
-    private readonly sseService: SseService,
-  ) {}
-
-  //?-------------------------------------------------------------------------//
-  //? SSE
-  //?-------------------------------------------------------------------------//
-
-  @EventPattern('sse.answers')
-  handleSseAnswers(data: any): void {
-    this.sseService.fire(data.key, data.value);
-  }
-
-  @Public()
-  @Sse(':meetupId/threads/:threadId/answers/stream')
-  sse(): Observable<IMessageEvent> {
-    return this.sseService.sseStream$;
-  }
+  constructor(private readonly threadsService: ThreadsService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE

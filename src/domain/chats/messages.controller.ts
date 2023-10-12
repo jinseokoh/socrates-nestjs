@@ -36,13 +36,15 @@ export class MessagesController {
 
   @EventPattern('sse.add_chat')
   handleSseComments(data: any): void {
-    this.sseService.fire('sse.add_chat', data);
+    this.sseService
+      .for(data.meetupId)
+      .fire(data.meetupId, 'sse.add_chat', data);
   }
 
   @Public()
   @Sse(':id/messages/stream')
-  sse(): Observable<IMessageEvent> {
-    return this.sseService.sseStream$;
+  sse(@Param('id', ParseIntPipe) meetupId: number): Observable<IMessageEvent> {
+    return this.sseService.for(meetupId).streamz$[meetupId];
   }
 
   //?-------------------------------------------------------------------------//

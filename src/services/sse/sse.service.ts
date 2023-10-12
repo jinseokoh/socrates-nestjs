@@ -7,11 +7,21 @@ import { IMessageEvent } from 'src/common/interfaces';
 //   type: 'ping', // event name
 // });
 export class SseService {
-  //? Subject is required to broadcast message out to all the clients
-  private subject = new Subject<IMessageEvent>();
-  public sseStream$: Observable<IMessageEvent> = this.subject.asObservable();
+  //? not fully tested, but the theory is as follows:
+  //? - Subject is required to broadcast message out to all the clients
+  //? - A list of Subjects and Observables are required to selectively send/receive data
+  public static subjectz: Subject<IMessageEvent>[] = [];
+  public streamz$: Observable<IMessageEvent>[] = [];
 
-  fire(type: string, data: object) {
-    this.subject.next({ data, type });
+  for(channel: number) {
+    if (!SseService.subjectz[channel]) {
+      SseService.subjectz[channel] = new Subject<IMessageEvent>();
+      this.streamz$[channel] = SseService.subjectz[channel].asObservable();
+    }
+    return this;
+  }
+
+  fire(channel: number, type: string, data: object) {
+    SseService.subjectz[channel].next({ type, data });
   }
 }

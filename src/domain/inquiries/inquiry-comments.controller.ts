@@ -21,34 +21,11 @@ import { CreateCommentDto } from 'src/domain/inquiries/dto/create-comment.dto';
 import { UpdateCommentDto } from 'src/domain/inquiries/dto/update-comment.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { Public } from 'src/common/decorators/public.decorator';
-import { IMessageEvent } from 'src/common/interfaces';
-import { Observable } from 'rxjs';
-import { SseService } from 'src/services/sse/sse.service';
-import { EventPattern } from '@nestjs/microservices';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('inquiries')
 export class InquiryCommentsController {
-  constructor(
-    private readonly commentsService: CommentsService,
-    private readonly sseService: SseService,
-  ) {}
-
-  //?-------------------------------------------------------------------------//
-  //? SSE
-  //?-------------------------------------------------------------------------//
-
-  @EventPattern('sse.add_inquiry')
-  handleSseComments(data: any): void {
-    this.sseService.fire('sse.add_inquiry', data);
-  }
-
-  @Public()
-  @Sse(':id/comments/stream')
-  sse(): Observable<IMessageEvent> {
-    return this.sseService.sseStream$;
-  }
+  constructor(private readonly commentsService: CommentsService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
