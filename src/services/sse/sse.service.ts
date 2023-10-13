@@ -3,13 +3,15 @@ import { IMessageEvent } from 'src/common/interfaces';
 
 // ref) https://stackoverflow.com/questions/67202527/can-we-use-server-sent-events-in-nestjs-without-using-interval
 // {
-//   data: 'hello', // payload
 //   type: 'ping', // event name
+//   data: 'hello', // payload
 // });
 export class SseService {
   //? not fully tested, but the theory is as follows:
-  //? - Subject is required to broadcast message out to all the clients
-  //? - A list of Subjects and Observables are required to selectively send/receive data
+  //?
+  //? 1. Subject is required to broadcast messages out to all the participants
+  //? 2. A list of Subjects and Observables are required to selectively send/receive data
+  //?
   public static subjectz: Subject<IMessageEvent>[] = [];
   public streamz$: Observable<IMessageEvent>[] = [];
 

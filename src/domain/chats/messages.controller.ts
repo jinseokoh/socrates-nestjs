@@ -41,9 +41,12 @@ export class MessagesController {
       .fire(data.meetupId, 'sse.add_chat', data);
   }
 
-  @Public()
   @Sse(':id/messages/stream')
-  sse(@Param('id', ParseIntPipe) meetupId: number): Observable<IMessageEvent> {
+  sse(
+    @CurrentUserId() id: number,
+    @Param('id', ParseIntPipe) meetupId: number,
+  ): Observable<IMessageEvent> {
+    console.log(`userId: ${id} meetupId: ${meetupId}`);
     return this.sseService.for(meetupId).streamz$[meetupId];
   }
 
