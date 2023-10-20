@@ -46,7 +46,6 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
-import { AWS_SES_CONNECTION } from 'src/common/constants';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { Interest } from 'src/domain/users/entities/interest.entity';
@@ -57,6 +56,7 @@ import { CreateLedgerDto } from 'src/domain/ledgers/dto/create-ledger.dto';
 import { Ledger as LedgerType } from 'src/common/enums';
 import { LedgersService } from 'src/domain/ledgers/ledgers.service';
 
+@Injectable()
 export class UsersService {
   private readonly env: any;
   private readonly logger = new Logger(UsersService.name);

@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { MessageType } from 'src/common/enums';
+import { IImage } from 'src/domain/chats/entities/message.interface';
 export class CreateMessageDto {
   @ApiProperty({ description: 'Message', required: true })
   @IsNumber()
@@ -23,9 +30,15 @@ export class CreateMessageDto {
   @IsEnum(MessageType)
   messageType: MessageType;
 
-  @ApiProperty({ description: 'Message', required: true })
+  @ApiProperty({ description: 'TextMessage 용 payload', required: false })
   @IsString()
-  message: string;
+  @IsOptional()
+  message: string | null;
+
+  @ApiProperty({ description: 'ImageMessage 용 payload', required: false })
+  @IsObject()
+  @IsOptional()
+  image: IImage | null;
 
   @ApiProperty({ description: 'createdAt', required: true })
   @IsNumber()

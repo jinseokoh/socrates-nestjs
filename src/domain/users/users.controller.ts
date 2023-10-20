@@ -236,9 +236,7 @@ export class UsersController {
     if (mimeType) {
       return await this.usersService.getSignedUrl(id, mimeType);
     }
-    // todo. do something meaningful like throwing an exception here!
-    // throw new BadRequestException('mimeType is missing');
-    return { upload: '', image: '' };
+    throw new BadRequestException('mimeType is missing');
   }
 
   //--------------------------------------------------------------------------//

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -155,7 +156,6 @@ export class MeetupsController {
     if (mimeType) {
       return await this.meetupsService.getSignedUrl(id, mimeType);
     }
-    // todo. do something meaningful like throwing an exception here!
-    return { upload: '', image: '' };
+    throw new BadRequestException('mimeType is missing');
   }
 }

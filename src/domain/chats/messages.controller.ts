@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -15,6 +16,7 @@ import { Observable } from 'rxjs';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 import { IMessageEvent } from 'src/common/interfaces';
+import { SignedUrl } from 'src/common/types';
 import { CreateMessageDto } from 'src/domain/chats/dto/create-message.dto';
 import {
   IMessage,
@@ -86,12 +88,41 @@ export class MessagesController {
     };
   }
 
+  //?-------------------------------------------------------------------------//
+  //? DELETE
+  //?-------------------------------------------------------------------------//
+
   @ApiOperation({ description: 'Message 삭제' })
   @Delete(':id/messages')
-  async delete(@Body() dto: IMessageKey): Promise<any> {
-    await this.messagesService.delete(dto);
+  async delete(
+    @Param('id', ParseIntPipe) meetupId: number, // meetupId
+    @Body('id') id: string,
+  ): Promise<any> {
+    const key = {
+      meetupId: meetupId,
+      id: id,
+    } as IMessageKey;
+
+    console.log(key);
+    await this.messagesService.delete(key);
     return {
       data: 'ok',
     };
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? UPLOAD
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
+  @Post('image/url')
+  async getSignedUrl(
+    @CurrentUserId() id: number,
+    @Body('mimeType') mimeType: string,
+  ): Promise<SignedUrl> {
+    if (mimeType) {
+      return await this.messagesService.getSignedUrl(id, mimeType);
+    }
+    throw new BadRequestException('mimeType is missing');
   }
 }

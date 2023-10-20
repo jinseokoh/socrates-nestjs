@@ -5,10 +5,18 @@ export interface IMessageKey {
   id: string | null; // sort key
 }
 
+export interface IImage {
+  uri: string;
+  size: number;
+  width: number;
+  height: number;
+}
+
 export interface IMessage extends IMessageKey {
   userId: number;
   messageType: MessageType;
-  message: string;
+  message: string | null;
+  image: IImage | null;
   createdAt?: number;
   updatedAt?: number;
 }

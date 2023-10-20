@@ -31,6 +31,17 @@ export const MessageSchema = new Schema(
     },
     message: {
       type: String,
+      required: false,
+    },
+    image: {
+      type: Object,
+      schema: {
+        uri: String,
+        size: Number,
+        width: Number,
+        height: Number,
+      },
+      required: false,
     },
   },
   {

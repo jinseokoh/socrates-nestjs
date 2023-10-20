@@ -2,14 +2,17 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { SortOrder } from 'dynamoose/dist/General';
-import * as moment from 'moment';
 import { InjectModel, Model } from 'nestjs-dynamoose';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
+import { SignedUrl } from 'src/common/types';
+import { S3Service } from 'src/services/aws/s3.service';
 import { UpdateMessageDto } from 'src/domain/chats/dto/update-message.dto';
 import {
   IMessage,
   IMessageKey,
 } from 'src/domain/chats/entities/message.interface';
+import { randomName } from 'src/helpers/random-filename';
+import * as moment from 'moment';
 
 const LIMIT = 10;
 
@@ -19,6 +22,7 @@ export class MessagesService {
     @InjectModel('Message')
     private readonly model: Model<IMessage, IMessageKey>,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
+    private readonly s3Service: S3Service,
   ) {}
 
   //?
@@ -92,5 +96,24 @@ export class MessagesService {
       console.error(`[dynamodb] error`, error);
       throw new BadRequestException(error);
     }
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? UPLOAD
+  //?-------------------------------------------------------------------------//
+
+  // S3 직접 업로드를 위한 signedUrl 리턴
+  async getSignedUrl(
+    userId: number,
+    mimeType = 'image/jpeg',
+  ): Promise<SignedUrl> {
+    const fileUri = randomName('chat', mimeType);
+    const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
+    const url = await this.s3Service.generateSignedUrl(path);
+
+    return {
+      upload: url,
+      image: `https://cdn.fleaauction.world/${path}`,
+    };
   }
 }
