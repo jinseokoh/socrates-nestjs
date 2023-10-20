@@ -43,6 +43,14 @@ export const MessageSchema = new Schema(
       },
       required: false,
     },
+    expires: {
+      type: {
+        value: Number,
+        settings: {
+          storage: 'milliseconds',
+        },
+      },
+    },
   },
   {
     timestamps: {

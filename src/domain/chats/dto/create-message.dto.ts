@@ -40,6 +40,11 @@ export class CreateMessageDto {
   @IsOptional()
   image: IImage | null;
 
+  @ApiProperty({ description: 'ttl', required: false })
+  @IsNumber()
+  @IsOptional()
+  expires: number;
+
   @ApiProperty({ description: 'createdAt', required: true })
   @IsNumber()
   // @IsOptional()

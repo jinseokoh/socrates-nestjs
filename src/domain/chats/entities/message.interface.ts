@@ -17,6 +17,7 @@ export interface IMessage extends IMessageKey {
   messageType: MessageType;
   message: string | null;
   image: IImage | null;
+  expires?: number;
   createdAt?: number;
   updatedAt?: number;
 }
