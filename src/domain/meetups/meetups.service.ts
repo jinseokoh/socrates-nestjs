@@ -76,7 +76,14 @@ export class MeetupsService {
     );
     meetup.venue = venue;
 
-    // 2) prevent users blocked this poster from seeing this new post.
+    // todo. 2) update user's interests
+    // await this.usersService.upsertCategoryWithSkill(
+    //   askingUserId,
+    //   meetup.subCategory,
+    //   dto.skill,
+    // );
+
+    // 3) prevent users blocked this poster from seeing this new post.
     const blockedUsers = await this.repository.manager.query(
       'SELECT hatingUserId AS id FROM `hate` WHERE hatedUserId = ?',
       [dto.userId],

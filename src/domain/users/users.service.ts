@@ -33,7 +33,7 @@ import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune.dto';
 import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
-import { FindOneOptions, In } from 'typeorm';
+import { Brackets, FindOneOptions, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
@@ -55,6 +55,7 @@ import { SesService } from 'src/services/aws/ses.service';
 import { CreateLedgerDto } from 'src/domain/ledgers/dto/create-ledger.dto';
 import { Ledger as LedgerType } from 'src/common/enums';
 import { LedgersService } from 'src/domain/ledgers/ledgers.service';
+import { Hate } from 'src/domain/users/entities/hate.entity';
 
 @Injectable()
 export class UsersService {
@@ -76,6 +77,8 @@ export class UsersService {
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Dislike)
     private readonly dislikeRepository: Repository<Dislike>,
+    @InjectRepository(Hate)
+    private readonly hateRepository: Repository<Hate>,
     @InjectRepository(Join)
     private readonly joinRepository: Repository<Join>,
     @Inject(ConfigService) private configService: ConfigService, // global
@@ -728,8 +731,8 @@ GROUP BY userId HAVING userId = ?',
   //? 차단 (Hate)
   //?-------------------------------------------------------------------------//
 
-  // 사용자 블락 리스트에 추가
-  async attachToHatePivot(
+  // 블락한 사용자 리스트에 추가
+  async attachUserIdToHatePivot(
     hatingUserId: number,
     hatedUserId: number,
     message: string,
@@ -739,31 +742,31 @@ GROUP BY userId HAVING userId = ?',
       [hatingUserId, hatedUserId, message],
     );
 
-    if (affectedRows > 0) {
-      //
-      // 대상회원이 만든 모임의 차단처리
-      //
-      const meetups = await this.meetupRepository.find({
-        select: {
-          id: true,
-        },
-        where: {
-          userId: hatedUserId,
-        },
-      });
-      await Promise.all(
-        meetups.map(async (v) => {
-          await this.repository.manager.query(
-            'INSERT IGNORE INTO `dislike` (userId, meetupId, message) VALUES (?, ?, ?)',
-            [hatingUserId, v.id, `${hatingUserId} hates ${hatedUserId}`],
-          );
-        }),
-      );
-    }
+    // if (affectedRows > 0) {
+    //   //
+    //   // 대상회원이 만든 모임의 차단처리
+    //   //
+    //   const meetups = await this.meetupRepository.find({
+    //     select: {
+    //       id: true,
+    //     },
+    //     where: {
+    //       userId: hatedUserId,
+    //     },
+    //   });
+    //   await Promise.all(
+    //     meetups.map(async (v) => {
+    //       await this.repository.manager.query(
+    //         'INSERT IGNORE INTO `dislike` (userId, meetupId, message) VALUES (?, ?, ?)',
+    //         [hatingUserId, v.id, `${hatingUserId} hates ${hatedUserId}`],
+    //       );
+    //     }),
+    //   );
+    // }
   }
 
-  // 사용자 블락 리스트에서 삭제
-  async detachFromHatePivot(
+  // 블락한 사용자 리스트에서 삭제
+  async detachUserIdFromHatePivot(
     hatingUserId: number,
     hatedUserId: number,
   ): Promise<void> {
@@ -772,29 +775,53 @@ GROUP BY userId HAVING userId = ?',
       [hatingUserId, hatedUserId],
     );
 
-    if (affectedRows > 0) {
-      //
-      // 대상회원이 만든 모임의 차단처리 취소
-      //
-      const meetups = await this.meetupRepository.find({
-        select: {
-          id: true,
-        },
-        where: {
-          userId: hatedUserId,
-        },
+    // if (affectedRows > 0) {
+    //   //
+    //   // 대상회원이 만든 모임의 차단처리 취소
+    //   //
+    //   const meetups = await this.meetupRepository.find({
+    //     select: {
+    //       id: true,
+    //     },
+    //     where: {
+    //       userId: hatedUserId,
+    //     },
+    //   });
+
+    //   const ids = meetups.map((v) => v.id);
+    //   await this.repository.manager.query(
+    //     'DELETE FROM `dislike` WHERE userId = ? AND meetupId IN (?)',
+    //     [hatingUserId, ids],
+    //   );
+    // }
+  }
+
+  // 내가 블락한 사용자 리스트
+  async getUsersHatedByMe(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Hate>> {
+    const queryBuilder = this.hateRepository
+      .createQueryBuilder('hate')
+      .innerJoinAndSelect('hate.hatedUser', 'user')
+      .innerJoinAndSelect('user.profile', 'profile')
+      .where({
+        hatingUserId: userId,
       });
 
-      const ids = meetups.map((v) => v.id);
-      await this.repository.manager.query(
-        'DELETE FROM `dislike` WHERE userId = ? AND meetupId IN (?)',
-        [hatingUserId, ids],
-      );
-    }
+    const config: PaginateConfig<Hate> = {
+      sortableColumns: ['hatedUserId'],
+      searchableColumns: ['message'],
+      defaultLimit: 20,
+      defaultSortBy: [['hatedUserId', 'ASC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
   }
 
   // 내가 블락하거나 나를 블락한 ids
-  async getUserIdsHatedByMe(userId: number): Promise<AnyData> {
+  async getUserIdsEitherHatingOrBeingHated(userId: number): Promise<AnyData> {
     const rows = await this.repository.manager.query(
       'SELECT hatingUserId, hatedUserId \
       FROM `hate` \
@@ -820,7 +847,7 @@ GROUP BY userId HAVING userId = ?',
       [userId],
     );
     const count = row.cnt;
-    if (+count >= 10) {
+    if (+count > 30) {
       throw new NotAcceptableException('reached maximum count');
     }
 
@@ -899,7 +926,7 @@ GROUP BY userId HAVING userId = ?',
     userId: number,
     meetupId: number,
     message: string,
-  ): Promise<any> {
+  ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
       'INSERT IGNORE INTO `dislike` (userId, meetupId, message) VALUES (?, ?, ?)',
       [userId, meetupId, message],
@@ -914,7 +941,10 @@ GROUP BY userId HAVING userId = ?',
   }
 
   // 모임 블락 리스트에서 삭제
-  async detachFromDislikePivot(userId: number, meetupId: number): Promise<any> {
+  async detachFromDislikePivot(
+    userId: number,
+    meetupId: number,
+  ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
       'DELETE FROM `dislike` WHERE userId = ? AND meetupId = ?',
       [userId, meetupId],
@@ -970,7 +1000,7 @@ GROUP BY userId HAVING userId = ?',
   //? Join Pivot
   //?-------------------------------------------------------------------------//
 
-  // 신청리스트에 추가
+  // 나의 신청리스트에 추가
   async attachToJoinPivot(
     askingUserId: number,
     askedUserId: number,
@@ -1019,20 +1049,19 @@ GROUP BY userId HAVING userId = ?',
     );
   }
 
-  // 내가 신청한 모임 리스트
+  //? 내가 신청한 모임 리스트
   async getMeetupsAskedByMe(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Join>> {
     const queryBuilder = this.joinRepository
       .createQueryBuilder('join')
-      .leftJoinAndSelect('join.meetup', 'meetup')
-      .leftJoinAndSelect('meetup.venue', 'venue')
+      .innerJoinAndSelect('join.meetup', 'meetup')
+      .innerJoinAndSelect('meetup.venue', 'venue')
       // .leftJoinAndSelect('join.askedUser', 'askedUser')
       .leftJoinAndSelect('meetup.user', 'user')
-      .where({
-        askingUserId: userId,
-      });
+      .where('meetup.userId <> :userId', { userId: userId })
+      .andWhere({ askingUserId: userId });
 
     const config: PaginateConfig<Join> = {
       sortableColumns: ['meetupId'],
@@ -1045,11 +1074,51 @@ GROUP BY userId HAVING userId = ?',
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내가 신청한 모임 ID 리스트
+  //? 내가 신청한 모임ID 리스트
   async getMeetupIdsAskedByMe(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId FROM `join` \
 INNER JOIN `user` ON `user`.id = `join`.askingUserId \
+INNER JOIN `meetup` ON `meetup`.id = `join`.meetupId \
+WHERE `meetup`.userId <> user.id AND `user`.id = ?',
+      [userId],
+    );
+
+    return {
+      data: items.map(({ meetupId }) => meetupId),
+    };
+  }
+
+  //? 나를 초대한 모임 리스트
+  async getMeetupsAskingMe(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Join>> {
+    const queryBuilder = this.joinRepository
+      .createQueryBuilder('join')
+      .innerJoinAndSelect('join.meetup', 'meetup')
+      .innerJoinAndSelect('meetup.venue', 'venue')
+      // .leftJoinAndSelect('join.askedUser', 'askedUser')
+      .leftJoinAndSelect('meetup.user', 'user')
+      .where('meetup.userId <> :userId', { userId: userId })
+      .andWhere({ askedUserId: userId });
+
+    const config: PaginateConfig<Join> = {
+      sortableColumns: ['meetupId'],
+      searchableColumns: ['meetup.title'],
+      defaultLimit: 20,
+      defaultSortBy: [['meetupId', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  //? 나를 초대한 모임ID 리스트
+  async getMeetupIdsAskingMe(userId: number): Promise<AnyData> {
+    const items = await this.repository.manager.query(
+      'SELECT meetupId FROM `join` \
+INNER JOIN `user` ON `user`.id = `join`.askedUserId \
 INNER JOIN `meetup` ON `meetup`.id = `join`.meetupId \
 WHERE `meetup`.userId <> user.id AND `user`.id = ?',
       [userId],
@@ -1067,8 +1136,8 @@ WHERE `meetup`.userId <> user.id AND `user`.id = ?',
   ): Promise<Paginated<Join>> {
     const queryBuilder = this.joinRepository
       .createQueryBuilder('join')
-      .leftJoinAndSelect('join.meetup', 'meetup')
-      .leftJoinAndSelect('meetup.venue', 'venue')
+      .innerJoinAndSelect('join.meetup', 'meetup')
+      .innerJoinAndSelect('meetup.venue', 'venue')
       .leftJoinAndSelect('join.askingUser', 'askingUser')
       .leftJoinAndSelect('askingUser.profile', 'askingUserProfile')
       // .leftJoinAndSelect('join.askedUser', 'askedUser')

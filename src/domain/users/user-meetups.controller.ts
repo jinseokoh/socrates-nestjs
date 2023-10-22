@@ -47,7 +47,7 @@ export class UserMeetupsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '나의 찜 리스트에 추가' })
-  @Post(':userId/likemeetups/:meetupId')
+  @Post(':userId/meetups-liked/:meetupId')
   async attachToLikePivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
@@ -68,7 +68,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '나의 찜 리스트에서 삭제' })
-  @Delete(':userId/likemeetups/:meetupId')
+  @Delete(':userId/meetups-liked/:meetupId')
   async detachFromLikePivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
@@ -88,7 +88,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 찜한 모임 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/likemeetups')
+  @Get(':userId/meetups-liked')
   async getMeetupsLikedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
@@ -107,7 +107,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 찜한 모임ID 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/likemeetupids')
+  @Get(':userId/meetupids-liked')
   async getMeetupIdsLikedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
@@ -119,7 +119,7 @@ export class UserMeetupsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '나의 블락 리스트에 추가' })
-  @Post(':userId/dislikemeetups/:meetupId')
+  @Post(':userId/meetups-disliked/:meetupId')
   async attachToDislikePivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
@@ -140,7 +140,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '나의 블락 리스트에서 삭제' })
-  @Delete(':userId/dislikemeetups/:meetupId')
+  @Delete(':userId/meetups-disliked/:meetupId')
   async detachFromDislikePivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
@@ -160,7 +160,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 블락한 모임 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/dislikemeetups')
+  @Get(':userId/meetups-disliked')
   async getMeetupsDislikedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
@@ -177,7 +177,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 블락한 모임ID 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/dislikemeetupids')
+  @Get(':userId/meetupids-disliked')
   async getMeetupIdsDislikedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
@@ -189,14 +189,14 @@ export class UserMeetupsController {
   //?-------------------------------------------------------------------------//
 
   // todo. validate this meetup belongs to me
-  @ApiOperation({ description: '나를 참가신청 리스트에 추가' })
+  @ApiOperation({ description: '참가신청 리스트에 추가' })
   @PaginateQueryOptions()
   @Post(':askingUserId/joins/:askedUserId/meetups/:meetupId')
   async attachToJoinPivot(
     @Param('askingUserId', ParseIntPipe) askingUserId: number,
     @Param('askedUserId', ParseIntPipe) askedUserId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
-    @Body() dto: CreateJoinDto,
+    @Body() dto: CreateJoinDto, // optional message, and skill
   ): Promise<AnyData> {
     const meetup = await this.usersService.attachToJoinPivot(
       askingUserId,
@@ -241,8 +241,8 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 신청한 모임 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/prejoin-meetups')
-  async getMeetupsAskedByMe(
+  @Get(':userId/meetups-asked-by-me')
+  async getMeetupsToJoin(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Meetup>> {
@@ -259,11 +259,36 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '내가 신청한 모임ID 리스트' })
-  @Get(':userId/prejoin-meetupids')
-  async getMeetupIdsAskedByMe(
+  @Get(':userId/meetupids-asked-by-me')
+  async getMeetupIdsToJoin(@Param('userId') userId: number): Promise<AnyData> {
+    return this.usersService.getMeetupIdsAskedByMe(userId);
+  }
+
+  @ApiOperation({ description: '나를 초대한 모임 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/meetups-asking-me')
+  async getMeetupsAskingMeToJoin(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Meetup>> {
+    const { data, meta, links } = await this.usersService.getMeetupsAskingMe(
+      userId,
+      query,
+    );
+
+    return {
+      data: data.map((v) => v.meetup),
+      meta: meta,
+      links: links,
+    } as Paginated<Meetup>;
+  }
+
+  @ApiOperation({ description: '나를 초대한 모임ID 리스트' })
+  @Get(':userId/meetupids-asking-me')
+  async getMeetupIdsAskingMeToJoin(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
-    return this.usersService.getMeetupIdsAskedByMe(userId);
+    return this.usersService.getMeetupIdsAskingMe(userId);
   }
 
   @ApiOperation({ description: '내에게 만나자고 신청한 호구 리스트' })

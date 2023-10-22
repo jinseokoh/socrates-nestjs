@@ -23,6 +23,7 @@ import { UserUsersController } from 'src/domain/users/user-users.controller';
 import { UserImpressionsController } from 'src/domain/users/user-impressions.controller';
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
+import { Hate } from 'src/domain/users/entities/hate.entity';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
       Meetup,
       Like,
       Dislike,
+      Hate,
       Join,
     ]),
     ThrottlerModule.forRoot({
