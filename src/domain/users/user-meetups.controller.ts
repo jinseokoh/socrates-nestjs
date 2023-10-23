@@ -188,7 +188,6 @@ export class UserMeetupsController {
   //? Join Pivot
   //?-------------------------------------------------------------------------//
 
-  // todo. validate this meetup belongs to me
   @ApiOperation({ description: '참가신청 리스트에 추가' })
   @PaginateQueryOptions()
   @Post(':askingUserId/joins/:askedUserId/meetups/:meetupId')
@@ -214,7 +213,6 @@ export class UserMeetupsController {
     };
   }
 
-  // todo. validate asking/asked combo is the other way around
   @ApiOperation({ description: '매치신청 승인/거부' })
   @PaginateQueryOptions()
   @Patch(':askingUserId/joins/:askedUserId/meetups/:meetupId')
@@ -239,14 +237,14 @@ export class UserMeetupsController {
     }
   }
 
-  @ApiOperation({ description: '내가 신청한 모임 리스트' })
+  @ApiOperation({ description: '신청한 모임 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/meetups-asked-by-me')
-  async getMeetupsToJoin(
+  @Get(':userId/meetups-requested')
+  async getMeetupsRequested(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Meetup>> {
-    const { data, meta, links } = await this.usersService.getMeetupsAskedByMe(
+    const { data, meta, links } = await this.usersService.getMeetupsRequested(
       userId,
       query,
     );
@@ -258,20 +256,20 @@ export class UserMeetupsController {
     } as Paginated<Meetup>;
   }
 
-  @ApiOperation({ description: '내가 신청한 모임ID 리스트' })
-  @Get(':userId/meetupids-asked-by-me')
+  @ApiOperation({ description: '신청한 모임ID 리스트' })
+  @Get(':userId/meetupids-requested')
   async getMeetupIdsToJoin(@Param('userId') userId: number): Promise<AnyData> {
-    return this.usersService.getMeetupIdsAskedByMe(userId);
+    return this.usersService.getMeetupIdsRequested(userId);
   }
 
-  @ApiOperation({ description: '나를 초대한 모임 리스트' })
+  @ApiOperation({ description: '초대받은 모임 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/meetups-asking-me')
+  @Get(':userId/meetups-invited')
   async getMeetupsAskingMeToJoin(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Meetup>> {
-    const { data, meta, links } = await this.usersService.getMeetupsAskingMe(
+    const { data, meta, links } = await this.usersService.getMeetupsInvited(
       userId,
       query,
     );
@@ -283,31 +281,29 @@ export class UserMeetupsController {
     } as Paginated<Meetup>;
   }
 
-  @ApiOperation({ description: '나를 초대한 모임ID 리스트' })
-  @Get(':userId/meetupids-asking-me')
-  async getMeetupIdsAskingMeToJoin(
-    @Param('userId') userId: number,
-  ): Promise<AnyData> {
-    return this.usersService.getMeetupIdsAskingMe(userId);
+  @ApiOperation({ description: '초대받은 모임ID 리스트' })
+  @Get(':userId/meetupids-invited')
+  async getMeetupIdsInvited(@Param('userId') userId: number): Promise<AnyData> {
+    return this.usersService.getMeetupIdsInvited(userId);
   }
 
-  @ApiOperation({ description: '내에게 만나자고 신청한 호구 리스트' })
+  @ApiOperation({ description: '내가 신청한 사용자 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/users-asking-me-to-join')
-  async getUsersAskingMe(
+  @Get(':userId/users-requested')
+  async getUsersRequested(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Join>> {
-    return await this.usersService.getUsersAskingMe(userId, query);
+    return await this.usersService.getUsersRequested(userId, query);
   }
 
-  @ApiOperation({ description: '내가 만나자고 신청드린 상대방 리스트' })
+  @ApiOperation({ description: '나를 초대한 사용자 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/users-i-asked-to-join')
-  async getUsersAskedByMe(
+  @Get(':userId/users-invited')
+  async getUsersInvited(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Join>> {
-    return await this.usersService.getUsersAskedByMe(userId, query);
+    return await this.usersService.getUsersInvited(userId, query);
   }
 }

@@ -995,21 +995,28 @@ GROUP BY userId HAVING userId = ?',
     }
   }
 
-  // 매치신청 승인
+  // 매치신청 승인/거부
   async updateJoinToAcceptOrDeny(
     askingUserId: number,
     askedUserId: number,
     meetupId: number,
     status: JoinStatus,
-  ): Promise<any> {
+  ): Promise<void> {
     await this.repository.manager.query(
       'UPDATE `join` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
       [status, askingUserId, askedUserId, meetupId],
     );
+
+    if (status === 'accepted') {
+      // if this `join` is invitation, add askedUserId to `room`
+      console.log(``);
+      // if this `join` is request, add askingUserId to `room`
+      console.log(``);
+    }
   }
 
-  //? 내가 신청한 모임 리스트
-  async getMeetupsAskedByMe(
+  //? 신청(request)한 모임 리스트
+  async getMeetupsRequested(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Join>> {
@@ -1017,10 +1024,11 @@ GROUP BY userId HAVING userId = ?',
       .createQueryBuilder('join')
       .innerJoinAndSelect('join.meetup', 'meetup')
       .innerJoinAndSelect('meetup.venue', 'venue')
-      // .leftJoinAndSelect('join.askedUser', 'askedUser')
       .leftJoinAndSelect('meetup.user', 'user')
-      .where('meetup.userId <> :userId', { userId: userId })
-      .andWhere({ askingUserId: userId });
+      .where({
+        joinType: JoinType.REQUEST,
+        askingUserId: userId,
+      });
 
     const config: PaginateConfig<Join> = {
       sortableColumns: ['meetupId'],
@@ -1033,14 +1041,14 @@ GROUP BY userId HAVING userId = ?',
     return await paginate(query, queryBuilder, config);
   }
 
-  //? 내가 신청한 모임ID 리스트
-  async getMeetupIdsAskedByMe(userId: number): Promise<AnyData> {
+  //? 신청(request)한 모임ID 리스트
+  async getMeetupIdsRequested(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId FROM `join` \
 INNER JOIN `user` ON `user`.id = `join`.askingUserId \
 INNER JOIN `meetup` ON `meetup`.id = `join`.meetupId \
-WHERE `meetup`.userId <> user.id AND `user`.id = ?',
-      [userId],
+WHERE `joinType` = ? AND `user`.id = ?',
+      [JoinType.REQUEST, userId],
     );
 
     return {
@@ -1048,8 +1056,8 @@ WHERE `meetup`.userId <> user.id AND `user`.id = ?',
     };
   }
 
-  //? 나를 초대한 모임 리스트
-  async getMeetupsAskingMe(
+  //? 초대(invitation)받은 모임 리스트
+  async getMeetupsInvited(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Join>> {
@@ -1057,10 +1065,11 @@ WHERE `meetup`.userId <> user.id AND `user`.id = ?',
       .createQueryBuilder('join')
       .innerJoinAndSelect('join.meetup', 'meetup')
       .innerJoinAndSelect('meetup.venue', 'venue')
-      // .leftJoinAndSelect('join.askedUser', 'askedUser')
       .leftJoinAndSelect('meetup.user', 'user')
-      .where('meetup.userId <> :userId', { userId: userId })
-      .andWhere({ askedUserId: userId });
+      .where({
+        joinType: JoinType.INVITATION,
+        askedUserId: userId,
+      });
 
     const config: PaginateConfig<Join> = {
       sortableColumns: ['meetupId'],
@@ -1074,13 +1083,13 @@ WHERE `meetup`.userId <> user.id AND `user`.id = ?',
   }
 
   //? 나를 초대한 모임ID 리스트
-  async getMeetupIdsAskingMe(userId: number): Promise<AnyData> {
+  async getMeetupIdsInvited(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId FROM `join` \
 INNER JOIN `user` ON `user`.id = `join`.askedUserId \
 INNER JOIN `meetup` ON `meetup`.id = `join`.meetupId \
-WHERE `meetup`.userId <> user.id AND `user`.id = ?',
-      [userId],
+WHERE `joinType` = ? AND `user`.id = ?',
+      [JoinType.INVITATION, userId],
     );
 
     return {
@@ -1088,8 +1097,37 @@ WHERE `meetup`.userId <> user.id AND `user`.id = ?',
     };
   }
 
-  // 내에게 만나자고 신청한 호구 리스트
-  async getUsersAskingMe(
+  //! 내가 신청한 사용자 리스트 (deprecated at the moment) : askedUser 나 meetup.user 나 동일하다.
+  async getUsersRequested(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Join>> {
+    const queryBuilder = this.joinRepository
+      .createQueryBuilder('join')
+      .innerJoinAndSelect('join.meetup', 'meetup')
+      .innerJoinAndSelect('meetup.venue', 'venue')
+      .leftJoinAndSelect('meetup.user', 'user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .where({
+        joinType: JoinType.REQUEST,
+        askingUserId: userId,
+      });
+
+    const config: PaginateConfig<Join> = {
+      sortableColumns: ['meetupId'],
+      searchableColumns: ['meetup.title'],
+      defaultLimit: 20,
+      defaultSortBy: [['meetupId', 'DESC']],
+      filterableColumns: {
+        status: [FilterOperator.EQ],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  //! 나를 초대한 사용자 리스트 (deprecated at the moment) : askingUser 나 meetup.user 나 동일하다.
+  async getUsersInvited(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Join>> {
@@ -1102,42 +1140,15 @@ WHERE `meetup`.userId <> user.id AND `user`.id = ?',
       // .leftJoinAndSelect('join.askedUser', 'askedUser')
       // .leftJoinAndSelect('askedUser.profile', 'askedUserProfile')
       .where({
+        joinType: JoinType.INVITATION,
         askedUserId: userId,
       });
 
     const config: PaginateConfig<Join> = {
-      sortableColumns: ['createdAt'],
+      sortableColumns: ['meetupId'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
-      filterableColumns: {
-        status: [FilterOperator.EQ],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // 내가 만나자고 신청드린 상대방 리스트
-  async getUsersAskedByMe(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Join>> {
-    const queryBuilder = this.joinRepository
-      .createQueryBuilder('join')
-      .leftJoinAndSelect('join.meetup', 'meetup')
-      .leftJoinAndSelect('meetup.venue', 'venue')
-      .leftJoinAndSelect('join.askedUser', 'askedUser')
-      .leftJoinAndSelect('askedUser.profile', 'profile')
-      .where({
-        askingUserId: userId,
-      });
-
-    const config: PaginateConfig<Join> = {
-      sortableColumns: ['createdAt'],
-      searchableColumns: ['meetup.title'],
-      defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
+      defaultSortBy: [['meetupId', 'DESC']],
       filterableColumns: {
         status: [FilterOperator.EQ],
       },
