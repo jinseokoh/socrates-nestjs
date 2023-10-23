@@ -20,7 +20,7 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Status } from 'src/common/enums/status';
+import { JoinStatus } from 'src/common/enums/join-status';
 import { AnyData, SignedUrl } from 'src/common/types';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
@@ -53,7 +53,7 @@ import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto'
 import { initialUsername } from 'src/helpers/random-username';
 import { SesService } from 'src/services/aws/ses.service';
 import { CreateLedgerDto } from 'src/domain/ledgers/dto/create-ledger.dto';
-import { Ledger as LedgerType } from 'src/common/enums';
+import { JoinType, Ledger as LedgerType } from 'src/common/enums';
 import { LedgersService } from 'src/domain/ledgers/ledgers.service';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 
@@ -741,28 +741,6 @@ GROUP BY userId HAVING userId = ?',
       'INSERT IGNORE INTO `hate` (hatingUserId, hatedUserId, message) VALUES (?, ?, ?)',
       [hatingUserId, hatedUserId, message],
     );
-
-    // if (affectedRows > 0) {
-    //   //
-    //   // 대상회원이 만든 모임의 차단처리
-    //   //
-    //   const meetups = await this.meetupRepository.find({
-    //     select: {
-    //       id: true,
-    //     },
-    //     where: {
-    //       userId: hatedUserId,
-    //     },
-    //   });
-    //   await Promise.all(
-    //     meetups.map(async (v) => {
-    //       await this.repository.manager.query(
-    //         'INSERT IGNORE INTO `dislike` (userId, meetupId, message) VALUES (?, ?, ?)',
-    //         [hatingUserId, v.id, `${hatingUserId} hates ${hatedUserId}`],
-    //       );
-    //     }),
-    //   );
-    // }
   }
 
   // 블락한 사용자 리스트에서 삭제
@@ -774,26 +752,6 @@ GROUP BY userId HAVING userId = ?',
       'DELETE FROM `hate` WHERE hatingUserId = ? AND hatedUserId = ?',
       [hatingUserId, hatedUserId],
     );
-
-    // if (affectedRows > 0) {
-    //   //
-    //   // 대상회원이 만든 모임의 차단처리 취소
-    //   //
-    //   const meetups = await this.meetupRepository.find({
-    //     select: {
-    //       id: true,
-    //     },
-    //     where: {
-    //       userId: hatedUserId,
-    //     },
-    //   });
-
-    //   const ids = meetups.map((v) => v.id);
-    //   await this.repository.manager.query(
-    //     'DELETE FROM `dislike` WHERE userId = ? AND meetupId IN (?)',
-    //     [hatingUserId, ids],
-    //   );
-    // }
   }
 
   // 내가 블락한 사용자 리스트
@@ -1000,7 +958,7 @@ GROUP BY userId HAVING userId = ?',
   //? Join Pivot
   //?-------------------------------------------------------------------------//
 
-  // 나의 신청리스트에 추가
+  // 신청리스트에 추가
   async attachToJoinPivot(
     askingUserId: number,
     askedUserId: number,
@@ -1012,8 +970,9 @@ GROUP BY userId HAVING userId = ?',
       relations: ['joins'],
     });
 
+    let joinType = JoinType.REQUEST;
     if (meetup.userId == askedUserId) {
-      // 1. 방장에게 asking 하는 경우, 30명 까지로 제한.
+      // 1. 방장에게 신청하는 경우, 30명 까지로 제한.
       if (
         meetup.joins.filter((v) => meetup.userId === v.askedUserId).length > 30
       ) {
@@ -1021,15 +980,15 @@ GROUP BY userId HAVING userId = ?',
       }
       // await this.attachToLikePivot(askingUserId, meetupId);
     } else {
-      // 2. 방장이 찜한 사람에게 asking 하는 경우, 갯수 제한 없음.
+      // 2. 방장이 초대하는 경우, 갯수 제한 없음.
+      joinType = JoinType.INVITATION;
     }
 
     try {
       await this.repository.manager.query(
-        'INSERT IGNORE INTO `join` (askingUserId, askedUserId, meetupId, message, skill) VALUES (?, ?, ?, ?, ?)',
-        [askingUserId, askedUserId, meetupId, dto.message, dto.skill],
+        'INSERT IGNORE INTO `join` (askingUserId, askedUserId, meetupId, message, skill, joinType) VALUES (?, ?, ?, ?, ?, ?)',
+        [askingUserId, askedUserId, meetupId, dto.message, dto.skill, joinType],
       );
-
       return meetup;
     } catch (e) {
       throw new BadRequestException('database has gone crazy.');
@@ -1041,7 +1000,7 @@ GROUP BY userId HAVING userId = ?',
     askingUserId: number,
     askedUserId: number,
     meetupId: number,
-    status: Status,
+    status: JoinStatus,
   ): Promise<any> {
     await this.repository.manager.query(
       'UPDATE `join` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',

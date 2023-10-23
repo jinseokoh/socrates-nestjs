@@ -76,26 +76,21 @@ export class MeetupsService {
     );
     meetup.venue = venue;
 
-    // todo. 2) update user's interests
-    // await this.usersService.upsertCategoryWithSkill(
-    //   askingUserId,
-    //   meetup.subCategory,
-    //   dto.skill,
-    // );
-
-    // 3) prevent users blocked this poster from seeing this new post.
-    const blockedUsers = await this.repository.manager.query(
-      'SELECT hatingUserId AS id FROM `hate` WHERE hatedUserId = ?',
-      [dto.userId],
-    );
-    await Promise.all(
-      blockedUsers.map(async (user) => {
-        await this.repository.manager.query(
-          'INSERT IGNORE INTO `dislike` (userId, meetupId, message) VALUES (?, ?, ?)',
-          [user.id, meetup.id, `${user.id} hates ${dto.userId}`],
-        );
-      }),
-    );
+    // 2) update user's interests
+    const category = await this.categoryRepository.findOneBy({
+      slug: dto.subCategory,
+    });
+    if (category !== null) {
+      await this.repository.manager.query(
+        'INSERT IGNORE INTO `interest` \
+  (userId, categoryId, skill) VALUES (?, ?, ?) \
+  ON DUPLICATE KEY UPDATE \
+  userId = VALUES(`userId`), \
+  categoryId = VALUES(`categoryId`), \
+  skill = VALUES(`skill`)',
+        [dto.userId, category.id, dto.skill],
+      );
+    }
 
     return meetup;
   }
