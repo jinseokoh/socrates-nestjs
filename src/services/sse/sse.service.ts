@@ -23,6 +23,12 @@ export class SseService {
     return this;
   }
 
+  // additional ref) https://ncjamieson.com/closed-subjects/
+  close(channel: number) {
+    SseService.subjectz[channel] = null;
+    this.streamz$[channel] = null;
+  }
+
   fire(channel: number, type: string, data: object) {
     SseService.subjectz[channel].next({ type, data });
   }

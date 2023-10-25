@@ -38,6 +38,9 @@ export class MessagesController {
 
   @EventPattern('sse.add_chat')
   handleSseComments(data: any): void {
+    // todo. record a footprint of data.meetupId to redis w/ timestamp
+    // todo. check every once in a while to see if any stalled record exists
+    // todo. call this.sseService.close(data.meetupId) to clean up
     this.sseService
       .for(data.meetupId)
       .fire(data.meetupId, 'sse.add_chat', data);
