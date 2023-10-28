@@ -58,25 +58,40 @@ export class MeetupsService {
   // Meetup 생성
   async create(dto: CreateMeetupDto): Promise<any> {
     const user = await this.userRepository.findOne({
-      where: { id: dto.userId },
+      where: {
+        id: dto.userId,
+      },
     });
     if (!user || user?.isBanned) {
       throw new BadRequestException(`not allowed to create`);
     }
 
-    // 1) create model and the relationship
+    //? 1) create model and the relationship
     const _meetup = this.repository.create(dto);
     const categories = await this._getCategoriesBySlug(dto.subCategory);
     const careers = await this._getCareersBySlugs(dto.targetCareers);
+    let venue = await this.venueRepository.findOne({
+      where: {
+        providerId: dto.venue.providerId,
+      },
+    });
+    if (!venue) {
+      venue = await this.venueRepository.save(
+        this.venueRepository.create(dto.venue),
+      );
+    }
     _meetup.categories = categories;
     _meetup.careers = careers;
+    _meetup.venue = venue;
     const meetup = await this.repository.save(_meetup);
-    const venue = await this.venueRepository.save(
-      this.venueRepository.create({ ...dto.venue, meetupId: meetup.id }),
-    );
-    meetup.venue = venue;
 
-    // 2) update user's interests
+    //? 2) insert a new room record
+    await this.repository.manager.query(
+      'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
+      ['host', dto.userId, meetup.id],
+    );
+
+    //? 3) update user's interests
     const category = await this.categoryRepository.findOneBy({
       slug: dto.subCategory,
     });

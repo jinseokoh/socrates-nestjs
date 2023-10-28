@@ -351,6 +351,13 @@ export class CategoriesService {
     await this.repository.manager.save(leisure);
 
     leisure = new Category({
+      slug: SubCategory.POPUP,
+      depth: 2,
+      parent: leisureRoot,
+    });
+    await this.repository.manager.save(leisure);
+
+    leisure = new Category({
       slug: SubCategory.PARK,
       depth: 2,
       parent: leisureRoot,

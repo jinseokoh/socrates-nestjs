@@ -1001,6 +1001,7 @@ GROUP BY userId HAVING userId = ?',
     askedUserId: number,
     meetupId: number,
     status: JoinStatus,
+    joinType: JoinType,
   ): Promise<void> {
     await this.repository.manager.query(
       'UPDATE `join` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
@@ -1008,10 +1009,19 @@ GROUP BY userId HAVING userId = ?',
     );
 
     if (status === 'accepted') {
-      // if this `join` is invitation, add askedUserId to `room`
-      console.log(``);
-      // if this `join` is request, add askingUserId to `room`
-      console.log(``);
+      if (joinType === JoinType.REQUEST) {
+        // 모임 신청 (add askingUserId to `room`)
+        await this.repository.manager.query(
+          'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
+          ['guest', askingUserId, meetupId],
+        );
+      } else {
+        // 모임 초대 (add askedUserId to `room`)
+        await this.repository.manager.query(
+          'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
+          ['guest', askedUserId, meetupId],
+        );
+      }
     }
   }
 

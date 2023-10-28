@@ -4,8 +4,8 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import {
   Column,
   Entity,
-  JoinColumn,
-  OneToOne,
+  Index,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -18,15 +18,15 @@ export class Venue {
   @ApiProperty({ description: '장소명' })
   name: string;
 
-  @Column({ length: 128, nullable: true }) // from Auction
+  @Column({ length: 128, nullable: true })
   @ApiProperty({ description: '주소' })
   address?: string | null;
 
-  @Column({ length: 255, nullable: false }) // from Auction
+  @Column({ length: 255, nullable: false })
   @ApiProperty({ description: 'image' })
   image: string;
 
-  @Column({ length: 128, nullable: true }) // from Auction
+  @Column({ length: 128, nullable: true })
   @ApiProperty({ description: 'comma separated hashtags for this venue' })
   tags?: string | null;
 
@@ -49,8 +49,9 @@ export class Venue {
   @ApiProperty({ description: '경도' })
   longitude: number;
 
+  @Index()
   @Column({ length: 32 })
-  @ApiProperty({ description: '네이버 장소ID, 방구석은 empty' })
+  @ApiProperty({ description: '네이버 장소ID, 방구석은 `home${userId}`' })
   providerId: string;
 
   //**--------------------------------------------------------------------------*/
@@ -67,13 +68,8 @@ export class Venue {
   // user: User;
 
   //**--------------------------------------------------------------------------*/
-  //** 1-to-1 belongsToOne
+  //** 1-to-many hasMany
 
-  @Exclude()
-  @Column({ type: 'int', unsigned: true })
-  meetupId: number; // to make it available to Repository.
-
-  @OneToOne(() => Meetup, (meetup) => meetup.venue)
-  @JoinColumn()
-  meetup: Meetup;
+  @OneToMany(() => Meetup, (meetup) => meetup.venue)
+  meetups: Meetup[];
 }

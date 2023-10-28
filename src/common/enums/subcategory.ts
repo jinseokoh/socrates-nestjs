@@ -40,6 +40,7 @@ export enum SubCategory {
   THEATER = 'theater', // 연극
   CONCERT = 'concert', // 콘서트
   STADIUM = 'stadium', // 스포츠관람
+  POPUP = 'popup', // 팝업스토어
   EXHIBITION = 'exhibition', // 전시공연
   PARK = 'park', // 공원
   OTHER_LEISURE = 'otherLeisure',

@@ -177,14 +177,6 @@ export class Meetup {
   deletedAt: Date | null;
 
   //**--------------------------------------------------------------------------*/
-  //** 1-to-1 hasOne
-
-  @OneToOne(() => Venue, (venue) => venue.meetup, {
-    // cascade: ['insert', 'update'],
-  })
-  venue?: Venue;
-
-  //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
   @Exclude()
@@ -195,6 +187,15 @@ export class Meetup {
     onDelete: 'CASCADE',
   })
   user?: User;
+
+  @Exclude()
+  @Column({ type: 'int', unsigned: true })
+  venueId: number; // to make it available to Repository.
+
+  @ManyToOne(() => Venue, (venue) => venue.meetups, {
+    onDelete: 'CASCADE',
+  })
+  venue?: Venue;
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany using one-to-many

@@ -17,10 +17,11 @@ import { AnyData } from 'src/common/types';
 import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { JoinStatus } from 'src/common/enums';
+import { JoinStatus, JoinType } from 'src/common/enums';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
+import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -220,14 +221,15 @@ export class UserMeetupsController {
     @Param('askingUserId', ParseIntPipe) askingUserId: number,
     @Param('askedUserId', ParseIntPipe) askedUserId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
-    @Body('status') status: JoinStatus,
+    @Body() dto: AcceptOrDenyDto,
   ): Promise<AnyData> {
     try {
       await this.usersService.updateJoinToAcceptOrDeny(
         askingUserId,
         askedUserId,
         meetupId,
-        status,
+        JoinStatus[dto.status],
+        JoinType[dto.joinType],
       );
       return {
         data: 'ok',

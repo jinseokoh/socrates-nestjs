@@ -30,11 +30,6 @@ export class CreateVenueDto {
   @IsString()
   providerId: string; // id as id
 
-  @ApiProperty({ description: 'Meetup ID', required: true })
-  @IsNumber()
-  @IsOptional()
-  meetupId?: number; // id as id
-
   @Expose()
   public get isOnlineVenue(): boolean {
     console.log('is this even called in venue?');
