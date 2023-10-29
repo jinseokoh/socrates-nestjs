@@ -12,6 +12,7 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
 import { ContentsService } from 'src/domain/contents/contents.service';
 import { CreateContentDto } from 'src/domain/contents/dto/create-content.dto';
 import { UpdateContentDto } from 'src/domain/contents/dto/update-content.dto';
@@ -36,6 +37,7 @@ export class ContentsController {
   //? READ
   //?-------------------------------------------------------------------------//
 
+  @Public()
   @ApiOperation({ description: '공지사항 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get()
