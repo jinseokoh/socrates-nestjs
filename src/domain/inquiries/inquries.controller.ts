@@ -48,6 +48,7 @@ export class InquiriesController {
   async getInquries(
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Inquiry>> {
+    console.log(query);
     return await this.inquiriesService.findAll(query);
   }
 

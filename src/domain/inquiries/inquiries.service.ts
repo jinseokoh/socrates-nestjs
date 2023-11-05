@@ -40,13 +40,14 @@ export class InquiriesService {
 
   async findAll(query: PaginateQuery): Promise<Paginated<Inquiry>> {
     return await paginate(query, this.repository, {
+      relations: ['user', 'comments'], // can be removed.
       sortableColumns: ['id'],
       searchableColumns: ['title'],
-      defaultSortBy: [['id', 'ASC']],
+      defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         inquiryType: [FilterOperator.EQ],
+        userId: [FilterOperator.EQ],
       },
-      relations: ['user', 'comments'], // can be removed.
     });
   }
 
