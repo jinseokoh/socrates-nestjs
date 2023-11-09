@@ -3,18 +3,24 @@ import {
   IsArray,
   IsEnum,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { InquiryType } from 'src/common/enums/inquiry-type';
+import { ITargetEntity } from 'src/domain/inquiries/entities/target-entity.interface';
 
 export class CreateInquiryDto {
+  @ApiProperty({ description: 'TargetEntity', required: false })
+  @IsObject()
+  @IsOptional()
+  targetEntity?: ITargetEntity;
+
   @ApiProperty({
     description: '질문유형',
     default: InquiryType.OTHER,
   })
   @IsEnum(InquiryType)
-  @IsOptional()
   inquiryType?: InquiryType = InquiryType.OTHER;
 
   @ApiProperty({ description: '질문' })

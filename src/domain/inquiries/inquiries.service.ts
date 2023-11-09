@@ -30,8 +30,25 @@ export class InquiriesService {
   //?-------------------------------------------------------------------------//
 
   async create(dto: CreateInquiryDto): Promise<Inquiry> {
-    const question = this.repository.create(dto);
-    return await this.repository.save(question);
+    const entity = this.repository.create(dto);
+    const inquiry = await this.repository.save(entity);
+
+    if (dto.targetEntity) {
+      if (dto.targetEntity.model === 'meetup') {
+        await this.repository.manager.query(
+          'INSERT IGNORE INTO `inquiry_target_meetup` (inquiryId, meetupId) VALUES (?, ?)',
+          [inquiry.id, dto.targetEntity.id],
+        );
+      }
+      if (dto.targetEntity.model === 'user') {
+        await this.repository.manager.query(
+          'INSERT IGNORE INTO `inquiry_target_user` (inquiryId, userId) VALUES (?, ?)',
+          [inquiry.id, dto.targetEntity.id],
+        );
+      }
+    }
+
+    return inquiry;
   }
 
   //?-------------------------------------------------------------------------//
@@ -40,7 +57,7 @@ export class InquiriesService {
 
   async findAll(query: PaginateQuery): Promise<Paginated<Inquiry>> {
     return await paginate(query, this.repository, {
-      relations: ['user', 'comments'], // can be removed.
+      relations: ['user', 'comments', 'flaggedMeetups', 'flaggedUsers'], // can be removed.
       sortableColumns: ['id'],
       searchableColumns: ['title'],
       defaultSortBy: [['id', 'DESC']],
