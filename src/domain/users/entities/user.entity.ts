@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -191,10 +192,8 @@ export class User {
   // @JoinTable({ name: 'meetup_region' }) // owning side
   // regions: Region[];
 
-  // used to have this many to many relationship.
-  // @ManyToMany(() => Category, (category) => category.users)
-  // @JoinTable({ name: 'user_category' }) // owning side
-  // categories: Category[];
+  @ManyToMany(() => Inquiry, (inquiry) => inquiry.flaggedUsers)
+  flaggedInquiries: Inquiry[];
 
   //?-------------------------------------------------------------------------?/
   //? constructor

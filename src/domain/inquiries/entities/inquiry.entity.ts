@@ -7,12 +7,15 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 
 @Entity()
 export class Inquiry {
@@ -42,10 +45,6 @@ export class Inquiry {
   @ApiProperty({ description: 'view count' })
   viewCount: number;
 
-  @Column({ default: false })
-  @ApiProperty({ description: '신고여부' })
-  isFlagged: boolean;
-
   @CreateDateColumn()
   createdAt: Date;
 
@@ -74,6 +73,17 @@ export class Inquiry {
     // cascade: ['insert', 'update'],
   })
   comments: Comment[];
+
+  //**--------------------------------------------------------------------------*/
+  //** many-to-many belongsToMany
+
+  @ManyToMany(() => User, (user) => user.flaggedInquiries)
+  @JoinTable({ name: 'inquiry_target_user' }) // owning side
+  flaggedUsers: User[];
+
+  @ManyToMany(() => Meetup, (meetup) => meetup.flaggedInquiries)
+  @JoinTable({ name: 'inquiry_target_meetup' }) // owning side
+  flaggedMeetups: Meetup[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

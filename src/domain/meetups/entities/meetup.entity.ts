@@ -34,6 +34,7 @@ import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
+import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 
 @Entity()
 export class Meetup {
@@ -225,6 +226,9 @@ export class Meetup {
   @ManyToMany(() => Category, (category) => category.meetups)
   @JoinTable({ name: 'meetup_category' }) // owning side
   categories: Category[];
+
+  @ManyToMany(() => Inquiry, (inquiry) => inquiry.flaggedMeetups)
+  flaggedInquiries: Inquiry[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
