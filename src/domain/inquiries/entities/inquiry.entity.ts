@@ -22,7 +22,7 @@ export class Inquiry {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
-  @Column({ type: 'enum', enum: InquiryType, default: InquiryType.OTHER })
+  @Column({ type: 'enum', enum: InquiryType, default: InquiryType.GENERAL })
   inquiryType: InquiryType;
 
   @Column({ length: 255, nullable: true })

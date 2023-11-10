@@ -18,10 +18,10 @@ export class CreateInquiryDto {
 
   @ApiProperty({
     description: '질문유형',
-    default: InquiryType.OTHER,
+    default: InquiryType.GENERAL,
   })
   @IsEnum(InquiryType)
-  inquiryType?: InquiryType = InquiryType.OTHER;
+  inquiryType?: InquiryType = InquiryType.GENERAL;
 
   @ApiProperty({ description: '질문' })
   @IsString()
