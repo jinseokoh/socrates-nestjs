@@ -99,14 +99,6 @@ export class InquiryCommentsController {
   @ApiOperation({ description: '관리자) 댓글 soft 삭제' })
   @Delete(':inquiryId/comments/:commentId')
   async remove(@Param('commentId') id: number): Promise<Comment> {
-    const comment = await this.commentsService.findByUniqueKey({
-      where: { parentId: id },
-    });
-    if (comment) {
-      // 대댓글이 있으면 모두 삭제
-      await this.commentsService.softRemove(comment.id);
-    }
-
     return await this.commentsService.softRemove(id);
   }
 }
