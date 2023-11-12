@@ -239,23 +239,23 @@ export class UserMeetupsController {
     }
   }
 
-  @ApiOperation({ description: '신청한 모임 리스트' })
+  @ApiOperation({ description: '보낸 신청 리스트' })
   @PaginateQueryOptions()
   @Get(':userId/meetups-requested')
   async getMeetupsRequested(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Meetup>> {
+  ): Promise<Paginated<Join>> {
     const { data, meta, links } = await this.usersService.getMeetupsRequested(
       userId,
       query,
     );
 
     return {
-      data: data.map((v) => v.meetup),
+      data: data,
       meta: meta,
       links: links,
-    } as Paginated<Meetup>;
+    }; // as Paginated<Join>;
   }
 
   @ApiOperation({ description: '신청한 모임ID 리스트' })
@@ -264,23 +264,23 @@ export class UserMeetupsController {
     return this.usersService.getMeetupIdsRequested(userId);
   }
 
-  @ApiOperation({ description: '초대받은 모임 리스트' })
+  @ApiOperation({ description: '받은 초대 리스트' })
   @PaginateQueryOptions()
   @Get(':userId/meetups-invited')
   async getMeetupsAskingMeToJoin(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Meetup>> {
+  ): Promise<Paginated<Join>> {
     const { data, meta, links } = await this.usersService.getMeetupsInvited(
       userId,
       query,
     );
 
     return {
-      data: data.map((v) => v.meetup),
+      data: data,
       meta: meta,
       links: links,
-    } as Paginated<Meetup>;
+    }; // as Paginated<Join>;
   }
 
   @ApiOperation({ description: '초대받은 모임ID 리스트' })
