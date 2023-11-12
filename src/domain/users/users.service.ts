@@ -1008,7 +1008,7 @@ GROUP BY userId HAVING userId = ?',
       [status, askingUserId, askedUserId, meetupId],
     );
 
-    if (status === 'accepted') {
+    if (status === JoinStatus.ACCEPTED) {
       if (joinType === JoinType.REQUEST) {
         // 모임 신청 (add askingUserId to `room`)
         await this.repository.manager.query(

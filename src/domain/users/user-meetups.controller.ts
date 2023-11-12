@@ -228,8 +228,8 @@ export class UserMeetupsController {
         askingUserId,
         askedUserId,
         meetupId,
-        JoinStatus[dto.status],
-        JoinType[dto.joinType],
+        dto.status,
+        dto.joinType,
       );
       return {
         data: 'ok',
