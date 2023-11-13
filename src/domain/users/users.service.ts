@@ -1034,7 +1034,8 @@ GROUP BY userId HAVING userId = ?',
       .createQueryBuilder('join')
       .innerJoinAndSelect('join.meetup', 'meetup')
       .innerJoinAndSelect('meetup.venue', 'venue')
-      .leftJoinAndSelect('meetup.user', 'user')
+      .innerJoinAndSelect('meetup.user', 'user')
+      .leftJoinAndSelect('meetup.joins', 'joins')
       .where({
         joinType: JoinType.REQUEST,
         askingUserId: userId,
@@ -1075,7 +1076,8 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .createQueryBuilder('join')
       .innerJoinAndSelect('join.meetup', 'meetup')
       .innerJoinAndSelect('meetup.venue', 'venue')
-      .leftJoinAndSelect('meetup.user', 'user')
+      .innerJoinAndSelect('meetup.user', 'user')
+      .leftJoinAndSelect('meetup.joins', 'joins')
       .where({
         joinType: JoinType.INVITATION,
         askedUserId: userId,
