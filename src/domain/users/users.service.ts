@@ -580,11 +580,10 @@ GROUP BY userId HAVING userId = ?',
   ): Promise<Paginated<Meetup>> {
     const queryBuilder = this.meetupRepository
       .createQueryBuilder('meetup')
-      .leftJoinAndSelect('meetup.venue', 'venue')
-      .leftJoinAndSelect('meetup.joins', 'join')
-      .leftJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('join.askingUser', 'askingUser')
-      .leftJoinAndSelect('join.askedUser', 'askedUser')
+      .innerJoinAndSelect('meetup.venue', 'venue')
+      .innerJoinAndSelect('meetup.user', 'user')
+      .leftJoinAndSelect('meetup.rooms', 'rooms')
+      .leftJoinAndSelect('rooms.user', 'participant')
       .where({
         userId,
       });
@@ -844,8 +843,11 @@ GROUP BY userId HAVING userId = ?',
   ): Promise<Paginated<Like>> {
     const queryBuilder = this.likeRepository
       .createQueryBuilder('like')
-      .leftJoinAndSelect('like.meetup', 'meetup')
-      .leftJoinAndSelect('meetup.venue', 'venue')
+      .innerJoinAndSelect('like.meetup', 'meetup')
+      .innerJoinAndSelect('meetup.venue', 'venue')
+      .innerJoinAndSelect('meetup.user', 'user')
+      .leftJoinAndSelect('meetup.rooms', 'rooms')
+      .leftJoinAndSelect('rooms.user', 'participant')
       .where({
         userId,
       });
@@ -1035,7 +1037,8 @@ GROUP BY userId HAVING userId = ?',
       .innerJoinAndSelect('join.meetup', 'meetup')
       .innerJoinAndSelect('meetup.venue', 'venue')
       .innerJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('meetup.joins', 'joins')
+      .leftJoinAndSelect('meetup.rooms', 'rooms')
+      .leftJoinAndSelect('rooms.user', 'participant')
       .where({
         joinType: JoinType.REQUEST,
         askingUserId: userId,
@@ -1077,7 +1080,8 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .innerJoinAndSelect('join.meetup', 'meetup')
       .innerJoinAndSelect('meetup.venue', 'venue')
       .innerJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('meetup.joins', 'joins')
+      .leftJoinAndSelect('meetup.rooms', 'rooms')
+      .leftJoinAndSelect('rooms.user', 'participant')
       .where({
         joinType: JoinType.INVITATION,
         askedUserId: userId,
