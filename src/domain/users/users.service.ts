@@ -1024,6 +1024,22 @@ GROUP BY userId HAVING userId = ?',
           ['guest', askedUserId, meetupId],
         );
       }
+
+      const [{ max }] = await this.repository.manager.query(
+        'SELECT max FROM `meetup` WHERE id = ?',
+        [meetupId],
+      );
+      const [{ count }] = await this.repository.manager.query(
+        'SELECT COUNT(*) AS count FROM `room` WHERE meetupId = ?',
+        [meetupId],
+      );
+
+      if (max >= +count) {
+        await this.repository.manager.query(
+          'UPDATE `meetup` SET isFull = 1 WHERE id = ?',
+          [meetupId],
+        );
+      }
     }
   }
 

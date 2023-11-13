@@ -214,7 +214,7 @@ export class UserMeetupsController {
     };
   }
 
-  @ApiOperation({ description: '매치신청 승인/거부' })
+  @ApiOperation({ description: '참가신청 승인/거부' })
   @PaginateQueryOptions()
   @Patch(':askingUserId/joins/:askedUserId/meetups/:meetupId')
   async updateJoinToAcceptOrDeny(
