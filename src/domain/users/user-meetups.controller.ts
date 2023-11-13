@@ -267,7 +267,7 @@ export class UserMeetupsController {
   @ApiOperation({ description: '받은 초대 리스트' })
   @PaginateQueryOptions()
   @Get(':userId/meetups-invited')
-  async getMeetupsAskingMeToJoin(
+  async getMeetupsInvited(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Join>> {
@@ -288,6 +288,8 @@ export class UserMeetupsController {
   async getMeetupIdsInvited(@Param('userId') userId: number): Promise<AnyData> {
     return this.usersService.getMeetupIdsInvited(userId);
   }
+
+  //--------------------------------------------------- @deprecated
 
   @ApiOperation({ description: '내가 신청한 사용자 리스트' })
   @PaginateQueryOptions()
