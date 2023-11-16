@@ -1,4 +1,4 @@
-export enum ContentCategory {
+export enum ContentType {
   ANNOUNCEMENTS = 'announcements',
   CAMPAIGNS = 'campaigns',
   EVENTS = 'events',

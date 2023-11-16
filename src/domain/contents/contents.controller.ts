@@ -48,16 +48,16 @@ export class ContentsController {
   }
 
   @ApiOperation({ description: '공지사항 상세보기' })
-  @Get(':slug/slug')
-  async getContentBySlug(@Param('slug') slug: string): Promise<Content> {
-    return await this.contentsService.findBySlug(slug);
-  }
-
-  @ApiOperation({ description: '공지사항 상세보기' })
   @Get(':id')
   async getContentById(@Param('id') id: number): Promise<Content> {
     return await this.contentsService.findById(id);
   }
+
+  // @ApiOperation({ description: '공지사항 상세보기' })
+  // @Get(':slug/slug')
+  // async getContentBySlug(@Param('slug') slug: string): Promise<Content> {
+  //   return await this.contentsService.findBySlug(slug);
+  // }
 
   //?-------------------------------------------------------------------------//
   //? UPDATE

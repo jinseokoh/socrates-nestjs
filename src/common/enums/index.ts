@@ -1,8 +1,8 @@
 // export * from './availability'; // unused
 export * from './career';
 export * from './category';
-export * from './content-category';
-export * from './content-subcategory';
+export * from './content-type';
+export * from './button-type';
 export * from './day';
 export * from './expense';
 export * from './gender';

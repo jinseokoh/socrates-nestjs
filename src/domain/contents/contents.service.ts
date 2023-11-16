@@ -32,9 +32,7 @@ export class ContentsService {
 
   // 리스트
   async findAll(query: PaginateQuery): Promise<Paginated<Content>> {
-    const queryBuilder = this.repository
-      .createQueryBuilder('content')
-      .where({ isPublished: true });
+    const queryBuilder = this.repository.createQueryBuilder('content');
 
     const config: PaginateConfig<Content> = {
       sortableColumns: ['id', 'title'],
@@ -42,8 +40,7 @@ export class ContentsService {
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         id: [FilterOperator.IN, FilterOperator.EQ],
-        slug: [FilterOperator.EQ],
-        category: [FilterOperator.EQ],
+        contentType: [FilterOperator.EQ],
         isPublished: [FilterOperator.EQ],
       },
     };
@@ -54,6 +51,7 @@ export class ContentsService {
   // 상세보기
   async findById(id: number, relations: string[] = []): Promise<Content> {
     try {
+      await this.increaseViewCount(id);
       return relations.length > 0
         ? await this.repository.findOneOrFail({
             where: { id },
@@ -67,20 +65,20 @@ export class ContentsService {
     }
   }
 
-  async findBySlug(slug: string, relations: string[] = []): Promise<Content> {
-    try {
-      return relations.length > 0
-        ? await this.repository.findOneOrFail({
-            where: { slug },
-            relations,
-          })
-        : await this.repository.findOneOrFail({
-            where: { slug },
-          });
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
-  }
+  // async findBySlug(slug: string, relations: string[] = []): Promise<Content> {
+  //   try {
+  //     return relations.length > 0
+  //       ? await this.repository.findOneOrFail({
+  //           where: { slug },
+  //           relations,
+  //         })
+  //       : await this.repository.findOneOrFail({
+  //           where: { slug },
+  //         });
+  //   } catch (e) {
+  //     throw new NotFoundException('entity not found');
+  //   }
+  // }
 
   async count(title: string): Promise<number> {
     return await this.repository.count({
@@ -100,6 +98,27 @@ export class ContentsService {
       throw new NotFoundException(`entity not found`);
     }
     return await this.repository.save(content);
+  }
+
+  async increaseViewCount(id: number): Promise<void> {
+    await this.repository.manager.query(
+      'UPDATE `content` SET viewCount = viewCount + 1 WHERE id = ?',
+      [id],
+    );
+  }
+
+  async increaseLikeCount(id: number): Promise<void> {
+    await this.repository.manager.query(
+      'UPDATE `content` SET likeCount = likeCount + 1 WHERE id = ?',
+      [id],
+    );
+  }
+
+  async decreaseLikeCount(id: number): Promise<void> {
+    await this.repository.manager.query(
+      'UPDATE `content` SET likeCount = likeCount - 1 WHERE id = ? AND likeCount > 0',
+      [id],
+    );
   }
 
   //?-------------------------------------------------------------------------//

@@ -1,17 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
-import { ContentCategory } from 'src/common/enums';
+import { ContentType } from 'src/common/enums';
 export class CreateContentDto {
-  @ApiProperty({ description: 'Slug' })
-  @IsString()
-  slug: string;
-
   @ApiProperty({ description: '제목' })
   @IsString()
   title: string;
 
-  @ApiProperty({ description: '본문' })
+  @ApiProperty({ description: '본문', required: false })
   @IsString()
   @IsOptional()
   body?: string | null;
@@ -23,16 +19,12 @@ export class CreateContentDto {
 
   @ApiProperty({
     description: '분류',
-    default: ContentCategory.NEWS,
+    default: ContentType.ANNOUNCEMENTS,
   })
-  @IsEnum(ContentCategory)
-  @IsOptional()
-  category?: ContentCategory;
+  @IsEnum(ContentType)
+  contentType: ContentType;
 
-  @ApiProperty({
-    description: '공개여부',
-    default: false,
-  })
+  @ApiProperty({ description: '공개여부', default: false })
   @IsBoolean()
   @IsOptional()
   isPublished?: boolean;
