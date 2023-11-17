@@ -24,7 +24,7 @@ export class Join {
   @ApiProperty({ description: 'INVITATION|REQUEST' })
   joinType: JoinType;
 
-  @Column({ length: 36, nullable: true })
+  @Column({ length: 32, nullable: true })
   @ApiProperty({ description: 'message' })
   message: string | null;
 

@@ -20,7 +20,6 @@ import { NaverModule } from 'src/services/naver/naver.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { RedisModule } from 'src/services/redis/redis.module';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
-import { ReportsModule } from 'src/domain/reports/reports.module';
 import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
 
 @Module({
@@ -95,7 +94,6 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
     InquiriesModule,
     MeetupsModule,
     ChatsModule,
-    ReportsModule,
     UsersModule,
     RedisModule.register({ name: REDIS_PUBSUB_CLIENT }),
   ],

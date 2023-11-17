@@ -20,42 +20,42 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { JoinStatus } from 'src/common/enums/join-status';
+import { JoinType, JoinStatus, Ledger as LedgerType } from 'src/common/enums';
 import { AnyData, SignedUrl } from 'src/common/types';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
+import { CreateLedgerDto } from 'src/domain/ledgers/dto/create-ledger.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune.dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
 import { LoveFortuneDto } from 'src/domain/users/dto/love-fortune.dto';
 import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
+import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
+import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
+import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune.dto';
-import { randomName } from 'src/helpers/random-filename';
-import { S3Service } from 'src/services/aws/s3.service';
-import { CrawlerService } from 'src/services/crawler/crawler.service';
+import { ConfigService } from '@nestjs/config';
 import { Brackets, FindOneOptions, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
+import { Category } from 'src/domain/categories/entities/category.entity';
+import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
+import { Hate } from 'src/domain/users/entities/hate.entity';
+import { Interest } from 'src/domain/users/entities/interest.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
-import { Category } from 'src/domain/categories/entities/category.entity';
-import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
+import { Report } from 'src/domain/users/entities/report.entity';
+import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
-import { SmsClient } from '@nestjs-packages/ncp-sens';
-import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
-import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
-import { Interest } from 'src/domain/users/entities/interest.entity';
-import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
 import { initialUsername } from 'src/helpers/random-username';
+import { randomName } from 'src/helpers/random-filename';
+import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SesService } from 'src/services/aws/ses.service';
-import { CreateLedgerDto } from 'src/domain/ledgers/dto/create-ledger.dto';
-import { JoinType, Ledger as LedgerType } from 'src/common/enums';
+import { S3Service } from 'src/services/aws/s3.service';
+import { CrawlerService } from 'src/services/crawler/crawler.service';
 import { LedgersService } from 'src/domain/ledgers/ledgers.service';
-import { Hate } from 'src/domain/users/entities/hate.entity';
 
 @Injectable()
 export class UsersService {
@@ -79,6 +79,8 @@ export class UsersService {
     private readonly dislikeRepository: Repository<Dislike>,
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
+    @InjectRepository(Report)
+    private readonly reportRepository: Repository<Report>,
     @InjectRepository(Join)
     private readonly joinRepository: Repository<Join>,
     @Inject(ConfigService) private configService: ConfigService, // global
@@ -788,6 +790,73 @@ GROUP BY userId HAVING userId = ?',
 
     const data = rows.map((v) => {
       return v.hatingUserId === userId ? v.hatedUserId : v.hatingUserId;
+    });
+
+    return { data: [...new Set(data)] };
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? 신고 (Report)
+  //?-------------------------------------------------------------------------//
+
+  // 블락한 사용자 리스트에 추가
+  async attachUserIdToReportPivot(
+    accusingUserId: number,
+    accusedUserId: number,
+    message: string | null,
+  ): Promise<void> {
+    const { affectedRows } = await this.repository.manager.query(
+      'INSERT IGNORE INTO `hate` (accusingUserId, accusedUserId, message) VALUES (?, ?, ?)',
+      [accusingUserId, accusedUserId, message],
+    );
+  }
+
+  // 블락한 사용자 리스트에서 삭제
+  async detachUserIdFromReportPivot(
+    accusingUserId: number,
+    accusedUserId: number,
+  ): Promise<void> {
+    const { affectedRows } = await this.repository.manager.query(
+      'DELETE FROM `hate` WHERE accusingUserId = ? AND accusedUserId = ?',
+      [accusingUserId, accusedUserId],
+    );
+  }
+
+  // 내가 신고한 사용자 리스트 ( #todo. verify the logic )
+  async getUsersBeingReportedByMe(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Report>> {
+    const queryBuilder = this.reportRepository
+      .createQueryBuilder('report')
+      .innerJoinAndSelect('report.accusedUser', 'user')
+      .innerJoinAndSelect('user.profile', 'profile')
+      .where({
+        accusingUserId: userId,
+      });
+
+    const config: PaginateConfig<Report> = {
+      sortableColumns: ['accusingUserId'],
+      searchableColumns: ['message'],
+      defaultLimit: 20,
+      defaultSortBy: [['accusedUserId', 'ASC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내가 신고한 사용자 ids ( #todo. verify the logic )
+  async getUserIdsBeingReportedByMe(userId: number): Promise<AnyData> {
+    const rows = await this.repository.manager.query(
+      'SELECT accusingUserId, accusedUserId \
+      FROM `report` \
+      WHERE accusingUserId = ?',
+      [userId],
+    );
+
+    const data = rows.map((v) => {
+      return v.accusingUserId === userId ? v.accusedUserId : v.accusingUserId;
     });
 
     return { data: [...new Set(data)] };

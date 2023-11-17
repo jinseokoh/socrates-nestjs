@@ -12,7 +12,7 @@ export class Like {
   @PrimaryColumn({ type: 'int', unsigned: true })
   public meetupId: number;
 
-  @Column({ length: 16, nullable: true })
+  @Column({ length: 32, nullable: true })
   message: string | null;
 
   @ManyToOne(() => User, (user) => user.meetupsLiked)

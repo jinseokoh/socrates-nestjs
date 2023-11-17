@@ -12,7 +12,7 @@ export class Hate {
   @PrimaryColumn({ type: 'int', unsigned: true })
   public hatedUserId: number;
 
-  @Column({ length: 16, nullable: true })
+  @Column({ length: 32, nullable: true })
   message: string | null;
 
   @ManyToOne(() => User, (user) => user.usersHating)

@@ -18,7 +18,7 @@ import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Comment } from 'src/domain/inquiries/entities/comment.entity';
-import { Report } from 'src/domain/reports/entities/report.entity';
+import { Report } from 'src/domain/users/entities/report.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
 import { Interest } from 'src/domain/users/entities/interest.entity';
@@ -125,11 +125,6 @@ export class User {
   })
   ledgers: Ledger[];
 
-  @OneToMany(() => Report, (report) => report.user, {
-    // cascade: ['insert', 'update'],
-  })
-  reports: Report[];
-
   @OneToMany(() => Inquiry, (inquiry) => inquiry.user, {
     // cascade: ['insert', 'update'],
   })
@@ -158,23 +153,11 @@ export class User {
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany using one-to-many
 
-  @OneToMany(() => Impression, (impression) => impression.user)
-  public impressions: Impression[];
-
-  @OneToMany(() => Room, (room) => room.user)
-  public rooms: Room[];
-
   @OneToMany(() => Join, (join) => join.askingUser)
   public askingJoins: Join[];
 
   @OneToMany(() => Join, (join) => join.askedUser)
   public askedJoins: Join[];
-
-  @OneToMany(() => Like, (like) => like.user)
-  public meetupsLiked: Like[];
-
-  @OneToMany(() => Dislike, (dislike) => dislike.user)
-  public meetupsDisliked: Dislike[];
 
   @OneToMany(() => Hate, (hate) => hate.hatingUser)
   public usersHating: Hate[];
@@ -182,8 +165,26 @@ export class User {
   @OneToMany(() => Hate, (hate) => hate.hatedUser)
   public usersHated: Hate[];
 
+  @OneToMany(() => Report, (report) => report.accusingUser)
+  public accusingReports: Report[];
+
+  @OneToMany(() => Report, (report) => report.accusedUser)
+  public accusedReports: Report[];
+
+  @OneToMany(() => Room, (room) => room.user)
+  public rooms: Room[];
+
+  @OneToMany(() => Like, (like) => like.user)
+  public meetupsLiked: Like[];
+
+  @OneToMany(() => Dislike, (dislike) => dislike.user)
+  public meetupsDisliked: Dislike[];
+
   @OneToMany(() => Interest, (interest) => interest.user)
   public categoriesInterested: Interest[];
+
+  @OneToMany(() => Impression, (impression) => impression.user)
+  public impressions: Impression[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany

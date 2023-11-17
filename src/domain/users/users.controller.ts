@@ -100,6 +100,7 @@ export class UsersController {
       //'providers',
       'categoriesInterested',
       'categoriesInterested.category',
+      'accusedReports',
     ]);
   }
 
