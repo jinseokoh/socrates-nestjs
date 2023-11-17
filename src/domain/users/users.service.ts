@@ -806,7 +806,7 @@ GROUP BY userId HAVING userId = ?',
     message: string | null,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `hate` (accusingUserId, accusedUserId, message) VALUES (?, ?, ?)',
+      'INSERT IGNORE INTO `report` (accusingUserId, accusedUserId, message) VALUES (?, ?, ?)',
       [accusingUserId, accusedUserId, message],
     );
   }
@@ -817,7 +817,7 @@ GROUP BY userId HAVING userId = ?',
     accusedUserId: number,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `hate` WHERE accusingUserId = ? AND accusedUserId = ?',
+      'DELETE FROM `report` WHERE accusingUserId = ? AND accusedUserId = ?',
       [accusingUserId, accusedUserId],
     );
   }

@@ -87,7 +87,7 @@ export class UserUsersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '블락한 사용자 리스트에 추가' })
-  @Post(':userId/users-reported/:otherId')
+  @Post(':userId/reports/:otherId')
   async attachUserIdToReportPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('otherId', ParseIntPipe) otherId: number,
@@ -111,7 +111,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '블락한 사용자 리스트에서 삭제' })
-  @Delete(':userId/users-reported/:otherId')
+  @Delete(':userId/reports/:otherId')
   async detachUserIdFromReportPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('otherId', ParseIntPipe) otherId: number,
