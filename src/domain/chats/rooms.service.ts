@@ -44,7 +44,7 @@ export class RoomsService {
       .innerJoinAndSelect('meetup.rooms', 'rooms')
       .innerJoinAndSelect('rooms.user', 'participant')
       .where('room.userId = :userId', { userId });
-    // andWhere('room.isExcluded', false)
+    // andWhere('room.isBanned', false)
 
     const config: PaginateConfig<Room> = {
       sortableColumns: ['createdAt'],
@@ -89,8 +89,8 @@ export class RoomsService {
     if (dto.hasOwnProperty('lastReadMessageId')) {
       room.lastReadMessageId = dto.lastReadMessageId;
     }
-    if (dto.hasOwnProperty('isExcluded')) {
-      room.isExcluded = dto.isExcluded;
+    if (dto.hasOwnProperty('isBanned')) {
+      room.isBanned = dto.isBanned;
     }
     if (dto.hasOwnProperty('isPaid')) {
       room.isPaid = dto.isPaid;
@@ -108,7 +108,7 @@ export class RoomsService {
   async remove(
     dto: Omit<
       CreateRoomDto,
-      'lastReadMessageId' | 'partyType' | 'isPaid' | 'isExcluded' | 'note'
+      'lastReadMessageId' | 'partyType' | 'isPaid' | 'isBanned' | 'note'
     >,
   ): Promise<Room> {
     const room = await this.findOneByIds(dto.userId, dto.meetupId);

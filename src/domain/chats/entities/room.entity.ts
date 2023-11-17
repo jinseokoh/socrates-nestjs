@@ -29,7 +29,7 @@ export class Room {
 
   @Column({ default: false })
   @ApiProperty({ description: 'is Excluded?' })
-  isExcluded: boolean;
+  isBanned: boolean;
 
   @Column({ length: 128, nullable: true })
   @ApiProperty({ description: 'message' })

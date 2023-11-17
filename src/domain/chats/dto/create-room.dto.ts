@@ -28,7 +28,7 @@ export class CreateRoomDto {
   @ApiProperty({ description: '신고여부', default: false })
   @IsBoolean()
   @IsOptional()
-  isExcluded: boolean;
+  isBanned: boolean;
 
   @ApiProperty({ description: '제목', required: false })
   @IsString()

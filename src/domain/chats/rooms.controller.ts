@@ -74,7 +74,7 @@ export class RoomsController {
     @Body()
     dto: Omit<
       CreateRoomDto,
-      'lastReadMessageId' | 'partyType' | 'isPaid' | 'isExcluded' | 'note'
+      'lastReadMessageId' | 'partyType' | 'isPaid' | 'isBanned' | 'note'
     >,
   ): Promise<Room> {
     return await this.roomsService.remove(dto);
