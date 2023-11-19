@@ -139,7 +139,7 @@ export class UsersService {
         return [];
       }
     } catch (e) {
-      console.log(e);
+      this.logger.log(e);
       throw new BadRequestException();
     }
   }
@@ -239,7 +239,7 @@ GROUP BY userId HAVING userId = ?',
         +parseFloat(row['manner']).toFixed(2),
       ];
 
-      console.log(data);
+      this.logger.log(data);
 
       return data;
     } catch (e) {
@@ -295,7 +295,7 @@ GROUP BY userId HAVING userId = ?',
   async changeUsername(id: number, dto: ChangeUsernameDto): Promise<number> {
     const user = await this.findById(id, ['profile']);
     const balance = user.profile.balance - dto.costToUpdate;
-    console.log(dto);
+
     if (dto.costToUpdate > 0) {
       if (user.profile.balance < 1) {
         throw new NotAcceptableException(`not enough coin`); //? 406
@@ -328,7 +328,6 @@ GROUP BY userId HAVING userId = ?',
   async updateProfile(id: number, dto: UpdateProfileDto): Promise<Profile> {
     const user = await this.findById(id, ['profile']);
     const profileId = user.profile.id;
-    console.log(user);
 
     const profile = await this.profileRepository.preload({
       id: profileId,
@@ -415,7 +414,7 @@ GROUP BY userId HAVING userId = ?',
       // image processing using Jimp
       await this.s3Service.uploadWithResizing(file, path, 640);
     } catch (e) {
-      console.log(e);
+      this.logger.log(e);
     }
     // upload the manipulated image to S3
     // update users table
