@@ -18,9 +18,11 @@ export class LedgerSubscriber implements EntitySubscriberInterface<Ledger> {
     return Ledger;
   }
 
+  //! https://github.com/typeorm/typeorm/issues/3563
+  //! you need to use the same entityManager instance because of transactions.
+  //! which means event.manager. not event.connection.manager.
   async afterInsert(event: InsertEvent<Ledger>) {
-    console.log(`~~~~~ after inserting Ledger`);
-
+    // console.log(`~~~~~ Ledger model afterInsert subscriber triggered.`);
     if (event.entity.ledgerType === LedgerType.DEBIT_PURCHASE) {
       await event.manager
         .createQueryBuilder()

@@ -23,7 +23,7 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
   //! you need to use the same entityManager instance because of transactions.
   //! which means event.manager. not event.connection.manager.
   async afterInsert(event: InsertEvent<User>) {
-    console.log(`~~~~~ after inserting User`);
+    // console.log(`~~~~~ User model afterInsert subscriber triggered.`);
     await event.manager
       .createQueryBuilder()
       .insert()
@@ -44,7 +44,7 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
           debit: 10,
           balance: 10,
           ledgerType: LedgerType.DEBIT_REWARD,
-          note: '10 coins granted',
+          note: 'free 10 coins granted',
           userId: event.entity.id,
         },
       ])

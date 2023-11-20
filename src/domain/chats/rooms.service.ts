@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -10,7 +15,11 @@ import {
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { CreateRoomDto } from 'src/domain/chats/dto/create-room.dto';
 import { UpdateRoomDto } from 'src/domain/chats/dto/update-room.dto';
-import { Repository } from 'typeorm';
+import { Ledger as LedgerType } from 'src/common/enums';
+import { User } from 'src/domain/users/entities/user.entity';
+import { ChangeRoomIsPaidDto } from 'src/domain/chats/dto/change-room-is-paid.dto';
+import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class RoomsService {
@@ -19,6 +28,7 @@ export class RoomsService {
   constructor(
     @InjectRepository(Room)
     private readonly repository: Repository<Room>,
+    private dataSource: DataSource, // for transaction
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -99,6 +109,61 @@ export class RoomsService {
       room.note = dto.note;
     }
     return await this.repository.save(room);
+  }
+
+  //? Room isPaid 값 갱신
+  //? 코인 비용이 발생할 수 있음.
+  //! balance will be adjusted w/ model event subscriber.
+  //! using transaction using query runner
+  async payChatroomFee(dto: ChangeRoomIsPaidDto): Promise<number> {
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    const user = await queryRunner.manager.findOne(User, {
+      where: { id: dto.userId },
+      relations: [`profile`],
+    });
+    const room = await queryRunner.manager.findOne(Room, {
+      where: {
+        meetupId: dto.meetupId,
+        userId: dto.userId,
+      },
+    });
+    const newBalance = user.profile?.balance - dto.costToUpdate;
+
+    await queryRunner.startTransaction();
+    try {
+      if (!user) {
+        throw new NotFoundException(`the user is not found`);
+      }
+      if (!room) {
+        throw new NotFoundException(`the room is not found`);
+      }
+      if (
+        user.profile?.balance === null ||
+        user.profile?.balance - dto.costToUpdate < 0
+      ) {
+        throw new BadRequestException(`insufficient balance`);
+      }
+      const ledger = new Ledger({
+        credit: dto.costToUpdate,
+        ledgerType: LedgerType.CREDIT_SPEND,
+        balance: newBalance,
+        note: `채팅방 입장료 (meetup #${dto.meetupId}, user #${dto.userId})`,
+        userId: dto.userId,
+      });
+      await queryRunner.manager.save(ledger);
+      room.isPaid = true;
+      await queryRunner.manager.save(room);
+      // commit transaction now:
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+    return newBalance;
   }
 
   //?-------------------------------------------------------------------------//

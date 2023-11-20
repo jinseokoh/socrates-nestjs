@@ -4,6 +4,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -38,26 +39,45 @@ export class LedgersService {
 
   // 차변 Ledger 생성
   async debit(dto: CreateLedgerDto): Promise<Ledger> {
-    // const user = await this.userRepository.findOne({
-    //   where: { id: dto.userId },
-    // });
-    // if (!user || user?.isBanned) {
-    //   throw new BadRequestException(`not allowed to create`);
-    // }
-    console.log(dto);
+    const user = await this.userRepository.findOne({
+      where: { id: dto.userId },
+      relations: [`profile`],
+    });
+    if (!user) {
+      throw new NotFoundException(`the user is not found`);
+    }
+    if (!user?.isBanned) {
+      throw new UnprocessableEntityException(`the user is banned`);
+    }
+    this.logger.log(dto);
     return await this.repository.save(this.repository.create(dto));
   }
 
   // 대변 Ledger 생성
   async credit(dto: CreateLedgerDto): Promise<Ledger> {
-    // const user = await this.userRepository.findOne({
-    //   where: { id: dto.userId },
-    // });
-    // if (!user || user?.isBanned) {
-    //   throw new BadRequestException(`not allowed to create`);
-    // }
-
-    return await this.repository.save(this.repository.create(dto));
+    const user = await this.userRepository.findOne({
+      where: { id: dto.userId },
+      relations: [`profile`],
+    });
+    if (!user) {
+      throw new NotFoundException(`the user is not found`);
+    }
+    if (!user?.isBanned) {
+      throw new UnprocessableEntityException(`the user is banned`);
+    }
+    if (
+      user.profile?.balance == null ||
+      user.profile?.balance - dto.credit < 0
+    ) {
+      throw new BadRequestException(`insufficient balance`);
+    }
+    this.logger.log(dto);
+    return await this.repository.save(
+      this.repository.create({
+        ...dto,
+        balance: user.profile?.balance ?? 0,
+      }),
+    );
   }
 
   // Ledger 생성

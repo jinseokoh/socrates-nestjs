@@ -4,14 +4,18 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Patch,
   Post,
+  Put,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
+import { AnyData } from 'src/common/types';
+import { ChangeRoomIsPaidDto } from 'src/domain/chats/dto/change-room-is-paid.dto';
 import { CreateRoomDto } from 'src/domain/chats/dto/create-room.dto';
 import { UpdateRoomDto } from 'src/domain/chats/dto/update-room.dto';
 import { Room } from 'src/domain/chats/entities/room.entity';
@@ -62,6 +66,16 @@ export class RoomsController {
   @Patch()
   async update(@Body() dto: UpdateRoomDto): Promise<Room> {
     return await this.roomsService.update(dto);
+  }
+
+  // A dedicated endpoint to update username.
+  @ApiOperation({ description: '입장료 지불' })
+  @Put()
+  async payChatroomFee(@Body() dto: ChangeRoomIsPaidDto): Promise<AnyData> {
+    const balance = await this.roomsService.payChatroomFee(dto);
+    return {
+      data: balance,
+    };
   }
 
   //?-------------------------------------------------------------------------//

@@ -21,6 +21,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { RedisModule } from 'src/services/redis/redis.module';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
+import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
@@ -31,6 +32,8 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
+      // Use useFactory, useClass, or useExisting
+      // to configure the DataSourceOptions.
       useFactory: async (
         configService: ConfigService,
       ): Promise<TypeOrmModuleOptions> => {
@@ -60,6 +63,12 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
             migrationsDir: 'dist/migrations',
           },
         } as TypeOrmModuleOptions;
+      },
+      // dataSource receives the configured DataSourceOptions
+      // and returns a Promise<DataSource>.
+      dataSourceFactory: async (options) => {
+        const dataSource = await new DataSource(options).initialize();
+        return dataSource;
       },
     }),
     DynamooseModule.forRoot({

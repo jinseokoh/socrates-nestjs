@@ -44,7 +44,6 @@ import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
       ttl: 60,
       limit: 2,
     }),
-    LedgersModule,
     SesModule,
     S3Module,
     CrawlerModule,

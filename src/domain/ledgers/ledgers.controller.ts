@@ -35,8 +35,6 @@ export class LedgersController {
     @CurrentUserId() id: number,
     @Body() dto: CreateLedgerDto,
   ): Promise<Ledger> {
-    console.log(dto);
-
     const userId = dto.userId ? dto.userId : id;
     const createLedgerDto = { ...dto, userId };
     if (dto.debit) {

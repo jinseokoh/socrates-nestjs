@@ -23,7 +23,6 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { JoinType, JoinStatus, Ledger as LedgerType } from 'src/common/enums';
 import { AnyData, SignedUrl } from 'src/common/types';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
-import { CreateLedgerDto } from 'src/domain/ledgers/dto/create-ledger.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune.dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
@@ -35,13 +34,14 @@ import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune.dto';
 import { ConfigService } from '@nestjs/config';
-import { Brackets, FindOneOptions, In } from 'typeorm';
+import { Brackets, DataSource, FindOneOptions, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
+import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
@@ -55,7 +55,6 @@ import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SesService } from 'src/services/aws/ses.service';
 import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
-import { LedgersService } from 'src/domain/ledgers/ledgers.service';
 
 @Injectable()
 export class UsersService {
@@ -86,10 +85,10 @@ export class UsersService {
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     @Inject(SmsClient) private readonly smsClient: SmsClient, // naver
-    private readonly ledgersService: LedgersService,
     private readonly sesService: SesService,
     private readonly s3Service: S3Service,
     private readonly crawlerService: CrawlerService,
+    private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
   }
@@ -292,25 +291,52 @@ GROUP BY userId HAVING userId = ?',
 
   //? User 닉네임 갱신
   //? 코인 비용이 발생할 수 있음.
+  //! balance will be adjusted w/ model event subscriber.
+  //! using transaction using query runner
   async changeUsername(id: number, dto: ChangeUsernameDto): Promise<number> {
-    const user = await this.findById(id, ['profile']);
-    const balance = user.profile.balance - dto.costToUpdate;
-
-    if (dto.costToUpdate > 0) {
-      if (user.profile.balance < 1) {
-        throw new NotAcceptableException(`not enough coin`); //? 406
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    const user = await queryRunner.manager.findOne(User, {
+      where: { id: id },
+      relations: [`profile`],
+    });
+    const newBalance = user.profile?.balance - dto.costToUpdate;
+    await queryRunner.startTransaction();
+    try {
+      if (!user) {
+        throw new NotFoundException(`the user is not found`);
       }
-      const createLedgerDto = new CreateLedgerDto();
-      createLedgerDto.credit = dto.costToUpdate;
-      createLedgerDto.balance = balance;
-      createLedgerDto.ledgerType = LedgerType.CREDIT_SPEND;
-      createLedgerDto.note = LedgerType.CREDIT_SPEND;
-      createLedgerDto.userId = id;
-      this.ledgersService.credit(createLedgerDto);
+      if (user?.isBanned) {
+        throw new UnprocessableEntityException(`the user is banned`);
+      }
+      if (
+        user.profile?.balance === null ||
+        user.profile?.balance - dto.costToUpdate < 0
+      ) {
+        throw new BadRequestException(`insufficient balance`);
+      }
+      if (dto.costToUpdate > 0) {
+        const ledger = new Ledger({
+          credit: dto.costToUpdate,
+          ledgerType: LedgerType.CREDIT_SPEND,
+          balance: newBalance,
+          note: `사용자명 변경료 (user #${id})`,
+          userId: id,
+        });
+        await queryRunner.manager.save(ledger);
+      }
+      user.username = dto.username;
+      await queryRunner.manager.save(user);
+      // commit transaction now:
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-    user.username = dto.username;
-    await this.repository.save(user);
-    return balance;
+    return newBalance;
   }
 
   // User 비밀번호 갱신
@@ -552,22 +578,18 @@ GROUP BY userId HAVING userId = ?',
 
   // todo refactor) this responsibility belongs to Profile. (priority: low)
   async increasePayCount(id: number): Promise<void> {
-    await this.profileRepository
-      .createQueryBuilder()
-      .update(Profile)
-      .set({ payCount: () => 'payCount + 1' })
-      .where('userId = :id', { id })
-      .execute();
+    await this.repository.manager.query(
+      'UPDATE `profile` SET payCount = payCount + 1 WHERE userId = ?',
+      [id],
+    );
   }
 
   // todo refactor) this responsibility belongs to Profile. (priority: low)
   async decreasePayCount(id: number): Promise<void> {
-    await this.profileRepository
-      .createQueryBuilder()
-      .update(Profile)
-      .set({ payCount: () => 'payCount - 1' })
-      .where('userId = :id', { id })
-      .execute();
+    await this.repository.manager.query(
+      'UPDATE `profile` SET payCount = payCount - 1 WHERE userId = ? AND payCount > 0',
+      [id],
+    );
   }
 
   //?-------------------------------------------------------------------------//
