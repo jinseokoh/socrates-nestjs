@@ -297,6 +297,9 @@ GROUP BY userId HAVING userId = ?',
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
+    const count = await queryRunner.manager.count(User, {
+      where: { username: dto.username },
+    });
     const user = await queryRunner.manager.findOne(User, {
       where: { id: id },
       relations: [`profile`],
@@ -304,6 +307,9 @@ GROUP BY userId HAVING userId = ?',
     const newBalance = user.profile?.balance - dto.costToUpdate;
     await queryRunner.startTransaction();
     try {
+      if (count > 0) {
+        throw new UnprocessableEntityException(`the username is taken`);
+      }
       if (!user) {
         throw new NotFoundException(`the user is not found`);
       }
