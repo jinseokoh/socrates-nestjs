@@ -115,7 +115,7 @@ export class RoomsService {
   //? 코인 비용이 발생할 수 있음.
   //! balance will be adjusted w/ model event subscriber.
   //! using transaction using query runner
-  async payChatroomFee(dto: ChangeRoomIsPaidDto): Promise<Room> {
+  async payRoomFee(dto: ChangeRoomIsPaidDto): Promise<Room> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -163,7 +163,7 @@ export class RoomsService {
     } finally {
       await queryRunner.release();
     }
-    return { ...room, isPaid: true };
+    return { ...room, isPaid: true, user: user };
   }
 
   //?-------------------------------------------------------------------------//
