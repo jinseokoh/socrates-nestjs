@@ -71,11 +71,8 @@ export class RoomsController {
   // A dedicated endpoint to update username.
   @ApiOperation({ description: '입장료 지불' })
   @Put()
-  async payChatroomFee(@Body() dto: ChangeRoomIsPaidDto): Promise<AnyData> {
-    const balance = await this.roomsService.payChatroomFee(dto);
-    return {
-      data: balance,
-    };
+  async payChatroomFee(@Body() dto: ChangeRoomIsPaidDto): Promise<Room> {
+    return await this.roomsService.payChatroomFee(dto);
   }
 
   //?-------------------------------------------------------------------------//
