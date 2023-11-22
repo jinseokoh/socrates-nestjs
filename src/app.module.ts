@@ -22,6 +22,7 @@ import { RedisModule } from 'src/services/redis/redis.module';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
 import { DataSource } from 'typeorm';
+import { LanguagesModule } from 'src/domain/languages/languages.module';
 
 @Module({
   imports: [
@@ -97,12 +98,13 @@ import { DataSource } from 'typeorm';
     }),
     NaverModule,
     AuthModule,
-    CategoriesModule,
     CareersModule,
+    CategoriesModule,
+    ChatsModule,
     ContentsModule,
     InquiriesModule,
+    LanguagesModule,
     MeetupsModule,
-    ChatsModule,
     UsersModule,
     RedisModule.register({ name: REDIS_PUBSUB_CLIENT }),
   ],

@@ -55,6 +55,8 @@ import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SesService } from 'src/services/aws/ses.service';
 import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
+import { Language } from 'src/domain/languages/entities/language.entity';
+import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 
 @Injectable()
 export class UsersService {
@@ -632,6 +634,60 @@ GROUP BY userId HAVING userId = ?',
     };
 
     return await paginate(query, queryBuilder, config);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? 언어 Languages
+  //?-------------------------------------------------------------------------//
+
+  // 사용자 언어 리스트
+  async getLanguageSkills(id: number): Promise<Array<LanguageSkill>> {
+    const user = await this.repository.findOneOrFail({
+      where: {
+        id: id,
+      },
+      relations: ['languages'],
+    });
+
+    return user.languageSkills;
+  }
+
+  // 나의 언어 리스트 UPSERT
+  async upsertLanguageSkill(
+    id: number,
+    slug: string,
+    skill: number,
+  ): Promise<Array<LanguageSkill>> {
+    const category = await this.categoryRepository.findOneBy({
+      slug: slug,
+    });
+    if (category !== null) {
+      await this.repository.manager.query(
+        'INSERT IGNORE INTO `interest` \
+  (userId, categoryId, skill) VALUES (?, ?, ?) \
+  ON DUPLICATE KEY UPDATE \
+  userId = VALUES(`userId`), \
+  categoryId = VALUES(`categoryId`), \
+  skill = VALUES(`skill`)',
+        [id, category.id, skill],
+      );
+    }
+
+    return await this.getLanguageSkills(id);
+  }
+
+  // 나의 언어 리스트에서 삭제
+  async removeLanguages(
+    id: number,
+    ids: number[],
+  ): Promise<Array<LanguageSkill>> {
+    // const user = await this.findById(id, ['categories']);
+    await this.repository.manager.query(
+      'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
+      [id, ids],
+    );
+
+    return await this.getLanguageSkills(id);
   }
 
   //?-------------------------------------------------------------------------//

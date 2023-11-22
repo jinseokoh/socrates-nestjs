@@ -27,6 +27,7 @@ import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
+import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -185,6 +186,9 @@ export class User {
 
   @OneToMany(() => Impression, (impression) => impression.user)
   public impressions: Impression[];
+
+  @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.user)
+  public languageSkills: LanguageSkill[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany
