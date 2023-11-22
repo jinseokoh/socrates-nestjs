@@ -655,8 +655,6 @@ GROUP BY userId HAVING userId = ?',
 
   // 나의 언어 리스트 UPSERT
   async upsertLanguageSkill(items: Array<LanguageSkill>): Promise<void> {
-    console.log(items);
-
     await this.languageSkillRepository.upsert(items, [`userId`, `languageId`]);
   }
 

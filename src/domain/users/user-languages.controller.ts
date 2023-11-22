@@ -36,7 +36,7 @@ export class UserLanguagesController {
     @Body() dto: LanguageSkillDto,
   ): Promise<void> {
     try {
-      return await this.usersService.upsertLanguageSkill(dto.skills);
+      return await this.usersService.upsertLanguageSkill(dto.items);
     } catch (e) {
       throw new BadRequestException();
     }

@@ -7,5 +7,5 @@ export class LanguageSkillDto {
   @ApiProperty({ description: 'array of LanguageSkills', required: true })
   @Transform(({ value }) => value)
   @IsArray()
-  skills: Array<LanguageSkill>;
+  items: Array<LanguageSkill>;
 }
