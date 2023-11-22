@@ -658,6 +658,12 @@ GROUP BY userId HAVING userId = ?',
     userId: number,
     items: Array<LanguageSkill>,
   ): Promise<Array<LanguageSkill>> {
+
+    await this.repository.manager.query(
+      'DELETE FROM `language_skill` WHERE userId = ?',
+      [userId],
+    );
+
     await this.languageSkillRepository.upsert(items, [`userId`, `languageId`]);
 
     return await this.getLanguageSkills(userId);
