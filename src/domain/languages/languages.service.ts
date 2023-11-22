@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AnyData } from 'src/common/types';
 import { Language } from 'src/domain/languages/entities/language.entity';
 
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class LanguagesService {
@@ -12,6 +12,7 @@ export class LanguagesService {
   constructor(
     @InjectRepository(Language)
     private readonly repository: Repository<Language>,
+    private dataSource: DataSource, // for transaction
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -65,9 +66,13 @@ export class LanguagesService {
       'vietnamese',
     ];
 
-    slugs.map(async (v) => {
-      const root = new Language({ slug: v });
-      await this.repository.manager.save(root);
-    });
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    Promise.all(
+      slugs.map(async (v) => {
+        const root = new Language({ slug: v });
+        return await queryRunner.manager.save(root);
+      }),
+    );
   }
 }
