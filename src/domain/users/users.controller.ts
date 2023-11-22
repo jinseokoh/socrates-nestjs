@@ -100,6 +100,8 @@ export class UsersController {
       //'providers',
       'categoriesInterested',
       'categoriesInterested.category',
+      'languageSkills',
+      'languageSkills.language',
       'accusedReports',
     ]);
   }
