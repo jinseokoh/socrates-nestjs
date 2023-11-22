@@ -68,11 +68,22 @@ export class LanguagesService {
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
-    Promise.all(
-      slugs.map(async (v) => {
-        const root = new Language({ slug: v });
-        return await queryRunner.manager.save(root);
-      }),
-    );
+    await queryRunner.startTransaction();
+    try {
+      await Promise.all(
+        slugs.map(async (v) => {
+          const lang = new Language({ slug: v });
+          return await queryRunner.manager.save(lang);
+        }),
+      );
+
+      // commit transaction now:
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
