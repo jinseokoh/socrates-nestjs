@@ -56,7 +56,6 @@ import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SesService } from 'src/services/aws/ses.service';
 import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
-import { LanguageSkillItemDto } from 'src/domain/users/dto/language-skill.dto';
 
 @Injectable()
 export class UsersService {
@@ -655,7 +654,7 @@ GROUP BY userId HAVING userId = ?',
   }
 
   // 나의 언어 리스트 UPSERT
-  async upsertLanguageSkill(items: Array<LanguageSkillItemDto>): Promise<void> {
+  async upsertLanguageSkill(items: Array<LanguageSkill>): Promise<void> {
     console.log(items);
 
     await this.languageSkillRepository.upsert(items, [`userId`, `languageId`]);

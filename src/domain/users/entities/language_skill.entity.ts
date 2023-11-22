@@ -13,12 +13,19 @@ export class LanguageSkill {
   @PrimaryColumn({ type: 'int', unsigned: true })
   public languageId: number;
 
-  @Column({ type: 'tinyint', unsigned: true, nullable: true })
-  skill: number | null;
+  @Column({ type: 'tinyint', unsigned: true })
+  skill: number;
 
   @ManyToOne(() => User, (user) => user.languageSkills)
-  public user: User;
+  public user?: User | null;
 
   @ManyToOne(() => Language, (language) => language.usersSkilled)
-  public language: Language;
+  public language?: Language | null;
+
+  //??--------------------------------------------------------------------------*/
+  //?? constructor
+
+  constructor(partial: Partial<LanguageSkill>) {
+    Object.assign(this, partial);
+  }
 }
