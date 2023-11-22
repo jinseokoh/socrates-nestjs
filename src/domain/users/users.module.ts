@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Category } from 'src/domain/categories/entities/category.entity';
+import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
@@ -24,12 +25,14 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { UserUsersController } from 'src/domain/users/user-users.controller';
 import { UserImpressionsController } from 'src/domain/users/user-impressions.controller';
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
-import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
+import { UserLanguagesController } from 'src/domain/users/user-languages.controller';
+import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Category,
+      LanguageSkill,
       Dislike,
       Hate,
       Join,
@@ -50,11 +53,12 @@ import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
     FcmModule,
   ],
   exports: [UsersService],
-  providers: [UsersService, UserSubscriber],
+  providers: [UsersService, UserSubscriber, LanguageSkillSubscriber],
   controllers: [
     UsersController,
     UserCategoriesController,
     UserImpressionsController,
+    UserLanguagesController,
     UserMeetupsController,
     UserUsersController,
     UserFcmController,

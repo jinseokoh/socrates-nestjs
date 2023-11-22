@@ -14,6 +14,7 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
+import { LanguageSkillDto, LanguageSkillItemDto } from 'src/domain/users/dto/language-skill.dto';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { UsersService } from 'src/domain/users/users.service';
@@ -29,14 +30,21 @@ export class UserLanguagesController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '나의 관심사 리스트에 추가' })
-  @Put(':userId/languages/:slug')
+  @Post(':userId/languages')
   async addLanguageSkill(
     @Param('userId') userId: number,
-    @Param('slug') slug: string,
-    @Body('skill') skill: number | null,
-  ): Promise<Array<LanguageSkill>> {
+    @Body() dto: LanguageSkillDto,
+  ): Promise<void> {
     try {
-      return await this.usersService.upsertLanguageSkill(userId, slug, skill);
+      const updatedDto = dto.languages.map((v) => {
+        const dto = new LanguageSkillItemDto();
+        dto.userId = userId;
+        dto.languageId = v['languageId'];
+        dto.skill = v['skill'];
+
+        return dto;
+      });
+      return await this.usersService.upsertLanguageSkill(updatedDto);
     } catch (e) {
       throw new BadRequestException();
     }
