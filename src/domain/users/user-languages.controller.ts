@@ -31,12 +31,12 @@ export class UserLanguagesController {
 
   @ApiOperation({ description: '나의 관심사 리스트에 추가' })
   @Post(':userId/languages')
-  async addLanguageSkill(
+  async addLanguageSkills(
     @Param('userId') userId: number,
     @Body() dto: LanguageSkillDto,
-  ): Promise<void> {
+  ): Promise<Array<LanguageSkill>> {
     try {
-      return await this.usersService.upsertLanguageSkill(dto.items);
+      return await this.usersService.upsertLanguageSkills(userId, dto.items);
     } catch (e) {
       throw new BadRequestException();
     }

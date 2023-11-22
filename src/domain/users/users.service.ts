@@ -642,10 +642,10 @@ GROUP BY userId HAVING userId = ?',
   //?-------------------------------------------------------------------------//
 
   // 사용자 언어 리스트
-  async getLanguageSkills(id: number): Promise<Array<LanguageSkill>> {
+  async getLanguageSkills(userId: number): Promise<Array<LanguageSkill>> {
     const user = await this.repository.findOneOrFail({
       where: {
-        id: id,
+        id: userId,
       },
       relations: ['languageSkills', 'languageSkills.language'],
     });
@@ -654,22 +654,27 @@ GROUP BY userId HAVING userId = ?',
   }
 
   // 나의 언어 리스트 UPSERT
-  async upsertLanguageSkill(items: Array<LanguageSkill>): Promise<void> {
+  async upsertLanguageSkills(
+    userId: number,
+    items: Array<LanguageSkill>,
+  ): Promise<Array<LanguageSkill>> {
     await this.languageSkillRepository.upsert(items, [`userId`, `languageId`]);
+
+    return await this.getLanguageSkills(userId);
   }
 
   // 나의 언어 리스트에서 삭제
   async removeLanguages(
-    id: number,
+    userId: number,
     ids: number[],
   ): Promise<Array<LanguageSkill>> {
     // const user = await this.findById(id, ['categories']);
     await this.repository.manager.query(
       'DELETE FROM `language_skill` WHERE userId = ? AND languageId IN (?)',
-      [id, ids],
+      [userId, ids],
     );
 
-    return await this.getLanguageSkills(id);
+    return await this.getLanguageSkills(userId);
   }
 
   //?-------------------------------------------------------------------------//
