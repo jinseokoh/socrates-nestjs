@@ -15,10 +15,6 @@ import {
 
 @Entity()
 export class Room {
-  @Column({ length: 36, nullable: true })
-  @ApiProperty({ description: 'ex) msg_1696663997213_##########' })
-  lastReadMessageId: string | null;
-
   @Column({ type: 'enum', enum: PartyType, default: PartyType.HOST })
   @ApiProperty({ description: 'host or guest' })
   partyType: PartyType;
@@ -28,14 +24,23 @@ export class Room {
   isPaid: boolean;
 
   @Column({ default: false })
-  @ApiProperty({ description: 'is Excluded?' })
+  @ApiProperty({ description: 'is Ended?' })
+  isEnded: boolean;
+
+  @Column({ default: false })
+  @ApiProperty({ description: 'is Banned?' })
   isBanned: boolean;
 
-  @Column({ length: 128, nullable: true })
-  @ApiProperty({ description: 'message' })
-  note: string | null;
+  @Column({ length: 36, nullable: true })
+  @ApiProperty({
+    description: 'last read message id ex) msg_1696663997213_##########',
+  })
+  lastMessageId: string | null;
 
-  @Index('created-at-index')
+  @Column({ length: 255, nullable: true })
+  @ApiProperty({ description: 'last message' })
+  lastMessage: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

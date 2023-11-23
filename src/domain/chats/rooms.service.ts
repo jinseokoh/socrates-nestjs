@@ -96,17 +96,20 @@ export class RoomsService {
     if (!room) {
       throw new NotFoundException(`entity not found`);
     }
-    if (dto.hasOwnProperty('lastReadMessageId')) {
-      room.lastReadMessageId = dto.lastReadMessageId;
+    if (dto.hasOwnProperty('isPaid')) {
+      room.isPaid = dto.isPaid;
+    }
+    if (dto.hasOwnProperty('isEndedd')) {
+      room.isEnded = dto.isEnded;
     }
     if (dto.hasOwnProperty('isBanned')) {
       room.isBanned = dto.isBanned;
     }
-    if (dto.hasOwnProperty('isPaid')) {
-      room.isPaid = dto.isPaid;
+    if (dto.hasOwnProperty('lastMessage')) {
+      room.lastMessage = dto.lastMessage;
     }
-    if (dto.hasOwnProperty('note')) {
-      room.note = dto.note;
+    if (dto.hasOwnProperty('lastMessageId')) {
+      room.lastMessageId = dto.lastMessageId;
     }
     return await this.repository.save(room);
   }
