@@ -36,13 +36,13 @@ export class InquiriesService {
     if (dto.targetEntity) {
       if (dto.targetEntity.model === 'meetup') {
         await this.repository.manager.query(
-          'INSERT IGNORE INTO `inquiry_target_meetup` (inquiryId, meetupId) VALUES (?, ?)',
+          'INSERT IGNORE INTO `inquiry_meetup` (inquiryId, meetupId) VALUES (?, ?)',
           [inquiry.id, dto.targetEntity.id],
         );
       }
       if (dto.targetEntity.model === 'user') {
         await this.repository.manager.query(
-          'INSERT IGNORE INTO `inquiry_target_user` (inquiryId, userId) VALUES (?, ?)',
+          'INSERT IGNORE INTO `inquiry_user` (inquiryId, userId) VALUES (?, ?)',
           [inquiry.id, dto.targetEntity.id],
         );
       }
