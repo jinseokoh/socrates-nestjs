@@ -43,6 +43,10 @@ export const MessageSchema = new Schema(
       },
       required: false,
     },
+    dateTime: {
+      type: String,
+      required: false,
+    },
     expires: {
       type: {
         value: Number,

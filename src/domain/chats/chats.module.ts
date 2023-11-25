@@ -19,7 +19,7 @@ import { Room } from 'src/domain/chats/entities/room.entity';
         name: 'Message',
         schema: MessageSchema,
         options: {
-          tableName: 'message',
+          tableName: 'message', // e.g. local_message_table
         },
       },
     ]),

@@ -80,7 +80,7 @@ import { LanguagesModule } from 'src/domain/languages/languages.module';
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       },
       table: {
-        create: true, // process.env.NODE_ENV === 'local',
+        create: process.env.NODE_ENV === 'local', // create only if in local env
         prefix: `${process.env.NODE_ENV}_`,
         suffix: '_table',
       },

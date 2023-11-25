@@ -40,6 +40,11 @@ export class CreateMessageDto {
   @IsOptional()
   image: IImage | null;
 
+  @ApiProperty({ description: 'CustomMessage 용 payload', required: false })
+  @IsString()
+  @IsOptional()
+  dateTime: string | null; // 모임약속시간
+
   @ApiProperty({ description: 'ttl', required: false })
   @IsNumber()
   @IsOptional()
