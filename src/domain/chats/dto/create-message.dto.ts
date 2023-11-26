@@ -7,7 +7,11 @@ import {
   IsString,
 } from 'class-validator';
 import { MessageType } from 'src/common/enums';
-import { IImage } from 'src/domain/chats/entities/message.interface';
+import {
+  IAppointment,
+  IImage,
+} from 'src/domain/chats/entities/message.interface';
+
 export class CreateMessageDto {
   @ApiProperty({ description: 'Message', required: true })
   @IsNumber()
@@ -41,9 +45,9 @@ export class CreateMessageDto {
   image: IImage | null;
 
   @ApiProperty({ description: 'CustomMessage 용 payload', required: false })
-  @IsString()
+  @IsObject()
   @IsOptional()
-  dateTime: string | null; // 모임약속시간
+  appointment: IAppointment | null;
 
   @ApiProperty({ description: 'ttl', required: false })
   @IsNumber()

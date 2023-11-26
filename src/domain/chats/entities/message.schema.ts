@@ -43,9 +43,23 @@ export const MessageSchema = new Schema(
       },
       required: false,
     },
-    dateTime: {
-      type: String,
-      required: false,
+    appointment: {
+      type: Object,
+      schema: {
+        dateTime: {
+          type: {
+            value: Date,
+            settings: {
+              storage: 'iso',
+            },
+          },
+        },
+        title: String,
+        image: String,
+        venueName: String,
+        venueAddress: String,
+        venueImage: String,
+      },
     },
     expires: {
       type: {

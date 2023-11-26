@@ -67,6 +67,10 @@ export class MessagesController {
     return await this.messagesService.create(createMessageDto);
   }
 
+  //?-------------------------------------------------------------------------//
+  //? READ
+  //?-------------------------------------------------------------------------//
+
   @ApiOperation({ description: 'Message 리스트' })
   @Get(':id/messages')
   async fetch(

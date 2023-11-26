@@ -12,6 +12,15 @@ export interface IImage {
   height: number;
 }
 
+export interface IAppointment {
+  dateTime: string;
+  title: string;
+  image: string;
+  venueName: string;
+  venueAddress: string;
+  venueImage: string;
+}
+
 export interface IMessage extends IMessageKey {
   userId: number;
   messageType: MessageType;
