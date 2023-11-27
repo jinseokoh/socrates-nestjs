@@ -12,9 +12,11 @@ import {
 } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
 import { ApiOperation } from '@nestjs/swagger';
+import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
+import { MessageType } from 'src/common/enums';
 import { IMessageEvent } from 'src/common/interfaces';
 import { SignedUrl } from 'src/common/types';
 import { CreateMessageDto } from 'src/domain/chats/dto/create-message.dto';
@@ -23,12 +25,14 @@ import {
   IMessageKey,
 } from 'src/domain/chats/entities/message.interface';
 import { MessagesService } from 'src/domain/chats/messages.service';
+import { RoomsService } from 'src/domain/chats/rooms.service';
 import { SseService } from 'src/services/sse/sse.service';
 
 @Controller('chats')
 export class MessagesController {
   constructor(
     private readonly messagesService: MessagesService,
+    private readonly roomsService: RoomsService,
     private readonly sseService: SseService,
   ) {}
 
@@ -47,8 +51,10 @@ export class MessagesController {
   }
 
   @Public()
-  @Sse(':id/messages/stream')
-  sse(@Param('id', ParseIntPipe) meetupId: number): Observable<IMessageEvent> {
+  @Sse(':meetupId/messages/stream')
+  sse(
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+  ): Observable<IMessageEvent> {
     // console.log(`userId: ${id} meetupId: ${meetupId}`);
     return this.sseService.for(meetupId).streamz$[meetupId];
   }
@@ -58,12 +64,21 @@ export class MessagesController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'Message 생성' })
-  @Post(':id/messages')
+  @Post(':meetupId/messages')
   async create(
-    @CurrentUserId() id: string,
+    @CurrentUserId() userId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() createMessageDto: CreateMessageDto,
   ): Promise<IMessage> {
-    console.log(createMessageDto);
+    console.log(createMessageDto.appointment.dateTime);
+    if (createMessageDto.messageType === MessageType.CUSTOM) {
+      const dt = moment.parseZone(createMessageDto.appointment.dateTime);
+      await this.roomsService.update({
+        meetupId: meetupId,
+        userId: userId,
+        appointedAt: dt.toDate(),
+      });
+    }
     return await this.messagesService.create(createMessageDto);
   }
 
@@ -72,9 +87,9 @@ export class MessagesController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'Message 리스트' })
-  @Get(':id/messages')
+  @Get(':meetupId/messages')
   async fetch(
-    @Param('id', ParseIntPipe) meetupId: number, // meetupId
+    @Param('meetupId', ParseIntPipe) meetupId: number,
     @Query('lastId') lastId: string | undefined,
   ): Promise<any> {
     const lastKey = lastId
@@ -100,9 +115,9 @@ export class MessagesController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'Message 삭제' })
-  @Delete(':id/messages')
+  @Delete(':meetupId/messages')
   async delete(
-    @Param('id', ParseIntPipe) meetupId: number, // meetupId
+    @Param('meetupId', ParseIntPipe) meetupId: number, // meetupId
     @Body('id') id: string,
   ): Promise<any> {
     const key = {
@@ -124,11 +139,11 @@ export class MessagesController {
   @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
   @Post('image/url')
   async getSignedUrl(
-    @CurrentUserId() id: number,
+    @CurrentUserId() userId: number,
     @Body('mimeType') mimeType: string,
   ): Promise<SignedUrl> {
     if (mimeType) {
-      return await this.messagesService.getSignedUrl(id, mimeType);
+      return await this.messagesService.getSignedUrl(userId, mimeType);
     }
     throw new BadRequestException('mimeType is missing');
   }

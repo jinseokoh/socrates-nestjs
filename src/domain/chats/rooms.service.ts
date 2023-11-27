@@ -106,11 +106,14 @@ export class RoomsService {
     if (dto.hasOwnProperty('isBanned')) {
       room.isBanned = dto.isBanned;
     }
+    if (dto.hasOwnProperty('lastMessageId')) {
+      room.lastMessageId = dto.lastMessageId;
+    }
     if (dto.hasOwnProperty('lastMessage')) {
       room.lastMessage = dto.lastMessage;
     }
-    if (dto.hasOwnProperty('lastMessageId')) {
-      room.lastMessageId = dto.lastMessageId;
+    if (dto.hasOwnProperty('appointedAt')) {
+      room.appointedAt = dto.appointedAt;
     }
     return await this.repository.save(room);
   }

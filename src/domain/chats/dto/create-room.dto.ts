@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsDate,
   IsEnum,
   IsNumber,
   IsOptional,
@@ -39,6 +41,11 @@ export class CreateRoomDto {
   @IsString()
   @IsOptional()
   lastMessageId: string | null;
+
+  @ApiProperty({ description: 'appointment time' })
+  @Type(() => Date)
+  @IsDate()
+  appointedAt: Date;
 
   @ApiProperty({ description: '사용자 아이디' })
   @IsNumber()

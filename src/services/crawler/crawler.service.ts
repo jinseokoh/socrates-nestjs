@@ -31,6 +31,8 @@ export class CrawlerService {
     const { document } = dom.window;
     const divs = document.querySelectorAll('div.result_cont');
 
+    console.log(divs);
+
     divs.forEach((element) => {
       const title = element.querySelector('h3 span');
       const content = element.querySelector('div.content');

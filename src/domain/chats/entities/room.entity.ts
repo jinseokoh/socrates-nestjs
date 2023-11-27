@@ -24,6 +24,10 @@ export class Room {
   isPaid: boolean;
 
   @Column({ default: false })
+  @ApiProperty({ description: 'is Confirmed?' })
+  isConfirmed: boolean;
+
+  @Column({ default: false })
   @ApiProperty({ description: 'is Ended?' })
   isEnded: boolean;
 
@@ -40,6 +44,10 @@ export class Room {
   @Column({ length: 255, nullable: true })
   @ApiProperty({ description: 'last message' })
   lastMessage: string | null;
+
+  @Column({ type: 'datetime', nullable: true })
+  @ApiProperty({ description: 'appointment' })
+  appointedAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
