@@ -70,7 +70,6 @@ export class MessagesController {
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() createMessageDto: CreateMessageDto,
   ): Promise<IMessage> {
-    console.log(createMessageDto.appointment.dateTime);
     if (createMessageDto.messageType === MessageType.CUSTOM) {
       const dt = moment.parseZone(createMessageDto.appointment.dateTime);
       await this.roomsService.update({
