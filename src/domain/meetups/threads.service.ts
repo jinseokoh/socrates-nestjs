@@ -15,6 +15,7 @@ import { UpdateThreadDto } from 'src/domain/meetups/dto/update-thread.dto';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
+import { FcmService } from 'src/services/fcm/fcm.service';
 import { Repository } from 'typeorm';
 @Injectable()
 export class ThreadsService {
@@ -23,6 +24,7 @@ export class ThreadsService {
     private readonly repository: Repository<Thread>,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     private readonly s3Service: S3Service,
+    private readonly fcmService: FcmService,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -33,13 +35,19 @@ export class ThreadsService {
     // creation
     const thread = await this.repository.save(this.repository.create(dto));
     // fetch thread w/ user to emit SSE
-    const threadWithUser = await this.findById(thread.id, ['user']);
+    const threadWithUser = await this.findById(thread.id, [
+      'user',
+      'meetup',
+      'meetup.user',
+    ]);
     console.log('threadWithUser', threadWithUser);
-    // emit SSE
-    this.redisClient.emit('sse.threads', {
-      key: 'sse.create',
-      value: threadWithUser,
-    });
+
+    const fbToken = threadWithUser.meetup.user.pushToken;
+    const notification = {
+      title: 'MeSo',
+      body: '모임에 댓글이 달렸습니다.',
+    };
+    this.fcmService.sendToToken(fbToken, notification);
 
     // notify slack
     return threadWithUser;

@@ -23,6 +23,7 @@ import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
 import { DataSource } from 'typeorm';
 import { LanguagesModule } from 'src/domain/languages/languages.module';
+import { FcmModule } from 'src/services/fcm/fcm.module';
 
 @Module({
   imports: [
@@ -96,6 +97,7 @@ import { LanguagesModule } from 'src/domain/languages/languages.module';
         ttl: 60 * 3, // default to 3 mins
       }),
     }),
+    FcmModule,
     NaverModule,
     AuthModule,
     CareersModule,

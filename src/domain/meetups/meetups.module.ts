@@ -12,12 +12,13 @@ import { MeetupsController } from 'src/domain/meetups/meetups.controller';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
 import { ThreadsService } from 'src/domain/meetups/threads.service';
 import { S3Module } from 'src/services/aws/s3.module';
-import { SseModule } from 'src/services/sse/sse.module';
+// import { SseModule } from 'src/services/sse/sse.module';
+import { FcmModule } from 'src/services/fcm/fcm.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Meetup, Venue, Category, Career, User, Thread]),
     S3Module,
-    SseModule,
+    FcmModule,
   ],
   // exports: [MeetupsService], // we need this for what?
   providers: [MeetupsService, ThreadsService],
