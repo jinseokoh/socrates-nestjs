@@ -36,6 +36,7 @@ export class LanguagesService {
   //? SEED
   //?-------------------------------------------------------------------------//
 
+  // synchronously seed data
   async seedLanguages(): Promise<void> {
     const slugs = [
       'arabic',

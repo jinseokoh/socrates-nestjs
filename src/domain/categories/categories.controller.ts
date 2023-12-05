@@ -36,7 +36,7 @@ export class CategoriesController {
 
   @ApiOperation({ description: 'seed categories' })
   @Post('seed')
-  async category(): Promise<void> {
+  async seed(): Promise<void> {
     return await this.categoriesService.seedCategory();
   }
 }

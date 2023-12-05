@@ -14,6 +14,7 @@ import { CareersModule } from 'src/domain/careers/careers.module';
 import { CategoriesModule } from 'src/domain/categories/categories.module';
 import { ContentsModule } from 'src/domain/contents/contents.module';
 import { ChatsModule } from 'src/domain/chats/chats.module';
+import { DotsModule } from 'src/domain/dots/dots.module';
 import { MeetupsModule } from 'src/domain/meetups/meetups.module';
 import { UsersModule } from 'src/domain/users/users.module';
 import { NaverModule } from 'src/services/naver/naver.module';
@@ -102,6 +103,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
     AuthModule,
     CareersModule,
     CategoriesModule,
+    DotsModule,
     ChatsModule,
     ContentsModule,
     InquiriesModule,
