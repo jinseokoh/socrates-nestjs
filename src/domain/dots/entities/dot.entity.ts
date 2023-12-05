@@ -21,10 +21,10 @@ export class Dot {
   question: string;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  vote: number;
+  votes: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  count: number;
+  answers: number;
 
   @Column({ default: false })
   @ApiProperty({ description: 'isActive' })
