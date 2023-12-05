@@ -75,7 +75,7 @@ export class DotsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'seed dots' })
-  @Post('seed')
+  @Post('seed/dots')
   async seedDots(): Promise<void> {
     return await this.dotsService.seedDots();
   }
