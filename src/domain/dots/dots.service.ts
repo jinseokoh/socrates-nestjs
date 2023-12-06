@@ -53,7 +53,8 @@ export class DotsService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  async findAll(): Promise<Array<Dot>> {
+  // Dot 리스트
+  async getAll(): Promise<Array<Dot>> {
     return await this.repository.find({
       where: {
         isActive: true,
@@ -62,39 +63,30 @@ export class DotsService {
   }
 
   // Connection 리스트 w/ Pagination
-  async findPaginatedAll(
-    dotId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Connection>> {
-    const queryBuilder =
-      dotId > 0
-        ? this.connectionRepository
-            .createQueryBuilder('connection')
-            .leftJoinAndSelect('connection.user', 'user')
-            .leftJoinAndSelect('user.profile', 'profile')
-            .leftJoinAndSelect('connection.dot', 'dot')
-            .where({
-              dotId,
-            })
-        : this.connectionRepository
-            .createQueryBuilder('connection')
-            .leftJoinAndSelect('connection.user', 'user')
-            .leftJoinAndSelect('user.profile', 'profile')
-            .leftJoinAndSelect('connection.dot', 'dot');
+  // filtering example)
+  // - /v1/dots/connections?filter.user.gender=male
+  // - /v1/dots/connections?filter.user.dob=$btw:1990-01-01,2010-01-01
+  async findAll(query: PaginateQuery): Promise<Paginated<Connection>> {
+    const queryBuilder = this.connectionRepository
+      .createQueryBuilder('connection')
+      .leftJoinAndSelect('connection.user', 'user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('connection.dot', 'dot');
 
     const config: PaginateConfig<Connection> = {
       relations: {
         user: { profile: true },
-        dot: true, // needed for filtering
+        // dot: true, // not being used at least for now.
       },
       sortableColumns: ['userId', 'dotId'],
       searchableColumns: ['body'],
       defaultSortBy: [['createdAt', 'DESC']],
       filterableColumns: {
+        dotId: [FilterOperator.EQ, FilterOperator.IN],
         userId: [FilterOperator.EQ, FilterOperator.IN],
         'user.dob': [FilterOperator.GTE, FilterOperator.LT, FilterOperator.BTW],
         'user.gender': [FilterOperator.EQ],
-        'dot.slug': [FilterOperator.EQ, FilterOperator.IN],
+        // 'dot.slug': [FilterOperator.EQ, FilterOperator.IN],
       },
     };
 

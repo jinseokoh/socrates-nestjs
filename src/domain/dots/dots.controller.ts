@@ -50,18 +50,17 @@ export class DotsController {
   @ApiOperation({ description: 'Dot List' })
   @Get()
   async getDots(): Promise<Array<Dot>> {
-    return await this.dotsService.findAll();
+    return await this.dotsService.getAll();
   }
 
   @Public()
   @ApiOperation({ description: 'Connection 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':dotId')
-  async getPaginatedDots(
-    @Param('dotId', ParseIntPipe) dotId: number,
+  @Get('connections')
+  async findAllConnections(
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Connection>> {
-    return await this.dotsService.findPaginatedAll(dotId, query);
+    return await this.dotsService.findAll(query);
   }
 
   // @ApiOperation({ description: 'return sub-trees' })
