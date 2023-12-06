@@ -1,10 +1,8 @@
 import { BadRequestException, Logger } from '@nestjs/common';
 import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator';
 import * as firebaseAdmin from 'firebase-admin';
-import { MulticastMessage } from 'firebase-admin/lib/messaging/messaging-api';
 
 //** reference) https://blog.logrocket.com/implement-in-app-notifications-nestjs-mysql-firebase/
-
 @Injectable()
 export class FcmService {
   private readonly logger = new Logger(FcmService.name);
@@ -12,9 +10,8 @@ export class FcmService {
   async sendToToken(
     token: string,
     notification: firebaseAdmin.messaging.Notification,
-  ) {
-    let result = null;
-    const payload: firebaseAdmin.messaging.Message = {
+  ): Promise<string> {
+    const payload: firebaseAdmin.messaging.TokenMessage = {
       token,
       notification: {
         title: notification.title,
@@ -28,23 +25,23 @@ export class FcmService {
       },
       android: {
         priority: 'high',
-        ttl: 60 * 60 * 24,
+        ttl: 60 * 60 * 24, // 1 day
       },
     };
+
     try {
-      result = await firebaseAdmin.messaging().send(payload);
+      return await firebaseAdmin.messaging().send(payload);
     } catch (error) {
-      this.logger.error(error.message, error.stackTrace, 'sendToToken');
+      this.logger.error(error.message, error.stackTrace, '@sendToToken');
       throw error;
     }
-    return result;
   }
 
   async sendToTopic(
     topic: string,
     notification: firebaseAdmin.messaging.Notification,
-  ) {
-    const payload: firebaseAdmin.messaging.Message = {
+  ): Promise<string> {
+    const payload: firebaseAdmin.messaging.TopicMessage = {
       topic,
       notification: {
         title: notification.title,
@@ -61,21 +58,19 @@ export class FcmService {
         ttl: 60 * 60 * 24,
       },
     };
-    let result = null;
     try {
-      result = await firebaseAdmin.messaging().send(payload);
+      return await firebaseAdmin.messaging().send(payload);
     } catch (error) {
-      this.logger.error(error.message, error.stackTrace, 'sendToTopic');
+      this.logger.error(error.message, error.stackTrace, '@sendToTopic');
       throw error;
     }
-    return result;
   }
 
   async sendToCondition(
     condition: string,
     notification: firebaseAdmin.messaging.Notification,
-  ) {
-    const payload: firebaseAdmin.messaging.Message = {
+  ): Promise<string> {
+    const payload: firebaseAdmin.messaging.ConditionMessage = {
       condition,
       notification: {
         title: notification.title,
@@ -92,16 +87,15 @@ export class FcmService {
         ttl: 60 * 60 * 24,
       },
     };
-    let result = null;
     try {
-      result = await firebaseAdmin.messaging().send(payload);
+      return await firebaseAdmin.messaging().send(payload);
     } catch (error) {
-      this.logger.error(error.message, error.stackTrace, 'sendToCondition');
+      this.logger.error(error.message, error.stackTrace, '@sendToCondition');
       throw error;
     }
-    return result;
   }
 
+  // todo. define a return type... insteady of using any. okay?!
   async sendMulticast(
     tokens: string[],
     notification: firebaseAdmin.messaging.Notification,
