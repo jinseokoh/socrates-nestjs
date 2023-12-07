@@ -1,11 +1,11 @@
 import { Socket } from 'socket.io';
-import { SocketIoJwtGuard } from 'src/domain/auth/guards/ws-jwt.guard';
+import { SocketIoJwtGuard } from 'src/websockets/socketio-jwt.guard';
 
-export type SocketIoMiddleware = {
+export type TWebsocketMiddleware = {
   (client: Socket, next: (err?: Error) => void);
 };
 
-export const SocketIoJwtMiddleware = (): SocketIoMiddleware => {
+export const SocketIoJwtMiddleware = (): TWebsocketMiddleware => {
   return (client, next) => {
     try {
       SocketIoJwtGuard.validateToken(client);

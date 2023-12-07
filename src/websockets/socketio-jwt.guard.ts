@@ -13,7 +13,6 @@ export class SocketIoJwtGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-
     console.log(`validation calls from socketIoJwtGuard`);
 
     if (context.getType() !== 'ws') {
