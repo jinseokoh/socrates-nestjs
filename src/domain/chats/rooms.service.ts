@@ -119,9 +119,9 @@ export class RoomsService {
   }
 
   //? Room isPaid 값 갱신
-  //? 코인 비용이 발생할 수 있음.
-  //! balance will be adjusted w/ model event subscriber.
-  //! using transaction using query runner
+  //? 코인 비용 발생
+  //! balance will automatically be updated w/ Ledger model event subscriber.
+  //! do not try to update it manually. perform a transaction using query runner
   async payRoomFee(dto: ChangeRoomIsPaidDto): Promise<Room> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();

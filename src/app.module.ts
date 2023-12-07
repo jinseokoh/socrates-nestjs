@@ -25,6 +25,7 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
 import { DataSource } from 'typeorm';
 import { LanguagesModule } from 'src/domain/languages/languages.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -111,6 +112,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
     MeetupsModule,
     UsersModule,
     RedisModule.register({ name: REDIS_PUBSUB_CLIENT }),
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [

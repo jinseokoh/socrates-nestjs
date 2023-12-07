@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  ObjectCannedACL,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -32,7 +33,7 @@ export class S3Service {
       Bucket: this.bucket,
       Body: buffer,
       Key: path,
-      ACL: 'private',
+      ACL: ObjectCannedACL.private,
     };
     // upload the manipulated image to S3
     const command = new PutObjectCommand(bucketParams);
@@ -64,7 +65,7 @@ export class S3Service {
       Bucket: this.bucket,
       Body: imgResized,
       Key: path,
-      ACL: 'private',
+      ACL: ObjectCannedACL.private,
       ContentType: 'image/jpeg',
     };
     // upload the manipulated image to S3

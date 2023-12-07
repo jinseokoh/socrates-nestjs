@@ -43,10 +43,12 @@ import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-s
       Secret,
       User,
     ]),
-    ThrottlerModule.forRoot({
-      ttl: 60,
-      limit: 2,
-    }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60 * 1000,
+        limit: 2,
+      },
+    ]),
     SesModule,
     S3Module,
     CrawlerModule,
