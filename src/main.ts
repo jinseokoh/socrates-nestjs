@@ -10,6 +10,7 @@ import helmet from 'helmet';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from 'src/app.module';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
+import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -50,13 +51,7 @@ async function bootstrap() {
   // https://stackoverflow.com/questions/60062318/how-to-inject-service-to-validator-constraint-interface-in-nestjs-using-class-va
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  // const firebaseConfig = configService.get<IFirebaseConfig>('firebase');
-  // https://dev.to/aswinsanakan/how-to-integrate-firebase-in-nestjs-5gl9
-  // const serviceAccount: firebaseAdmin.ServiceAccount = {
-  //   projectId: firebaseConfig.projectId,
-  //   privateKey: firebaseConfig.privateKey.replace(/\\n/g, '\n'),
-  //   clientEmail: firebaseConfig.clientEmail,
-  // };
+  // firebase config
   initializeApp({
     credential: applicationDefault(),
     // databaseURL: 'https://flea-auction-dev.firebaseio.com',
@@ -68,6 +63,9 @@ async function bootstrap() {
   app.use(cookieParser());
   // see https://expressjs.com/en/guide/behind-proxies.html
   app.set('trust proxy', true);
+
+  // websocket client for basic test
+  app.useStaticAssets(join(__dirname, '..', 'static'));
 
   const config = new DocumentBuilder()
     .setTitle('Socrates v1')
