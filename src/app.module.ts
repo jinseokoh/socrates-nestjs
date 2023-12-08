@@ -26,6 +26,8 @@ import { DataSource } from 'typeorm';
 import { LanguagesModule } from 'src/domain/languages/languages.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
 import { SocketIoModule } from './websockets/socketio.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -98,6 +100,9 @@ import { SocketIoModule } from './websockets/socketio.module';
         db: 0,
         ttl: 60 * 3, // default to 3 mins
       }),
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'static'),
     }),
     FcmModule,
     NaverModule,

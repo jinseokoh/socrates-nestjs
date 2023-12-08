@@ -61,11 +61,18 @@ async function bootstrap() {
   app.use(helmet());
   app.use(helmet.hidePoweredBy());
   app.use(cookieParser());
+
+  //! this is for static index.html to run inline and cdn script code. remove this if you don't want.
+  app.use(function (req, res, next) {
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; font-src 'self'; img-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*; style-src 'self'; frame-src 'self'",
+    );
+    next();
+  });
+
   // see https://expressjs.com/en/guide/behind-proxies.html
   app.set('trust proxy', true);
-
-  // websocket client for basic test
-  app.useStaticAssets(join(__dirname, '..', 'static'));
 
   const config = new DocumentBuilder()
     .setTitle('Socrates v1')
