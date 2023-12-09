@@ -14,8 +14,11 @@ import {
 
 import { Server, Socket } from 'socket.io';
 
+//? references)
+//? https://github.com/brianjohnsonsr/nest.ws.tutorial
+//? or `build a websockets server` on youtube
 @WebSocketGateway({ namespace: 'chat' })
-@UseGuards(SocketIoJwtGuard) // no quite valid here.
+// @UseGuards(SocketIoJwtGuard)
 export class SocketIoGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -26,7 +29,7 @@ export class SocketIoGateway
 
   afterInit(client: Socket) {
     this.logger.log('initialized');
-    client.use(SocketIoJwtMiddleware() as any);
+    // client.use(SocketIoJwtMiddleware() as any);
   }
 
   handleConnection(client: Socket, ...args: any[]) {
@@ -41,11 +44,11 @@ export class SocketIoGateway
   // handleMessage(@MessageBody() message: string): void {
   //  this.server.emit(`messageToClient`, message);
   // }
-  @SubscribeMessage(`messageToServer`)
+  @SubscribeMessage(`chatToServer`)
   handleMessage(client: Socket, payload: any): WsResponse<string> {
     //! send to the specific client, client.emit('messageToClient', ...)
     //! send to everyone on server, this.server.emit('messageToClient', ...)
-    return { event: 'messageToClient', data: payload };
+    return { event: 'chatToClient', data: payload };
   }
 
   sendMessage() {
