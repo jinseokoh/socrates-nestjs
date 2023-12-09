@@ -7,14 +7,31 @@
     <script src="http://localhost:4001/socket.io/socket.io.js"></script>
   <body>
     <div id="v-app">
-      <h1>{{ title }}</h1>
+      <h1>Vue Chat</h1>
       <form>
         <input v-model="text" type="text" />
         <button type="submit" @click.prevent="sendChatMessage()">Send</button>
       </form>
+      <div class="flex">
+        <p>Room: {{ activeRoom }}</p>
+        <p>Status: {{ isJoined ? 'joined' : 'not joined' }}</p>
+        <div>
+          <button @click="toggleRoomMembership">{{ isJoined ? 'Leave' : 'Join' }}</button>
+        </div>        
+        <div class="flex">
+          <button class="tab-btn" :class="{ active: activeRoom == 'room1'}" @click="activeRoom = 'room1'">Room #1</button>
+          <button class="tab-btn" :class="{ active: activeRoom == 'room2'}" @click="activeRoom = 'room2'">Room #2</button>
+          <button class="tab-btn" :class="{ active: activeRoom == 'room3'}" @click="activeRoom = 'room3'">Room #3</button>
+        </div>
+      </div>
       <p>
         <ul>
-          <li v-for="msg of messages">{{ msg }}</li>
+          <li v-for="message of messages[activeRoom]">
+            <string>
+              {{ message.sender }}
+            </string>
+            {{ message.message }}
+          </li>
         </ul>
       </p>
     </div> 
@@ -22,9 +39,19 @@
       var app = new Vue({
         el: '#v-app',
         data: {
-          title: 'websocket tester',
           text: '',
-          messages: ['initial message'],
+          messages: {
+            room1: [],
+            room2: [],
+            room3: [],
+          },
+          rooms: {
+            room1: false,
+            room2: false,
+            room3: false,
+          },
+          activeRoom: 'room1',
+          username: '',
           sockets: {
             chat: null,
             alert: null
@@ -32,17 +59,45 @@
         },
         methods: {
           sendChatMessage() {
-            this.sockets.chat.emit('chatToServer', this.text);
-            this.text = '';
+            // check if user is memeber of active room
+            if (this.isJoined) {
+              this.sockets.chat.emit('chatToServer', {
+                sender: this.username,
+                message: this.text,
+                room: this.activeRoom,
+              })
+              this.text = '';
+            } else {
+              alert('join the room first');
+            }
           },
-          receiveChatMesssage(message) {
-            this.messages.push(message)
+          receiveChatMesssage(payload) {
+            this.messages[payload.room].push(payload)
+          },
+          toggleRoomMembership() {
+            if (this.isJoined) {
+              this.sockets.chat.emit('leaveRoom', this.activeRoom)
+            } else {
+              this.sockets.chat.emit('joinRoom', this.activeRoom)
+            }
+          }
+        },
+        computed: {
+          isJoined() {
+            return this.rooms[this.activeRoom];
           }
         },
         created() {
+          this.username = prompt('Enter your username:');
           this.sockets.chat = io('http://localhost:4001/chat');
-          this.sockets.chat.on('chatToClient', (message) => {
-            this.receiveChatMesssage(message);
+          this.sockets.chat.on('chatToClient', (payload) => {
+            this.receiveChatMesssage(payload);
+          });
+          this.sockets.chat.on('joinedRoom', (room) => {
+            this.rooms[room] = true;
+          });
+          this.sockets.chat.on('leftRoom', (room) => {
+            this.rooms[room] = false;
           });
         }
 

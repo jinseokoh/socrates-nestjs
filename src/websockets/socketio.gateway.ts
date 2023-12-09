@@ -2,17 +2,21 @@ import { SocketIoJwtMiddleware } from 'src/websockets/socketio-jwt.middleware';
 import { SocketIoJwtGuard } from 'src/websockets/socketio-jwt.guard';
 import { Logger, UseGuards } from '@nestjs/common';
 import {
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsResponse,
 } from '@nestjs/websockets';
 
 import { Server, Socket } from 'socket.io';
+
+interface IMessage {
+  sender: string;
+  message: string;
+  room: string;
+}
 
 //? references)
 //? https://github.com/brianjohnsonsr/nest.ws.tutorial
@@ -28,7 +32,7 @@ export class SocketIoGateway
   server: Server;
 
   afterInit(client: Socket) {
-    this.logger.log('initialized');
+    this.logger.log('chat gateway initialized');
     // client.use(SocketIoJwtMiddleware() as any);
   }
 
@@ -41,17 +45,27 @@ export class SocketIoGateway
   }
 
   // JFYI, this is equivalent to the following handler
-  // handleMessage(@MessageBody() message: string): void {
-  //  this.server.emit(`messageToClient`, message);
+  // handleMessage(@MessageBody() message: string): WsResponse<string> {
+  //  return { event: 'chatToClient', data: payload };
   // }
   @SubscribeMessage(`chatToServer`)
-  handleMessage(client: Socket, payload: any): WsResponse<string> {
-    //! send to the specific client, client.emit('messageToClient', ...)
-    //! send to everyone on server, this.server.emit('messageToClient', ...)
-    return { event: 'chatToClient', data: payload };
+  handleMessage(client: Socket, payload: IMessage): void {
+    this.server.to(payload.room).emit('chatToClient', payload);
   }
 
-  sendMessage() {
-    this.server.emit('newMessage', 'hello from the server');
+  // as opposed to namespace, which a client can detect its connection,
+  // room is different in that only server knows about which client has
+  // joined the room or not. therefore, server needs to inform client(s)
+  // which one has joined the room everytime things changed.
+  @SubscribeMessage(`joinRoom`)
+  handleJoinRoom(client: Socket, room: string): void {
+    client.join(room);
+    client.emit('joinedRoom', room);
+  }
+
+  @SubscribeMessage(`leaveRoom`)
+  handleLeaveRoom(client: Socket, room: string): void {
+    client.leave(room);
+    client.emit('leftRoom', room);
   }
 }
