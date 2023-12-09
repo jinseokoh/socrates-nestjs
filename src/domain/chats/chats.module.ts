@@ -10,6 +10,7 @@ import { RoomsService } from 'src/domain/chats/rooms.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { RoomSubscriber } from 'src/domain/chats/subscribers/room-subscriber';
+import { SocketIoGateway } from 'src/websockets/socketio.gateway';
 // import { MessagesGateway } from 'src/domain/chats/messages.gateway';
 // removed message gateway as we exploit SSE instead of websocket
 @Module({

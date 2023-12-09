@@ -9,27 +9,12 @@ import { IMessageEvent } from 'src/common/interfaces';
 export class SseService {
   //? not fully tested, but the theory is as follows:
   //?
-  //? 1. Subject is required to broadcast messages out to all the participants
-  //? 2. A list of Subjects and Observables are required to selectively send/receive data
+  //? Subject is required to broadcast messages out to all the participants
   //?
-  public static subjectz: Subject<IMessageEvent>[] = [];
-  public streamz$: Observable<IMessageEvent>[] = [];
+  private subject = new Subject<IMessageEvent>();
+  public sseStream$: Observable<IMessageEvent> = this.subject.asObservable();
 
-  for(channel: number) {
-    if (!SseService.subjectz[channel]) {
-      SseService.subjectz[channel] = new Subject<IMessageEvent>();
-      this.streamz$[channel] = SseService.subjectz[channel].asObservable();
-    }
-    return this;
-  }
-
-  // additional ref) https://ncjamieson.com/closed-subjects/
-  close(channel: number) {
-    SseService.subjectz[channel] = null;
-    this.streamz$[channel] = null;
-  }
-
-  fire(channel: number, type: string, data: object) {
-    SseService.subjectz[channel].next({ type, data });
+  fire(type: string, data: object) {
+    this.subject.next({ type, data });
   }
 }
