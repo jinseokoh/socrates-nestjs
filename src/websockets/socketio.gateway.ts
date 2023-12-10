@@ -57,8 +57,12 @@ export class SocketIoGateway
   @SubscribeMessage(`chatToServer`)
   async handleMessage(client: Socket, chatUIMessage: any): Promise<void> {
     const room = client.handshake.query.room; // # meetupId
-    // DB 저장은 client 에서 HTTP 통신으로 처리
+
+    console.log('~~~~~~~~~~~~~~~~~~~~~~~~');
+    console.log(chatUIMessage);
+    console.log('~~~~~~~~~~~~~~~~~~~~~~~~');
     // const message = await this.messagesService.create(dto);
+
     // send message payload back to clients
     this.server.to(`${room}`).emit('chatToClient', chatUIMessage);
   }
