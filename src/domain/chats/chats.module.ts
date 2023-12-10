@@ -30,5 +30,6 @@ import { SocketIoGateway } from 'src/websockets/socketio.gateway';
   ],
   providers: [RoomsService, MessagesService, RoomSubscriber],
   controllers: [RoomsController, MessagesController],
+  exports: [MessagesService],
 })
 export class ChatsModule {}

@@ -38,7 +38,7 @@ export class SocketIoGateway
 {
   private logger: Logger = new Logger('WebSocketGateway');
 
-  // constructor() {}
+  constructor(private readonly messagesService: MessagesService) {}
 
   @WebSocketServer()
   server: Server;
