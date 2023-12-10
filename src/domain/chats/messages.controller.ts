@@ -46,7 +46,7 @@ export class MessagesController {
   }
 
   @Public()
-  @Sse(':meetupId/messages/stream')
+  @Sse('/stream')
   sse(): Observable<IMessageEvent> {
     return this.sseService.sseStream$;
   }

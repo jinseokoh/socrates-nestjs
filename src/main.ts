@@ -11,6 +11,7 @@ import * as cookieParser from 'cookie-parser';
 import { AppModule } from 'src/app.module';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
 import { join } from 'path';
+import { RedisIoAdapter } from 'src/websockets/redis-io.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -25,6 +26,10 @@ async function bootstrap() {
     },
   });
   await app.startAllMicroservices();
+
+  const redisIoAdapter = new RedisIoAdapter(app);
+  await redisIoAdapter.connectToRedis();
+  app.useWebSocketAdapter(redisIoAdapter);
 
   // Create new DynamoDB instance
   // dynamoose.aws.ddb.local();

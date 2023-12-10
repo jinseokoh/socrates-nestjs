@@ -13,7 +13,7 @@ import {
 } from 'src/domain/chats/entities/message.interface';
 
 export class CreateMessageDto {
-  @ApiProperty({ description: 'Message', required: true })
+  @ApiProperty({ description: '모임 id', required: true })
   @IsNumber()
   meetupId: number;
 
@@ -21,7 +21,7 @@ export class CreateMessageDto {
   @IsNumber()
   userId: number;
 
-  @ApiProperty({ description: 'msg_createdAt_userId', required: true })
+  @ApiProperty({ description: '메시지 id (msg_xxx_userId)', required: true })
   @IsString()
   @IsOptional()
   id: string;

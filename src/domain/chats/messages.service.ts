@@ -35,10 +35,6 @@ export class MessagesService {
     const expires = moment().add(10, 'minutes').valueOf(); // todo. fix ttl value
     try {
       const message = await this.model.create({ ...dto, id, expires });
-
-      // emit SSE
-      this.redisClient.emit('sse.add_chat', message);
-
       return message;
     } catch (error) {
       console.error(`[dynamodb] error`, error);

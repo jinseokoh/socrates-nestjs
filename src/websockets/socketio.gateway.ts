@@ -16,12 +16,6 @@ import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/domain/chats/messages.service';
 import { CreateMessageDto } from 'src/domain/chats/dto/create-message.dto';
 
-interface IMessage {
-  sender: string;
-  message: string;
-  room: string;
-}
-
 //? references #1)
 //? https://github.com/brianjohnsonsr/nest.ws.tutorial
 //? or `build a websockets server` on youtube
@@ -61,8 +55,11 @@ export class SocketIoGateway
   //  return { event: 'chatToClient', data: payload };
   // }
   @SubscribeMessage(`chatToServer`)
-  handleMessage(client: Socket, payload: IMessage): void {
-    this.server.to(payload.room).emit('chatToClient', payload);
+  async handleMessage(client: Socket, dto: CreateMessageDto): Promise<void> {
+    // DB 저장
+    const message = await this.messagesService.create(dto);
+    // send message payload back to clients
+    this.server.to(`${dto.meetupId}`).emit('chatToClient', message);
   }
 
   // as opposed to namespace, which a client can detect its connection,
