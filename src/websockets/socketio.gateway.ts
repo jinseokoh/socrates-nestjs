@@ -55,11 +55,12 @@ export class SocketIoGateway
   //  return { event: 'chatToClient', data: payload };
   // }
   @SubscribeMessage(`chatToServer`)
-  async handleMessage(client: Socket, dto: CreateMessageDto): Promise<void> {
-    // DB 저장
-    const message = await this.messagesService.create(dto);
+  async handleMessage(client: Socket, chatUIMessage: any): Promise<void> {
+    const room = client.handshake.query.room; // # meetupId
+    // DB 저장은 client 에서 HTTP 통신으로 처리
+    // const message = await this.messagesService.create(dto);
     // send message payload back to clients
-    this.server.to(`${dto.meetupId}`).emit('chatToClient', message);
+    this.server.to(`${room}`).emit('chatToClient', chatUIMessage);
   }
 
   // as opposed to namespace, which a client can detect its connection,
@@ -67,15 +68,21 @@ export class SocketIoGateway
   // joined the room or not. therefore, server needs to inform client(s)
   // which one has joined the room everytime things changed.
   @SubscribeMessage(`joinRoom`)
-  handleJoinRoom(client: Socket, room: string): void {
-    client.join(room);
-    client.emit('joinedRoom', room);
+  handleJoinRoom(
+    client: Socket,
+    data: { room: string; username: string },
+  ): void {
+    client.join(data.room);
+    this.server.to(data.room).emit('joinedRoom', data.username);
   }
 
   @SubscribeMessage(`leaveRoom`)
-  handleLeaveRoom(client: Socket, room: string): void {
-    client.leave(room);
-    client.emit('leftRoom', room);
+  handleLeaveRoom(
+    client: Socket,
+    data: { room: string; username: string },
+  ): void {
+    client.leave(data.room);
+    this.server.to(data.room).emit('leftRoom', data.username);
   }
 
   // @SubscribeMessage('createMessage')
