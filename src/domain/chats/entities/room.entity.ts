@@ -6,15 +6,19 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
+@Unique('user_id_meetup_id_key', ['userId', 'meetupId'])
 export class Room {
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
+  id: number;
+
   @Column({ type: 'enum', enum: PartyType, default: PartyType.HOST })
   @ApiProperty({ description: 'host or guest' })
   partyType: PartyType;
@@ -56,7 +60,7 @@ export class Room {
   updatedAt: Date;
 
   //@Exclude()
-  @PrimaryColumn({ type: 'int', unsigned: true })
+  @Column({ type: 'int', unsigned: true })
   userId: number | null; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.id, {
@@ -65,10 +69,10 @@ export class Room {
     // onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'userId' })
-  public user!: User;
+  public user: User;
 
   //@Exclude()
-  @PrimaryColumn({ type: 'int', unsigned: true })
+  @Column({ type: 'int', unsigned: true })
   public meetupId!: number;
 
   @ManyToOne(() => Meetup, (meetup) => meetup.id, {
@@ -77,5 +81,5 @@ export class Room {
     // onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'meetupId' })
-  public meetup!: Meetup;
+  public meetup: Meetup;
 }
