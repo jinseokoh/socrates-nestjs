@@ -57,14 +57,13 @@ export class SocketIoGateway
   @SubscribeMessage(`chatToServer`)
   async handleMessage(client: Socket, chatUIMessage: any): Promise<void> {
     const room = client.handshake.query.room; // # meetupId
-
     console.log('~~~~~~~~~~~~~~~~~~~~~~~~');
     console.log(chatUIMessage);
     console.log('~~~~~~~~~~~~~~~~~~~~~~~~');
     // const message = await this.messagesService.create(dto);
 
-    // send message payload back to clients
-    this.server.to(`${room}`).emit('chatToClient', chatUIMessage);
+    // send message payload back to clients except myself
+    client.broadcast.to(`${room}`).emit('chatToClient', chatUIMessage);
   }
 
   // as opposed to namespace, which a client can detect its connection,
@@ -77,7 +76,7 @@ export class SocketIoGateway
     data: { room: string; username: string },
   ): void {
     client.join(data.room);
-    this.server.to(data.room).emit('joinedRoom', data.username);
+    client.broadcast.to(data.room).emit('joinedRoom', data.username);
   }
 
   @SubscribeMessage(`leaveRoom`)
@@ -86,7 +85,7 @@ export class SocketIoGateway
     data: { room: string; username: string },
   ): void {
     client.leave(data.room);
-    this.server.to(data.room).emit('leftRoom', data.username);
+    client.broadcast.to(data.room).emit('leftRoom', data.username);
   }
 
   // @SubscribeMessage('createMessage')
