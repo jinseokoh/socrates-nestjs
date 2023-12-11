@@ -75,6 +75,7 @@ export class SocketIoGateway
     client: Socket,
     data: { room: string; username: string },
   ): void {
+    console.log(data);
     client.join(data.room);
     client.broadcast.to(data.room).emit('joinedRoom', data.username);
   }
@@ -84,6 +85,7 @@ export class SocketIoGateway
     client: Socket,
     data: { room: string; username: string },
   ): void {
+    console.log(data);
     client.leave(data.room);
     client.broadcast.to(data.room).emit('leftRoom', data.username);
   }

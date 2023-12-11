@@ -19,18 +19,17 @@
           <button @click="toggleRoomMembership">{{ isJoined ? 'Leave' : 'Join' }}</button>
         </div>        
         <div class="flex">
-          <button class="tab-btn" :class="{ active: activeRoom == 'room1'}" @click="activeRoom = 'room1'">Room #1</button>
-          <button class="tab-btn" :class="{ active: activeRoom == 'room2'}" @click="activeRoom = 'room2'">Room #2</button>
-          <button class="tab-btn" :class="{ active: activeRoom == 'room3'}" @click="activeRoom = 'room3'">Room #3</button>
+          <button class="tab-btn" :class="{ active: activeRoom == '19'}" @click="activeRoom = '19'">Room #1</button>
+          <button class="tab-btn" :class="{ active: activeRoom == '20'}" @click="activeRoom = '20'">Room #2</button>
         </div>
       </div>
       <p>
         <ul>
           <li v-for="message of messages[activeRoom]">
             <string>
-              {{ message.sender }}
+              {{ message.author.firstName }}
             </string>
-            {{ message.message }}
+            {{ message.text }}
           </li>
         </ul>
       </p>
@@ -41,16 +40,14 @@
         data: {
           text: '',
           messages: {
-            room1: [],
-            room2: [],
-            room3: [],
+            19: [],
+            20: [],
           },
           rooms: {
-            room1: false,
-            room2: false,
-            room3: false,
+            19: false,
+            20: false,
           },
-          activeRoom: 'room1',
+          activeRoom: '19',
           username: '',
           sockets: {
             chat: null,
@@ -60,25 +57,31 @@
         methods: {
           sendChatMessage() {
             // check if user is memeber of active room
-            if (this.isJoined) {
-              this.sockets.chat.emit('chatToServer', {
-                sender: this.username,
-                message: this.text,
-                room: this.activeRoom,
-              })
-              this.text = '';
-            } else {
-              alert('join the room first');
+            const ts = new Date().getTime();
+            const msg = {
+              author: {
+                image: 'https://cdn.fleaauction.world/images/user.png',
+                firstName: 'tester',
+                lastName: 'last',
+                id: 2,
+              },
+              id: `msg_${ts}_2`,
+              text: this.text,
+              room: this.activeRoom,
+              createdAt: ts,
             }
+            this.messages[this.activeRoom].push(msg)
+            this.sockets.chat.emit('chatToServer', msg)
+            this.text = '';
           },
           receiveChatMesssage(payload) {
-            this.messages[payload.room].push(payload)
+            this.messages[this.activeRoom].push(payload)
           },
           toggleRoomMembership() {
             if (this.isJoined) {
-              this.sockets.chat.emit('leaveRoom', this.activeRoom)
+              this.sockets.chat.emit('leaveRoom', { room: this.activeRoom, username: 'tester' })
             } else {
-              this.sockets.chat.emit('joinRoom', this.activeRoom)
+              this.sockets.chat.emit('joinRoom', { room: this.activeRoom, username: 'tester' })
             }
           }
         },
@@ -89,15 +92,20 @@
         },
         created() {
           this.username = prompt('Enter your username:');
-          this.sockets.chat = io('http://localhost:4001/chat');
+          this.sockets.chat = io('http://localhost:4001/chat', {
+            query: {
+              room: '19',
+            }
+          });
           this.sockets.chat.on('chatToClient', (payload) => {
+            console.log(payload);
             this.receiveChatMesssage(payload);
           });
           this.sockets.chat.on('joinedRoom', (room) => {
-            this.rooms[room] = true;
+            // this.rooms[room] = true;
           });
           this.sockets.chat.on('leftRoom', (room) => {
-            this.rooms[room] = false;
+            // this.rooms[room] = false;
           });
         }
 
