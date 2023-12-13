@@ -666,31 +666,29 @@ export class DotsService {
       }),
       new Dot({
         slug: 'devil',
-        question: '당신의 로맨틱한 꿈이나 판타지 속 이상형은 어떤 모습인가요?',
+        question:
+          '내 가족을 상해한 원수의 아들과 내 아들이 서로 친하게 지내고 싶어한다면, 어떻게 조언하시겠어요?',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question:
-          '로맨틱한 분위기에서 빠지면 안되는 가장 중요한 요소가 있다면, 무엇인가요?',
+          '강력범죄인에 대한 인권보호를 위해 사형제도를 시행하고 있지 않다고 합니다. 어떻게 생각하나요?',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
-        question:
-          '로맨틱한 상황에서 상대방과 함께 나누고 싶은 음료나 음식이 있다면, 무엇인가요?',
+        question: '동성애를 찬성하거나 반대한다면 그 이유를 설명해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
-        question:
-          '로맨틱한 여행을 단둘이 떠날 수 있는 기회가 있다면, 가장 이상적인 여행지와 숙소는 어디인가요?',
+        question: '대마초와 마약에 대한 제재가 필요하다고 보시나요?',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
-        question:
-          '1시간 안에 갈 수 있는 가장 비밀스럽고 로맨틱한 장소를 떠올린다면 그 장소는 어디인가요?',
+        question: '과학 연구를 위한 동물 실험에 대하여 찬성하나요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
@@ -702,24 +700,23 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         question:
-          '이성에게 매력적으로 보이기 위해 사용하는 나만의 비법은 무엇인가요?',
+          '전세계적인 빈부격차가 증가하는 이유와 그것에 대한 나의 대응책은 무엇이 있나요?',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question:
-          '낯선 상대방으로부터 성적 매력을 느낄 때가 있었다면, 어떤 상황이었나요?',
+          '인공지능 기술이 지속적으로 발전한다면, 살기 편리한 사회가 될까요? 아니면 그 반대가 될까요?',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
-        question:
-          '당신을 섹시한 무드로 만드는 특별한 상황이나 분위기가 있다면, 무엇인가요?',
+        question: '지상외모주의에 대한 나의 견해는?',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
-        question: '내가 해본 가장 도발적이고 발칙한 상상은 무엇인가요?',
+        question: '결혼은 선택사항인가요? 아니면 필수사항인가요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
@@ -773,6 +770,64 @@ export class DotsService {
           '나와 함께 책을 읽고 문학적인 이해를 공유해야하는 이유를 묻는다면?',
         isActive: true,
       }),
+      // new Dot({
+      //   slug: 'devil',
+      //   question: '당신의 로맨틱한 꿈이나 판타지 속 이상형은 어떤 모습인가요?',
+      //   isActive: true,
+      // }),
+      // new Dot({
+      //   slug: 'devil',
+      //   question:
+      //     '로맨틱한 분위기에서 빠지면 안되는 가장 중요한 요소가 있다면, 무엇인가요?',
+      //   isActive: true,
+      // }),
+      // new Dot({
+      //   slug: 'devil',
+      //   question:
+      //     '로맨틱한 상황에서 상대방과 함께 나누고 싶은 음료나 음식이 있다면, 무엇인가요?',
+      //   isActive: true,
+      // }),
+      // new Dot({
+      //   slug: 'devil',
+      //   question:
+      //     '로맨틱한 여행을 단둘이 떠날 수 있는 기회가 있다면, 가장 이상적인 여행지와 숙소는 어디인가요?',
+      //   isActive: true,
+      // }),
+      // new Dot({
+      //   slug: 'devil',
+      //   question:
+      //     '1시간 안에 갈 수 있는 가장 비밀스럽고 로맨틱한 장소를 떠올린다면 그 장소는 어디인가요?',
+      //   isActive: true,
+      // }),
+      // new Dot({
+      //   slug: 'devil',
+      //   question:
+      //     '로맨틱한 영화나 소설 속 장면 중 잊지 못할 매력적인 장면을 소개해 주세요.',
+      //   isActive: true,
+      // }),
+      // new Dot({
+      //   slug: 'devil',
+      //   question:
+      //     '이성에게 매력적으로 보이기 위해 사용하는 나만의 비법은 무엇인가요?',
+      //   isActive: true,
+      // }),
+      // new Dot({
+      //   slug: 'devil',
+      //   question:
+      //     '낯선 상대방으로부터 성적 매력을 느낄 때가 있었다면, 어떤 상황이었나요?',
+      //   isActive: true,
+      // }),
+      // new Dot({
+      //   slug: 'devil',
+      //   question:
+      //     '당신을 섹시한 무드로 만드는 특별한 상황이나 분위기가 있다면, 무엇인가요?',
+      //   isActive: true,
+      // }),
+      // new Dot({
+      //   slug: 'devil',
+      //   question: '내가 해본 가장 도발적이고 발칙한 상상은 무엇인가요?',
+      //   isActive: true,
+      // }),
     ];
 
     const queryRunner = this.dataSource.createQueryRunner();
