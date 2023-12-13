@@ -9,18 +9,18 @@ import {
   Index,
   ManyToOne,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 // a user can like meetup
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
+@Unique('user_id_dot_id_key', ['userId', 'dotId'])
 export class Connection {
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  public userId: number;
-
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  public dotId: number;
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
+  id: number;
 
   @Column({ type: 'text', nullable: false })
   @ApiProperty({ description: '사용자 답변' })
@@ -35,7 +35,6 @@ export class Connection {
   @Column({ type: 'int', unsigned: true, default: 0 })
   nsfws: number;
 
-  @Index('created-at-index')
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })
   createdAt: Date;
@@ -44,12 +43,14 @@ export class Connection {
   @ApiProperty({ description: 'updatedAt' })
   updatedAt: Date;
 
-  @DeleteDateColumn()
-  @ApiProperty({ description: 'deletedAt' })
-  deletedAt: Date | null;
+  @Column({ type: 'int', unsigned: true })
+  public userId: number;
 
   @ManyToOne(() => User, (user) => user.connectedDots)
   public user: User;
+
+  @Column({ type: 'int', unsigned: true })
+  public dotId: number;
 
   @ManyToOne(() => Dot, (dot) => dot.connectedUsers)
   public dot: Dot;
