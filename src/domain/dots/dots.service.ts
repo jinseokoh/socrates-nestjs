@@ -78,9 +78,9 @@ export class DotsService {
         user: { profile: true },
         // dot: true, // not being used at least for now.
       },
-      sortableColumns: ['userId', 'dotId'],
+      sortableColumns: ['id'],
       searchableColumns: ['body'],
-      defaultSortBy: [['createdAt', 'DESC']],
+      defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         dotId: [FilterOperator.EQ, FilterOperator.IN],
         userId: [FilterOperator.EQ, FilterOperator.IN],
