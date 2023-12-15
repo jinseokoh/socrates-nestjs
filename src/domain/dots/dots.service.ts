@@ -667,23 +667,23 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         question:
-          '내 가족을 상해한 원수의 아들과 내 아들이 서로 친하게 지내고 싶어한다면, 어떻게 조언하시겠어요?',
+          '부모 세대에서는 원수 집안으로 여겨졌더라도 자식세대에서는 서로 친하게 지낼 수 있다고 생각하나요?',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question:
-          '강력범죄인에 대한 인권보호를 위해 사형제도를 시행하고 있지 않다고 합니다. 어떻게 생각하나요?',
+          '대한민국에서는 범죄인이 비록 사형을 선고받더라도, 형을 집행하고 있지 않습니다. 이에 동의하시나요?',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
-        question: '동성애를 찬성하거나 반대한다면 그 이유를 설명해주세요.',
+        question: '동성간의 결혼을 찬성 혹은 반대한다면 그 답변과 이유를 말해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
-        question: '대마초와 마약에 대한 제재가 필요하다고 보시나요?',
+        question: '대마초와 마약에 대하여, 지금 보다 더욱 강력한 법적 제재가 필요하다고 보시나요?',
         isActive: true,
       }),
       new Dot({
@@ -700,13 +700,13 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         question:
-          '전세계적인 빈부격차가 증가하는 이유와 그것에 대한 나의 대응책은 무엇이 있나요?',
+          '전세계적인 빈부격차가 증가하는 이유와 그것에 대한 대응책은 무엇이 있을지 말해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question:
-          '인공지능 기술이 지속적으로 발전한다면, 살기 편리한 사회가 될까요? 아니면 그 반대가 될까요?',
+          '인공지능 기술이 지속적으로 발전한다면, 인류는 유토피아를 맞이하게 될까요? 아니면 그 반대가 될까요?',
         isActive: true,
       }),
       new Dot({
