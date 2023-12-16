@@ -612,50 +612,50 @@ export class DotsService {
       new Dot({
         slug: 'wink',
         question:
-          '이 세상에서 가장 중요하다고 여기는 5가지 아이템에는 무엇이 있니요?',
+          '이 세상에서 가장 중요하다고 여기는 3가지 아이템에는 무엇이 있니요?',
         isActive: true,
       }),
       new Dot({
         slug: 'wink',
         question:
-          '내 방에서 없어서는 안 될 가장 소중한 5가지 아이템은 무엇인가요?',
+          '내 방에서 없어서는 안 될 가장 소중한 3가지 아이템은 무엇인가요?',
         isActive: true,
       }),
       new Dot({
         slug: 'wink',
-        question: '내 폰에서 없어서는 안 될 가장 중요한 5가지 앱은 무엇인가요?',
+        question: '내 폰에서 없어서는 안 될 가장 중요한 3가지 앱은 무엇인가요?',
         isActive: true,
       }),
       new Dot({
         slug: 'wink',
-        question: '언젠가는 꼭 갖고 싶은 5가지 아이템을 말한다면 무엇인가요?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'wink',
-        question:
-          '내가 하면 잘할 것 같은 비즈니스 종류를 5가지 물어본다면 무엇인가요?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'wink',
-        question: '나의 장점 5가지를 말해주세요.',
+        question: '현재는 갖고 있지 않지만, 언젠가는 꼭 마련하고 싶은 3가지 아이템은 무엇인가요?',
         isActive: true,
       }),
       new Dot({
         slug: 'wink',
         question:
-          '언제 떠올리더라도 행복한 장소 5군데를 물어본다면 어디인가요?',
+          '내가 하면 잘할 것 같은 비즈니스 종류를 3가지 물어본다면 무엇인가요?',
         isActive: true,
       }),
       new Dot({
         slug: 'wink',
-        question: '내가 함께 즐길 수 있는 운동종목 5가지를 알려주세요.',
+        question: '다른 사람한테는 없는 나의 장점 3가지를 말해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'wink',
-        question: '여가시간에 함께 즐길 수 있는 취미활동 5가지를 알려주세요.',
+        question:
+          '언제 떠올리더라도 행복한 장소 3군데를 물어본다면 어디인가요?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'wink',
+        question: '내가 누구나 함께 즐길 수 있는 운동종목 3가지를 알려주세요.',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'wink',
+        question: '여가시간에 함께 즐기고 싶은 취미활동 3가지를 알려주세요.',
         isActive: true,
       }),
       new Dot({
