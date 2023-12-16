@@ -63,11 +63,16 @@ export class DotsController {
     return await this.dotsService.findAll(query);
   }
 
-  // @ApiOperation({ description: 'return sub-trees' })
-  // @Get(':slug')
-  // async getBySlug(@Param('slug') slug: string): Promise<any> {
-  //   return await this.dotsService.findBySlug(slug);
-  // }
+  @ApiOperation({ description: 'return sub-trees' })
+  @Get('connections/:id')
+  async getById(@Param('id', ParseIntPipe) id: number): Promise<Connection> {
+    return await this.dotsService.findById(id, [
+      'dot',
+      'user',
+      'user.connections',
+      'user.connections.dot',
+    ]);
+  }
 
   //?-------------------------------------------------------------------------//
   //? SEED

@@ -192,7 +192,7 @@ export class User {
   public languageSkills: LanguageSkill[];
 
   @OneToMany(() => Connection, (connection) => connection.user)
-  public connectedDots: Connection[];
+  public connections: Connection[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany

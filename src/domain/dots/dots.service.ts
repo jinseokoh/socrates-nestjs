@@ -1,5 +1,5 @@
 import { ApiOperation } from '@nestjs/swagger';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -91,6 +91,22 @@ export class DotsService {
     };
 
     return await paginate(query, queryBuilder, config);
+  }
+
+  // Meetup 상세보기
+  async findById(id: number, relations: string[] = []): Promise<Connection> {
+    try {
+      return relations.length > 0
+        ? await this.connectionRepository.findOneOrFail({
+            where: { id },
+            relations,
+          })
+        : await this.connectionRepository.findOneOrFail({
+            where: { id },
+          });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
   }
 
   //?-------------------------------------------------------------------------//
@@ -628,7 +644,8 @@ export class DotsService {
       }),
       new Dot({
         slug: 'wink',
-        question: '현재는 갖고 있지 않지만, 언젠가는 꼭 마련하고 싶은 3가지 아이템은 무엇인가요?',
+        question:
+          '현재는 갖고 있지 않지만, 언젠가는 꼭 마련하고 싶은 3가지 아이템은 무엇인가요?',
         isActive: true,
       }),
       new Dot({
@@ -678,12 +695,14 @@ export class DotsService {
       }),
       new Dot({
         slug: 'devil',
-        question: '동성간의 결혼을 찬성 혹은 반대한다면 그 답변과 이유를 말해주세요.',
+        question:
+          '동성간의 결혼을 찬성 혹은 반대한다면 그 답변과 이유를 말해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
-        question: '대마초와 마약에 대하여, 지금 보다 더욱 강력한 법적 제재가 필요하다고 보시나요?',
+        question:
+          '대마초와 마약에 대하여, 지금 보다 더욱 강력한 법적 제재가 필요하다고 보시나요?',
         isActive: true,
       }),
       new Dot({

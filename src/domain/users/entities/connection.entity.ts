@@ -46,7 +46,7 @@ export class Connection {
   @Column({ type: 'int', unsigned: true })
   public userId: number;
 
-  @ManyToOne(() => User, (user) => user.connectedDots)
+  @ManyToOne(() => User, (user) => user.connections)
   public user: User;
 
   @Column({ type: 'int', unsigned: true })
