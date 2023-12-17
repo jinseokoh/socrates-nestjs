@@ -58,10 +58,10 @@ export class Remark {
   @Column({ type: 'int', unsigned: true })
   connectionId: number; // to make it available to Repository.
 
-  @ManyToOne(() => Connection, (connection) => connection.xxxs, {
-    // onDelete: 'CASCADE',
+  @ManyToOne(() => Connection, (connection) => connection.remarks, {
+    onDelete: 'CASCADE',
   })
-  connection: Connection;
+  connection?: Connection;
 
   //**--------------------------------------------------------------------------*/
   //** one to many (self recursive relations)

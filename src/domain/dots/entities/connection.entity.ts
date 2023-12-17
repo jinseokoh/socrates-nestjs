@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Remark } from 'src/domain/dots/entities/remark.entity';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { Remark } from 'src/domain/dots/entities/remark.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -23,7 +23,7 @@ export class Connection {
 
   @Column({ type: 'text', nullable: false })
   @ApiProperty({ description: '사용자 답변' })
-  body: string;
+  answer: string;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   likes: number;
@@ -48,7 +48,7 @@ export class Connection {
   @OneToMany(() => Remark, (remark) => remark.connection, {
     // cascade: ['insert', 'update'],
   })
-  public xxxs: Remark[];
+  remarks: Remark[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
@@ -62,6 +62,6 @@ export class Connection {
   @Column({ type: 'int', unsigned: true })
   public dotId: number;
 
-  @ManyToOne(() => Dot, (dot) => dot.connectedUsers)
+  @ManyToOne(() => Dot, (dot) => dot.connections)
   public dot: Dot;
 }

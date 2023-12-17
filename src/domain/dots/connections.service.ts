@@ -13,7 +13,7 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { Connection } from 'src/domain/users/entities/connection.entity';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { DataSource, Repository } from 'typeorm';
 import { CreateConnectionDto } from 'src/domain/dots/dto/create-connection.dto';
 import { LoremIpsum } from 'lorem-ipsum';
@@ -40,7 +40,7 @@ export class ConnectionsService {
           {
             userId: dto.userId,
             dotId: dto.dotId,
-            body: dto.body,
+            answer: dto.answer,
           },
         ],
         ['userId', 'dotId'],
@@ -53,25 +53,11 @@ export class ConnectionsService {
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
-
-  // Connection 리스트 w/ Pagination
-  // filtering example)
-  // - /v1/dots/connections?filter.user.gender=male
-  // - /v1/dots/connections?filter.user.dob=$btw:1990-01-01,2010-01-01
   async findAll(query: PaginateQuery): Promise<Paginated<Connection>> {
-    const queryBuilder = this.repository
-      .createQueryBuilder('connection')
-      .leftJoinAndSelect('connection.user', 'user')
-      .leftJoinAndSelect('user.profile', 'profile')
-      .leftJoinAndSelect('connection.dot', 'dot');
-
-    const config: PaginateConfig<Connection> = {
-      relations: {
-        user: { profile: true },
-        // dot: true, // not being used at least for now.
-      },
+    return await paginate(query, this.repository, {
+      relations: ['user', 'dot', 'remarks'],
       sortableColumns: ['id'],
-      searchableColumns: ['body'],
+      searchableColumns: ['answer'],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         dotId: [FilterOperator.EQ, FilterOperator.IN],
@@ -80,9 +66,7 @@ export class ConnectionsService {
         'user.gender': [FilterOperator.EQ],
         // 'dot.slug': [FilterOperator.EQ, FilterOperator.IN],
       },
-    };
-
-    return await paginate(query, queryBuilder, config);
+    });
   }
 
   // Meetup 상세보기
@@ -125,13 +109,13 @@ export class ConnectionsService {
       [...Array(240).keys()].map(async (v: number) => {
         const dotId = (v % 120) + 1;
         const userId = randomInt(1, 20);
-        const body = lorem.generateSentences(5);
+        const answer = lorem.generateSentences(5);
 
         const dto = new CreateConnectionDto();
         dto.dotId = dotId;
         dto.userId = userId;
-        dto.body = body;
-        this.repository.create(dto);
+        dto.answer = answer;
+        await this.repository.save(this.repository.create(dto));
       }),
     );
   }

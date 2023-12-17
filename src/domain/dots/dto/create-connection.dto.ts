@@ -14,7 +14,7 @@ export class CreateConnectionDto {
 
   @ApiProperty({ description: 'dot 답변' })
   @IsString()
-  body: string;
+  answer: string;
 
   @ApiProperty({ description: 'user 아이디' })
   @IsNumber()

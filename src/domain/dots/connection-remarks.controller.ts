@@ -59,7 +59,7 @@ export class ConnectionRemarksController {
     return await this.remarksService.findAll(connectionId, query);
   }
 
-  @ApiOperation({ description: '대댓글 리스트 w/ Pagination' })
+  @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':connectionId/remarks/:remarkId')
   async getRemarksById(

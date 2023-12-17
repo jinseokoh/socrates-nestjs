@@ -8,7 +8,7 @@ import { DotsService } from 'src/domain/dots/dots.service';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { Remark } from 'src/domain/dots/entities/remark.entity';
 import { RemarksService } from 'src/domain/dots/remarks.service';
-import { Connection } from 'src/domain/users/entities/connection.entity';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Dot, Connection, Remark])],
   providers: [DotsService, ConnectionsService, RemarksService],

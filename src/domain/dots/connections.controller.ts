@@ -16,7 +16,7 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { Public } from 'src/common/decorators/public.decorator';
 import { ConnectionsService } from 'src/domain/dots/connections.service';
 import { CreateConnectionDto } from 'src/domain/dots/dto/create-connection.dto';
-import { Connection } from 'src/domain/users/entities/connection.entity';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('connections')
@@ -60,8 +60,8 @@ export class ConnectionsController {
     return await this.connectionsService.findById(id, [
       'dot',
       'user',
-      'xxxs',
-      // 'remarks.user',
+      'remarks',
+      'remarks.user',
     ]);
   }
 

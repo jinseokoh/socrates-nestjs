@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Connection } from 'src/domain/users/entities/connection.entity';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -46,6 +46,12 @@ export class Dot {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  //*-------------------------------------------------------------------------*/
+  //* many-to-many belongsToMany using one-to-many
+
+  @OneToMany(() => Connection, (connection) => connection.dot)
+  public connections: Connection[];
+
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
@@ -55,21 +61,6 @@ export class Dot {
   @ManyToOne(() => User, (user) => user.dots, {})
   user: User;
 
-  //*-------------------------------------------------------------------------*/
-  //* many-to-many belongsToMany using one-to-many
-
-  @OneToMany(() => Connection, (connection) => connection.dot)
-  public connectedUsers: Connection[];
-
-  //*-------------------------------------------------------------------------*/
-  //* many-to-many belongsToMany
-
-  // @ManyToMany(() => Meetup, (meetup) => meetup.categories)
-  // meetups: Meetup[];
-
-  // used to have this many to many relationship.
-  // @ManyToMany(() => User, (user) => user.categories)
-  // users: User[];
   //?-------------------------------------------------------------------------?/
   //? constructor
 
