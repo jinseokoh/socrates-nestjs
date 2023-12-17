@@ -32,7 +32,7 @@ export class Connection {
   dislikes: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  nsfws: number;
+  explicits: number;
 
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })
