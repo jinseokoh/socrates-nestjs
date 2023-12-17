@@ -1,5 +1,6 @@
-import { Injectable, Logger, Param } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateDotDto } from 'src/domain/dots/dto/create-dot.dto';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { DataSource, Repository } from 'typeorm';
 
@@ -12,6 +13,18 @@ export class DotsService {
     private readonly repository: Repository<Dot>,
     private dataSource: DataSource, // for transaction
   ) {}
+
+  //?-------------------------------------------------------------------------//
+  //? Create
+  //?-------------------------------------------------------------------------//
+
+  async create(dto: CreateDotDto): Promise<Dot> {
+    try {
+      return await this.repository.save(this.repository.create(dto));
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
 
   //?-------------------------------------------------------------------------//
   //? READ
@@ -27,7 +40,7 @@ export class DotsService {
   }
 
   // Dot 리스트
-  async getBySlug(@Param('slug') slug: string): Promise<Array<Dot>> {
+  async getBySlug(slug: string): Promise<Array<Dot>> {
     return await this.repository.find({
       where: {
         isActive: true,
@@ -152,7 +165,7 @@ export class DotsService {
       new Dot({
         slug: 'yuck',
         question:
-          '평생 한가지 종류의 음식만 먹어야하는 저주에 걸렸다면 어떤 메뉴를 고를까요?',
+          '첫인상이 좋지 않았지만, 나중에 그 사람에 대한 평가가 달라진 경험이 있나요? 있었다면 그 계기는?',
         isActive: true,
       }),
       new Dot({
@@ -594,53 +607,48 @@ export class DotsService {
       }),
       new Dot({
         slug: 'wink',
-        question: '내가 누구나 함께 즐길 수 있는 운동종목 3가지를 알려주세요.',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'wink',
-        question: '여가시간에 함께 즐기고 싶은 취미활동 3가지를 알려주세요.',
+        question: '누구와도 함께 즐길 수 있는 운동종목 3가지를 알려주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'wink',
         question:
-          '바이러스로 인해 사람들간 접촉이 불가능해지는 시대가 온다면, 가장 잘 팔릴 아이템 5가지는?',
+          '여가시간에 누구와도 함께 즐길 수 있는 취미활동 3가지를 알려주세요.',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'wink',
+        question:
+          '연애 상대를 선택함에 있어서, 그 사람이 반드시 갖춰야 하는 3가지 조건이 있다면?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        question: '동성애에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question:
-          '부모 세대에서는 원수 집안으로 여겨졌더라도 자식세대에서는 서로 친하게 지낼 수 있다고 생각하나요?',
+          '대마초를 합법화 하는 나라가 늘어나고 있습니다. 이에 대하여 나의 찬반 의견과 그 이유를 말해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question:
-          '대한민국에서는 범죄인이 비록 사형을 선고받더라도, 형을 집행하고 있지 않습니다. 이에 동의하시나요?',
+          '과학 연구를 위한 동물 실험에 대하여 나의 찬반 의견과 그 이유를 말해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question:
-          '동성간의 결혼을 찬성 혹은 반대한다면 그 답변과 이유를 말해주세요.',
+          '범죄인이 비록 사형을 선고받더라도 형을 집행하고 있지 않습니다. 이에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question:
-          '대마초와 마약에 대하여, 지금 보다 더욱 강력한 법적 제재가 필요하다고 보시나요?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
-        question: '과학 연구를 위한 동물 실험에 대하여 찬성하나요? 그 이유는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
-        question:
-          '로맨틱한 영화나 소설 속 장면 중 잊지 못할 매력적인 장면을 소개해 주세요.',
+          '오픈 릴레이션십에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
         isActive: true,
       }),
       new Dot({
@@ -657,7 +665,13 @@ export class DotsService {
       }),
       new Dot({
         slug: 'devil',
-        question: '지상외모주의에 대한 나의 견해는?',
+        question:
+          '결혼도 비즈니스라는 말에 대하여 나의 찬반 의견과 그 이유를 말해주세요.',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        question: '귀신이나 사후세계가 존재한다고 믿나요?',
         isActive: true,
       }),
       new Dot({

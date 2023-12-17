@@ -30,6 +30,7 @@ import { Room } from 'src/domain/chats/entities/room.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Connection } from 'src/domain/users/entities/connection.entity';
 import { Remark } from 'src/domain/dots/entities/remark.entity';
+import { Dot } from 'src/domain/dots/entities/dot.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -147,6 +148,11 @@ export class User {
     // cascade: ['insert', 'update'],
   })
   meetups: Meetup[];
+
+  @OneToMany(() => Dot, (dot) => dot.user, {
+    // cascade: ['insert', 'update'],
+  })
+  dots: Dot[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany using one-to-many
