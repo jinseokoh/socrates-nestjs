@@ -29,6 +29,7 @@ import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Connection } from 'src/domain/users/entities/connection.entity';
+import { Remark } from 'src/domain/dots/entities/remark.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -137,11 +138,6 @@ export class User {
   })
   threads: Thread[];
 
-  @OneToMany(() => Comment, (comment) => comment.user, {
-    // cascade: ['insert', 'update'],
-  })
-  comments: Comment[];
-
   @OneToMany(() => Provider, (provider) => provider.user, {
     // cascade: ['insert', 'update'],
   })
@@ -191,8 +187,14 @@ export class User {
   @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.user)
   public languageSkills: LanguageSkill[];
 
+  @OneToMany(() => Comment, (comment) => comment.user)
+  public comments: Comment[];
+
   @OneToMany(() => Connection, (connection) => connection.user)
   public connections: Connection[];
+
+  @OneToMany(() => Remark, (remark) => remark.user)
+  public remarks: Remark[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany

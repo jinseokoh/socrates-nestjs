@@ -3,7 +3,6 @@ import { Connection } from 'src/domain/users/entities/connection.entity';
 import {
   Column,
   Entity,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';

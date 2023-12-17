@@ -6,15 +6,17 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
 
 @Entity()
-export class Comment {
+export class Remark {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
@@ -46,23 +48,44 @@ export class Comment {
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.comments, {
+  @ManyToOne(() => User, (user) => user.remarks, {
     onDelete: 'CASCADE',
   })
   user: User;
 
-  @Column({ type: 'int', unsigned: true })
-  inquiryId: number; // to make it available to Repository.
+  //**--------------------------------------------------------------------------*/
+  //** many-to-1 belongsTo
 
-  @ManyToOne(() => Inquiry, (inquiry) => inquiry.comments, {
+  @Column({ type: 'int', unsigned: true })
+  connectionId: number; // to make it available to Repository.
+
+  @ManyToOne(() => Connection, (connection) => connection.remarks, {
     onDelete: 'CASCADE',
   })
-  inquiry: Inquiry;
+  connection: Connection;
+
+  //**--------------------------------------------------------------------------*/
+  //** one to many (self recursive relations)
+  // data structure ref)
+  // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
+
+  // @Exclude()
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  parentId: number | null;
+
+  @OneToMany(() => Remark, (remark) => remark.parent)
+  children: Remark[];
+
+  @ManyToOne(() => Remark, (Remark) => Remark.children, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'parentId' })
+  parent: Remark;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  constructor(partial: Partial<Comment>) {
+  constructor(partial: Partial<Remark>) {
     Object.assign(this, partial);
   }
 }
