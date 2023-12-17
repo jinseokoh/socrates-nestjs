@@ -44,7 +44,6 @@ export class Remark {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
 
@@ -59,8 +58,8 @@ export class Remark {
   @Column({ type: 'int', unsigned: true })
   connectionId: number; // to make it available to Repository.
 
-  @ManyToOne(() => Connection, (connection) => connection.remarks, {
-    onDelete: 'CASCADE',
+  @ManyToOne(() => Connection, (connection) => connection.xxxs, {
+    // onDelete: 'CASCADE',
   })
   connection: Connection;
 

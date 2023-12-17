@@ -42,6 +42,14 @@ export class Connection {
   @ApiProperty({ description: 'updatedAt' })
   updatedAt: Date;
 
+  //*-------------------------------------------------------------------------*/
+  //* 1-to-many hasMany
+
+  @OneToMany(() => Remark, (remark) => remark.connection, {
+    // cascade: ['insert', 'update'],
+  })
+  public xxxs: Remark[];
+
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
@@ -56,12 +64,4 @@ export class Connection {
 
   @ManyToOne(() => Dot, (dot) => dot.connectedUsers)
   public dot: Dot;
-
-  //*-------------------------------------------------------------------------*/
-  //* 1-to-many hasMany
-
-  @OneToMany(() => Remark, (remark) => remark.connection, {
-    // cascade: ['insert', 'update'],
-  })
-  remarks: Remark[];
 }

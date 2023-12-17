@@ -47,21 +47,21 @@ export class ConnectionsController {
   @Public()
   @ApiOperation({ description: 'Connection 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get('connections')
+  @Get()
   async findAll(
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Connection>> {
     return await this.connectionsService.findAll(query);
   }
 
-  @ApiOperation({ description: 'return sub-trees' })
-  @Get('connections/:id')
-  async getById(@Param('id', ParseIntPipe) id: number): Promise<Connection> {
+  @ApiOperation({ description: 'Connection 상세보기' })
+  @Get(':id')
+  async getConnectionById(@Param('id') id: number): Promise<Connection> {
     return await this.connectionsService.findById(id, [
       'dot',
       'user',
-      'remarks',
-      'remarks.user',
+      'xxxs',
+      // 'remarks.user',
     ]);
   }
 

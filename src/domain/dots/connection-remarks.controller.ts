@@ -23,7 +23,7 @@ import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('dots')
+@Controller('connections')
 export class ConnectionRemarksController {
   constructor(private readonly remarksService: RemarksService) {}
 
