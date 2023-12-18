@@ -105,7 +105,7 @@ export class ConnectionsService {
     const randomInt = (min: number, max: number) =>
       Math.floor(Math.random() * (max - min + 1) + min);
 
-    Promise.all(
+    await Promise.all(
       [...Array(240).keys()].map(async (v: number) => {
         const dotId = (v % 120) + 1;
         const userId = randomInt(1, 20);
