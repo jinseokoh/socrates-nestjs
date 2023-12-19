@@ -87,7 +87,7 @@ export class DotsService {
       new Dot({
         slug: 'angry',
         question:
-          '직장에서 누군가가 당신을 자주 불편하게 만든다면, 그 상황을 어떻게 해결하고 극복하시겠어요?',
+          '누군가가 당신을 자주 불편하게 만든다면, 그 상황을 어떻게 해결하고 극복하시겠어요?',
         isActive: true,
       }),
       new Dot({
@@ -624,17 +624,6 @@ export class DotsService {
       }),
       new Dot({
         slug: 'devil',
-        question: '동성애에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
-        question:
-          '대마초를 합법화 하는 나라가 늘어나고 있습니다. 이에 대하여 나의 찬반 의견과 그 이유를 말해주세요.',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
         question:
           '과학 연구를 위한 동물 실험에 대하여 나의 찬반 의견과 그 이유를 말해주세요.',
         isActive: true,
@@ -642,19 +631,13 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         question:
-          '범죄인이 비록 사형을 선고받더라도 형을 집행하고 있지 않습니다. 이에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
+          '범죄인이 비록 사형을 선고받더라도 형을 집행하지는 않습니다. 이에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question:
-          '오픈 릴레이션십에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
-        question:
-          '전세계적인 빈부격차가 증가하는 이유와 그것에 대한 대응책은 무엇이 있을지 말해주세요.',
+          '전세계적인 빈부격차가 증가하는 이유와 그것에 대한 대응책이나 해결법은 무엇이 있을지 말해주세요.',
         isActive: true,
       }),
       new Dot({
@@ -666,17 +649,34 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         question:
-          '결혼도 비즈니스라는 말에 대하여 나의 찬반 의견과 그 이유를 말해주세요.',
+          '대마초를 합법화 하는 나라가 늘어나고 있습니다. 이에 대하여 나의 찬반 의견과 그 이유를 말해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
-        question: '귀신이나 사후세계가 존재한다고 믿나요?',
+        question: '귀신이나, 초자연적 현상, 혹은 사후세계가 존재한다고 믿나요?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        question:
+          '오픈 릴레이션십에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        question: '동성애에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question: '결혼은 선택사항인가요? 아니면 필수사항인가요? 그 이유는?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        question:
+          '결혼도 비즈니스라는 말에 대하여 나의 찬반 의견과 그 이유를 말해주세요.',
         isActive: true,
       }),
       new Dot({
