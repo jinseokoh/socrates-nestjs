@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Abhor } from 'src/domain/dots/entities/abhor.entity';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { Remark } from 'src/domain/dots/entities/remark.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -26,13 +27,13 @@ export class Connection {
   answer: string;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  likes: number;
+  fontCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  dislikes: number;
+  abhorCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  explicits: number;
+  explicitCount: number;
 
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })
@@ -49,6 +50,9 @@ export class Connection {
     // cascade: ['insert', 'update'],
   })
   remarks: Remark[];
+
+  @OneToMany(() => Abhor, (abhor) => abhor.connection)
+  public usersAbhorred: Abhor[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo

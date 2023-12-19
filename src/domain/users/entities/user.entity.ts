@@ -31,6 +31,7 @@ import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { Remark } from 'src/domain/dots/entities/remark.entity';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { Abhor } from 'src/domain/dots/entities/abhor.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -198,6 +199,9 @@ export class User {
 
   @OneToMany(() => Connection, (connection) => connection.user)
   public connections: Connection[];
+
+  @OneToMany(() => Abhor, (abhor) => abhor.user)
+  public connectionsAbhorred: Abhor[];
 
   @OneToMany(() => Remark, (remark) => remark.user)
   public remarks: Remark[];

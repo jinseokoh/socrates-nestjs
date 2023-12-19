@@ -37,18 +37,20 @@ import { ConfigService } from '@nestjs/config';
 import { Brackets, DataSource, FindOneOptions, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Category } from 'src/domain/categories/entities/category.entity';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Abhor } from 'src/domain/dots/entities/abhor.entity';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
-import { Like } from 'src/domain/meetups/entities/like.entity';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Report } from 'src/domain/users/entities/report.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
-import { User } from 'src/domain/users/entities/user.entity';
 import { Cache } from 'cache-manager';
 import { initialUsername } from 'src/helpers/random-username';
 import { randomName } from 'src/helpers/random-filename';
@@ -79,6 +81,10 @@ export class UsersService {
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Dislike)
     private readonly dislikeRepository: Repository<Dislike>,
+    @InjectRepository(Connection)
+    private readonly connectionRepository: Repository<Connection>,
+    @InjectRepository(Abhor)
+    private readonly abhorRepository: Repository<Abhor>,
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
     @InjectRepository(Report)
@@ -602,6 +608,40 @@ GROUP BY userId HAVING userId = ?',
   }
 
   //?-------------------------------------------------------------------------//
+  //? Connections
+  //?-------------------------------------------------------------------------//
+
+  // 내가 만든 모임 리스트
+  async getMyConnections(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Connection>> {
+    const queryBuilder = this.connectionRepository
+      .createQueryBuilder('connection')
+      .innerJoinAndSelect('connection.dot', 'dot')
+      .innerJoinAndSelect('connection.user', 'user')
+      .where({
+        userId,
+      });
+
+    const config: PaginateConfig<Connection> = {
+      sortableColumns: ['createdAt'],
+      searchableColumns: ['answer'],
+      defaultLimit: 20,
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {
+        region: [FilterOperator.EQ, FilterOperator.IN],
+        category: [FilterOperator.EQ, FilterOperator.IN],
+        subCategory: [FilterOperator.EQ, FilterOperator.IN],
+        targetGender: [FilterOperator.EQ, FilterOperator.IN],
+        expiredAt: [FilterOperator.GTE, FilterOperator.LT],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  //?-------------------------------------------------------------------------//
   //? Meetups
   //?-------------------------------------------------------------------------//
 
@@ -658,7 +698,6 @@ GROUP BY userId HAVING userId = ?',
     userId: number,
     items: Array<LanguageSkill>,
   ): Promise<Array<LanguageSkill>> {
-
     await this.repository.manager.query(
       'DELETE FROM `language_skill` WHERE userId = ?',
       [userId],
@@ -936,6 +975,85 @@ GROUP BY userId HAVING userId = ?',
     });
 
     return { data: [...new Set(data)] };
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Abhor Pivot
+  //?-------------------------------------------------------------------------//
+
+  // 발견 블락 리스트에 추가
+  async attachToAbhorPivot(
+    userId: number,
+    connectionId: number,
+    message: string,
+  ): Promise<void> {
+    const { affectedRows } = await this.repository.manager.query(
+      'INSERT IGNORE INTO `abhor` (userId, connectionId, message) VALUES (?, ?, ?)',
+      [userId, connectionId, message],
+    );
+    if (affectedRows > 0) {
+      await this.connectionRepository.increment(
+        { id: connectionId },
+        'abhorCount',
+        1,
+      );
+    }
+  }
+
+  // 발견 블락 리스트에서 삭제
+  async detachFromAbhorPivot(
+    userId: number,
+    connectionId: number,
+  ): Promise<void> {
+    const { affectedRows } = await this.repository.manager.query(
+      'DELETE FROM `abhor` WHERE userId = ? AND connectionId = ?',
+      [userId, connectionId],
+    );
+    if (affectedRows > 0) {
+      // await this.connectionRrepository.decrement({ connectionId }, 'abhorCount', 1);
+      await this.repository.manager.query(
+        'UPDATE `connection` SET abhorCount = abhorCount - 1 WHERE id = ? AND abhorCount > 0',
+        [connectionId],
+      );
+    }
+  }
+
+  // 내가 블락한 발견 리스트
+  async getConnectionsAbhorredByMe(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Abhor>> {
+    const queryBuilder = this.abhorRepository
+      .createQueryBuilder('abhor')
+      .leftJoinAndSelect('abhor.connection', 'connection')
+      .leftJoinAndSelect('connection.dot', 'dot')
+      .where({
+        userId,
+      });
+
+    const config: PaginateConfig<Abhor> = {
+      sortableColumns: ['connectionId'],
+      searchableColumns: ['connection.answer'],
+      defaultLimit: 20,
+      defaultSortBy: [['connectionId', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내가 블락한 발견 ID 리스트
+  async getConnectionIdsAbhorredByMe(userId: number): Promise<AnyData> {
+    const items = await this.repository.manager.query(
+      'SELECT connectionId \
+      FROM `user` INNER JOIN `abhor` ON `user`.id = `abhor`.userId \
+      WHERE `user`.id = ?',
+      [userId],
+    );
+
+    return {
+      data: items.map(({ connectionId }) => connectionId),
+    };
   }
 
   //?-------------------------------------------------------------------------//

@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
-import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
-import { Hate } from 'src/domain/users/entities/hate.entity';
-import { Join } from 'src/domain/meetups/entities/join.entity';
-import { Like } from 'src/domain/meetups/entities/like.entity';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Abhor } from 'src/domain/dots/entities/abhor.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { Like } from 'src/domain/meetups/entities/like.entity';
+import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
+import { Join } from 'src/domain/meetups/entities/join.entity';
+import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Report } from 'src/domain/users/entities/report.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
@@ -27,17 +29,20 @@ import { UserImpressionsController } from 'src/domain/users/user-impressions.con
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { UserLanguagesController } from 'src/domain/users/user-languages.controller';
 import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
+import { UserConnectionsController } from 'src/domain/users/user-connections.controller';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Category,
       LanguageSkill,
-      Dislike,
-      Hate,
-      Join,
-      Like,
+      Connection,
+      Abhor,
       Meetup,
+      Like,
+      Dislike,
+      Join,
+      Hate,
       Profile,
       Report,
       Secret,
@@ -62,6 +67,7 @@ import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-s
     UserImpressionsController,
     UserLanguagesController,
     UserMeetupsController,
+    UserConnectionsController,
     UserUsersController,
     UserFcmController,
     UserSmsController,
