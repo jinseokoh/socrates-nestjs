@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateDotDto } from 'src/domain/dots/dto/create-dot.dto';
-import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { CreateDotDto } from 'src/domain/connections/dto/create-dot.dto';
+import { Dot } from 'src/domain/connections/entities/dot.entity';
 import { DataSource, Repository } from 'typeorm';
 
 @Injectable()

@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Abhor } from 'src/domain/dots/entities/abhor.entity';
-import { Dot } from 'src/domain/dots/entities/dot.entity';
-import { Remark } from 'src/domain/dots/entities/remark.entity';
+import { Abhor } from 'src/domain/connections/entities/abhor.entity';
+import { Dot } from 'src/domain/connections/entities/dot.entity';
+import { Reaction } from 'src/domain/connections/entities/reaction.entity';
+import { Remark } from 'src/domain/connections/entities/remark.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -53,6 +54,9 @@ export class Connection {
 
   @OneToMany(() => Abhor, (abhor) => abhor.connection)
   public usersAbhorred: Abhor[];
+
+  @OneToMany(() => Reaction, (reaction) => reaction.connection)
+  public usersReacted: User[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo

@@ -1,4 +1,4 @@
-import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 

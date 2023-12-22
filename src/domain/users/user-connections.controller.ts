@@ -16,7 +16,7 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { AnyData } from 'src/common/types';
 import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
-import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';

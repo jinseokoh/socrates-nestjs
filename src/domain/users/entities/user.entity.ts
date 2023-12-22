@@ -28,10 +28,11 @@ import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
-import { Connection } from 'src/domain/dots/entities/connection.entity';
-import { Remark } from 'src/domain/dots/entities/remark.entity';
-import { Dot } from 'src/domain/dots/entities/dot.entity';
-import { Abhor } from 'src/domain/dots/entities/abhor.entity';
+import { Connection } from 'src/domain/connections/entities/connection.entity';
+import { Remark } from 'src/domain/connections/entities/remark.entity';
+import { Dot } from 'src/domain/connections/entities/dot.entity';
+import { Abhor } from 'src/domain/connections/entities/abhor.entity';
+import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -199,6 +200,9 @@ export class User {
 
   @OneToMany(() => Connection, (connection) => connection.user)
   public connections: Connection[];
+
+  @OneToMany(() => Connection, (connection) => connection.user)
+  public connectionsReacted: Reaction[];
 
   @OneToMany(() => Abhor, (abhor) => abhor.user)
   public connectionsAbhorred: Abhor[];

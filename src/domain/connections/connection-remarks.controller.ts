@@ -15,10 +15,10 @@ import {
 
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { Remark } from 'src/domain/dots/entities/remark.entity';
-import { RemarksService } from 'src/domain/dots/remarks.service';
-import { CreateRemarkDto } from 'src/domain/dots/dto/create-remark.dto';
-import { UpdateRemarkDto } from 'src/domain/dots/dto/update-remark.dto';
+import { Remark } from 'src/domain/connections/entities/remark.entity';
+import { RemarksService } from 'src/domain/connections/remarks.service';
+import { CreateRemarkDto } from 'src/domain/connections/dto/create-remark.dto';
+import { UpdateRemarkDto } from 'src/domain/connections/dto/update-remark.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 

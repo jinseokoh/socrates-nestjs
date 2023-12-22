@@ -13,7 +13,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Connection } from 'src/domain/connections/entities/connection.entity';
 
 @Entity()
 export class Remark {
