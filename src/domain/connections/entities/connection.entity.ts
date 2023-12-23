@@ -28,13 +28,26 @@ export class Connection {
   answer: string;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  fontCount: number;
+  abhorCount: number; // 신고
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  abhorCount: number;
+  @ApiProperty({ description: 'sympatheticCount' })
+  sympatheticCount: number; // 감정 reaction #1
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  explicitCount: number;
+  @ApiProperty({ description: 'laughterCount' })
+  humorousCount: number; // 감정 reaction #2
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'surpriseCount' })
+  surprisedCount: number; // 감정 reaction #3
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'disappointedCount' })
+  disappointedCount: number; // 감정 reaction #4
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  explicitCount: number; // 감정 reaction #5
 
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })

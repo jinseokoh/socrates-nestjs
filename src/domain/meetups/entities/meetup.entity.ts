@@ -135,7 +135,7 @@ export class Meetup {
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'dislike count' })
-  dislikeCount: number;
+  dislikeCount: number; // 신고
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'view count' })

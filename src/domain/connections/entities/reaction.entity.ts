@@ -13,25 +13,20 @@ export class Reaction {
   @PrimaryColumn({ type: 'int', unsigned: true })
   public connectionId: number;
 
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'sympathyCount' })
-  sympathyCount: number;
+  @Column({ default: false })
+  sympathetic: boolean;
 
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'laughterCount' })
-  laughterCount: number;
+  @Column({ default: false })
+  humorous: boolean;
 
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'surpriseCount' })
-  surpriseCount: number;
+  @Column({ default: false })
+  surprised: boolean;
 
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'disappointedCount' })
-  disappointedCount: number;
+  @Column({ default: false })
+  disappointed: boolean;
 
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'explicitCount' })
-  explicitCount: number;
+  @Column({ default: false })
+  explicit: boolean;
 
   @ManyToOne(() => User, (user) => user.connectionsReacted)
   public user: User;
