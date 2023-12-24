@@ -979,6 +979,61 @@ GROUP BY userId HAVING userId = ?',
   }
 
   //?-------------------------------------------------------------------------//
+  //?  Reaction Pivot
+  //?-------------------------------------------------------------------------//
+
+  // 찜 리스트에 추가
+  async attachToRectionPivot(
+    userId: number,
+    connectionId: number,
+    emotion: string,
+  ): Promise<any> {
+    // const [row] = await this.repository.query(
+    //   'SELECT COUNT(*) AS cnt FROM `like` WHERE userId = ?',
+    //   [userId],
+    // );
+    // const count = row.cnt;
+    // if (+count > 30) {
+    //   throw new NotAcceptableException('reached maximum count');
+    // }
+
+    const queryString = `INSERT IGNORE INTO reaction (userId, connectionId, ${emotion}) VALUES (?, ?, ?)`;
+    const { affectedRows } = await this.repository.manager.query(queryString, [
+      userId,
+      connectionId,
+      !!emotion,
+    ]);
+
+    if (affectedRows > 0) {
+      await this.connectionRepository.increment(
+        { id: connectionId },
+        `${emotion}Count`,
+        1,
+      );
+    }
+  }
+
+  // 찜 리스트에서 삭제
+  async detachFromReactionPivot(
+    userId: number,
+    connectionId: number,
+    emotion: string,
+  ): Promise<any> {
+    const { affectedRows } = await this.repository.manager.query(
+      `UPDATE reaction SET ${emotion} = ? WHERE userId = ? AND connectionId = ?`,
+      [false, userId, connectionId],
+    );
+    if (affectedRows > 0) {
+      // the following doesn't work at times.
+      // await this.connectionRrepository.decrement({ connectionId }, 'likeCount', 1);
+      //
+      // we need to make the likeCount always positive.
+      const queryString = `UPDATE connection SET ${emotion}Count = ${emotion}Count - 1 WHERE id = ? AND ${emotion}Count > 0`;
+      await this.repository.manager.query(queryString, [connectionId]);
+    }
+  }
+
+  //?-------------------------------------------------------------------------//
   //? Abhor Pivot
   //?-------------------------------------------------------------------------//
 
