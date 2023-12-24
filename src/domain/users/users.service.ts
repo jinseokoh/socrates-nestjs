@@ -620,6 +620,7 @@ GROUP BY userId HAVING userId = ?',
       .createQueryBuilder('connection')
       .innerJoinAndSelect('connection.dot', 'dot')
       .innerJoinAndSelect('connection.user', 'user')
+      .leftJoinAndSelect('connection.remarks', 'remarks')
       .where({
         userId,
       });

@@ -61,11 +61,13 @@ export class ConnectionsController {
       'dot',
       'user',
       'remarks',
+      'remarks.user',
       'usersAbhorred',
       'user.connections',
       'user.connections.dot',
       'user.connections.user',
       'user.connections.remarks',
+      'user.connections.remarks.user',
     ]);
   }
 
