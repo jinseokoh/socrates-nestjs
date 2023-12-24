@@ -183,9 +183,34 @@ export class UserConnectionsController {
     return this.usersService.getConnectionIdsAbhorredByMe(userId);
   }
 
-  // //?-------------------------------------------------------------------------//
-  // //? Join Pivot
-  // //?-------------------------------------------------------------------------//
+  //?-------------------------------------------------------------------------//
+  //? Reaction Pivot
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '참가신청 리스트에 추가' })
+  @PaginateQueryOptions()
+  @Post(':askingUserId/joins/:askedUserId/connections/:connectionId')
+  async attachToJoinPivot(
+    @Param('askingUserId', ParseIntPipe) askingUserId: number,
+    @Param('askedUserId', ParseIntPipe) askedUserId: number,
+    @Param('connectionId', ParseIntPipe) connectionId: number,
+    @Body() dto: CreateJoinDto, // optional message, and skill
+  ): Promise<AnyData> {
+    const connection = await this.usersService.attachToJoinPivot(
+      askingUserId,
+      askedUserId,
+      connectionId,
+      dto,
+    );
+    await this.usersService.upsertCategoryWithSkill(
+      askingUserId,
+      connection.subCategory,
+      dto.skill,
+    );
+    return {
+      data: 'ok',
+    };
+  }
 
   // @ApiOperation({ description: '참가신청 리스트에 추가' })
   // @PaginateQueryOptions()
