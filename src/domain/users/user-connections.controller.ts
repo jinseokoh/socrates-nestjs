@@ -18,6 +18,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreateReactionDto } from 'src/domain/users/dto/create-reaction.dto';
+import { RemoveReactionDto } from 'src/domain/users/dto/remove-reaction.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -187,13 +188,31 @@ export class UserConnectionsController {
 
   @ApiOperation({ description: '발견 reaction 리스트에 추가' })
   @PaginateQueryOptions()
-  @Post(':userId//connections/:connectionId')
+  @Post(':userId/connections/:connectionId')
   async attachToReactionPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('connectionId', ParseIntPipe) connectionId: number,
     @Body() dto: CreateReactionDto, // optional message, and skill
   ): Promise<AnyData> {
     await this.usersService.attachToReactionPivot(
+      userId,
+      connectionId,
+      dto.emotion,
+    );
+    return {
+      data: 'ok',
+    };
+  }
+
+  @ApiOperation({ description: '발견 reaction 리스트에서 삭제' })
+  @PaginateQueryOptions()
+  @Delete(':userId/connections/:connectionId')
+  async detachToReactionPivot(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('connectionId', ParseIntPipe) connectionId: number,
+    @Body() dto: RemoveReactionDto, // optional message, and skill
+  ): Promise<AnyData> {
+    await this.usersService.detachFromReactionPivot(
       userId,
       connectionId,
       dto.emotion,

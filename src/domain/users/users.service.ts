@@ -993,22 +993,12 @@ GROUP BY userId HAVING userId = ?',
     connectionId: number,
     emotion: Emotion,
   ): Promise<any> {
-    // const [row] = await this.repository.query(
-    //   'SELECT COUNT(*) AS cnt FROM `like` WHERE userId = ?',
-    //   [userId],
-    // );
-    // const count = row.cnt;
-    // if (+count > 30) {
-    //   throw new NotAcceptableException('reached maximum count');
-    // }
-
-    const queryString = `INSERT IGNORE INTO reaction (userId, connectionId, ${emotion}) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(userId), categoryId = VALUES(categoryId), ${emotion} = VALUES(${emotion})`;
+    const queryString = `INSERT IGNORE INTO reaction (userId, connectionId, ${emotion}) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(userId), connectionId = VALUES(connectionId), ${emotion} = VALUES(${emotion})`;
     const { affectedRows } = await this.repository.manager.query(queryString, [
       userId,
       connectionId,
       true,
     ]);
-
     if (affectedRows > 0) {
       await this.connectionRepository.increment(
         { id: connectionId },
@@ -1029,10 +1019,7 @@ GROUP BY userId HAVING userId = ?',
       [false, userId, connectionId],
     );
     if (affectedRows > 0) {
-      // the following doesn't work at times.
-      // await this.connectionRrepository.decrement({ connectionId }, 'likeCount', 1);
-      //
-      // we need to make the likeCount always positive.
+      // we need to make the xxxxCount always positive.
       const queryString = `UPDATE connection SET ${emotion}Count = ${emotion}Count - 1 WHERE id = ? AND ${emotion}Count > 0`;
       await this.repository.manager.query(queryString, [connectionId]);
     }
