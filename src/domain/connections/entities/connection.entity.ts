@@ -43,11 +43,11 @@ export class Connection {
   surprisedCount: number; // 감정 reaction #3
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'disappointedCount' })
-  disappointedCount: number; // 감정 reaction #4
+  @ApiProperty({ description: 'sadCount' })
+  sadCount: number; // 감정 reaction #4
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  explicitCount: number; // 감정 reaction #5
+  disgustCount: number; // 감정 reaction #5
 
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })

@@ -20,7 +20,12 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { JoinType, JoinStatus, Ledger as LedgerType } from 'src/common/enums';
+import {
+  Emotion,
+  JoinType,
+  JoinStatus,
+  Ledger as LedgerType,
+} from 'src/common/enums';
 import { AnyData, SignedUrl } from 'src/common/types';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
@@ -983,10 +988,10 @@ GROUP BY userId HAVING userId = ?',
   //?-------------------------------------------------------------------------//
 
   // 찜 리스트에 추가
-  async attachToRectionPivot(
+  async attachToReactionPivot(
     userId: number,
     connectionId: number,
-    emotion: string,
+    emotion: Emotion,
   ): Promise<any> {
     // const [row] = await this.repository.query(
     //   'SELECT COUNT(*) AS cnt FROM `like` WHERE userId = ?',
@@ -997,11 +1002,11 @@ GROUP BY userId HAVING userId = ?',
     //   throw new NotAcceptableException('reached maximum count');
     // }
 
-    const queryString = `INSERT IGNORE INTO reaction (userId, connectionId, ${emotion}) VALUES (?, ?, ?)`;
+    const queryString = `INSERT IGNORE INTO reaction (userId, connectionId, ${emotion}) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(userId), categoryId = VALUES(categoryId), ${emotion} = VALUES(${emotion})`;
     const { affectedRows } = await this.repository.manager.query(queryString, [
       userId,
       connectionId,
-      !!emotion,
+      true,
     ]);
 
     if (affectedRows > 0) {

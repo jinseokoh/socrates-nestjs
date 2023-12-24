@@ -4,6 +4,7 @@ export * from './category';
 export * from './content-type';
 export * from './button-type';
 export * from './day';
+export * from './emotion';
 export * from './expense';
 export * from './gender';
 export * from './inquiry-type';

@@ -17,16 +17,16 @@ export class Reaction {
   sympathetic: boolean;
 
   @Column({ default: false })
-  humorous: boolean;
-
-  @Column({ default: false })
   surprised: boolean;
 
   @Column({ default: false })
-  disappointed: boolean;
+  humorous: boolean;
 
   @Column({ default: false })
-  explicit: boolean;
+  sad: boolean;
+
+  @Column({ default: false })
+  disgust: boolean;
 
   @ManyToOne(() => User, (user) => user.connectionsReacted)
   public user: User;

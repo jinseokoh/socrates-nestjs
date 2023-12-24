@@ -7,7 +7,6 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,8 +17,7 @@ import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { SkipThrottle } from '@nestjs/throttler';
-import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
-import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
+import { CreateReactionDto } from 'src/domain/users/dto/create-reaction.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -187,25 +185,18 @@ export class UserConnectionsController {
   //? Reaction Pivot
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '참가신청 리스트에 추가' })
+  @ApiOperation({ description: '발견 reaction 리스트에 추가' })
   @PaginateQueryOptions()
-  @Post(':askingUserId/joins/:askedUserId/connections/:connectionId')
-  async attachToJoinPivot(
-    @Param('askingUserId', ParseIntPipe) askingUserId: number,
-    @Param('askedUserId', ParseIntPipe) askedUserId: number,
+  @Post(':userId//connections/:connectionId')
+  async attachToReactionPivot(
+    @Param('userId', ParseIntPipe) userId: number,
     @Param('connectionId', ParseIntPipe) connectionId: number,
-    @Body() dto: CreateJoinDto, // optional message, and skill
+    @Body() dto: CreateReactionDto, // optional message, and skill
   ): Promise<AnyData> {
-    const connection = await this.usersService.attachToJoinPivot(
-      askingUserId,
-      askedUserId,
+    await this.usersService.attachToReactionPivot(
+      userId,
       connectionId,
-      dto,
-    );
-    await this.usersService.upsertCategoryWithSkill(
-      askingUserId,
-      connection.subCategory,
-      dto.skill,
+      dto.emotion,
     );
     return {
       data: 'ok',
