@@ -55,7 +55,7 @@ export class ConnectionsService {
   //?-------------------------------------------------------------------------//
   async findAll(query: PaginateQuery): Promise<Paginated<Connection>> {
     return await paginate(query, this.repository, {
-      relations: ['user', 'dot', 'remarks'],
+      relations: ['user', 'dot', 'remarks', 'remarks.user'],
       sortableColumns: ['id'],
       searchableColumns: ['answer'],
       defaultSortBy: [['id', 'DESC']],
