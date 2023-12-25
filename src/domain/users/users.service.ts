@@ -992,20 +992,25 @@ GROUP BY userId HAVING userId = ?',
     userId: number,
     connectionId: number,
     emotion: Emotion,
-  ): Promise<any> {
-    const queryString = `INSERT IGNORE INTO reaction (userId, connectionId, ${emotion}) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(userId), connectionId = VALUES(connectionId), ${emotion} = VALUES(${emotion})`;
-    const { affectedRows } = await this.repository.manager.query(queryString, [
-      userId,
-      connectionId,
-      true,
-    ]);
-    if (affectedRows > 0) {
-      await this.connectionRepository.increment(
-        { id: connectionId },
-        `${emotion}Count`,
-        1,
+  ): Promise<number> {
+    try {
+      await this.repository.manager.query(
+        `INSERT IGNORE INTO reaction (userId, connectionId, ${emotion}) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(userId), connectionId = VALUES(connectionId), ${emotion} = VALUES(${emotion})`,
+        [userId, connectionId, true],
       );
+    } catch (e) {
+      this.logger.log(e);
     }
+    const [row] = await this.repository.manager.query(
+      `SELECT COUNT(*) AS cnt FROM reaction WHERE connectionId = ? AND ${emotion} = ?`,
+      [connectionId, true],
+    );
+    const count = row ? +row[`cnt`] : 0;
+    const queryString = `UPDATE connection SET ${emotion}Count = ? WHERE id = ?`;
+    await this.repository.manager.query(queryString, [count, connectionId]);
+
+
+    return count;
   }
 
   // 찜 리스트에서 삭제
@@ -1013,16 +1018,24 @@ GROUP BY userId HAVING userId = ?',
     userId: number,
     connectionId: number,
     emotion: string,
-  ): Promise<any> {
-    const { affectedRows } = await this.repository.manager.query(
-      `UPDATE reaction SET ${emotion} = ? WHERE userId = ? AND connectionId = ?`,
-      [false, userId, connectionId],
-    );
-    if (affectedRows > 0) {
-      // we need to make the xxxxCount always positive.
-      const queryString = `UPDATE connection SET ${emotion}Count = ${emotion}Count - 1 WHERE id = ? AND ${emotion}Count > 0`;
-      await this.repository.manager.query(queryString, [connectionId]);
+  ): Promise<number> {
+    try {
+      await this.repository.manager.query(
+        `UPDATE reaction SET ${emotion} = ? WHERE userId = ? AND connectionId = ?`,
+        [false, userId, connectionId],
+      );
+    } catch (e) {
+      this.logger.log(e);
     }
+    const [row] = await this.repository.manager.query(
+      `SELECT COUNT(*) AS cnt FROM reaction WHERE connectionId = ? AND ${emotion} = ?`,
+      [connectionId, true],
+    );
+    const count = row ? +row[`cnt`] : 0;
+    const queryString = `UPDATE connection SET ${emotion}Count = ? WHERE id = ?`;
+    await this.repository.manager.query(queryString, [count, connectionId]);
+
+    return count;
   }
 
   //?-------------------------------------------------------------------------//

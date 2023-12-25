@@ -194,14 +194,13 @@ export class UserConnectionsController {
     @Param('connectionId', ParseIntPipe) connectionId: number,
     @Body() dto: CreateReactionDto, // optional message, and skill
   ): Promise<AnyData> {
-    const a = await this.usersService.attachToReactionPivot(
+    const count = await this.usersService.attachToReactionPivot(
       userId,
       connectionId,
       dto.emotion,
     );
-    console.log('result : ', a);
     return {
-      data: 'ok',
+      data: count,
     };
   }
 
@@ -213,13 +212,13 @@ export class UserConnectionsController {
     @Param('connectionId', ParseIntPipe) connectionId: number,
     @Body() dto: RemoveReactionDto, // optional message, and skill
   ): Promise<AnyData> {
-    await this.usersService.detachFromReactionPivot(
+    const count = await this.usersService.detachFromReactionPivot(
       userId,
       connectionId,
       dto.emotion,
     );
     return {
-      data: 'ok',
+      data: count,
     };
   }
 
