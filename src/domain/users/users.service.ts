@@ -1009,7 +1009,6 @@ GROUP BY userId HAVING userId = ?',
     const queryString = `UPDATE connection SET ${emotion}Count = ? WHERE id = ?`;
     await this.repository.manager.query(queryString, [count, connectionId]);
 
-
     return count;
   }
 
