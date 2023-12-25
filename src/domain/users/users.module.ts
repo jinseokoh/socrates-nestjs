@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
+import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { Abhor } from 'src/domain/connections/entities/abhor.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
@@ -37,6 +38,7 @@ import { UserConnectionsController } from 'src/domain/users/user-connections.con
       Category,
       LanguageSkill,
       Connection,
+      Reaction,
       Abhor,
       Meetup,
       Like,

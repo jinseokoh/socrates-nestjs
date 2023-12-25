@@ -33,4 +33,11 @@ export class Reaction {
 
   @ManyToOne(() => Connection, (connection) => connection.usersReacted)
   public connection: Connection;
+
+  //?-------------------------------------------------------------------------?/
+  //? constructor
+
+  constructor(partial: Partial<Reaction>) {
+    Object.assign(this, partial);
+  }
 }

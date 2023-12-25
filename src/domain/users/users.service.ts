@@ -63,6 +63,7 @@ import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SesService } from 'src/services/aws/ses.service';
 import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
+import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 
 @Injectable()
 export class UsersService {
@@ -88,6 +89,8 @@ export class UsersService {
     private readonly dislikeRepository: Repository<Dislike>,
     @InjectRepository(Connection)
     private readonly connectionRepository: Repository<Connection>,
+    @InjectRepository(Reaction)
+    private readonly reactionRepository: Repository<Reaction>,
     @InjectRepository(Abhor)
     private readonly abhorRepository: Repository<Abhor>,
     @InjectRepository(Hate)
@@ -986,6 +989,27 @@ GROUP BY userId HAVING userId = ?',
   //?-------------------------------------------------------------------------//
   //?  Reaction Pivot
   //?-------------------------------------------------------------------------//
+
+  // 찜 리스트에 추가
+  async getReaction(userId: number, connectionId: number): Promise<Reaction> {
+    try {
+      return await this.reactionRepository.findOneOrFail({
+        where: { userId, connectionId },
+      });
+    } catch (e) {
+      //? in case of 404
+      return new Reaction({
+        userId: userId,
+        connectionId: connectionId,
+        sympathetic: false,
+        surprised: false,
+        humorous: false,
+        sad: false,
+        disgust: false,
+      });
+      this.logger.log(e);
+    }
+  }
 
   // 찜 리스트에 추가
   async attachToReactionPivot(
