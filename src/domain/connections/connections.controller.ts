@@ -63,6 +63,7 @@ export class ConnectionsController {
       'remarks',
       'remarks.user',
       'usersAbhorred',
+      'usersReacted',
       'user.connections',
       'user.connections.dot',
       'user.connections.user',
