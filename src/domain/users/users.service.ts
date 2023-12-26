@@ -1,3 +1,4 @@
+import { GetReactionsDto } from 'src/domain/users/dto/get-reactions.dto';
 import {
   BadRequestException,
   ForbiddenException,
@@ -619,7 +620,7 @@ GROUP BY userId HAVING userId = ?',
   //? Connections
   //?-------------------------------------------------------------------------//
 
-  // 내가 만든 모임 리스트
+  // 내가 만든 발견 리스트
   async getMyConnections(
     userId: number,
     query: PaginateQuery,
@@ -1008,6 +1009,22 @@ GROUP BY userId HAVING userId = ?',
         disgust: false,
       });
       this.logger.log(e);
+    }
+  }
+
+  // 찜 리스트에 추가
+  async getReactions(dto: GetReactionsDto): Promise<Array<Reaction>> {
+    try {
+      const items = await this.reactionRepository
+        .createQueryBuilder()
+        .where('connectionId IN (:ids)', { ids: dto.connectionIds })
+        .where('userId = :id', { id: dto.userId })
+        .getMany();
+
+      return items;
+    } catch (e) {
+      this.logger.log(e);
+      throw e;
     }
   }
 

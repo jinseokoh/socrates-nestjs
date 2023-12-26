@@ -20,6 +20,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { CreateReactionDto } from 'src/domain/users/dto/create-reaction.dto';
 import { RemoveReactionDto } from 'src/domain/users/dto/remove-reaction.dto';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
+import { GetReactionsDto } from 'src/domain/users/dto/get-reactions.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -187,6 +188,26 @@ export class UserConnectionsController {
   //? User Reaction to Connection Pivot
   //?-------------------------------------------------------------------------//
 
+  @ApiOperation({ description: '발견 reaction' })
+  @PaginateQueryOptions()
+  @Get(':userId/connections/:connectionId')
+  async getReaction(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('connectionId', ParseIntPipe) connectionId: number,
+  ): Promise<Reaction> {
+    return await this.usersService.getReaction(userId, connectionId);
+  }
+
+  @ApiOperation({ description: '발견 reaction 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/reactions')
+  async getReactions(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() dto: GetReactionsDto,
+  ): Promise<Array<Reaction>> {
+    return await this.usersService.getReactions({ ...dto, userId: userId });
+  }
+
   @ApiOperation({ description: '발견 reaction 리스트에 추가' })
   @Post(':userId/connections/:connectionId')
   async attachToReactionPivot(
@@ -219,16 +240,6 @@ export class UserConnectionsController {
     return {
       data: count,
     };
-  }
-
-  @ApiOperation({ description: '발견 reaction 리스트에 추가' })
-  @PaginateQueryOptions()
-  @Get(':userId/connections/:connectionId')
-  async getReaction(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('connectionId', ParseIntPipe) connectionId: number,
-  ): Promise<Reaction> {
-    return await this.usersService.getReaction(userId, connectionId);
   }
 
   // @ApiOperation({ description: '참가신청 리스트에 추가' })
