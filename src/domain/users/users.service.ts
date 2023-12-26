@@ -1017,7 +1017,7 @@ GROUP BY userId HAVING userId = ?',
     try {
       const items = await this.reactionRepository
         .createQueryBuilder()
-        .where('connectionId IN (:ids)', { ids: dto.connectionIds })
+        .where('connectionId IN (:ids)', { ids: dto.ids })
         .andWhere('userId = :id', { id: dto.userId })
         .getMany();
 
