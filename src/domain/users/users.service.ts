@@ -1013,12 +1013,12 @@ GROUP BY userId HAVING userId = ?',
   }
 
   // 내 리스트
-  async getReactions(dto: GetReactionsDto): Promise<Array<Reaction>> {
+  async getReactions(userId: number, ids: number[]): Promise<Array<Reaction>> {
     try {
       const items = await this.reactionRepository
         .createQueryBuilder()
-        .where('connectionId IN (:ids)', { ids: dto.ids })
-        .andWhere('userId = :id', { id: dto.userId })
+        .where('connectionId IN (:ids)', { ids: ids })
+        .andWhere('userId = :id', { id: userId })
         .getMany();
 
       return items;

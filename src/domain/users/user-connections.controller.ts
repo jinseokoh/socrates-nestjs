@@ -6,8 +6,10 @@ import {
   Delete,
   Get,
   Param,
+  ParseArrayPipe,
   ParseIntPipe,
   Post,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -199,14 +201,14 @@ export class UserConnectionsController {
   }
 
   @ApiOperation({ description: '발견 reaction 리스트' })
-  @PaginateQueryOptions()
   @Get(':userId/reactions')
   async getReactions(
     @Param('userId', ParseIntPipe) userId: number,
-    @Body() dto: GetReactionsDto,
+    @Query('ids', new ParseArrayPipe({ items: Number, separator: ',' }))
+    ids: number[],
   ): Promise<Array<Reaction>> {
     // console.log(dto);
-    return await this.usersService.getReactions({ ...dto, userId: userId });
+    return await this.usersService.getReactions(userId, ids);
   }
 
   @ApiOperation({ description: '발견 reaction 리스트에 추가' })
