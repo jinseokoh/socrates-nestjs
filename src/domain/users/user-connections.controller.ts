@@ -205,6 +205,7 @@ export class UserConnectionsController {
     @Param('userId', ParseIntPipe) userId: number,
     @Body() dto: GetReactionsDto,
   ): Promise<Array<Reaction>> {
+    // console.log(dto);
     return await this.usersService.getReactions({ ...dto, userId: userId });
   }
 

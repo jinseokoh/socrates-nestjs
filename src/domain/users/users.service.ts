@@ -991,7 +991,7 @@ GROUP BY userId HAVING userId = ?',
   //?  Reaction Pivot
   //?-------------------------------------------------------------------------//
 
-  // 찜 리스트에 추가
+  // 아이템 조회
   async getReaction(userId: number, connectionId: number): Promise<Reaction> {
     try {
       return await this.reactionRepository.findOneOrFail({
@@ -1012,13 +1012,13 @@ GROUP BY userId HAVING userId = ?',
     }
   }
 
-  // 찜 리스트에 추가
+  // 내 리스트
   async getReactions(dto: GetReactionsDto): Promise<Array<Reaction>> {
     try {
       const items = await this.reactionRepository
         .createQueryBuilder()
         .where('connectionId IN (:ids)', { ids: dto.connectionIds })
-        .where('userId = :id', { id: dto.userId })
+        .andWhere('userId = :id', { id: dto.userId })
         .getMany();
 
       return items;
@@ -1028,7 +1028,7 @@ GROUP BY userId HAVING userId = ?',
     }
   }
 
-  // 찜 리스트에 추가
+  // 리스트에 추가
   async attachToReactionPivot(
     userId: number,
     connectionId: number,
@@ -1053,7 +1053,7 @@ GROUP BY userId HAVING userId = ?',
     return count;
   }
 
-  // 찜 리스트에서 삭제
+  // 리스트에서 삭제
   async detachFromReactionPivot(
     userId: number,
     connectionId: number,
