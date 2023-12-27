@@ -56,7 +56,10 @@ export class InquiriesController {
   @ApiOperation({ description: '질문 상세보기 w/ Pagination' })
   @Get(':id')
   async getCommentsById(@Param('id') inquiryId: number): Promise<Inquiry> {
-    return await this.inquiriesService.findById(inquiryId, ['user', 'comments']);
+    return await this.inquiriesService.findById(inquiryId, [
+      'user',
+      'comments',
+    ]);
   }
 
   //?-------------------------------------------------------------------------//

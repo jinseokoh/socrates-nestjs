@@ -34,15 +34,21 @@ export class InquiriesService {
     const inquiry = await this.repository.save(entity);
 
     if (dto.targetEntity) {
+      if (dto.targetEntity.model === 'user') {
+        await this.repository.manager.query(
+          'INSERT IGNORE INTO `inquiry_user` (inquiryId, userId) VALUES (?, ?)',
+          [inquiry.id, dto.targetEntity.id],
+        );
+      }
       if (dto.targetEntity.model === 'meetup') {
         await this.repository.manager.query(
           'INSERT IGNORE INTO `inquiry_meetup` (inquiryId, meetupId) VALUES (?, ?)',
           [inquiry.id, dto.targetEntity.id],
         );
       }
-      if (dto.targetEntity.model === 'user') {
+      if (dto.targetEntity.model === 'connection') {
         await this.repository.manager.query(
-          'INSERT IGNORE INTO `inquiry_user` (inquiryId, userId) VALUES (?, ?)',
+          'INSERT IGNORE INTO `inquiry_connection` (inquiryId, connectionId) VALUES (?, ?)',
           [inquiry.id, dto.targetEntity.id],
         );
       }
@@ -57,7 +63,13 @@ export class InquiriesService {
 
   async findAll(query: PaginateQuery): Promise<Paginated<Inquiry>> {
     return await paginate(query, this.repository, {
-      relations: ['user', 'comments', 'flaggedMeetups', 'flaggedUsers'], // can be removed.
+      relations: [
+        'user',
+        'comments',
+        'flaggedUsers',
+        'flaggedMeetups',
+        'flaggedConnections',
+      ], // can be removed.
       sortableColumns: ['id'],
       searchableColumns: ['title'],
       defaultSortBy: [['id', 'DESC']],

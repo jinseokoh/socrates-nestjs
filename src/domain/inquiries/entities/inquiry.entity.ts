@@ -16,6 +16,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { Connection } from 'src/domain/connections/entities/connection.entity';
 
 @Entity()
 export class Inquiry {
@@ -84,6 +85,10 @@ export class Inquiry {
   @ManyToMany(() => Meetup, (meetup) => meetup.flaggedInquiries)
   @JoinTable({ name: 'inquiry_meetup' }) // owning side
   flaggedMeetups: Meetup[];
+
+  @ManyToMany(() => User, (user) => user.flaggedInquiries)
+  @JoinTable({ name: 'inquiry_connection' }) // owning side
+  flaggedConnections: Connection[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
