@@ -3,11 +3,13 @@ import { Abhor } from 'src/domain/connections/entities/abhor.entity';
 import { Dot } from 'src/domain/connections/entities/dot.entity';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { Remark } from 'src/domain/connections/entities/remark.entity';
+import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -85,4 +87,10 @@ export class Connection {
 
   @ManyToOne(() => Dot, (dot) => dot.connections)
   public dot: Dot;
+
+  //**--------------------------------------------------------------------------*/
+  //** many-to-many belongsToMany
+
+  @ManyToMany(() => Inquiry, (inquiry) => inquiry.flaggedConnections)
+  flaggedInquiries: Inquiry[];
 }

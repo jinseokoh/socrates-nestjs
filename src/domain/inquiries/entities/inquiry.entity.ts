@@ -86,7 +86,7 @@ export class Inquiry {
   @JoinTable({ name: 'inquiry_meetup' }) // owning side
   flaggedMeetups: Meetup[];
 
-  @ManyToMany(() => User, (user) => user.flaggedInquiries)
+  @ManyToMany(() => Connection, (connection) => connection.flaggedInquiries)
   @JoinTable({ name: 'inquiry_connection' }) // owning side
   flaggedConnections: Connection[];
 
