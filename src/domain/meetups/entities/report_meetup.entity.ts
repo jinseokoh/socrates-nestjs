@@ -5,7 +5,7 @@ import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 // a user can dislike meetup
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-export class Dislike {
+export class ReportMeetup {
   @PrimaryColumn({ type: 'int', unsigned: true })
   public userId: number;
 
@@ -15,9 +15,9 @@ export class Dislike {
   @Column({ length: 32, nullable: true })
   message: string | null;
 
-  @ManyToOne(() => User, (user) => user.meetupsDisliked)
+  @ManyToOne(() => User, (user) => user.meetupsReported)
   public user: User;
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.usersDisliked)
+  @ManyToOne(() => Meetup, (meetup) => meetup.usersReported)
   public meetup: Meetup;
 }

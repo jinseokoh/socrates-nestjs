@@ -368,25 +368,25 @@ export class MeetupsService {
   //? 블락한 모든 사용자 리스트
   //?-------------------------------------------------------------------------//
 
-  async getAllDislikers(id: number): Promise<any> {
+  async getMeetupReporters(id: number): Promise<any> {
     try {
       const meetup = await this.repository.findOneOrFail({
         where: {
           id: id,
         },
-        relations: ['usersDisliked', 'usersDisliked.user'],
+        relations: ['usersReported', 'usersReported.user'],
       });
 
-      return meetup.usersDisliked.map((v: any) => v.user);
+      return meetup.usersReported.map((v: any) => v.user);
     } catch (e) {
       throw new NotFoundException('entity not found');
     }
   }
 
-  async getAllDislikeIds(id: number): Promise<Array<Like>> {
+  async getMeetupReporterIds(id: number): Promise<Array<Like>> {
     try {
       const rows = await this.repository.manager.query(
-        'SELECT userId FROM `dislike` WHERE meetupId = ?',
+        'SELECT userId FROM `report_meetup` WHERE meetupId = ?',
         [id],
       );
 

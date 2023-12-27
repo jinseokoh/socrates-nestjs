@@ -44,10 +44,10 @@ import { Brackets, DataSource, FindOneOptions, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
-import { Abhor } from 'src/domain/connections/entities/abhor.entity';
+import { ReportConnection } from 'src/domain/connections/entities/report_connection.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
-import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
+import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Interest } from 'src/domain/users/entities/interest.entity';
@@ -55,7 +55,7 @@ import { Join } from 'src/domain/meetups/entities/join.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
-import { Report } from 'src/domain/users/entities/report.entity';
+import { ReportUser } from 'src/domain/users/entities/report_user.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { Cache } from 'cache-manager';
 import { initialUsername } from 'src/helpers/random-username';
@@ -86,18 +86,18 @@ export class UsersService {
     private readonly meetupRepository: Repository<Meetup>,
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
-    @InjectRepository(Dislike)
-    private readonly dislikeRepository: Repository<Dislike>,
+    @InjectRepository(ReportMeetup)
+    private readonly reportMeetupRepository: Repository<ReportMeetup>,
     @InjectRepository(Connection)
     private readonly connectionRepository: Repository<Connection>,
     @InjectRepository(Reaction)
     private readonly reactionRepository: Repository<Reaction>,
-    @InjectRepository(Abhor)
-    private readonly abhorRepository: Repository<Abhor>,
+    @InjectRepository(ReportConnection)
+    private readonly reportConnectionRepository: Repository<ReportConnection>,
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
-    @InjectRepository(Report)
-    private readonly reportRepository: Repository<Report>,
+    @InjectRepository(ReportUser)
+    private readonly reportUserRepository: Repository<ReportUser>,
     @InjectRepository(Join)
     private readonly joinRepository: Repository<Join>,
     @Inject(ConfigService) private configService: ConfigService, // global
@@ -925,25 +925,25 @@ GROUP BY userId HAVING userId = ?',
   //?-------------------------------------------------------------------------//
 
   // 블락한 사용자 리스트에 추가
-  async attachUserIdToReportPivot(
-    accusingUserId: number,
+  async attachUserIdToReportUserPivot(
+    userId: number,
     accusedUserId: number,
     message: string | null,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `report` (accusingUserId, accusedUserId, message) VALUES (?, ?, ?)',
-      [accusingUserId, accusedUserId, message],
+      'INSERT IGNORE INTO `report_user` (userId, accusedUserId, message) VALUES (?, ?, ?)',
+      [userId, accusedUserId, message],
     );
   }
 
   // 블락한 사용자 리스트에서 삭제
-  async detachUserIdFromReportPivot(
-    accusingUserId: number,
+  async detachUserIdFromReportUserPivot(
+    userId: number,
     accusedUserId: number,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `report` WHERE accusingUserId = ? AND accusedUserId = ?',
-      [accusingUserId, accusedUserId],
+      'DELETE FROM `report_user` WHERE userId = ? AND accusedUserId = ?',
+      [userId, accusedUserId],
     );
   }
 
@@ -951,17 +951,17 @@ GROUP BY userId HAVING userId = ?',
   async getUsersBeingReportedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Report>> {
-    const queryBuilder = this.reportRepository
-      .createQueryBuilder('report')
-      .innerJoinAndSelect('report.accusedUser', 'user')
+  ): Promise<Paginated<ReportUser>> {
+    const queryBuilder = this.reportUserRepository
+      .createQueryBuilder('reportUser')
+      .innerJoinAndSelect('reportUser.accusedUser', 'user')
       .innerJoinAndSelect('user.profile', 'profile')
       .where({
-        accusingUserId: userId,
+        userId: userId,
       });
 
-    const config: PaginateConfig<Report> = {
-      sortableColumns: ['accusingUserId'],
+    const config: PaginateConfig<ReportUser> = {
+      sortableColumns: ['userId'],
       searchableColumns: ['message'],
       defaultLimit: 20,
       defaultSortBy: [['accusedUserId', 'ASC']],
@@ -974,14 +974,14 @@ GROUP BY userId HAVING userId = ?',
   // 내가 신고한 사용자 ids ( #todo. verify the logic )
   async getUserIdsBeingReportedByMe(userId: number): Promise<AnyData> {
     const rows = await this.repository.manager.query(
-      'SELECT accusingUserId, accusedUserId \
+      'SELECT userId, accusedUserId \
       FROM `report` \
-      WHERE accusingUserId = ?',
+      WHERE userId = ?',
       [userId],
     );
 
     const data = rows.map((v) => {
-      return v.accusingUserId === userId ? v.accusedUserId : v.accusingUserId;
+      return v.userId === userId ? v.accusedUserId : v.userId;
     });
 
     return { data: [...new Set(data)] };
@@ -1079,60 +1079,60 @@ GROUP BY userId HAVING userId = ?',
   }
 
   //?-------------------------------------------------------------------------//
-  //? Abhor Pivot
+  //? ReportConnection Pivot
   //?-------------------------------------------------------------------------//
 
   // 발견 블락 리스트에 추가
-  async attachToAbhorPivot(
+  async attachToReportConnectionPivot(
     userId: number,
     connectionId: number,
     message: string,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `abhor` (userId, connectionId, message) VALUES (?, ?, ?)',
+      'INSERT IGNORE INTO `ReportConnection` (userId, connectionId, message) VALUES (?, ?, ?)',
       [userId, connectionId, message],
     );
     if (affectedRows > 0) {
       await this.connectionRepository.increment(
         { id: connectionId },
-        'abhorCount',
+        'ReportConnectionCount',
         1,
       );
     }
   }
 
   // 발견 블락 리스트에서 삭제
-  async detachFromAbhorPivot(
+  async detachFromReportConnectionPivot(
     userId: number,
     connectionId: number,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `abhor` WHERE userId = ? AND connectionId = ?',
+      'DELETE FROM `ReportConnection` WHERE userId = ? AND connectionId = ?',
       [userId, connectionId],
     );
     if (affectedRows > 0) {
-      // await this.connectionRrepository.decrement({ connectionId }, 'abhorCount', 1);
+      // await this.connectionRrepository.decrement({ connectionId }, 'ReportConnectionCount', 1);
       await this.repository.manager.query(
-        'UPDATE `connection` SET abhorCount = abhorCount - 1 WHERE id = ? AND abhorCount > 0',
+        'UPDATE `connection` SET ReportConnectionCount = ReportConnectionCount - 1 WHERE id = ? AND ReportConnectionCount > 0',
         [connectionId],
       );
     }
   }
 
   // 내가 블락한 발견 리스트
-  async getConnectionsAbhorredByMe(
+  async getConnectionsReportedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Abhor>> {
-    const queryBuilder = this.abhorRepository
-      .createQueryBuilder('abhor')
-      .leftJoinAndSelect('abhor.connection', 'connection')
+  ): Promise<Paginated<ReportConnection>> {
+    const queryBuilder = this.reportConnectionRepository
+      .createQueryBuilder('reportConnection')
+      .leftJoinAndSelect('reportConnection.connection', 'connection')
       .leftJoinAndSelect('connection.dot', 'dot')
       .where({
         userId,
       });
 
-    const config: PaginateConfig<Abhor> = {
+    const config: PaginateConfig<ReportConnection> = {
       sortableColumns: ['connectionId'],
       searchableColumns: ['connection.answer'],
       defaultLimit: 20,
@@ -1144,10 +1144,10 @@ GROUP BY userId HAVING userId = ?',
   }
 
   // 내가 블락한 발견 ID 리스트
-  async getConnectionIdsAbhorredByMe(userId: number): Promise<AnyData> {
+  async getConnectionIdsReportedByMe(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT connectionId \
-      FROM `user` INNER JOIN `abhor` ON `user`.id = `abhor`.userId \
+      FROM `user` INNER JOIN `ReportConnection` ON `user`.id = `ReportConnection`.userId \
       WHERE `user`.id = ?',
       [userId],
     );
@@ -1242,17 +1242,17 @@ GROUP BY userId HAVING userId = ?',
   }
 
   //?-------------------------------------------------------------------------//
-  //? Dislike Pivot
+  //? Report Meetup Pivot
   //?-------------------------------------------------------------------------//
 
   // 모임 블락 리스트에 추가
-  async attachToDislikePivot(
+  async attachToReportMeetupPivot(
     userId: number,
     meetupId: number,
     message: string,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `dislike` (userId, meetupId, message) VALUES (?, ?, ?)',
+      'INSERT IGNORE INTO `report_meetup` (userId, meetupId, message) VALUES (?, ?, ?)',
       [userId, meetupId, message],
     );
     if (affectedRows > 0) {
@@ -1265,12 +1265,12 @@ GROUP BY userId HAVING userId = ?',
   }
 
   // 모임 블락 리스트에서 삭제
-  async detachFromDislikePivot(
+  async detachFromReportMeetupPivot(
     userId: number,
     meetupId: number,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `dislike` WHERE userId = ? AND meetupId = ?',
+      'DELETE FROM `report_meetup` WHERE userId = ? AND meetupId = ?',
       [userId, meetupId],
     );
     if (affectedRows > 0) {
@@ -1283,19 +1283,19 @@ GROUP BY userId HAVING userId = ?',
   }
 
   // 내가 블락한 모임 리스트
-  async getMeetupsDislikedByMe(
+  async getMeetupsReportedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Dislike>> {
-    const queryBuilder = this.dislikeRepository
-      .createQueryBuilder('dislike')
-      .leftJoinAndSelect('dislike.meetup', 'meetup')
+  ): Promise<Paginated<ReportMeetup>> {
+    const queryBuilder = this.reportMeetupRepository
+      .createQueryBuilder('reportMeetup')
+      .leftJoinAndSelect('reportMeetup.meetup', 'meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
       .where({
         userId,
       });
 
-    const config: PaginateConfig<Dislike> = {
+    const config: PaginateConfig<ReportMeetup> = {
       sortableColumns: ['meetupId'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,
@@ -1307,10 +1307,10 @@ GROUP BY userId HAVING userId = ?',
   }
 
   // 내가 블락한 모임 ID 리스트
-  async getMeetupIdsDislikedByMe(userId: number): Promise<AnyData> {
+  async getMeetupIdsReportedByMe(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId \
-      FROM `user` INNER JOIN `dislike` ON `user`.id = `dislike`.userId \
+      FROM `user` INNER JOIN `report_meetup` ON `user`.id = `report_meetup`.userId \
       WHERE `user`.id = ?',
       [userId],
     );

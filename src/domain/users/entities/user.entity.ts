@@ -12,13 +12,13 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
+import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Comment } from 'src/domain/inquiries/entities/comment.entity';
-import { Report } from 'src/domain/users/entities/report.entity';
+import { ReportUser } from 'src/domain/users/entities/report_user.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
 import { Interest } from 'src/domain/users/entities/interest.entity';
@@ -31,7 +31,7 @@ import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { Remark } from 'src/domain/connections/entities/remark.entity';
 import { Dot } from 'src/domain/connections/entities/dot.entity';
-import { Abhor } from 'src/domain/connections/entities/abhor.entity';
+import { ReportConnection } from 'src/domain/connections/entities/report_connection.entity';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 @Entity()
 export class User {
@@ -171,11 +171,11 @@ export class User {
   @OneToMany(() => Hate, (hate) => hate.hatedUser)
   public usersHated: Hate[];
 
-  @OneToMany(() => Report, (report) => report.accusingUser)
-  public accusingReports: Report[];
+  @OneToMany(() => ReportUser, (reportUser) => reportUser.user)
+  public accusingReports: ReportUser[];
 
-  @OneToMany(() => Report, (report) => report.accusedUser)
-  public accusedReports: Report[];
+  @OneToMany(() => ReportUser, (reportUser) => reportUser.accusedUser)
+  public accusedReports: ReportUser[];
 
   @OneToMany(() => Room, (room) => room.user)
   public rooms: Room[];
@@ -183,8 +183,8 @@ export class User {
   @OneToMany(() => Like, (like) => like.user)
   public meetupsLiked: Like[];
 
-  @OneToMany(() => Dislike, (dislike) => dislike.user)
-  public meetupsDisliked: Dislike[];
+  @OneToMany(() => ReportMeetup, (reportMeetup) => reportMeetup.user)
+  public meetupsReported: ReportMeetup[];
 
   @OneToMany(() => Interest, (interest) => interest.user)
   public categoriesInterested: Interest[];
@@ -204,8 +204,8 @@ export class User {
   @OneToMany(() => Connection, (connection) => connection.user)
   public connectionsReacted: Reaction[];
 
-  @OneToMany(() => Abhor, (abhor) => abhor.user)
-  public connectionsAbhorred: Abhor[];
+  @OneToMany(() => ReportConnection, (ReportConnection) => ReportConnection.user)
+  public connectionsReported: ReportConnection[];
 
   @OneToMany(() => Remark, (remark) => remark.user)
   public remarks: Remark[];

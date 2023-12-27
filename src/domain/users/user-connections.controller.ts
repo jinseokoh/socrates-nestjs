@@ -121,8 +121,8 @@ export class UserConnectionsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '나의 블락 리스트에 추가' })
-  @Post(':userId/connections-abhorred/:connectionId')
-  async attachToAbhorPivot(
+  @Post(':userId/connections-reported/:connectionId')
+  async attachToConnectionReportPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('connectionId', ParseIntPipe) connectionId: number,
     @Body('message') message: string,
@@ -131,7 +131,11 @@ export class UserConnectionsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.attachToAbhorPivot(userId, connectionId, message);
+      await this.usersService.attachToReportConnectionPivot(
+        userId,
+        connectionId,
+        message,
+      );
 
       return {
         data: 'ok',
@@ -142,8 +146,8 @@ export class UserConnectionsController {
   }
 
   @ApiOperation({ description: '나의 블락 리스트에서 삭제' })
-  @Delete(':userId/connections-abhorred/:connectionId')
-  async detachFromAbhorPivot(
+  @Delete(':userId/connections-reported/:connectionId')
+  async detachFromConnectionReportPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('connectionId', ParseIntPipe) connectionId: number,
   ): Promise<any> {
@@ -151,7 +155,10 @@ export class UserConnectionsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.detachFromAbhorPivot(userId, connectionId);
+      await this.usersService.detachFromReportConnectionPivot(
+        userId,
+        connectionId,
+      );
       return {
         data: 'ok',
       };
@@ -162,13 +169,13 @@ export class UserConnectionsController {
 
   @ApiOperation({ description: '내가 블락한 발견 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/connections-abhorred')
-  async getConnectionsAbhorredByMe(
+  @Get(':userId/connections-reported')
+  async getConnectionsReportedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Connection>> {
     const { data, meta, links } =
-      await this.usersService.getConnectionsAbhorredByMe(userId, query);
+      await this.usersService.getConnectionsReportedByMe(userId, query);
 
     return {
       data: data.map((v) => v.connection),
@@ -179,11 +186,11 @@ export class UserConnectionsController {
 
   @ApiOperation({ description: '내가 블락한 발견ID 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/connectionids-abhorred')
-  async getConnectionIdsAbhorredByMe(
+  @Get(':userId/connectionids-reported')
+  async getConnectionIdsReportedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
-    return this.usersService.getConnectionIdsAbhorredByMe(userId);
+    return this.usersService.getConnectionIdsReportedByMe(userId);
   }
 
   //?-------------------------------------------------------------------------//

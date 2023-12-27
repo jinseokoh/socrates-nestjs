@@ -29,7 +29,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
-import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
+import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
@@ -212,8 +212,8 @@ export class Meetup {
   @OneToMany(() => Like, (like) => like.meetup)
   public usersLiked: Like[];
 
-  @OneToMany(() => Dislike, (dislike) => dislike.meetup)
-  public usersDisliked: Dislike[];
+  @OneToMany(() => ReportMeetup, (reportMeetup) => reportMeetup.meetup)
+  public usersReported: ReportMeetup[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany

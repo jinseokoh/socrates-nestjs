@@ -4,14 +4,14 @@ import { Category } from 'src/domain/categories/entities/category.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
-import { Abhor } from 'src/domain/connections/entities/abhor.entity';
+import { ReportConnection } from 'src/domain/connections/entities/report_connection.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
-import { Dislike } from 'src/domain/meetups/entities/dislike.entity';
+import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
-import { Report } from 'src/domain/users/entities/report.entity';
+import { ReportUser } from 'src/domain/users/entities/report_user.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { UserFcmController } from 'src/domain/users/user-fcm.controller';
@@ -37,18 +37,18 @@ import { UserConnectionsController } from 'src/domain/users/user-connections.con
     TypeOrmModule.forFeature([
       Category,
       LanguageSkill,
-      Connection,
-      Reaction,
-      Abhor,
-      Meetup,
       Like,
-      Dislike,
       Join,
       Hate,
-      Profile,
-      Report,
+      Reaction,
+      ReportConnection,
+      ReportMeetup,
+      ReportUser,
       Secret,
+      Profile,
       User,
+      Connection,
+      Meetup,
     ]),
     ThrottlerModule.forRoot([
       {

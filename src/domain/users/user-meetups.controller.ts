@@ -130,7 +130,11 @@ export class UserMeetupsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.attachToDislikePivot(userId, meetupId, message);
+      await this.usersService.attachToReportMeetupPivot(
+        userId,
+        meetupId,
+        message,
+      );
 
       return {
         data: 'ok',
@@ -142,7 +146,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '나의 블락 리스트에서 삭제' })
   @Delete(':userId/meetups-disliked/:meetupId')
-  async detachFromDislikePivot(
+  async detachFromReportMeetupPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<any> {
@@ -150,7 +154,7 @@ export class UserMeetupsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.detachFromDislikePivot(userId, meetupId);
+      await this.usersService.detachFromReportMeetupPivot(userId, meetupId);
       return {
         data: 'ok',
       };
@@ -162,12 +166,12 @@ export class UserMeetupsController {
   @ApiOperation({ description: '내가 블락한 모임 리스트' })
   @PaginateQueryOptions()
   @Get(':userId/meetups-disliked')
-  async getMeetupsDislikedByMe(
+  async getMeetupsReportedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Meetup>> {
     const { data, meta, links } =
-      await this.usersService.getMeetupsDislikedByMe(userId, query);
+      await this.usersService.getMeetupsReportedByMe(userId, query);
 
     return {
       data: data.map((v) => v.meetup),
@@ -182,7 +186,7 @@ export class UserMeetupsController {
   async getMeetupIdsDislikedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
-    return this.usersService.getMeetupIdsDislikedByMe(userId);
+    return this.usersService.getMeetupIdsReportedByMe(userId);
   }
 
   //?-------------------------------------------------------------------------//

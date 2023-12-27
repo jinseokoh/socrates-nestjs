@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Abhor } from 'src/domain/connections/entities/abhor.entity';
+import { ReportConnection } from 'src/domain/connections/entities/report_connection.entity';
 import { Dot } from 'src/domain/connections/entities/dot.entity';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { Remark } from 'src/domain/connections/entities/remark.entity';
@@ -30,7 +30,7 @@ export class Connection {
   answer: string;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  abhorCount: number; // 신고
+  ReportConnectionCount: number; // 신고
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'sympatheticCount' })
@@ -67,8 +67,11 @@ export class Connection {
   })
   remarks: Remark[];
 
-  @OneToMany(() => Abhor, (abhor) => abhor.connection)
-  public usersAbhorred: Abhor[];
+  @OneToMany(
+    () => ReportConnection,
+    (ReportConnection) => ReportConnection.connection,
+  )
+  public usersReported: ReportConnection[];
 
   @OneToMany(() => Reaction, (reaction) => reaction.connection)
   public usersReacted: User[];

@@ -5,7 +5,7 @@ import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 // a user can abhor connection
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-export class Abhor {
+export class ReportConnection {
   @PrimaryColumn({ type: 'int', unsigned: true })
   public userId: number;
 
@@ -15,9 +15,9 @@ export class Abhor {
   @Column({ length: 32, nullable: true })
   message: string | null;
 
-  @ManyToOne(() => User, (user) => user.connectionsAbhorred)
+  @ManyToOne(() => User, (user) => user.connectionsReported)
   public user: User;
 
-  @ManyToOne(() => Connection, (connection) => connection.usersAbhorred)
+  @ManyToOne(() => Connection, (connection) => connection.usersReported)
   public connection: Connection;
 }

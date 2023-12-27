@@ -2,13 +2,13 @@ import { Exclude } from 'class-transformer';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 @Entity()
-export class Report {
+export class ReportUser {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
   // @Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })
-  public accusingUserId: number; // to make it available to Repository.
+  public userId: number; // to make it available to Repository.
 
   @PrimaryColumn({ type: 'int', unsigned: true })
   public accusedUserId: number; // to make it available to Repository.
@@ -21,8 +21,8 @@ export class Report {
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'accusingUserId' })
-  public accusingUser!: User;
+  @JoinColumn({ name: 'userId' })
+  public user!: User;
 
   // @Exclude()
   @ManyToOne(() => User, (user) => user.accusedReports, {

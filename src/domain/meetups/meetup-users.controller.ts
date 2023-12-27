@@ -68,12 +68,12 @@ export class MeetupUsersController {
   //? 블락 리스트
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '이 모임을 신고한 사용자ID 리스트' })
+  @ApiOperation({ description: '이 모임을 신고한 사용자 리스트' })
   @Get(':id/dislikers')
-  async getAllDislikers(
+  async getMeetupReporters(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<AnyData> {
-    const dislikers = await this.meetupsService.getAllDislikers(id);
+    const dislikers = await this.meetupsService.getMeetupReporters(id);
     return {
       data: dislikers,
     };
@@ -81,10 +81,10 @@ export class MeetupUsersController {
 
   @ApiOperation({ description: '이 모임을 신고한 사용자ID 리스트' })
   @Get(':id/dislike_ids')
-  async getAllDislikeIds(
+  async getMeetupReporterIds(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<AnyData> {
-    const ids = await this.meetupsService.getAllDislikeIds(id);
+    const ids = await this.meetupsService.getMeetupReporterIds(id);
     return {
       data: ids,
     };

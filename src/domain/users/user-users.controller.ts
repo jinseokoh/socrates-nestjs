@@ -14,7 +14,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { UsersService } from 'src/domain/users/users.service';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Hate } from 'src/domain/users/entities/hate.entity';
-import { Report } from 'src/domain/users/entities/report.entity';
+import { ReportUser } from 'src/domain/users/entities/report_user.entity';
 import { AnyData } from 'src/common/types';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 
@@ -97,7 +97,7 @@ export class UserUsersController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.attachUserIdToReportPivot(
+      await this.usersService.attachUserIdToReportUserPivot(
         userId,
         otherId,
         message,
@@ -120,7 +120,7 @@ export class UserUsersController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.detachUserIdFromReportPivot(userId, otherId);
+      await this.usersService.detachUserIdFromReportUserPivot(userId, otherId);
       return {
         data: 'ok',
       };
@@ -134,7 +134,7 @@ export class UserUsersController {
   async getUsersBeingReportedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Report>> {
+  ): Promise<Paginated<ReportUser>> {
     return this.usersService.getUsersBeingReportedByMe(userId, query);
   }
 
