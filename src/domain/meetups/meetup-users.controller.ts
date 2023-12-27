@@ -69,18 +69,18 @@ export class MeetupUsersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '이 모임을 신고한 사용자 리스트' })
-  @Get(':id/dislikers')
+  @Get(':id/reporters')
   async getMeetupReporters(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<AnyData> {
-    const dislikers = await this.meetupsService.getMeetupReporters(id);
+    const reporters = await this.meetupsService.getMeetupReporters(id);
     return {
-      data: dislikers,
+      data: reporters,
     };
   }
 
   @ApiOperation({ description: '이 모임을 신고한 사용자ID 리스트' })
-  @Get(':id/dislike_ids')
+  @Get(':id/reporter_ids')
   async getMeetupReporterIds(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<AnyData> {

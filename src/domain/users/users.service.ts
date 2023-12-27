@@ -1089,13 +1089,13 @@ GROUP BY userId HAVING userId = ?',
     message: string,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `ReportConnection` (userId, connectionId, message) VALUES (?, ?, ?)',
+      'INSERT IGNORE INTO `report_connection` (userId, connectionId, message) VALUES (?, ?, ?)',
       [userId, connectionId, message],
     );
     if (affectedRows > 0) {
       await this.connectionRepository.increment(
         { id: connectionId },
-        'ReportConnectionCount',
+        'reportCount',
         1,
       );
     }
@@ -1107,13 +1107,13 @@ GROUP BY userId HAVING userId = ?',
     connectionId: number,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `ReportConnection` WHERE userId = ? AND connectionId = ?',
+      'DELETE FROM `report_connection` WHERE userId = ? AND connectionId = ?',
       [userId, connectionId],
     );
     if (affectedRows > 0) {
       // await this.connectionRrepository.decrement({ connectionId }, 'ReportConnectionCount', 1);
       await this.repository.manager.query(
-        'UPDATE `connection` SET ReportConnectionCount = ReportConnectionCount - 1 WHERE id = ? AND ReportConnectionCount > 0',
+        'UPDATE `connection` SET reportCount = reportCount - 1 WHERE id = ? AND reportCount > 0',
         [connectionId],
       );
     }
@@ -1258,7 +1258,7 @@ GROUP BY userId HAVING userId = ?',
     if (affectedRows > 0) {
       await this.meetupRepository.increment(
         { id: meetupId },
-        'dislikeCount',
+        'reportCount',
         1,
       );
     }
@@ -1274,9 +1274,9 @@ GROUP BY userId HAVING userId = ?',
       [userId, meetupId],
     );
     if (affectedRows > 0) {
-      // await this.meetupRrepository.decrement({ meetupId }, 'dislikeCount', 1);
+      // await this.meetupRrepository.decrement({ meetupId }, 'reportCount', 1);
       await this.repository.manager.query(
-        'UPDATE `meetup` SET dislikeCount = dislikeCount - 1 WHERE id = ? AND dislikeCount > 0',
+        'UPDATE `meetup` SET reportCount = reportCount - 1 WHERE id = ? AND reportCount > 0',
         [meetupId],
       );
     }

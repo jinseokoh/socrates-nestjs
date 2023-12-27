@@ -30,7 +30,7 @@ export class Connection {
   answer: string;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  ReportConnectionCount: number; // 신고
+  reportCount: number; // 신고
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'sympatheticCount' })

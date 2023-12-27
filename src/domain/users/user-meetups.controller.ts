@@ -120,7 +120,7 @@ export class UserMeetupsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '나의 블락 리스트에 추가' })
-  @Post(':userId/meetups-disliked/:meetupId')
+  @Post(':userId/meetups-reported/:meetupId')
   async attachToDislikePivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
@@ -145,7 +145,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '나의 블락 리스트에서 삭제' })
-  @Delete(':userId/meetups-disliked/:meetupId')
+  @Delete(':userId/meetups-reported/:meetupId')
   async detachFromReportMeetupPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
@@ -165,7 +165,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 블락한 모임 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/meetups-disliked')
+  @Get(':userId/meetups-reported')
   async getMeetupsReportedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
@@ -182,7 +182,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 블락한 모임ID 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/meetupids-disliked')
+  @Get(':userId/meetupids-reported')
   async getMeetupIdsDislikedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {

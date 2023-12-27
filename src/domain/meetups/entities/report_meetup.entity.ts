@@ -2,7 +2,7 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 
-// a user can dislike meetup
+// a user can report meetup
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 export class ReportMeetup {

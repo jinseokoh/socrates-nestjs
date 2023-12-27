@@ -134,8 +134,8 @@ export class Meetup {
   likeCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'dislike count' })
-  dislikeCount: number; // 신고
+  @ApiProperty({ description: 'report count' })
+  reportCount: number; // 신고
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'view count' })

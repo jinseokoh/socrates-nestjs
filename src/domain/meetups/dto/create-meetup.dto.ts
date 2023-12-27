@@ -113,10 +113,10 @@ export class CreateMeetupDto {
   @IsOptional()
   likeCount: number;
 
-  @ApiProperty({ description: 'dislike count', default: 0 })
+  @ApiProperty({ description: 'report count', default: 0 })
   @IsNumber()
   @IsOptional()
-  dislikeCount: number;
+  reportCount: number;
 
   @ApiProperty({ description: 'view count', default: 0 })
   @IsNumber()
