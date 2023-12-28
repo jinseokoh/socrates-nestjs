@@ -1125,8 +1125,8 @@ GROUP BY userId HAVING userId = ?',
     query: PaginateQuery,
   ): Promise<Paginated<ReportConnection>> {
     const queryBuilder = this.reportConnectionRepository
-      .createQueryBuilder('reportConnection')
-      .leftJoinAndSelect('reportConnection.connection', 'connection')
+      .createQueryBuilder('report_connection')
+      .leftJoinAndSelect('report_connection.connection', 'connection')
       .leftJoinAndSelect('connection.dot', 'dot')
       .where({
         userId,
@@ -1147,7 +1147,7 @@ GROUP BY userId HAVING userId = ?',
   async getConnectionIdsReportedByMe(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT connectionId \
-      FROM `user` INNER JOIN `ReportConnection` ON `user`.id = `ReportConnection`.userId \
+      FROM `user` INNER JOIN `report_connection` ON `user`.id = `report_connection`.userId \
       WHERE `user`.id = ?',
       [userId],
     );
