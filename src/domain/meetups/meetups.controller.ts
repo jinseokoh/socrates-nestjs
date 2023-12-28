@@ -90,7 +90,7 @@ export class MeetupsController {
       'usersLiked',
       'usersLiked.user',
       'usersLiked.user.profile',
-      'usersDisliked',
+      'usersReported',
       // 'rooms',
       'joins',
       'joins.askingUser',
