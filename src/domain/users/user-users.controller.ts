@@ -69,12 +69,12 @@ export class UserUsersController {
 
   @ApiOperation({ description: '보낸 친구신청 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/friendship-senders')
+  @Get(':userId/friendship-sent')
   async getFriendshipSenders(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
-    const { data, meta, links } = await this.usersService.getFriendshipSenders(
+    const { data, meta, links } = await this.usersService.getFriendshipSent(
       userId,
       query,
     );
@@ -88,13 +88,15 @@ export class UserUsersController {
 
   @ApiOperation({ description: '받은 친구신청 리스트' })
   @PaginateQueryOptions()
-  @Get(':userId/friendship-recipients')
+  @Get(':userId/friendship-received')
   async getFriendshipRecipients(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
-    const { data, meta, links } =
-      await this.usersService.getFriendshipRecipients(userId, query);
+    const { data, meta, links } = await this.usersService.getFriendshipReceived(
+      userId,
+      query,
+    );
 
     return {
       data: data,

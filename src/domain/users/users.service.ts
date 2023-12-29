@@ -1590,7 +1590,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
   }
 
   // 신청(request)한 예비친구 리스트
-  async getFriendshipSenders(
+  async getFriendshipSent(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
@@ -1599,8 +1599,8 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .innerJoinAndSelect('friendship.sender', 'sender')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .where({
-        joinStatus: JoinStatus.ACCEPTED,
-        recipientId: userId,
+        // status: JoinStatus.ACCEPTED,
+        senderId: userId,
       });
 
     const config: PaginateConfig<Friendship> = {
@@ -1615,7 +1615,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
   }
 
   // 신청(request)한 예비친구 리스트
-  async getFriendshipRecipients(
+  async getFriendshipReceived(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
@@ -1624,8 +1624,8 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .innerJoinAndSelect('friendship.sender', 'sender')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .where({
-        joinStatus: JoinStatus.ACCEPTED,
-        senderId: userId,
+        // status: JoinStatus.ACCEPTED,
+        recipientId: userId,
       });
 
     const config: PaginateConfig<Friendship> = {
