@@ -7,6 +7,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,15 +15,93 @@ import { ApiOperation } from '@nestjs/swagger';
 import { UsersService } from 'src/domain/users/users.service';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Hate } from 'src/domain/users/entities/hate.entity';
+import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { ReportUser } from 'src/domain/users/entities/report_user.entity';
-import { AnyData } from 'src/common/types';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
+import { AnyData } from 'src/common/types';
+import { JoinStatus } from 'src/common/enums';
+import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UserUsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  //?-------------------------------------------------------------------------//
+  //? Friendship Pivot
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '친구신청 리스트에 추가' })
+  @PaginateQueryOptions()
+  @Post(':senderId/friendship/:recipientId')
+  async attachToFriendshipPivot(
+    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
+  ): Promise<AnyData> {
+    await this.usersService.attachToFriendshipPivot(senderId, recipientId);
+    return {
+      data: 'ok',
+    };
+  }
+
+  @ApiOperation({ description: '친구신청 승인/거부' })
+  @PaginateQueryOptions()
+  @Patch(':senderId/friendship/:recipientId')
+  async updateFriendshipToAcceptOrDeny(
+    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
+    @Body('status') status: JoinStatus, // optional message, and skill
+  ): Promise<AnyData> {
+    try {
+      await this.usersService.updateFriendshipWithStatus(
+        senderId,
+        recipientId,
+        status,
+      );
+      return {
+        data: 'ok',
+      };
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
+
+  @ApiOperation({ description: '보낸 친구신청 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/friendship-senders')
+  async getFriendshipSenders(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Friendship>> {
+    const { data, meta, links } = await this.usersService.getFriendshipSenders(
+      userId,
+      query,
+    );
+
+    return {
+      data: data,
+      meta: meta,
+      links: links,
+    };
+  }
+
+  @ApiOperation({ description: '받은 친구신청 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/friendship-recipients')
+  async getFriendshipRecipients(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Friendship>> {
+    const { data, meta, links } =
+      await this.usersService.getFriendshipRecipients(userId, query);
+
+    return {
+      data: data,
+      meta: meta,
+      links: links,
+    };
+  }
 
   //?-------------------------------------------------------------------------//
   //? Hate Pivot

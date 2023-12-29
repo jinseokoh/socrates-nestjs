@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { JoinStatus, JoinType } from 'src/common/enums';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { JoinStatus } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,

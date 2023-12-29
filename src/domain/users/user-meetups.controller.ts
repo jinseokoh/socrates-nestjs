@@ -17,7 +17,6 @@ import { AnyData } from 'src/common/types';
 import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { JoinStatus, JoinType } from 'src/common/enums';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
@@ -116,12 +115,12 @@ export class UserMeetupsController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Dislike Pivot
+  //? MeetupReport Pivot
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '나의 블락 리스트에 추가' })
   @Post(':userId/meetups-reported/:meetupId')
-  async attachToDislikePivot(
+  async attachToMeetupReportPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body('message') message: string,
@@ -183,7 +182,7 @@ export class UserMeetupsController {
   @ApiOperation({ description: '내가 블락한 모임ID 리스트' })
   @PaginateQueryOptions()
   @Get(':userId/meetupids-reported')
-  async getMeetupIdsDislikedByMe(
+  async getMeetupIdsReportdByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
     return this.usersService.getMeetupIdsReportedByMe(userId);

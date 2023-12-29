@@ -7,9 +7,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
-import { Join } from 'src/domain/meetups/entities/join.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
 import { User } from 'src/domain/users/entities/user.entity';
 

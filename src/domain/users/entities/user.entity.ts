@@ -33,6 +33,7 @@ import { Remark } from 'src/domain/connections/entities/remark.entity';
 import { Dot } from 'src/domain/connections/entities/dot.entity';
 import { ReportConnection } from 'src/domain/connections/entities/report_connection.entity';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
+import { Friendship } from 'src/domain/users/entities/friendship.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -177,6 +178,12 @@ export class User {
   @OneToMany(() => ReportUser, (reportUser) => reportUser.accusedUser)
   public accusedReports: ReportUser[];
 
+  @OneToMany(() => Friendship, (friendship) => friendship.sender)
+  public friendshipSenders: Friendship[];
+
+  @OneToMany(() => Friendship, (friendship) => friendship.recipient)
+  public friendshipRecipients: Friendship[];
+
   @OneToMany(() => Room, (room) => room.user)
   public rooms: Room[];
 
@@ -189,6 +196,18 @@ export class User {
   @OneToMany(() => Interest, (interest) => interest.user)
   public categoriesInterested: Interest[];
 
+  @OneToMany(() => Connection, (connection) => connection.user)
+  public connections: Connection[];
+
+  @OneToMany(() => Connection, (connection) => connection.user)
+  public connectionsReacted: Reaction[];
+
+  @OneToMany(
+    () => ReportConnection,
+    (reportConnection) => reportConnection.user,
+  )
+  public connectionsReported: ReportConnection[];
+
   @OneToMany(() => Impression, (impression) => impression.user)
   public impressions: Impression[];
 
@@ -197,15 +216,6 @@ export class User {
 
   @OneToMany(() => Comment, (comment) => comment.user)
   public comments: Comment[];
-
-  @OneToMany(() => Connection, (connection) => connection.user)
-  public connections: Connection[];
-
-  @OneToMany(() => Connection, (connection) => connection.user)
-  public connectionsReacted: Reaction[];
-
-  @OneToMany(() => ReportConnection, (ReportConnection) => ReportConnection.user)
-  public connectionsReported: ReportConnection[];
 
   @OneToMany(() => Remark, (remark) => remark.user)
   public remarks: Remark[];

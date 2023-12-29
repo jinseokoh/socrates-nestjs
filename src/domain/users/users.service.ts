@@ -1,4 +1,3 @@
-import { GetReactionsDto } from 'src/domain/users/dto/get-reactions.dto';
 import {
   BadRequestException,
   ForbiddenException,
@@ -65,6 +64,7 @@ import { SesService } from 'src/services/aws/ses.service';
 import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
+import { Friendship } from 'src/domain/users/entities/friendship.entity';
 
 @Injectable()
 export class UsersService {
@@ -84,22 +84,24 @@ export class UsersService {
     private readonly secretRepository: Repository<Secret>,
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
-    @InjectRepository(Like)
-    private readonly likeRepository: Repository<Like>,
-    @InjectRepository(ReportMeetup)
-    private readonly reportMeetupRepository: Repository<ReportMeetup>,
     @InjectRepository(Connection)
     private readonly connectionRepository: Repository<Connection>,
     @InjectRepository(Reaction)
     private readonly reactionRepository: Repository<Reaction>,
-    @InjectRepository(ReportConnection)
-    private readonly reportConnectionRepository: Repository<ReportConnection>,
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
-    @InjectRepository(ReportUser)
-    private readonly reportUserRepository: Repository<ReportUser>,
+    @InjectRepository(Like)
+    private readonly likeRepository: Repository<Like>,
     @InjectRepository(Join)
     private readonly joinRepository: Repository<Join>,
+    @InjectRepository(Friendship)
+    private readonly friendshipRepository: Repository<Friendship>,
+    @InjectRepository(ReportMeetup)
+    private readonly reportMeetupRepository: Repository<ReportMeetup>,
+    @InjectRepository(ReportConnection)
+    private readonly reportConnectionRepository: Repository<ReportConnection>,
+    @InjectRepository(ReportUser)
+    private readonly reportUserRepository: Repository<ReportUser>,
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     @Inject(SmsClient) private readonly smsClient: SmsClient, // naver
@@ -1256,11 +1258,7 @@ GROUP BY userId HAVING userId = ?',
       [userId, meetupId, message],
     );
     if (affectedRows > 0) {
-      await this.meetupRepository.increment(
-        { id: meetupId },
-        'reportCount',
-        1,
-      );
+      await this.meetupRepository.increment({ id: meetupId }, 'reportCount', 1);
     }
   }
 
@@ -1374,6 +1372,7 @@ GROUP BY userId HAVING userId = ?',
       [status, askingUserId, askedUserId, meetupId],
     );
 
+    //? room record 생성
     if (status === JoinStatus.ACCEPTED) {
       if (joinType === JoinType.REQUEST) {
         // 모임 신청 (add askingUserId to `room`)
@@ -1548,6 +1547,93 @@ WHERE `joinType` = ? AND `user`.id = ?',
       filterableColumns: {
         status: [FilterOperator.EQ],
       },
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? friendship
+  //?-------------------------------------------------------------------------//
+
+  // 친구신청 리스트에 추가
+  async attachToFriendshipPivot(
+    senderId: number,
+    recipientId: number,
+    message = '친구 신청합니다.',
+  ): Promise<void> {
+    // check if the recipient exists
+    await this.repository.findOneOrFail({
+      where: { id: recipientId },
+    });
+
+    try {
+      await this.repository.manager.query(
+        'INSERT IGNORE INTO `friendship` (senderId, recipientId, message) VALUES (?, ?, ?)',
+        [senderId, recipientId, message],
+      );
+    } catch (e) {
+      throw new BadRequestException('database has gone crazy.');
+    }
+  }
+
+  // 친구신청 승인/거부
+  async updateFriendshipWithStatus(
+    senderId: number,
+    recipientId: number,
+    status: JoinStatus,
+  ): Promise<void> {
+    await this.repository.manager.query(
+      'UPDATE `friendship` SET status = ? WHERE senderId = ? AND recipientId = ?',
+      [status, senderId, recipientId],
+    );
+  }
+
+  // 신청(request)한 예비친구 리스트
+  async getFriendshipSenders(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Friendship>> {
+    const queryBuilder = this.friendshipRepository
+      .createQueryBuilder('friendship')
+      .innerJoinAndSelect('friendship.sender', 'sender')
+      .innerJoinAndSelect('friendship.recipient', 'recipient')
+      .where({
+        joinStatus: JoinStatus.ACCEPTED,
+        recipientId: userId,
+      });
+
+    const config: PaginateConfig<Friendship> = {
+      sortableColumns: ['createdAt'],
+      searchableColumns: ['message'],
+      defaultLimit: 20,
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 신청(request)한 예비친구 리스트
+  async getFriendshipRecipients(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Friendship>> {
+    const queryBuilder = this.friendshipRepository
+      .createQueryBuilder('friendship')
+      .innerJoinAndSelect('friendship.sender', 'sender')
+      .innerJoinAndSelect('friendship.recipient', 'recipient')
+      .where({
+        joinStatus: JoinStatus.ACCEPTED,
+        senderId: userId,
+      });
+
+    const config: PaginateConfig<Friendship> = {
+      sortableColumns: ['createdAt'],
+      searchableColumns: ['message'],
+      defaultLimit: 20,
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {},
     };
 
     return await paginate(query, queryBuilder, config);
