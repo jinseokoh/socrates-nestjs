@@ -21,6 +21,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
 import { JoinStatus } from 'src/common/enums';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
+import { CreateFriendRequestDto } from 'src/domain/users/dto/create-friend-request.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -38,8 +39,9 @@ export class UserUsersController {
   async attachToFriendshipPivot(
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
+    @Body() dto: CreateFriendRequestDto,
   ): Promise<AnyData> {
-    await this.usersService.attachToFriendshipPivot(senderId, recipientId);
+    await this.usersService.attachToFriendshipPivot(senderId, recipientId, dto);
     return {
       data: 'ok',
     };

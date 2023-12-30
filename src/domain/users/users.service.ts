@@ -65,6 +65,7 @@ import { S3Service } from 'src/services/aws/s3.service';
 import { CrawlerService } from 'src/services/crawler/crawler.service';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
+import { CreateFriendRequestDto } from 'src/domain/users/dto/create-friend-request.dto';
 
 @Injectable()
 export class UsersService {
@@ -311,9 +312,10 @@ GROUP BY userId HAVING userId = ?',
 
   //? User 닉네임 갱신
   //? 코인 비용이 발생할 수 있음.
-  //! balance will be adjusted w/ model event subscriber.
+  //! balance will be adjusted w/ ledger model event subscriber.
   //! using transaction using query runner
   async changeUsername(id: number, dto: ChangeUsernameDto): Promise<number> {
+    let newBalance = 0;
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -324,7 +326,6 @@ GROUP BY userId HAVING userId = ?',
       where: { id: id },
       relations: [`profile`],
     });
-    const newBalance = user.profile?.balance - dto.costToUpdate;
     await queryRunner.startTransaction();
     try {
       if (count > 0) {
@@ -343,11 +344,12 @@ GROUP BY userId HAVING userId = ?',
         throw new BadRequestException(`insufficient balance`);
       }
       if (dto.costToUpdate > 0) {
+        newBalance = user.profile?.balance - dto.costToUpdate;
         const ledger = new Ledger({
           credit: dto.costToUpdate,
           ledgerType: LedgerType.CREDIT_SPEND,
           balance: newBalance,
-          note: `사용자명 변경료 (user #${id})`,
+          note: `사용자명 변경요금 (user #${id})`,
           userId: id,
         });
         await queryRunner.manager.save(ledger);
@@ -1556,25 +1558,68 @@ WHERE `joinType` = ? AND `user`.id = ?',
   //? friendship
   //?-------------------------------------------------------------------------//
 
-  // 친구신청 리스트에 추가
+  //? 친구신청 리스트에 추가
+  //? 코인 비용이 발생할 수 있음.
+  //! balance will be adjusted w/ ledger model event subscriber.
+  //! using transaction using query runner
   async attachToFriendshipPivot(
     senderId: number,
     recipientId: number,
-    message = '친구 신청합니다.',
-  ): Promise<void> {
-    // check if the recipient exists
-    await this.repository.findOneOrFail({
+    dto: CreateFriendRequestDto,
+  ): Promise<number> {
+    let newBalance = 0;
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+    const count = await queryRunner.manager.count(User, {
       where: { id: recipientId },
     });
+    const user = await queryRunner.manager.findOne(User, {
+      where: { id: senderId },
+      relations: [`profile`],
+    });
+    await queryRunner.startTransaction();
 
     try {
-      await this.repository.manager.query(
+      if (count < 1) {
+        throw new UnprocessableEntityException(`recipient is not found`);
+      }
+      if (!user) {
+        throw new NotFoundException(`sender is not found`);
+      }
+      if (user?.isBanned) {
+        throw new UnprocessableEntityException(`the user is banned`);
+      }
+      if (
+        user.profile?.balance === null ||
+        user.profile?.balance - dto.costToUpdate < 0
+      ) {
+        throw new BadRequestException(`insufficient balance`);
+      }
+      if (dto.costToUpdate > 0) {
+        newBalance = user.profile?.balance - dto.costToUpdate;
+        const ledger = new Ledger({
+          credit: dto.costToUpdate,
+          ledgerType: LedgerType.CREDIT_SPEND,
+          balance: newBalance,
+          note: `친구신청요금 (user #${senderId})`,
+          userId: senderId,
+        });
+        await queryRunner.manager.save(ledger);
+      }
+      await queryRunner.manager.query(
         'INSERT IGNORE INTO `friendship` (senderId, recipientId, message) VALUES (?, ?, ?)',
-        [senderId, recipientId, message],
+        [senderId, recipientId, dto.message],
       );
-    } catch (e) {
-      throw new BadRequestException('database has gone crazy.');
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
+    return newBalance;
   }
 
   // 친구신청 승인/거부
