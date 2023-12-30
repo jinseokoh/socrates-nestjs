@@ -60,7 +60,6 @@ import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-s
     ]),
     SesModule,
     S3Module,
-    CrawlerModule,
     FcmModule,
   ],
   exports: [UsersService],

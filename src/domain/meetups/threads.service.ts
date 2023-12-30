@@ -34,7 +34,8 @@ export class ThreadsService {
   async create(dto: CreateThreadDto): Promise<Thread> {
     // creation
     const thread = await this.repository.save(this.repository.create(dto));
-    // fetch thread w/ user to emit SSE
+
+    //? 푸시노티 push notification
     const threadWithUser = await this.findById(thread.id, [
       'user',
       'meetup',
@@ -42,6 +43,7 @@ export class ThreadsService {
     ]);
     console.log('threadWithUser', threadWithUser);
 
+    //? 푸시노티 push notification
     const fbToken = threadWithUser.meetup.user.pushToken;
     const notification = {
       title: 'MeSo',

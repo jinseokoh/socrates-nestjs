@@ -29,15 +29,12 @@ import {
 import { AnyData, SignedUrl } from 'src/common/types';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
-import { DailyFortuneDto } from 'src/domain/users/dto/daily-fortune.dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
-import { LoveFortuneDto } from 'src/domain/users/dto/love-fortune.dto';
 import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
-import { YearlyFortuneDto } from 'src/domain/users/dto/yearly-fortune.dto';
 import { ConfigService } from '@nestjs/config';
 import { Brackets, DataSource, FindOneOptions, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
@@ -62,10 +59,10 @@ import { randomName } from 'src/helpers/random-filename';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SesService } from 'src/services/aws/ses.service';
 import { S3Service } from 'src/services/aws/s3.service';
-import { CrawlerService } from 'src/services/crawler/crawler.service';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { CreateFriendRequestDto } from 'src/domain/users/dto/create-friend-request.dto';
+import { FcmService } from 'src/services/fcm/fcm.service';
 
 @Injectable()
 export class UsersService {
@@ -108,7 +105,7 @@ export class UsersService {
     @Inject(SmsClient) private readonly smsClient: SmsClient, // naver
     private readonly sesService: SesService,
     private readonly s3Service: S3Service,
-    private readonly crawlerService: CrawlerService,
+    private readonly fcmService: FcmService,
     private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
@@ -343,8 +340,8 @@ GROUP BY userId HAVING userId = ?',
       ) {
         throw new BadRequestException(`insufficient balance`);
       }
+      newBalance = user.profile?.balance - dto.costToUpdate;
       if (dto.costToUpdate > 0) {
-        newBalance = user.profile?.balance - dto.costToUpdate;
         const ledger = new Ledger({
           credit: dto.costToUpdate,
           ledgerType: LedgerType.CREDIT_SPEND,
@@ -1597,8 +1594,8 @@ WHERE `joinType` = ? AND `user`.id = ?',
       ) {
         throw new BadRequestException(`insufficient balance`);
       }
+      newBalance = user.profile?.balance - dto.costToUpdate;
       if (dto.costToUpdate > 0) {
-        newBalance = user.profile?.balance - dto.costToUpdate;
         const ledger = new Ledger({
           credit: dto.costToUpdate,
           ledgerType: LedgerType.CREDIT_SPEND,
@@ -1632,6 +1629,19 @@ WHERE `joinType` = ? AND `user`.id = ?',
       'UPDATE `friendship` SET status = ? WHERE senderId = ? AND recipientId = ?',
       [status, senderId, recipientId],
     );
+
+    if (status === JoinStatus.ACCEPTED) {
+      //? 푸시노티 push notification
+      const sender = await this.findById(senderId);
+      if (sender.pushToken) {
+        const fbToken = sender.pushToken;
+        const notification = {
+          title: 'MeSo',
+          body: '상대방이 나의 친구신청을 승락했습니다.',
+        };
+        this.fcmService.sendToToken(fbToken, notification);
+      }
+    }
   }
 
   // 신청(request)한 예비친구 리스트
@@ -1688,18 +1698,18 @@ WHERE `joinType` = ? AND `user`.id = ?',
   //? 신한운세
   //?-------------------------------------------------------------------------//
 
-  // 올해의 운세보기
-  async askYearly(dto: YearlyFortuneDto): Promise<any> {
-    return await this.crawlerService.askYearly(dto);
-  }
+  // // 올해의 운세보기
+  // async askYearly(dto: YearlyFortuneDto): Promise<any> {
+  //   return await this.crawlerService.askYearly(dto);
+  // }
 
-  // 오늘의 운세보기
-  async askDaily(dto: DailyFortuneDto): Promise<any> {
-    return await this.crawlerService.askDaily(dto);
-  }
+  // // 오늘의 운세보기
+  // async askDaily(dto: DailyFortuneDto): Promise<any> {
+  //   return await this.crawlerService.askDaily(dto);
+  // }
 
-  // 궁합보기
-  async askLove(dto: LoveFortuneDto): Promise<any> {
-    return await this.crawlerService.askLove(dto);
-  }
+  // // 궁합보기
+  // async askLove(dto: LoveFortuneDto): Promise<any> {
+  //   return await this.crawlerService.askLove(dto);
+  // }
 }

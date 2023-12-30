@@ -41,9 +41,13 @@ export class UserUsersController {
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body() dto: CreateFriendRequestDto,
   ): Promise<AnyData> {
-    await this.usersService.attachToFriendshipPivot(senderId, recipientId, dto);
+    const balance = await this.usersService.attachToFriendshipPivot(
+      senderId,
+      recipientId,
+      dto,
+    );
     return {
-      data: 'ok',
+      data: balance,
     };
   }
 
