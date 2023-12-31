@@ -1578,6 +1578,10 @@ WHERE `joinType` = ? AND `user`.id = ?',
     });
     await queryRunner.startTransaction();
 
+    // todo. already sent
+    // todo. already received
+    // todo. already in the hater list
+
     try {
       if (count < 1) {
         throw new UnprocessableEntityException(`recipient is not found`);
