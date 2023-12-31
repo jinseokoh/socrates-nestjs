@@ -117,29 +117,6 @@ export class UsersController {
     };
   }
 
-  @ApiOperation({ description: '신한사주 올해의 운세' })
-  @HttpCode(HttpStatus.OK)
-  @Post('yearly')
-  async askYearly(
-    @Body(YearlyFortunePipe) dto: YearlyFortuneDto,
-  ): Promise<any> {
-    return await this.usersService.askYearly(dto);
-  }
-
-  @ApiOperation({ description: '신한사주 오늘의 운세' })
-  @HttpCode(HttpStatus.OK)
-  @Post('daily')
-  async askDaily(@Body(DailyFortunePipe) dto: DailyFortuneDto): Promise<any> {
-    return await this.usersService.askDaily(dto);
-  }
-
-  @ApiOperation({ description: '신한궁합' })
-  @HttpCode(HttpStatus.OK)
-  @Post('love')
-  async askLove(@Body(LoveFortunePipe) dto: LoveFortuneDto): Promise<any> {
-    return await this.usersService.askLove(dto);
-  }
-
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//
@@ -257,4 +234,27 @@ export class UsersController {
       content: dto.body,
     });
   }
+
+  // @ApiOperation({ description: '신한사주 올해의 운세' })
+  // @HttpCode(HttpStatus.OK)
+  // @Post('yearly')
+  // async askYearly(
+  //   @Body(YearlyFortunePipe) dto: YearlyFortuneDto,
+  // ): Promise<any> {
+  //   return await this.usersService.askYearly(dto);
+  // }
+
+  // @ApiOperation({ description: '신한사주 오늘의 운세' })
+  // @HttpCode(HttpStatus.OK)
+  // @Post('daily')
+  // async askDaily(@Body(DailyFortunePipe) dto: DailyFortuneDto): Promise<any> {
+  //   return await this.usersService.askDaily(dto);
+  // }
+
+  // @ApiOperation({ description: '신한궁합' })
+  // @HttpCode(HttpStatus.OK)
+  // @Post('love')
+  // async askLove(@Body(LoveFortunePipe) dto: LoveFortuneDto): Promise<any> {
+  //   return await this.usersService.askLove(dto);
+  // }
 }
