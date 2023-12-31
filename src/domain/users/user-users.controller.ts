@@ -112,7 +112,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '내가 친구신청 중인 ID 리스트' })
-  @Get(':userId/friendsids')
+  @Get(':userId/friendship-pending')
   async getAllFriendIdsPending(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
@@ -120,7 +120,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '내 친구 ID 리스트' })
-  @Get(':userId/friendsids')
+  @Get(':userId/friend-ids')
   async getFriendIds(@Param('userId') userId: number): Promise<AnyData> {
     return this.usersService.getAllFriendIds(userId);
   }
