@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -112,11 +113,12 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '내가 친구신청 중인 ID 리스트' })
-  @Get(':userId/friend-ids-pending')
+  @Get(':userId/friend-ids-status')
   async getAllFriendIdsPending(
     @Param('userId') userId: number,
+    @Query('status') status: string | undefined,
   ): Promise<AnyData> {
-    return this.usersService.getAllFriendIdsPending(userId);
+    return this.usersService.getFriendIdsWithStatus(userId, status);
   }
 
   @ApiOperation({ description: '내 친구 ID 리스트' })

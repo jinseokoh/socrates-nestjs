@@ -166,10 +166,10 @@ export class User {
   @OneToMany(() => Join, (join) => join.askedUser)
   public askedJoins: Join[];
 
-  @OneToMany(() => Hate, (hate) => hate.hatingUser)
+  @OneToMany(() => Hate, (hate) => hate.sender)
   public usersHating: Hate[];
 
-  @OneToMany(() => Hate, (hate) => hate.hatedUser)
+  @OneToMany(() => Hate, (hate) => hate.recipient)
   public usersHated: Hate[];
 
   @OneToMany(() => ReportUser, (reportUser) => reportUser.user)

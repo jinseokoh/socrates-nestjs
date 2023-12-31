@@ -860,24 +860,24 @@ GROUP BY userId HAVING userId = ?',
 
   // 블락한 사용자 리스트에 추가
   async attachUserIdToHatePivot(
-    hatingUserId: number,
-    hatedUserId: number,
+    senderId: number,
+    recipientId: number,
     message: string,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `hate` (hatingUserId, hatedUserId, message) VALUES (?, ?, ?)',
-      [hatingUserId, hatedUserId, message],
+      'INSERT IGNORE INTO `hate` (senderId, recipientId, message) VALUES (?, ?, ?)',
+      [senderId, recipientId, message],
     );
   }
 
   // 블락한 사용자 리스트에서 삭제
   async detachUserIdFromHatePivot(
-    hatingUserId: number,
-    hatedUserId: number,
+    senderId: number,
+    recipientId: number,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `hate` WHERE hatingUserId = ? AND hatedUserId = ?',
-      [hatingUserId, hatedUserId],
+      'DELETE FROM `hate` WHERE senderId = ? AND recipientId = ?',
+      [senderId, recipientId],
     );
   }
 
@@ -888,17 +888,17 @@ GROUP BY userId HAVING userId = ?',
   ): Promise<Paginated<Hate>> {
     const queryBuilder = this.hateRepository
       .createQueryBuilder('hate')
-      .innerJoinAndSelect('hate.hatedUser', 'user')
+      .innerJoinAndSelect('hate.recipient', 'user')
       .innerJoinAndSelect('user.profile', 'profile')
       .where({
-        hatingUserId: userId,
+        senderId: userId,
       });
 
     const config: PaginateConfig<Hate> = {
-      sortableColumns: ['hatedUserId'],
+      sortableColumns: ['recipientId'],
       searchableColumns: ['message'],
       defaultLimit: 20,
-      defaultSortBy: [['hatedUserId', 'ASC']],
+      defaultSortBy: [['recipientId', 'ASC']],
       filterableColumns: {},
     };
 
@@ -908,21 +908,21 @@ GROUP BY userId HAVING userId = ?',
   // 내가 블락하거나 나를 블락한 ids
   async getUserIdsEitherHatingOrBeingHated(userId: number): Promise<AnyData> {
     const rows = await this.repository.manager.query(
-      'SELECT hatingUserId, hatedUserId \
+      'SELECT senderId, recipientId \
       FROM `hate` \
-      WHERE hatingUserId = ? OR hatedUserId = ?',
+      WHERE senderId = ? OR recipientId = ?',
       [userId, userId],
     );
 
     const data = rows.map((v) => {
-      return v.hatingUserId === userId ? v.hatedUserId : v.hatingUserId;
+      return v.senderId === userId ? v.recipientId : v.senderId;
     });
 
     return { data: [...new Set(data)] };
   }
 
   //?-------------------------------------------------------------------------//
-  //? 신고 (Report)
+  //? 신고 (ReportUser)
   //?-------------------------------------------------------------------------//
 
   // 블락한 사용자 리스트에 추가
@@ -1569,8 +1569,11 @@ WHERE `joinType` = ? AND `user`.id = ?',
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
 
-    const count = await queryRunner.manager.count(User, {
-      where: { id: recipientId },
+    const friendshipCount = await queryRunner.manager.count(Friendship, {
+      where: [
+        { senderId: senderId, recipientId: recipientId },
+        { senderId: recipientId, recipientId: senderId },
+      ],
     });
     const user = await queryRunner.manager.findOne(User, {
       where: { id: senderId },
@@ -1578,16 +1581,14 @@ WHERE `joinType` = ? AND `user`.id = ?',
     });
     await queryRunner.startTransaction();
 
-    // todo. already sent
-    // todo. already received
-    // todo. already in the hater list
+    //! in case of hated(blocked) user, we need to ignore after writing the request.
 
     try {
-      if (count < 1) {
-        throw new UnprocessableEntityException(`recipient is not found`);
+      if (friendshipCount > 0) {
+        throw new UnprocessableEntityException(`entity already exists`);
       }
       if (!user) {
-        throw new NotFoundException(`sender is not found`);
+        throw new NotFoundException(`the user is not found`);
       }
       if (user?.isBanned) {
         throw new UnprocessableEntityException(`the user is banned`);
@@ -1699,29 +1700,23 @@ WHERE `joinType` = ? AND `user`.id = ?',
   }
 
   // 내 친구 (보낸 신청이 승인되거나 받은 신청을 승인한 경우 ids
-  async getAllFriendIds(userId: number, status = 'accepted'): Promise<AnyData> {
-    const rows = await this.repository.manager.query(
-      'SELECT senderId, recipientId \
-      FROM `friendship` \
-      WHERE status = ? AND (senderId = ? OR recipientId = ?)',
-      [status, userId, userId],
-    );
-
-    const data = rows.map((v) => {
-      return v.senderId === userId ? v.recipientId : v.senderId;
-    });
-
-    return { data: [...new Set(data)] };
-  }
-
-  // 내 친구 (보낸 신청이 승인되거나 받은 신청을 승인한 경우 ids
-  async getAllFriendIdsPending(userId: number): Promise<AnyData> {
-    const rows = await this.repository.manager.query(
-      'SELECT senderId, recipientId \
+  async getFriendIdsWithStatus(
+    userId: number,
+    status = null,
+  ): Promise<AnyData> {
+    const rows = !status
+      ? await this.repository.manager.query(
+          'SELECT senderId, recipientId \
       FROM `friendship` \
       WHERE status IS null AND (senderId = ? OR recipientId = ?)',
-      [userId, userId],
-    );
+          [userId, userId],
+        )
+      : await this.repository.manager.query(
+          'SELECT senderId, recipientId \
+      FROM `friendship` \
+      WHERE status = ? AND (senderId = ? OR recipientId = ?)',
+          [status, userId, userId],
+        );
 
     const data = rows.map((v) => {
       return v.senderId === userId ? v.recipientId : v.senderId;
@@ -1731,7 +1726,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
   }
 
   // 내 친구 (보낸 신청이 승인되거나 받은 신청을 승인한 경우 ids
-  async getAllFriendships(userId: number): Promise<AnyData> {
+  async getAllFriendIds(userId: number): Promise<AnyData> {
     const rows = await this.repository.manager.query(
       'SELECT senderId, recipientId \
       FROM `friendship` \
