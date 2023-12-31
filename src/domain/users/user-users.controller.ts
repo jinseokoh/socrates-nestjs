@@ -111,6 +111,20 @@ export class UserUsersController {
     };
   }
 
+  @ApiOperation({ description: '내가 친구신청 중인 ID 리스트' })
+  @Get(':userId/friendsids')
+  async getAllFriendIdsPending(
+    @Param('userId') userId: number,
+  ): Promise<AnyData> {
+    return this.usersService.getAllFriendIdsPending(userId);
+  }
+
+  @ApiOperation({ description: '내 친구 ID 리스트' })
+  @Get(':userId/friendsids')
+  async getFriendIds(@Param('userId') userId: number): Promise<AnyData> {
+    return this.usersService.getAllFriendIds(userId);
+  }
+
   //?-------------------------------------------------------------------------//
   //? Hate Pivot
   //?-------------------------------------------------------------------------//

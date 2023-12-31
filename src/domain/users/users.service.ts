@@ -1694,6 +1694,54 @@ WHERE `joinType` = ? AND `user`.id = ?',
     return await paginate(query, queryBuilder, config);
   }
 
+  // 내 친구 (보낸 신청이 승인되거나 받은 신청을 승인한 경우 ids
+  async getAllFriendIds(userId: number, status = 'accepted'): Promise<AnyData> {
+    const rows = await this.repository.manager.query(
+      'SELECT senderId, recipientId \
+      FROM `friendship` \
+      WHERE status = ? AND (senderId = ? OR recipientId = ?)',
+      [status, userId, userId],
+    );
+
+    const data = rows.map((v) => {
+      return v.senderId === userId ? v.recipientId : v.senderId;
+    });
+
+    return { data: [...new Set(data)] };
+  }
+
+  // 내 친구 (보낸 신청이 승인되거나 받은 신청을 승인한 경우 ids
+  async getAllFriendIdsPending(userId: number): Promise<AnyData> {
+    const rows = await this.repository.manager.query(
+      'SELECT senderId, recipientId \
+      FROM `friendship` \
+      WHERE status IS null AND (senderId = ? OR recipientId = ?)',
+      [userId, userId],
+    );
+
+    const data = rows.map((v) => {
+      return v.senderId === userId ? v.recipientId : v.senderId;
+    });
+
+    return { data: [...new Set(data)] };
+  }
+
+  // 내 친구 (보낸 신청이 승인되거나 받은 신청을 승인한 경우 ids
+  async getAllFriendships(userId: number): Promise<AnyData> {
+    const rows = await this.repository.manager.query(
+      'SELECT senderId, recipientId \
+      FROM `friendship` \
+      WHERE senderId = ? OR recipientId = ?',
+      [userId, userId],
+    );
+
+    const data = rows.map((v) => {
+      return v.senderId === userId ? v.recipientId : v.senderId;
+    });
+
+    return { data: [...new Set(data)] };
+  }
+
   //?-------------------------------------------------------------------------//
   //? 신한운세
   //?-------------------------------------------------------------------------//
