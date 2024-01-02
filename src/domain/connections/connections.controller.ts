@@ -59,16 +59,18 @@ export class ConnectionsController {
   async getConnectionById(@Param('id') id: number): Promise<Connection> {
     return await this.connectionsService.findById(id, [
       'dot',
-      'user',
       'remarks',
       'remarks.user',
       'usersReported',
       // 'usersReacted',
+      'user',
       'user.connections',
       'user.connections.dot',
       'user.connections.user',
       'user.connections.remarks',
       'user.connections.remarks.user',
+      'user.friendshipSent',
+      'user.friendshipReceived',
     ]);
   }
 

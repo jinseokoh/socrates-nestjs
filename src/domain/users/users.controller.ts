@@ -106,6 +106,8 @@ export class UsersController {
       'languageSkills',
       'languageSkills.language',
       'accusedReports',
+      'friendshipSent',
+      'friendshipReceived',
     ]);
   }
 

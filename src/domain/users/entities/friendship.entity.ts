@@ -29,7 +29,6 @@ export class Friendship {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })
   senderId: number | null; // to make it available to Repository.
 
@@ -41,7 +40,6 @@ export class Friendship {
   @JoinColumn({ name: 'senderId' })
   public sender!: User;
 
-  @Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })
   recipientId: number | null; // to make it available to Repository.
 

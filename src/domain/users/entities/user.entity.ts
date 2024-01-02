@@ -179,10 +179,10 @@ export class User {
   public accusedReports: ReportUser[];
 
   @OneToMany(() => Friendship, (friendship) => friendship.sender)
-  public friendshipSenders: Friendship[];
+  public friendshipSent: Friendship[];
 
   @OneToMany(() => Friendship, (friendship) => friendship.recipient)
-  public friendshipRecipients: Friendship[];
+  public friendshipReceived: Friendship[];
 
   @OneToMany(() => Room, (room) => room.user)
   public rooms: Room[];
