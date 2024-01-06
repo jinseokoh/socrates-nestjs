@@ -27,7 +27,7 @@ export class ConnectionsController {
   //? Create
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '나의 커넥션 리스트에 추가' })
+  @ApiOperation({ description: '커넥션 답변 추가' })
   @Post()
   async createConnection(
     @CurrentUserId() userId: number,

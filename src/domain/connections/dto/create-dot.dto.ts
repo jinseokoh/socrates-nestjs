@@ -4,7 +4,7 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateDotDto {
   @ApiProperty({ description: 'slug' })
   @IsString()
-  slug: string;
+  slug: string; // category slug
 
   @ApiProperty({ description: 'quesiton' })
   @IsString()

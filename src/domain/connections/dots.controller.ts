@@ -24,7 +24,7 @@ export class DotsController {
   //? Create
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '나의 커넥션 리스트에 추가' })
+  @ApiOperation({ description: '커넥션 질문 추가' })
   @Post()
   async createConnection(
     @CurrentUserId() userId: number,
