@@ -59,13 +59,7 @@ export class DotsService {
       new Dot({
         slug: 'angry',
         question:
-          '친구나 지인으로부터 상처를 크게 받은 갈등 상황이 있었다면 어떤 것이 있었나요? 그 이유는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'angry',
-        question:
-          '화가 나거나 스트레스를 받을때, 나를 진정시킬 수 있는 치유 방법에는 어떤 것이 있나요? 그 이유는?',
+          '가까운 지인으로부터 상처를 크게 받은 갈등 상황에 대해 이야기 해주실 수 있나요? 그 일로 얻은 교훈은?',
         isActive: true,
       }),
       new Dot({
@@ -83,19 +77,19 @@ export class DotsService {
       new Dot({
         slug: 'angry',
         question:
-          '당시에는 화를 냈었지만, 지나고 보니 오히려 내가 미안해졌다면 어떤 식으로 사과표현을 하는 것이 좋을까요? 그 이유는?',
+          '다른 사람의 행동 중에서 당신을 가장 화나게 하는 것은 무엇인가요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
         slug: 'angry',
         question:
-          '과거의 갈등으로 오랫동안 연락을 안했던 사람이, 만나자고 연락을 해온다면 어떻게 반응 할까요? 그 이유는?',
+          '과거의 갈등으로 연락두절한 사람이 연락을 해온다면, 만날까요? 아니면 무시할까요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
         slug: 'angry',
         question:
-          '화가 났을때 상대방에게 직설적으로 표현하는 편인가요? 아니며 표현하지 않는 편인가요? 그 이유는?',
+          '대다수의 사람과 나의 의견이 다르다면 내 소신을 분명히 밝히는 편인가요? 아니면 표현하지 않고 넘어가는 편인가요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
@@ -107,13 +101,19 @@ export class DotsService {
       new Dot({
         slug: 'angry',
         question:
-          '대다수의 사람과 의견이 다른 경우, 내 소신을 분명히 전하는 편인가요? 아니면 표현하지 않는 편인가요? 그 이유는?',
+          '화가 났을때 상대방에게 직설적으로 표현하는 편인가요? 아니면 잘 표현하지 않는 편인가요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
         slug: 'angry',
         question:
-          '룸메이트와 함께 산다고 가정한다면 상대의 어떤 생활습관이나 특징이 당신을 가장 거슬리게 할까요? 그 이유는?',
+          '룸메이트와 함께 산다고 가정한다면 상대방의 어떤 생활습관이나 특징이 당신을 가장 거슬리게 할까요? 그 이유는?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'angry',
+        question:
+          '화가 나거나 스트레스를 받을때, 진정시킬 수 있는 나만의 비법이 있다면 무엇인가요? 그 이유는?',
         isActive: true,
       }),
       //! 엉뚱
@@ -156,6 +156,12 @@ export class DotsService {
       new Dot({
         slug: 'yuck',
         question:
+          '만약 하루 동안만 성별이 바뀌는 기회가 주어진다면, 어떤 일을 경험해보고 싶나요? 그 이유는?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'yuck',
+        question:
           '당신의 미래에 대해 단 한가지를 물어볼 수 있는 마법의 구슬이 있다면, 어떤 질문을 하고 싶나요? 그 이유는?',
         isActive: true,
       }),
@@ -168,13 +174,7 @@ export class DotsService {
       new Dot({
         slug: 'yuck',
         question:
-          '지난 역사상 유명인물들 중 그 누구와도 대화를 나눌 수 있는 기회가 생긴다면, 누구를 초대하고 싶나요? 그 이유는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'yuck',
-        question:
-          '만약 하루 동안만 성별이 바뀌는 기회가 주어진다면, 어떤 일을 경험해보고 싶나요? 그 이유는?',
+          '지난 역사상 유명 인물들 중 그 누구와도 대화를 나눌 수 있는 기회가 생긴다면, 누구와 대화를 나누고 싶나요? 그 이유는?',
         isActive: true,
       }),
       //! 최애
@@ -199,7 +199,7 @@ export class DotsService {
       new Dot({
         slug: 'love',
         question:
-          '내가 가장 즐겨찾는 음식점이나 맛집을 꼽는다면 어디인가요? 그 이유는?',
+          '집·학교·직장을 제외하고 내가 가장 즐겨찾는 장소가 있다면, 어디인가요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
@@ -215,13 +215,13 @@ export class DotsService {
       new Dot({
         slug: 'love',
         question:
-          '내가 가장 좋아하는 스포츠 나 스포츠 팀은 무엇인가요? 그 이유는?',
+          '내가 가장 좋아하는 스포츠 혹은 스포츠 팀은 무엇인가요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
         slug: 'love',
         question:
-          '가장 좋아하고, 기억에 남는 TV프로그램이나 시리즈는 무엇이 있나요? 그 이유는?',
+          '가장 기억에 남는 TV 프로그램이나 시리즈는 무엇이 있나요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
@@ -240,7 +240,30 @@ export class DotsService {
       new Dot({
         slug: 'yes',
         question:
+          '최근에 친분을 쌓은 사람이 있다면 누구이며, 그 사람을 알게 된 계기는 무엇인가요?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'yes',
+        question:
           '최근에 나의 건강을 위해 새롭게 시작했거나 관심을 갖게 된 분야가 있다면 무엇인가요? 그 계기는?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'yes',
+        question: '최근에 관심을 갖게 된 취미활동은 무엇인가요? 그 계기는?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'yes',
+        question:
+          '최근에 관심갖기 시작한 재태크 혹은 경제활동이 있다면 무엇인가요? 그 계기는?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'yes',
+        question:
+          '최근에 좋아진 음식, 요리, 혹은 음료가 있다면 무엇인가요? 그 계기는?',
         isActive: true,
       }),
       new Dot({
@@ -252,13 +275,13 @@ export class DotsService {
       new Dot({
         slug: 'yes',
         question:
-          '최근에 발견한 좋아하는 책, 영화, 혹은 드라마가 있다면 무엇인가요? 그 이유는?',
+          '최근에 봤던 영화나 드라마 중에서 가장 기억에 남는 것은 무엇인가요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
         slug: 'yes',
         question:
-          '최근에 시작하거나 관심갖기 시작한 재태크 혹은 경제활동이 있다면 무엇인가요? 그 계기는?',
+          '최근에 발견했거나 읽었던 유익한 책이 있다면 무엇인가요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
@@ -270,30 +293,7 @@ export class DotsService {
       new Dot({
         slug: 'yes',
         question:
-          '최근에 좋아진 음식, 요리, 혹은 음료가 있다면 무엇인가요? 그 계기는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'yes',
-        question: '최근에 관심을 갖게 된 취미활동은 무엇인가요? 그 계기는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'yes',
-        question:
-          '최근에 친분을 쌓은 사람이 있다면 누구이며, 그 사람을 알게 된 계기는 무엇인가요?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'yes',
-        question:
           '최근에 쇼핑한 물건 중에 가장 마음에 드는 것은 무엇인가요? 그 이유는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'yes',
-        question:
-          '최근에 쇼핑한 물건 중에 가장 후회하는 것은 무엇인가요? 그 이유는?',
         isActive: true,
       }),
       //! 실수
@@ -301,12 +301,6 @@ export class DotsService {
         slug: 'no',
         question:
           '지금까지의 삶에서 가장 힘들거나 어려웠던 순간은 언제였나요? 그 이유는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'no',
-        question:
-          '지금은 담담하게 말할 수 있는 흑역사 하나를 털어놓는다면 무엇인가요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
@@ -336,12 +330,6 @@ export class DotsService {
       new Dot({
         slug: 'no',
         question:
-          '실수를 반복하지 않기위해 스스로 정한 규칙이나 자기관리 방법이 있나요? 그 계기는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'no',
-        question:
           '투자 등으로 경제적인 손해를 본 경험이 있었다면 무엇인가요? 그것이 나의 인생을 어떻게 변화시켰나요?',
         isActive: true,
       }),
@@ -354,7 +342,19 @@ export class DotsService {
       new Dot({
         slug: 'no',
         question:
-          '심경의 변화로 과거에 옳다고 믿던 일이 그렇지 않음을 깨달은 경험이 있다면 무엇인가요? 그 변화의 계기는?',
+          '심경의 변화로 과거에 옳다고 믿던 일이 현재 정반대로 여겨지는 경험이 있나요? 그 변화의 계기는 무엇인가요?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'no',
+        question:
+          '실수를 반복하지 않기위해 스스로 정한 규칙이나 자기관리 방법이 있나요? 그 계기는?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'no',
+        question:
+          '최근에 쇼핑한 물건 중에 가장 후회하는 것은 무엇인가요? 그 이유는?',
         isActive: true,
       }),
       //! 성취
@@ -372,19 +372,18 @@ export class DotsService {
       new Dot({
         slug: 'cool',
         question:
-          '성공적으로 이뤄낸 과제나 프로젝트가 있나요? 그 경험이 당신에게 어떤 영향을 미쳤나요?',
+          '내가 다른 사람들을 리드하여 성공적으로 결과를 이뤄낸 과제나 프로젝트가 있다면 무엇인가요?',
         isActive: true,
       }),
       new Dot({
         slug: 'cool',
         question:
-          '자신이 설정한 목표를 달성하고 그 경험에서 얻은 교훈은 무엇인가요?',
+          '스스로 결심한 목표를 달성한 경험에 대하여 이야기해줄 수 있나요? 그 경험에서 얻은 교훈은 무엇인가요?',
         isActive: true,
       }),
       new Dot({
         slug: 'cool',
-        question:
-          '당신의 노력으로 인해 다른 사람에게 영향을 미쳤거나 도움을 주었던 적이 있나요?',
+        question: '일상에서 느낄 수 있는',
         isActive: true,
       }),
       new Dot({
@@ -546,48 +545,49 @@ export class DotsService {
       }),
       new Dot({
         slug: 'pirate',
-        question: '인간관계에서 가장 중요한 것은 무엇이라고 생각하나요?',
+        question:
+          '인간관계에서 가장 중요한 것은 무엇이라고 생각하나요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
         slug: 'pirate',
         question:
-          '꼭 해보고 싶다고 염원해 왔지만 못해본 일 중 가장 아쉬운 건 무엇인가요?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'pirate',
-        question: '유명해지고 싶다면 어떤 분야에서 유명해 지고 싶나요?',
+          '꼭 해보고 싶다고 염원해 왔지만 못해본 일 중 가장 아쉬운 건 무엇인가요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
         slug: 'pirate',
         question:
-          '애인과 친구가 바람을 피웠다면 누구를 택할 것인가요? 그 이유는?',
+          '유명해지고 싶다면 어떤 분야에서 유명해 지고 싶나요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
         slug: 'pirate',
         question:
-          '비트코인, 주식, US달러, 미술작품 중 안전자산을 선택한다면? 그 이유는?',
+          '귀신이나, 초자연적 현상, 혹은 사후세계가 존재한다고 믿나요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
         slug: 'pirate',
         question:
-          '로봇과 AI 가 극도로 발전한 사회에서도 꾸준히 각광받을 직업군은 어떤 것이 있을까요?',
+          '비트코인, 주식, US달러, 귀금속, 예술품 중 안전자산을 선택한다면? 그 이유는?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'pirate',
+        question: '이 세상에서 가장 부러운 사람은 누구입니까? 그 이유는?',
         isActive: true,
       }),
       new Dot({
         slug: 'pirate',
         question:
-          '이것 하나만 충족된다면 나는 완벽할 것 같다. 이것은 무엇인가요?',
+          '가장 많이 울었던 영화는 무엇인가요? 어떤 장면이 감동적이였나요?',
         isActive: true,
       }),
       new Dot({
         slug: 'pirate',
         question:
-          '내가 이것을 소유하면 나의 성공의 상징이 될 것이다. 어것은 무엇인가요?',
+          '가장 과대평가된 유명인이 있다면 누굴 꼽을 수 있을까요? 그 이유는?',
         isActive: true,
       }),
       //! 소중
@@ -622,7 +622,8 @@ export class DotsService {
       }),
       new Dot({
         slug: 'wink',
-        question: '다른 사람한테는 없는 나의 장점 3가지를 말해주세요.',
+        question:
+          '내 이상형과 가장 비슷하거나 닮은꼴인 3명의 연애인 이름을 말해주세요.',
         isActive: true,
       }),
       new Dot({
@@ -633,13 +634,14 @@ export class DotsService {
       }),
       new Dot({
         slug: 'wink',
-        question: '누구와도 함께 즐길 수 있는 운동종목 3가지를 알려주세요.',
+        question:
+          '누구와 함께 하더라도 자신있게 즐길 수 있는 운동종목 3가지를 알려주세요.',
         isActive: true,
       }),
       new Dot({
         slug: 'wink',
         question:
-          '여가시간에 누구와도 함께 즐길 수 있는 취미활동 3가지를 알려주세요.',
+          '누구와 함께 하더라도 자신있게 즐길 수 있는 취미활동 3가지를 알려주세요.',
         isActive: true,
       }),
       new Dot({
@@ -652,25 +654,13 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         question:
-          '과학 연구를 위한 동물 실험에 대하여 나의 찬반 의견과 그 이유를 말해주세요.',
+          '육류 섭취를 안하는 비건에 대하여 유별난 소수라는 시각과, 윤리적인 동물 애호가라는 시각이 있습니다. 나의 의견과 그 이유는?',
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question:
-          '범죄인이 사형을 선고받더라도 형집행을 안하고 있습니다. 이에 대한 나의 찬반 의견과 그 이유는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
-        question:
-          '전세계적으로 빈부격차가 증가하는 현상에 대하여, 내가 생각하는 대응책이나 해결법은 무엇이고, 그 이유는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
-        question:
-          '인공지능 기술이 지속적으로 발전한다면, 인류는 유토피아를 맞이하게 될까요? 아니면 그 반대가 될까요? 그 이유는?',
+          '두 명의 상대를 동시에 사랑하는 것이 가능할까요? 나의 의견과 그 이유는?',
         isActive: true,
       }),
       new Dot({
@@ -682,7 +672,19 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         question:
-          '귀신이나, 초자연적 현상, 혹은 사후세계가 존재한다고 믿나요? 그 이유는?',
+          '당신이 꾼 꿈 중에 기억에 남는 가장 이상한 꿈 내용을 말해주세요.',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        question:
+          '당신이 겪은 일 중에 가장 무서웠던 일은 무엇인가요? 그 이유는?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        question:
+          '애인과 친구가 바람을 피웠다면 누구를 택할 것인가요? 그 이유는?',
         isActive: true,
       }),
       new Dot({
@@ -711,59 +713,61 @@ export class DotsService {
       new Dot({
         slug: 'saint',
         question:
-          '나와 함께 차를 마실 수 있는 기회가 만들어진다면, 어떤 차를 추천하겠습니까? 그 이유는?',
+          '다른 사람이 아닌, 바로 나와 함께 차를 마셔야 하는 이유를 물어본다면?',
         isActive: true,
       }),
       new Dot({
         slug: 'saint',
         question:
-          '나와 함께 요리를 할 수 있는 기회가 만들어진다면, 어떤 요리를 추천하겠습니까? 그 이유는?',
+          '다른 사람이 아닌, 바로 나와 함께 요리를 해야 하는 이유를 물어본다면?',
         isActive: true,
       }),
       new Dot({
         slug: 'saint',
         question:
-          '나와 함께 점심을 먹을 수 있는 기회가 만들어진다면, 어떤 음식을 추천하겠습니까? 그 이유는?',
+          '다른 사람이 아닌, 바로 나와 함께 점심을 먹어야 하는 이유를 물어본다면?',
         isActive: true,
       }),
       new Dot({
         slug: 'saint',
         question:
-          '나와 함께 운동을 할 수 있는 기회가 만들어진다면, 어떤 운동을 추천하겠습니까? 그 이유는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'saint',
-        question: '나와 함께 여행 계획을 세워야 하는 이유는?',
+          '다른 사람이 아닌, 바로 나와 함께 운동을 해야 하는 이유를 물어본다면?',
         isActive: true,
       }),
       new Dot({
         slug: 'saint',
         question:
-          '나와 함께 영화나 드라마를 볼 수 있는 기회가 만들어진뎜봐야하는 이유는?',
+          '다른 사람이 아닌, 바로 나와 함께 여행 계획을 세워야 하는 이유를 물어본다면?',
         isActive: true,
       }),
       new Dot({
         slug: 'saint',
         question:
-          '나와 함께 스포츠 경기관람의 기회가 만들어진다면, 어떤 경기를 추천하겠습니까? 그 이유는?',
+          '다른 사람이 아닌, 바로 나와 함께 영화를 봐야 하는 이유를 물어본다면?',
         isActive: true,
       }),
       new Dot({
         slug: 'saint',
         question:
-          '나와 함께 쇼핑할 수 있는 기회가 만들어진다면, 어떤 장소를 추천하겠습니까? 그 이유는?',
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'saint',
-        question: '나와 함께 하이킹이나 산책을 즐겨야 하는 이유는?',
+          '다른 사람이 아닌, 바로 나와 함께 스포츠 경기를 관람해야 하는 이유를 물어본다면?',
         isActive: true,
       }),
       new Dot({
         slug: 'saint',
         question:
-          '나와 함께 책을 읽고 문학적인 이해를 공유하는 기회가 만들어진다면, 어떤 책을 추천하겠습니까? 그 이유는?',
+          '다른 사람이 아닌, 바로 나와 함께 쇼핑을 해야하는 이유를 물어본다면?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'saint',
+        question:
+          '다른 사람이 아닌, 바로 나와 함께 산책을 즐겨야 하는 이유를 물어본다면?',
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'saint',
+        question:
+          '다른 사람이 아닌, 바로 나와 함께 책을 읽고 문학적인 이해를 공유해야하는 이유를 물어본다면?',
         isActive: true,
       }),
       // new Dot({
