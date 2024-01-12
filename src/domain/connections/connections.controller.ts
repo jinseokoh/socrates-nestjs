@@ -32,9 +32,26 @@ export class ConnectionsController {
   async createConnection(
     @CurrentUserId() userId: number,
     @Body() dto: CreateConnectionDto,
-  ): Promise<void> {
+  ): Promise<Connection> {
     try {
       return await this.connectionsService.create({ ...dto, userId });
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Create
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '커넥션 답변 추가' })
+  @Post()
+  async upsertConnection(
+    @CurrentUserId() userId: number,
+    @Body() dto: CreateConnectionDto,
+  ): Promise<void> {
+    try {
+      await this.connectionsService.create({ ...dto, userId });
     } catch (e) {
       throw new BadRequestException();
     }

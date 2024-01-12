@@ -32,8 +32,20 @@ export class ConnectionsService {
   //? Create
   //?-------------------------------------------------------------------------//
 
+  async create(dto: CreateConnectionDto): Promise<Connection> {
+    try {
+      return await this.repository.save(this.repository.create(dto));
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Upsert
+  //?-------------------------------------------------------------------------//
+
   @ApiOperation({ description: 'create connection! not dot.' })
-  async create(dto: CreateConnectionDto): Promise<void> {
+  async upsert(dto: CreateConnectionDto): Promise<void> {
     try {
       await this.repository.upsert(
         [
