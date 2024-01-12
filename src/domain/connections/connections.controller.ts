@@ -41,11 +41,11 @@ export class ConnectionsController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Create
+  //? Upsert
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '커넥션 답변 추가' })
-  @Post()
+  @Post('upsert')
   async upsertConnection(
     @CurrentUserId() userId: number,
     @Body() dto: CreateConnectionDto,
