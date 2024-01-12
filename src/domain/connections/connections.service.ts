@@ -34,7 +34,8 @@ export class ConnectionsService {
 
   async create(dto: CreateConnectionDto): Promise<Connection> {
     try {
-      return await this.repository.save(this.repository.create(dto));
+      const entity = await this.repository.save(this.repository.create(dto));
+      return await this.findById(entity.id, ['dot']);
     } catch (e) {
       throw new BadRequestException();
     }
@@ -90,7 +91,6 @@ export class ConnectionsService {
 
   // Meetup 상세보기
   async findById(id: number, relations: string[] = []): Promise<Connection> {
-    console.log(relations);
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
