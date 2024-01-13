@@ -1,4 +1,4 @@
 export enum UserStatus {
-  BANNED = 'BANNED',
-  NORMAL = 'NORMAL',
+  BANNED = 'banned',
+  NORMAL = 'normal',
 }

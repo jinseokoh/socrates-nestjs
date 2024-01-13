@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { DotStatus } from 'src/common/enums';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -30,9 +31,14 @@ export class Dot {
   @ApiProperty({ description: 'isActive' })
   isActive: boolean;
 
-  @Column({ default: false })
-  @ApiProperty({ description: 'isVoting' })
-  isVoting: boolean;
+  @Column({
+    type: 'enum',
+    enum: DotStatus,
+    default: DotStatus.PENDING,
+    nullable: true,
+  })
+  @ApiProperty({ description: 'status' })
+  status: DotStatus;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   up: number;
