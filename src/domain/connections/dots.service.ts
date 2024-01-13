@@ -79,7 +79,7 @@ export class DotsService {
 
   // Dot decrement
   async thumbsDown(id: number): Promise<void> {
-    await this.repository.decrement({ id }, 'down', 1);
+    await this.repository.increment({ id }, 'down', 1);
   }
 
   //?-------------------------------------------------------------------------//

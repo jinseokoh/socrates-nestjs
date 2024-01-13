@@ -71,13 +71,13 @@ export class DotsController {
   }
 
   @ApiOperation({ description: 'Dot 갱신' })
-  @Patch(':id')
+  @Patch(':id/up')
   async thumbsUp(@Param('id') id: number): Promise<any> {
     return await this.dotsService.thumbsUp(id);
   }
 
   @ApiOperation({ description: 'Dot 갱신' })
-  @Patch(':id')
+  @Patch(':id/down')
   async thumbsDown(@Param('id') id: number): Promise<any> {
     return await this.dotsService.thumbsDown(id);
   }
