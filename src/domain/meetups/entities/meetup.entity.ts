@@ -213,7 +213,7 @@ export class Meetup {
   public usersLiked: Like[];
 
   @OneToMany(() => ReportMeetup, (reportMeetup) => reportMeetup.meetup)
-  public usersReported: ReportMeetup[];
+  public userReports: ReportMeetup[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany

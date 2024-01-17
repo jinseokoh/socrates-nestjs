@@ -17,6 +17,7 @@ import { Public } from 'src/common/decorators/public.decorator';
 import { ConnectionsService } from 'src/domain/connections/connections.service';
 import { CreateConnectionDto } from 'src/domain/connections/dto/create-connection.dto';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
+import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('connections')
@@ -78,8 +79,8 @@ export class ConnectionsController {
       'dot',
       'remarks',
       'remarks.user',
-      'usersReported',
-      // 'usersReacted',
+      'userReports',
+      // 'userReactions',
       'user',
       'user.connections',
       'user.connections.dot',
@@ -89,6 +90,19 @@ export class ConnectionsController {
       'user.friendshipSent',
       'user.friendshipReceived',
     ]);
+  }
+
+  @ApiOperation({ description: 'Connection 의 reaction 리스트' })
+  @Get(':id/reactions')
+  async getConnectionReactionsById(
+    @Param('id') id: number,
+  ): Promise<Reaction[]> {
+    const connection = await this.connectionsService.findById(id, [
+      'userReactions',
+      'userReactions.user',
+    ]);
+
+    return connection.userReactions ?? [];
   }
 
   //?-------------------------------------------------------------------------//

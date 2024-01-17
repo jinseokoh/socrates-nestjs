@@ -374,10 +374,10 @@ export class MeetupsService {
         where: {
           id: id,
         },
-        relations: ['usersReported', 'usersReported.user'],
+        relations: ['userReports', 'userReports.user'],
       });
 
-      return meetup.usersReported.map((v: any) => v.user);
+      return meetup.userReports.map((v: any) => v.user);
     } catch (e) {
       throw new NotFoundException('entity not found');
     }

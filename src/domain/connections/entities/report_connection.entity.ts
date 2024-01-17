@@ -18,6 +18,6 @@ export class ReportConnection {
   @ManyToOne(() => User, (user) => user.connectionsReported)
   public user: User;
 
-  @ManyToOne(() => Connection, (connection) => connection.usersReported)
+  @ManyToOne(() => Connection, (connection) => connection.userReports)
   public connection: Connection;
 }

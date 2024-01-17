@@ -15,9 +15,9 @@ export class ReportMeetup {
   @Column({ length: 32, nullable: true })
   message: string | null;
 
-  @ManyToOne(() => User, (user) => user.meetupsReported)
+  @ManyToOne(() => User, (user) => user.meetupReports)
   public user: User;
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.usersReported)
+  @ManyToOne(() => Meetup, (meetup) => meetup.userReports)
   public meetup: Meetup;
 }

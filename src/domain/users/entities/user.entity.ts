@@ -191,7 +191,7 @@ export class User {
   public meetupsLiked: Like[];
 
   @OneToMany(() => ReportMeetup, (reportMeetup) => reportMeetup.user)
-  public meetupsReported: ReportMeetup[];
+  public meetupReports: ReportMeetup[];
 
   @OneToMany(() => Interest, (interest) => interest.user)
   public categoriesInterested: Interest[];

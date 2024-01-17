@@ -71,10 +71,10 @@ export class Connection {
     () => ReportConnection,
     (ReportConnection) => ReportConnection.connection,
   )
-  public usersReported: ReportConnection[];
+  public userReports: ReportConnection[];
 
   @OneToMany(() => Reaction, (reaction) => reaction.connection)
-  public usersReacted: User[];
+  public userReactions: Reaction[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo

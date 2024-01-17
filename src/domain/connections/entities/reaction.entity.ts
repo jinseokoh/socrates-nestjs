@@ -31,7 +31,7 @@ export class Reaction {
   @ManyToOne(() => User, (user) => user.connectionsReacted)
   public user: User;
 
-  @ManyToOne(() => Connection, (connection) => connection.usersReacted)
+  @ManyToOne(() => Connection, (connection) => connection.userReactions)
   public connection: Connection;
 
   //?-------------------------------------------------------------------------?/
