@@ -105,6 +105,12 @@ export class ConnectionsController {
     return connection.userReactions ?? [];
   }
 
+  @ApiOperation({ description: 'Connection 상세보기' })
+  @Get('users/:id')
+  async getConnectionByUserId(@Param('id') id: number): Promise<Connection[]> {
+    return await this.connectionsService.findByUserId(id);
+  }
+
   //?-------------------------------------------------------------------------//
   //? SEED
   //?-------------------------------------------------------------------------//
