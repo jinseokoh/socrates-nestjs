@@ -6,10 +6,10 @@ import {
   Expense,
   Region,
   Time,
-  Gender,
   Career as CareerEnum,
   Category as CategoryEnum,
   SubCategory,
+  TargetGender,
 } from 'src/common/enums';
 import {
   Column,
@@ -65,9 +65,9 @@ export class Meetup {
   @IsArray()
   images: string[] | null;
 
-  @Column({ type: 'enum', enum: Gender, default: Gender.ALL })
+  @Column({ type: 'enum', enum: TargetGender, default: TargetGender.ALL })
   @ApiProperty({ description: 'gender looking for' })
-  targetGender: Gender;
+  targetGender: TargetGender;
 
   @Column({
     type: 'set',

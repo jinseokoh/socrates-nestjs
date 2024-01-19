@@ -18,7 +18,7 @@ import {
 } from 'src/common/enums';
 import { Day } from 'src/common/enums/day';
 import { Expense } from 'src/common/enums/expense';
-import { Gender } from 'src/common/enums/gender';
+import { TargetGender } from 'src/common/enums/gender';
 import { Time } from 'src/common/enums/time';
 import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
 export class CreateMeetupDto {
@@ -50,10 +50,10 @@ export class CreateMeetupDto {
   @IsArray()
   images: string[];
 
-  @ApiProperty({ description: '상대방 성별', default: Gender.ALL })
-  @IsEnum(Gender)
+  @ApiProperty({ description: '상대 성별', default: TargetGender.ALL })
+  @IsEnum(TargetGender)
   @IsOptional()
-  targetGender: Gender;
+  targetGender: TargetGender;
 
   @ApiProperty({ description: '상대방 careers', default: ['all'] })
   @IsArray()

@@ -13,6 +13,7 @@ export class YearlyFortuneDto {
   @Type(() => Date)
   @IsDate()
   dob: Date; // YYYY-MM-DD
+
   @ApiProperty({ description: 'gender', default: Gender.MALE })
   @IsEnum(Gender)
   gender: Gender;
