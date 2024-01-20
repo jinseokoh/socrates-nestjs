@@ -109,16 +109,18 @@ export class ConnectionsService {
   // Meetup 상세보기
   async findByUserId(id: number): Promise<Connection[]> {
     try {
-      return this.repository
-        .createQueryBuilder('connection')
-        .leftJoinAndSelect('connection.dot', 'dot')
-        .leftJoinAndSelect('connection.user', 'author')
-        .leftJoinAndSelect('connection.remarks', 'remark')
-        .leftJoinAndSelect('remark.user', 'user')
-        .where({
-          userId: id,
-        })
-        .getMany();
+      return (
+        this.repository
+          .createQueryBuilder('connection')
+          .leftJoinAndSelect('connection.dot', 'dot')
+          // .leftJoinAndSelect('connection.user', 'author')
+          .leftJoinAndSelect('connection.remarks', 'remark')
+          .leftJoinAndSelect('remark.user', 'user')
+          .where({
+            userId: id,
+          })
+          .getMany()
+      );
     } catch (e) {
       this.logger.error(e);
       throw new NotFoundException('entity not found');

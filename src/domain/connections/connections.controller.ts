@@ -82,6 +82,7 @@ export class ConnectionsController {
       'userReports',
       // 'userReactions',
       'user',
+      'user.profile',
       'user.connections',
       'user.connections.dot',
       'user.connections.user',
@@ -100,6 +101,7 @@ export class ConnectionsController {
     const connection = await this.connectionsService.findById(id, [
       'userReactions',
       'userReactions.user',
+      'userReactions.user.profile',
     ]);
 
     return connection.userReactions ?? [];
