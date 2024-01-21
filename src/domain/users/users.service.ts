@@ -1699,10 +1699,10 @@ WHERE `joinType` = ? AND `user`.id = ?',
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내 친구 (보낸 신청이 승인되거나 받은 신청을 승인한 경우 ids
+  // 내 친구 (보낸 신청이 승인되거나 받은 신청을 승인한 경우) ids
   async getFriendIdsWithStatus(
     userId: number,
-    status = null,
+    status = 'accepted',
   ): Promise<AnyData> {
     const rows = !status
       ? await this.repository.manager.query(
@@ -1725,7 +1725,8 @@ WHERE `joinType` = ? AND `user`.id = ?',
     return { data: [...new Set(data)] };
   }
 
-  // 내 친구 (보낸 신청이 승인되거나 받은 신청을 승인한 경우 ids
+  // 내 친구 (pending or approved or denied) ids
+  // you need to filter out before using 'em
   async getAllFriendIds(userId: number): Promise<AnyData> {
     const rows = await this.repository.manager.query(
       'SELECT senderId, recipientId \
