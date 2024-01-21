@@ -122,9 +122,9 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '내 친구 ID 리스트' })
-  @Get(':userId/friend-ids')
-  async getFriendIds(@Param('userId') userId: number): Promise<AnyData> {
-    return this.usersService.getAllFriendIds(userId);
+  @Get(':userId/friendships')
+  async getFriendIds(@Param('userId') userId: number): Promise<Friendship[]> {
+    return this.usersService.getAllFriendships(userId);
   }
 
   //?-------------------------------------------------------------------------//

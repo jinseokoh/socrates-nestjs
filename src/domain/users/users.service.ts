@@ -1727,19 +1727,13 @@ WHERE `joinType` = ? AND `user`.id = ?',
 
   // 내 친구 (pending or approved or denied) ids
   // you need to filter out before using 'em
-  async getAllFriendIds(userId: number): Promise<AnyData> {
-    const rows = await this.repository.manager.query(
-      'SELECT senderId, recipientId \
-      FROM `friendship` \
-      WHERE senderId = ? OR recipientId = ?',
-      [userId, userId],
-    );
-
-    const data = rows.map((v) => {
-      return v.senderId === userId ? v.recipientId : v.senderId;
-    });
-
-    return { data: [...new Set(data)] };
+  async getAllFriendships(userId: number): Promise<Friendship[]> {
+    return await this.friendshipRepository
+      .createQueryBuilder('friendship')
+      .innerJoinAndSelect('friendship.sender', 'sender')
+      .innerJoinAndSelect('friendship.recipient', 'recipient')
+      .where([{ senderId: userId }, { recipientId: userId }])
+      .getMany();
   }
 
   //?-------------------------------------------------------------------------//

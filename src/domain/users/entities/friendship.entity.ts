@@ -50,4 +50,11 @@ export class Friendship {
   })
   @JoinColumn({ name: 'recipientId' })
   public recipient!: User;
+
+  //?-------------------------------------------------------------------------?/
+  //? constructor
+
+  constructor(partial: Partial<Friendship>) {
+    Object.assign(this, partial);
+  }
 }
