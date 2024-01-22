@@ -19,7 +19,7 @@ export class Friendship {
   @ApiProperty({ description: 'ACCEPTED|DENIED' })
   status: JoinStatus;
 
-  @Column({ length: 32, nullable: true })
+  @Column({ length: 64, nullable: true })
   @ApiProperty({ description: 'message' })
   message: string | null;
 
