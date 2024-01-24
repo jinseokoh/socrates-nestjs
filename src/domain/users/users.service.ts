@@ -1658,6 +1658,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .createQueryBuilder('friendship')
       .innerJoinAndSelect('friendship.sender', 'sender')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
+      .leftJoinAndSelect('friendship.dot', 'dot')
       .where({
         // status: JoinStatus.ACCEPTED,
         senderId: userId,
@@ -1683,6 +1684,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .createQueryBuilder('friendship')
       .innerJoinAndSelect('friendship.sender', 'sender')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
+      .leftJoinAndSelect('friendship.dot', 'dot')
       .where({
         // status: JoinStatus.ACCEPTED,
         recipientId: userId,
