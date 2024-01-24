@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DotStatus } from 'src/common/enums';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
+import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -66,6 +67,12 @@ export class Dot {
 
   @ManyToOne(() => User, (user) => user.dots, {})
   user: User;
+
+  //**--------------------------------------------------------------------------*/
+  //** 1-to-many hasMany
+
+  @OneToMany(() => Friendship, (friendship) => friendship.dot)
+  friendships: Friendship[];
 
   //?-------------------------------------------------------------------------?/
   //? constructor

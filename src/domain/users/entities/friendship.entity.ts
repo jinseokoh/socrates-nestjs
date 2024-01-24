@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { JoinStatus } from 'src/common/enums';
+import { Dot } from 'src/domain/connections/entities/dot.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -30,7 +31,7 @@ export class Friendship {
   updatedAt: Date;
 
   @PrimaryColumn({ type: 'int', unsigned: true })
-  senderId: number | null; // to make it available to Repository.
+  senderId: number; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
@@ -41,7 +42,7 @@ export class Friendship {
   public sender!: User;
 
   @PrimaryColumn({ type: 'int', unsigned: true })
-  recipientId: number | null; // to make it available to Repository.
+  recipientId: number; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
@@ -50,6 +51,14 @@ export class Friendship {
   })
   @JoinColumn({ name: 'recipientId' })
   public recipient!: User;
+
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  dotId: number | null; // to make it available to Repository.
+
+  @ManyToOne(() => Dot, (dot) => dot.friendships, {
+    onDelete: 'SET NULL',
+  })
+  dot?: Dot;
 
   //?-------------------------------------------------------------------------?/
   //? constructor
