@@ -41,6 +41,7 @@ export class DotsService {
   // Dot 리스트
   async getAll(): Promise<Array<Dot>> {
     return await this.repository.find({
+      relations: ['user'],
       where: {
         isActive: true,
         status: Not(IsNull()),

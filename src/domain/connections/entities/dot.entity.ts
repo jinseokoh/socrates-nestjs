@@ -66,7 +66,7 @@ export class Dot {
   userId: number | null; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.dots, {})
-  user: User;
+  user: User | null;
 
   //**--------------------------------------------------------------------------*/
   //** 1-to-many hasMany
