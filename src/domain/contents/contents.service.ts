@@ -48,6 +48,15 @@ export class ContentsService {
     return await paginate(query, queryBuilder, config);
   }
 
+  // Dot 리스트
+  async getActiveContents(): Promise<Content[]> {
+    return await this.repository.find({
+      where: {
+        isPublished: true,
+      },
+    });
+  }
+
   // 상세보기
   async findById(id: number, relations: string[] = []): Promise<Content> {
     try {
