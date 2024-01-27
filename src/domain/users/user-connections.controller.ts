@@ -117,7 +117,7 @@ export class UserConnectionsController {
   // }
 
   //?-------------------------------------------------------------------------//
-  //? Abhor Pivot
+  //? Connection Report Pivot
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '나의 블락 리스트에 추가' })
