@@ -12,6 +12,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
   UsePipes,
@@ -97,18 +98,23 @@ export class UsersController {
 
   @ApiOperation({ description: 'User 상세보기' })
   @Get(':id')
-  async getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return await this.usersService.findById(id, [
+  async getUserById(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('extra') extra: string[],
+  ): Promise<User> {
+    const defaultRelations = [
       'profile',
-      //'providers',
       'categoriesInterested',
       'categoriesInterested.category',
       'languageSkills',
       'languageSkills.language',
       'accusedReports',
-      'friendshipSent',
-      'friendshipReceived',
-    ]);
+      'sentFriendships',
+      'receivedFriendships',
+    ];
+    return extra && extra.length > 0
+      ? await this.usersService.findById(id, [...defaultRelations, ...extra])
+      : await this.usersService.findById(id, defaultRelations);
   }
 
   @ApiOperation({ description: 'initial username' })

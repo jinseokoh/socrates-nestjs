@@ -88,8 +88,8 @@ export class ConnectionsController {
       'user.connections.user',
       'user.connections.remarks',
       'user.connections.remarks.user',
-      'user.friendshipSent',
-      'user.friendshipReceived',
+      'user.sentFriendships',
+      'user.receivedFriendships',
     ]);
   }
 
