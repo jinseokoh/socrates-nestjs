@@ -103,8 +103,10 @@ export class UsersController {
       'languageSkills',
       'languageSkills.language',
       'accusedReports',
-      'sentFriendships',
-      'receivedFriendships',
+      // 'sentFriendships',
+      // 'receivedFriendships',
+      // 'connections',
+      // 'connections.dot',
     ];
     return extra && extra.length > 0
       ? await this.usersService.findById(id, [...defaultRelations, ...extra])

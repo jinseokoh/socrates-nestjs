@@ -1724,7 +1724,39 @@ WHERE `joinType` = ? AND `user`.id = ?',
       return v.senderId === userId ? v.recipientId : v.senderId;
     });
 
-    return { data: [...new Set(data)] };
+    return { data };
+    // to simplify the process i didn't use the following alternative.
+    // return { data: [...new Set(data)] };
+  }
+
+  async getFriendIds(userId: number): Promise<AnyData> {
+    const rows = await this.repository.manager.query(
+      'SELECT status, senderId, recipientId \
+      FROM `friendship` \
+      WHERE senderId = ? OR recipientId = ?',
+      [userId, userId],
+    );
+
+    const pendingIds = rows
+      .filter((v: any) => v.status === null)
+      .map((v: any) => {
+        return v.senderId === userId ? v.recipientId : v.senderId;
+      });
+
+    const friendIds = rows
+      .filter((v: any) => v.status === 'accepted')
+      .map((v: any) => {
+        return v.senderId === userId ? v.recipientId : v.senderId;
+      });
+
+    return {
+      data: {
+        pendingIds,
+        friendIds,
+      },
+    };
+    // to simplify the process i didn't use the following alternative.
+    // return { data: [...new Set(data)] };
   }
 
   // 내 친구 (pending or approved or denied) ids

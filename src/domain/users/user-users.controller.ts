@@ -113,15 +113,15 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '내가 친구신청 중인 ID 리스트' })
-  @Get(':userId/friend-ids-status')
+  @Get(':userId/friend-ids')
   async getAllFriendIdsPending(
     @Param('userId') userId: number,
     @Query('status') status: string | undefined,
   ): Promise<AnyData> {
-    return this.usersService.getFriendIdsWithStatus(userId, status);
+    return this.usersService.getFriendIds(userId);
   }
 
-  @ApiOperation({ description: '내 친구 ID 리스트' })
+  @ApiOperation({ description: '내 친구관계 리스트' })
   @Get(':userId/friendships')
   async getFriendIds(@Param('userId') userId: number): Promise<Friendship[]> {
     return this.usersService.getAllFriendships(userId);
