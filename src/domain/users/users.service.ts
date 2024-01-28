@@ -1738,6 +1738,27 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .getMany();
   }
 
+  async getMyFriends(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Friendship>> {
+    const queryBuilder = this.friendshipRepository
+      .createQueryBuilder('friendship')
+      .innerJoinAndSelect('friendship.sender', 'sender')
+      .innerJoinAndSelect('friendship.recipient', 'recipient')
+      .where([{ senderId: userId }, { recipientId: userId }]);
+
+    const config: PaginateConfig<Friendship> = {
+      sortableColumns: ['dotId'],
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {
+        status: [FilterOperator.EQ],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
   //?-------------------------------------------------------------------------//
   //? 신한운세
   //?-------------------------------------------------------------------------//

@@ -127,6 +127,15 @@ export class UserUsersController {
     return this.usersService.getAllFriendships(userId);
   }
 
+  @ApiOperation({ description: 'Paginated 내 친구 리스트' })
+  @Get(':userId/friends')
+  async getMyFriends(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Friendship>> {
+    return this.usersService.getMyFriends(userId, query);
+  }
+
   //?-------------------------------------------------------------------------//
   //? Hate Pivot
   //?-------------------------------------------------------------------------//
