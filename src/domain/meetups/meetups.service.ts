@@ -336,7 +336,7 @@ export class MeetupsService {
   //? 찜한 모든 사용자 리스트
   //?-------------------------------------------------------------------------//
 
-  async getAllLikers(id: number): Promise<any> {
+  async getAllLikers(id: number): Promise<User[]> {
     try {
       const meetup = await this.repository.findOneOrFail({
         where: {
