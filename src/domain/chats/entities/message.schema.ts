@@ -65,7 +65,7 @@ export const MessageSchema = new Schema(
       type: {
         value: Number,
         settings: {
-          storage: 'milliseconds',
+          storage: 'seconds', //! this must be 10 digit number
         },
       },
     },
