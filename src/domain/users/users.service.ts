@@ -63,6 +63,7 @@ import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { CreateFriendRequestDto } from 'src/domain/users/dto/create-friend-request.dto';
 import { FcmService } from 'src/services/fcm/fcm.service';
+import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
 @Injectable()
 export class UsersService {
@@ -474,11 +475,8 @@ GROUP BY userId HAVING userId = ?',
   }
 
   // S3 직접 업로드를 위한 signedUrl 리턴
-  async getSignedUrl(
-    userId: number,
-    mimeType = 'image/jpeg',
-  ): Promise<SignedUrl> {
-    const fileUri = randomName('avatar', mimeType);
+  async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
+    const fileUri = randomName(dto.name ?? 'avatar', dto.mimeType);
     const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 

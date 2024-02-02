@@ -1,3 +1,4 @@
+import { SignedUrlDto } from './dto/signed-url.dto';
 import {
   BadRequestException,
   Body,
@@ -218,12 +219,9 @@ export class UsersController {
   @Post('image/url')
   async getSignedUrl(
     @CurrentUserId() id: number,
-    @Body('mimeType') mimeType: string,
+    @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
-    if (mimeType) {
-      return await this.usersService.getSignedUrl(id, mimeType);
-    }
-    throw new BadRequestException('mimeType is missing');
+    return await this.usersService.getSignedUrl(id, dto);
   }
 
   //--------------------------------------------------------------------------//
