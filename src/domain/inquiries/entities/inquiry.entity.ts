@@ -34,7 +34,7 @@ export class Inquiry {
   @ApiProperty({ description: '내용' })
   body: string | null;
 
-  @Column('json', { nullable: true }) // from Artwork
+  @Column('json', { nullable: true })
   @ApiProperty({ description: 'images' })
   images: string[] | null;
 

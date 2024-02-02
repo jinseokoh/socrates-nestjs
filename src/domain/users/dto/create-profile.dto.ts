@@ -3,11 +3,17 @@ import {
   IsArray,
   IsBoolean,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
 // import { SubCategory } from 'src/common/enums';
 export class CreateProfileDto {
+  @ApiProperty({ description: '보유 코인수', required: false, default: 0 })
+  @IsNumber()
+  @IsOptional()
+  balance: number;
+
   @ApiProperty({ description: '소개글', required: false })
   @IsString()
   @IsOptional()
@@ -18,45 +24,35 @@ export class CreateProfileDto {
   @IsOptional()
   region?: string | null;
 
-  @ApiProperty({ description: '학력', required: false })
-  @IsString()
-  @IsOptional()
-  education?: string | null;
-
   @ApiProperty({ description: '직업', required: false })
   @IsString()
   @IsOptional()
   occupation?: string | null;
+
+  @ApiProperty({ description: '학력', required: false })
+  @IsString()
+  @IsOptional()
+  education?: string | null;
 
   @ApiProperty({ description: 'MBTI', required: false })
   @IsString()
   @IsOptional()
   mbti?: string | null;
 
-  @ApiProperty({ description: 'impressions', required: false })
-  @IsArray()
-  @IsOptional()
-  impressions?: number[];
-
   @ApiProperty({ description: 'fyis', required: false })
   @IsArray()
   @IsOptional()
   fyis?: string[];
 
-  @ApiProperty({ description: '푸시알림', required: false, default: true })
-  @IsBoolean()
+  @ApiProperty({ description: 'images', required: false })
+  @IsArray()
   @IsOptional()
-  notifyPush?: boolean;
+  images?: string[];
 
-  @ApiProperty({ description: '이메일알림', required: false, default: true })
-  @IsBoolean()
+  @ApiProperty({ description: 'options', required: false })
+  @IsObject()
   @IsOptional()
-  notifyEmail?: boolean;
-
-  @ApiProperty({ description: '카카오알림', required: false, default: true })
-  @IsBoolean()
-  @IsOptional()
-  notifyKakao?: boolean;
+  options?: object;
 
   @ApiProperty({ description: 'view수', required: false, default: 0 })
   @IsNumber()

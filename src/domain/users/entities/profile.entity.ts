@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -17,14 +18,11 @@ export class Profile {
   id: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: '현재보유액' })
+  @ApiProperty({ description: '보유 코인수' })
   balance: number;
 
   @Column({ length: 255, nullable: true })
   bio: string | null;
-
-  @Column({ length: 4, nullable: true })
-  mbti: string | null;
 
   @Column({ length: 64, nullable: true })
   @ApiProperty({ description: '지역' })
@@ -38,32 +36,21 @@ export class Profile {
   @ApiProperty({ description: '학력' })
   education: string | null;
 
-  @Column({ default: true })
-  notifyPush: boolean;
-
-  @Column({ default: true })
-  notifyEmail: boolean;
-
-  @Column({ default: true })
-  notifyKakao: boolean;
-
-  // @Column({
-  //   type: 'set',
-  //   enum: SubCategory,
-  //   default: [],
-  // })
-  // @ApiProperty({ description: 'comma separated interest list' })
-  // interests: SubCategory[];
-
-  @Column('json', { nullable: true })
-  @ApiProperty({ description: '첫인상 평균' })
-  @IsArray()
-  impressions: number[] | null;
+  @Column({ length: 4, nullable: true })
+  mbti: string | null;
 
   @Column('json', { nullable: true })
   @ApiProperty({ description: 'FYI in Korean' })
   @IsArray()
   fyis: string[] | null;
+
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: 'images' })
+  images: string[] | null;
+
+  @Column({ type: 'json' })
+  @ApiProperty({ description: 'notification options' })
+  options: object;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   viewCount: number;
@@ -102,5 +89,23 @@ export class Profile {
 
   constructor(partial: Partial<Profile>) {
     Object.assign(this, partial);
+  }
+
+  //??--------------------------------------------------------------------------*/
+  //?? programatically set a default using TypeORM hook
+  @BeforeInsert()
+  setDefaults() {
+    this.options = this.options || {
+      meetupLike: false, // 모임 찜
+      meetupThread: false, // 모임 댓글
+      meetupRequest: false, // 모임신청
+      meetupRequestApproval: false, // 모임신청 승인
+      meetupInviteApproval: false, // 모임초대 승인
+      connectionReaction: false, // 발견 공감
+      connectionRemark: false, // 발견 댓글
+      friendRequest: false, // 친구 신청
+      friendRequestApproval: false, // 친구신청 승인
+      friendRequestFeedback: false, // 친구신청 발견글 요청
+    };
   }
 }

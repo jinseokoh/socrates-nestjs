@@ -148,9 +148,9 @@ export class UsersService {
       const user = await this.findById(id, ['impressions']);
       if (user.impressions && user.impressions.length > 1) {
         const impressions = await this.getImpressionAverageById(id);
-        const dto = new UpdateProfileDto();
-        dto.impressions = impressions;
-        await this.updateProfile(id, dto);
+        // const dto = new UpdateProfileDto();
+        // dto.impressions = impressions;
+        // await this.updateProfile(id, dto);
         return impressions;
       } else {
         return [];
