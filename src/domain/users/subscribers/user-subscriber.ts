@@ -31,6 +31,18 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
       .values([
         {
           userId: event.entity.id,
+          options: {
+            meetupLike: false, // 모임 찜
+            meetupThread: false, // 모임 댓글
+            meetupRequest: false, // 모임신청
+            meetupRequestApproval: false, // 모임신청 승인
+            meetupInviteApproval: false, // 모임초대 승인
+            connectionReaction: false, // 발견 공감
+            connectionRemark: false, // 발견 댓글
+            friendRequest: false, // 친구 신청
+            friendRequestApproval: false, // 친구신청 승인
+            friendRequestFeedback: false, // 친구신청 발견글 요청
+          },
         },
       ])
       .execute();
