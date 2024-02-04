@@ -1671,7 +1671,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .createQueryBuilder('friendship')
       .innerJoinAndSelect('friendship.sender', 'sender')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
-      .innerJoinAndSelect('friendship.recipient.profile', 'profile')
+      .innerJoinAndSelect('recipient.profile', 'profile')
       .leftJoinAndSelect('friendship.dot', 'dot')
       .where({
         senderId: userId,
@@ -1697,7 +1697,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
     const queryBuilder = this.friendshipRepository
       .createQueryBuilder('friendship')
       .innerJoinAndSelect('friendship.sender', 'sender')
-      .innerJoinAndSelect('friendship.sender.profile', 'profile')
+      .innerJoinAndSelect('sender.profile', 'profile')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .leftJoinAndSelect('friendship.dot', 'dot')
       .where({
@@ -1724,9 +1724,9 @@ WHERE `joinType` = ? AND `user`.id = ?',
     const queryBuilder = this.friendshipRepository
       .createQueryBuilder('friendship')
       .innerJoinAndSelect('friendship.sender', 'sender')
-      .innerJoinAndSelect('friendship.sender.profile', 'senderProfile')
+      .innerJoinAndSelect('sender.profile', 'sprofile')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
-      .innerJoinAndSelect('friendship.recipient.profile', 'recipientProfile')
+      .innerJoinAndSelect('recipient.profile', 'rprofile')
       .where([{ senderId: userId }, { recipientId: userId }]);
 
     const config: PaginateConfig<Friendship> = {
