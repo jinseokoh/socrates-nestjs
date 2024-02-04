@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { JoinStatus } from 'src/common/enums';
+import { FriendshipStatus } from 'src/common/enums';
 import { Dot } from 'src/domain/connections/entities/dot.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -16,9 +16,9 @@ import {
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 export class Friendship {
-  @Column({ type: 'enum', enum: JoinStatus, nullable: true })
-  @ApiProperty({ description: 'ACCEPTED|DENIED' })
-  status: JoinStatus;
+  @Column({ type: 'enum', enum: FriendshipStatus, nullable: true })
+  @ApiProperty({ description: 'ACCEPTED|PENDING' })
+  status: FriendshipStatus;
 
   @Column({ length: 64, nullable: true })
   @ApiProperty({ description: 'message' })

@@ -74,7 +74,7 @@ export class UserUsersController {
     }
   }
 
-  @ApiOperation({ description: '친구신청 거절(삭제)' })
+  @ApiOperation({ description: '친구신청 거절/삭제' })
   @PaginateQueryOptions()
   @Delete(':senderId/friendships/:recipientId')
   async deleteFriendship(
