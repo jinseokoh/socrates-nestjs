@@ -1640,7 +1640,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
         this.fcmService.sendToToken(fbToken, notification);
       }
     }
-    if (status === FriendshipStatus.HOLD) {
+    if (status === FriendshipStatus.PENDING) {
       if (sender.pushToken) {
         const fbToken = sender.pushToken;
         const notification = {
@@ -1741,7 +1741,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
 
   //--------------------------------------------------------------------------//
 
-  async getFriendIds(userId: number): Promise<AnyData> {
+  async getFriendshipIds(userId: number): Promise<AnyData> {
     const rows = await this.repository.manager.query(
       'SELECT status, senderId, recipientId \
       FROM `friendship` \

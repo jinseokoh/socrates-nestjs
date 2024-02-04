@@ -20,7 +20,7 @@ import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { ReportUser } from 'src/domain/users/entities/report_user.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
-import { FriendshipStatus, JoinStatus } from 'src/common/enums';
+import { FriendshipStatus } from 'src/common/enums';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { CreateFriendRequestDto } from 'src/domain/users/dto/create-friend-request.dto';
 
@@ -142,11 +142,11 @@ export class UserUsersController {
 
   @ApiOperation({ description: '내가 친구신청 중인 ID 리스트' })
   @Get(':userId/friendship-ids')
-  async getFriendIds(
+  async getFriendshipIds(
     @Param('userId') userId: number,
     // @Query('status') status: string | undefined,
   ): Promise<AnyData> {
-    return this.usersService.getFriendIds(userId);
+    return this.usersService.getFriendshipIds(userId);
   }
 
   //?-------------------------------------------------------------------------//
