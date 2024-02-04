@@ -7,6 +7,7 @@ export * from './day';
 export * from './dot-status';
 export * from './emotion';
 export * from './expense';
+export * from './friendship-status';
 export * from './gender';
 export * from './inquiry-type';
 export * from './interest';

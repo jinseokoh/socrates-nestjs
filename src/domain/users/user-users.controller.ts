@@ -20,7 +20,7 @@ import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { ReportUser } from 'src/domain/users/entities/report_user.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
-import { JoinStatus } from 'src/common/enums';
+import { FriendshipStatus, JoinStatus } from 'src/common/enums';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { CreateFriendRequestDto } from 'src/domain/users/dto/create-friend-request.dto';
 
@@ -34,15 +34,15 @@ export class UserUsersController {
   //? Friendship Pivot
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '친구신청 리스트에 추가' })
+  @ApiOperation({ description: '친구신청 생성' })
   @PaginateQueryOptions()
-  @Post(':senderId/friendship/:recipientId')
-  async attachToFriendshipPivot(
+  @Post(':senderId/friendships/:recipientId')
+  async createFriendship(
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body() dto: CreateFriendRequestDto,
   ): Promise<AnyData> {
-    const balance = await this.usersService.attachToFriendshipPivot(
+    const balance = await this.usersService.createFriendship(
       senderId,
       recipientId,
       dto,
@@ -52,13 +52,13 @@ export class UserUsersController {
     };
   }
 
-  @ApiOperation({ description: '친구신청 승인/거부' })
+  @ApiOperation({ description: '친구신청 승인/보류' })
   @PaginateQueryOptions()
-  @Patch(':senderId/friendship/:recipientId')
-  async updateFriendshipToAcceptOrDeny(
+  @Patch(':senderId/friendships/:recipientId')
+  async updateFriendshipWithStatus(
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
-    @Body('status') status: JoinStatus, // optional message, and skill
+    @Body('status') status: FriendshipStatus,
   ): Promise<AnyData> {
     try {
       await this.usersService.updateFriendshipWithStatus(
@@ -74,66 +74,79 @@ export class UserUsersController {
     }
   }
 
-  @ApiOperation({ description: '보낸 친구신청 리스트' })
+  @ApiOperation({ description: '친구신청 거절(삭제)' })
   @PaginateQueryOptions()
-  @Get(':userId/friendship-sent')
-  async getFriendshipSenders(
-    @Param('userId') userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Friendship>> {
-    const { data, meta, links } = await this.usersService.getFriendshipSent(
-      userId,
-      query,
-    );
-
-    return {
-      data: data,
-      meta: meta,
-      links: links,
-    };
-  }
-
-  @ApiOperation({ description: '받은 친구신청 리스트' })
-  @PaginateQueryOptions()
-  @Get(':userId/friendship-received')
-  async getFriendshipRecipients(
-    @Param('userId') userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Friendship>> {
-    const { data, meta, links } = await this.usersService.getFriendshipReceived(
-      userId,
-      query,
-    );
-
-    return {
-      data: data,
-      meta: meta,
-      links: links,
-    };
-  }
-
-  @ApiOperation({ description: '내가 친구신청 중인 ID 리스트' })
-  @Get(':userId/friend-ids')
-  async getAllFriendIdsPending(
-    @Param('userId') userId: number,
-    @Query('status') status: string | undefined,
+  @Delete(':senderId/friendships/:recipientId')
+  async deleteFriendship(
+    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<AnyData> {
-    return this.usersService.getFriendIds(userId);
+    try {
+      await this.usersService.deleteFriendship(senderId, recipientId);
+      return {
+        data: 'ok',
+      };
+    } catch (e) {
+      throw new BadRequestException();
+    }
   }
 
-  @ApiOperation({ description: '내 친구관계 리스트' })
+  //--------------------------------------------------------------------------//
+
+  @ApiOperation({ description: 'Paginated, 보낸 친구신청 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/friendships-sent')
+  async getFriendshipsSent(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Friendship>> {
+    const { data, meta, links } = await this.usersService.getFriendshipsSent(
+      userId,
+      query,
+    );
+
+    return {
+      data: data,
+      meta: meta,
+      links: links,
+    };
+  }
+
+  @ApiOperation({ description: 'Paginated, 받은 친구신청 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/friendships-received')
+  async getFriendshipsReceived(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Friendship>> {
+    const { data, meta, links } =
+      await this.usersService.getFriendshipsReceived(userId, query);
+
+    return {
+      data: data,
+      meta: meta,
+      links: links,
+    };
+  }
+
+  @ApiOperation({ description: 'Paginated, 내 친구신청 리스트' })
   @Get(':userId/friendships')
-  async getFriendIds(@Param('userId') userId: number): Promise<Friendship[]> {
-    return this.usersService.getAllFriendships(userId);
-  }
-
-  @ApiOperation({ description: 'Paginated 내 친구 리스트' })
-  @Get(':userId/friends')
   async getMyFriends(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
-    return this.usersService.getMyFriends(userId, query);
+    return this.usersService.getMyFriendships(userId, query);
+  }
+
+  //--------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '내가 친구신청 중인 ID 리스트' })
+  @Get(':userId/friendship-ids')
+  async getFriendIds(
+    @Param('userId') userId: number,
+    // @Query('status') status: string | undefined,
+  ): Promise<AnyData> {
+    return this.usersService.getFriendIds(userId);
   }
 
   //?-------------------------------------------------------------------------//

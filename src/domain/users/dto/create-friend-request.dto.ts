@@ -9,5 +9,5 @@ export class CreateFriendRequestDto {
 
   @ApiProperty({ description: '친구신청 비용' })
   @IsNumber()
-  costToUpdate: number;
+  cost: number;
 }
