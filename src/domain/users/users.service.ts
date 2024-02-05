@@ -37,7 +37,7 @@ import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto'
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
-import { Brackets, DataSource, FindOneOptions, In } from 'typeorm';
+import { Brackets, DataSource, FindOneOptions, In, Not } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
@@ -1675,6 +1675,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .leftJoinAndSelect('friendship.dot', 'dot')
       .where({
         senderId: userId,
+        status: Not(FriendshipStatus.ACCEPTED),
       });
 
     const config: PaginateConfig<Friendship> = {
@@ -1702,6 +1703,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .leftJoinAndSelect('friendship.dot', 'dot')
       .where({
         recipientId: userId,
+        status: Not(FriendshipStatus.ACCEPTED),
       });
 
     const config: PaginateConfig<Friendship> = {

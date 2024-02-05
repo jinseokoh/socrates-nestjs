@@ -16,8 +16,12 @@ import {
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 export class Friendship {
-  @Column({ type: 'enum', enum: FriendshipStatus, nullable: true })
-  @ApiProperty({ description: 'ACCEPTED|PENDING' })
+  @Column({
+    type: 'enum',
+    enum: FriendshipStatus,
+    default: FriendshipStatus.NILL,
+  })
+  @ApiProperty({ description: 'ACCEPTED|PENDING|NILL' })
   status: FriendshipStatus;
 
   @Column({ length: 64, nullable: true })
