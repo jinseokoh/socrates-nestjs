@@ -19,6 +19,11 @@ export class CreateConnectionDto {
   @ApiProperty({ description: 'count' })
   @IsNumber()
   @IsOptional()
+  remarkCount: number | null;
+
+  @ApiProperty({ description: 'count' })
+  @IsNumber()
+  @IsOptional()
   reportCount: number | null;
 
   @ApiProperty({ description: 'count' })

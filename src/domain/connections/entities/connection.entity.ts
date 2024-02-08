@@ -30,26 +30,29 @@ export class Connection {
   answer: string;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
+  remarkCount: number; // 신고
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
   reportCount: number; // 신고
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'sympatheticCount' })
-  sympatheticCount: number; // 감정 reaction #1
+  sympatheticCount: number; // 감정) reaction #1
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'laughterCount' })
-  humorousCount: number; // 감정 reaction #2
+  humorousCount: number; // 감정) reaction #2
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'surpriseCount' })
-  surprisedCount: number; // 감정 reaction #3
+  surprisedCount: number; // 감정) reaction #3
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'sadCount' })
-  sadCount: number; // 감정 reaction #4
+  sadCount: number; // 감정) reaction #4
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  disgustCount: number; // 감정 reaction #5
+  disgustCount: number; // 감정) reaction #5
 
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })
