@@ -88,24 +88,22 @@ export class UserConnectionsController {
   //   }
   // }
 
-  // @ApiOperation({ description: '내가 찜한 발견 리스트' })
-  // @PaginateQueryOptions()
-  // @Get(':userId/connections-liked')
-  // async getConnectionsLikedByMe(
-  //   @Param('userId') userId: number,
-  //   @Paginate() query: PaginateQuery,
-  // ): Promise<Paginated<Connection>> {
-  //   const { data, meta, links } = await this.usersService.getConnectionsLikedByMe(
-  //     userId,
-  //     query,
-  //   );
+  @ApiOperation({ description: '내가 찜한 발견 리스트' })
+  @PaginateQueryOptions()
+  @Get(':userId/connections-reacted')
+  async getConnectionsReactedByMe(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Connection>> {
+    const { data, meta, links } =
+      await this.usersService.getConnectionsReactedByMe(userId, query);
 
-  //   return {
-  //     data: data.map((v) => v.connection),
-  //     meta: meta,
-  //     links: links,
-  //   } as Paginated<Connection>;
-  // }
+    return {
+      data: data.map((v) => v.connection),
+      meta: meta,
+      links: links,
+    } as Paginated<Connection>;
+  }
 
   // @ApiOperation({ description: '내가 찜한 발견ID 리스트' })
   // @PaginateQueryOptions()

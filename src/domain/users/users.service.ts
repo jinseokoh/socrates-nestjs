@@ -28,43 +28,43 @@ import {
   FriendshipStatus,
 } from 'src/common/enums';
 import { AnyData, SignedUrl } from 'src/common/types';
+import { Brackets, DataSource, FindOneOptions, In, Not } from 'typeorm';
+import { Cache } from 'cache-manager';
+import { Category } from 'src/domain/categories/entities/category.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
-import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
-import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
-import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
+import { ConfigService } from '@nestjs/config';
+import { Connection } from 'src/domain/connections/entities/connection.entity';
+import { CreateFriendRequestDto } from 'src/domain/users/dto/create-friend-request.dto';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
-import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
-import { ConfigService } from '@nestjs/config';
-import { Brackets, DataSource, FindOneOptions, In, Not } from 'typeorm';
-import { Repository } from 'typeorm/repository/Repository';
-import { Category } from 'src/domain/categories/entities/category.entity';
-import { Connection } from 'src/domain/connections/entities/connection.entity';
-import { ReportConnection } from 'src/domain/connections/entities/report_connection.entity';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Like } from 'src/domain/meetups/entities/like.entity';
-import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
-import { User } from 'src/domain/users/entities/user.entity';
+import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
+import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
+import { FcmService } from 'src/services/fcm/fcm.service';
+import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
+import { initialUsername } from 'src/helpers/random-username';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
+import { Like } from 'src/domain/meetups/entities/like.entity';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
-import { ReportUser } from 'src/domain/users/entities/report_user.entity';
-import { Secret } from 'src/domain/secrets/entities/secret.entity';
-import { Cache } from 'cache-manager';
-import { initialUsername } from 'src/helpers/random-username';
 import { randomName } from 'src/helpers/random-filename';
-import { SmsClient } from '@nestjs-packages/ncp-sens';
-import { SesService } from 'src/services/aws/ses.service';
-import { S3Service } from 'src/services/aws/s3.service';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
-import { Friendship } from 'src/domain/users/entities/friendship.entity';
-import { CreateFriendRequestDto } from 'src/domain/users/dto/create-friend-request.dto';
-import { FcmService } from 'src/services/fcm/fcm.service';
+import { ReportConnection } from 'src/domain/connections/entities/report_connection.entity';
+import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
+import { ReportUser } from 'src/domain/users/entities/report_user.entity';
+import { Repository } from 'typeorm/repository/Repository';
+import { S3Service } from 'src/services/aws/s3.service';
+import { Secret } from 'src/domain/secrets/entities/secret.entity';
+import { SesService } from 'src/services/aws/ses.service';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
+import { SmsClient } from '@nestjs-packages/ncp-sens';
+import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
+import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
+import { User } from 'src/domain/users/entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -1076,6 +1076,31 @@ GROUP BY userId HAVING userId = ?',
     await this.repository.manager.query(queryString, [count, connectionId]);
 
     return count;
+  }
+
+  // 내가 찜한 모임 리스트
+  async getConnectionsReactedByMe(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Reaction>> {
+    const queryBuilder = this.reactionRepository
+      .createQueryBuilder('reaction')
+      .innerJoinAndSelect('reaction.connection', 'connection')
+      .innerJoinAndSelect('connection.dot', 'dot')
+      .innerJoinAndSelect('connection.user', 'user')
+      .leftJoinAndSelect('connection.userReactions', 'reactions')
+      .where({
+        userId,
+      });
+
+    const config: PaginateConfig<Reaction> = {
+      sortableColumns: ['connectionId'],
+      defaultLimit: 20,
+      defaultSortBy: [['connectionId', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
   }
 
   //?-------------------------------------------------------------------------//
