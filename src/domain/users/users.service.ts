@@ -1033,24 +1033,30 @@ GROUP BY userId HAVING userId = ?',
     userId: number,
     connectionId: number,
     emotion: Emotion,
-  ): Promise<number> {
+  ): Promise<Reaction> {
+    // upsert reaction
     try {
-      await this.repository.manager.query(
+      const { affectedRows } = await this.repository.manager.query(
         `INSERT IGNORE INTO reaction (userId, connectionId, ${emotion}) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(userId), connectionId = VALUES(connectionId), ${emotion} = VALUES(${emotion})`,
         [userId, connectionId, true],
       );
+      if (affectedRows > 1) { // returns 2 if updated
+        await this.connectionRepository.increment(
+          { id: connectionId },
+          `${emotion}Count`,
+          1,
+        );
+      }
     } catch (e) {
       this.logger.log(e);
     }
-    const [row] = await this.repository.manager.query(
-      `SELECT COUNT(*) AS cnt FROM reaction WHERE connectionId = ? AND ${emotion} = ?`,
-      [connectionId, true],
-    );
-    const count = row ? +row[`cnt`] : 0;
-    const queryString = `UPDATE connection SET ${emotion}Count = ? WHERE id = ?`;
-    await this.repository.manager.query(queryString, [count, connectionId]);
-
-    return count;
+    // return reaction
+    return await this.reactionRepository.findOne({
+      where: {
+        userId,
+        connectionId,
+      },
+    });
   }
 
   // 리스트에서 삭제
@@ -1058,24 +1064,28 @@ GROUP BY userId HAVING userId = ?',
     userId: number,
     connectionId: number,
     emotion: string,
-  ): Promise<number> {
+  ): Promise<Reaction> {
     try {
-      await this.repository.manager.query(
+      const { changedRows } = await this.reactionRepository.manager.query(
         `UPDATE reaction SET ${emotion} = ? WHERE userId = ? AND connectionId = ?`,
         [false, userId, connectionId],
       );
+      if (changedRows > 0) { // returns 1 if updated
+        await this.reactionRepository.manager.query(
+          `UPDATE connection SET ${emotion}Count = ${emotion}Count - 1 WHERE id = ? AND ${emotion}Count > 0`,
+          [connectionId],
+        );
+      }
     } catch (e) {
       this.logger.log(e);
     }
-    const [row] = await this.repository.manager.query(
-      `SELECT COUNT(*) AS cnt FROM reaction WHERE connectionId = ? AND ${emotion} = ?`,
-      [connectionId, true],
-    );
-    const count = row ? +row[`cnt`] : 0;
-    const queryString = `UPDATE connection SET ${emotion}Count = ? WHERE id = ?`;
-    await this.repository.manager.query(queryString, [count, connectionId]);
-
-    return count;
+    // return reaction
+    return await this.reactionRepository.findOne({
+      where: {
+        userId,
+        connectionId,
+      },
+    });
   }
 
   // 내가 찜한 모임 리스트

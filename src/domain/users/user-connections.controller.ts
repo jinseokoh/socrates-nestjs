@@ -45,7 +45,7 @@ export class UserConnectionsController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Like Pivot
+  //? Reaction Pivot
   //?-------------------------------------------------------------------------//
 
   // @ApiOperation({ description: '나의 찜 리스트에 추가' })
@@ -222,15 +222,12 @@ export class UserConnectionsController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('connectionId', ParseIntPipe) connectionId: number,
     @Body() dto: CreateReactionDto, // optional message, and skill
-  ): Promise<AnyData> {
-    const count = await this.usersService.attachToReactionPivot(
+  ): Promise<Reaction> {
+    return await this.usersService.attachToReactionPivot(
       userId,
       connectionId,
       dto.emotion,
     );
-    return {
-      data: count,
-    };
   }
 
   @ApiOperation({ description: '발견 reaction 리스트에서 삭제' })
@@ -239,15 +236,12 @@ export class UserConnectionsController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('connectionId', ParseIntPipe) connectionId: number,
     @Body() dto: RemoveReactionDto, // optional message, and skill
-  ): Promise<AnyData> {
-    const count = await this.usersService.detachFromReactionPivot(
+  ): Promise<Reaction> {
+    return await this.usersService.detachFromReactionPivot(
       userId,
       connectionId,
       dto.emotion,
     );
-    return {
-      data: count,
-    };
   }
 
   // @ApiOperation({ description: '참가신청 리스트에 추가' })
