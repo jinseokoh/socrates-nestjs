@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Sse,
@@ -43,6 +44,28 @@ export class ConnectionRemarksController {
       ...dto,
       userId,
       connectionId,
+    });
+  }
+
+  @ApiOperation({ description: '답글 등록' })
+  @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
+  @Post(':connectionId/remarks/:remarkId')
+  async createReply(
+    @CurrentUserId() userId: number,
+    @Param('connectionId') connectionId: number,
+    @Param('remarkId', ParseIntPipe) remarkId: number,
+    @Body() dto: CreateRemarkDto,
+  ): Promise<any> {
+    let parentId = null;
+    if (remarkId) {
+      const remark = await this.remarksService.findById(remarkId);
+      parentId = remark.parentId ? remark.parentId : remarkId;
+    }
+    return await this.remarksService.create({
+      ...dto,
+      userId,
+      connectionId,
+      parentId,
     });
   }
 

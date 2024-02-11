@@ -44,7 +44,7 @@ export class MeetupThreadsController {
   @ApiOperation({ description: '답글 등록' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
   @Post(':meetupId/threads/:threadId')
-  async createAnswer(
+  async createReply(
     @CurrentUserId() userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Param('threadId', ParseIntPipe) threadId: number,

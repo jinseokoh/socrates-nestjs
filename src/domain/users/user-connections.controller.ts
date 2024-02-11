@@ -48,46 +48,6 @@ export class UserConnectionsController {
   //? Reaction Pivot
   //?-------------------------------------------------------------------------//
 
-  // @ApiOperation({ description: '나의 찜 리스트에 추가' })
-  // @Post(':userId/connections-liked/:connectionId')
-  // async attachToLikePivot(
-  //   @Param('userId', ParseIntPipe) userId: number,
-  //   @Param('connectionId', ParseIntPipe) connectionId: number,
-  // ): Promise<any> {
-  //   //? checking if this connection belongs to the user costs a database access,
-  //   //? which you can get around if you design your application carefully.
-  //   //? so user validation has been removed. keep that in mind.
-
-  //   console.log(userId, connectionId);
-  //   try {
-  //     await this.usersService.attachToLikePivot(userId, connectionId);
-  //     return {
-  //       data: 'ok',
-  //     };
-  //   } catch (e) {
-  //     throw new BadRequestException();
-  //   }
-  // }
-
-  // @ApiOperation({ description: '나의 찜 리스트에서 삭제' })
-  // @Delete(':userId/connections-liked/:connectionId')
-  // async detachFromLikePivot(
-  //   @Param('userId', ParseIntPipe) userId: number,
-  //   @Param('connectionId', ParseIntPipe) connectionId: number,
-  // ): Promise<any> {
-  //   //? checking if this connection belongs to the user costs a database access,
-  //   //? which you can get around if you design your application carefully.
-  //   //? so user validation has been removed. keep that in mind.
-  //   try {
-  //     await this.usersService.detachFromLikePivot(userId, connectionId);
-  //     return {
-  //       data: 'ok',
-  //     };
-  //   } catch (e) {
-  //     throw new BadRequestException();
-  //   }
-  // }
-
   @ApiOperation({ description: '내가 찜한 발견 리스트' })
   @PaginateQueryOptions()
   @Get(':userId/connections-reacted')

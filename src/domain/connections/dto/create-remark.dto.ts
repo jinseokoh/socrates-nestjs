@@ -15,4 +15,9 @@ export class CreateRemarkDto {
   @IsNumber()
   @IsOptional()
   connectionId: number | null;
+
+  @ApiProperty({ description: '상위 댓글 아이디', required: false })
+  @IsNumber()
+  @IsOptional()
+  parentId?: number | null;
 }
