@@ -592,7 +592,7 @@ GROUP BY userId HAVING userId = ?',
       });
     } catch (e) {
       console.log(e);
-      throw new BadRequestException('ncloud smsClient error');
+      throw new BadRequestException('nCloud smsClient error');
     }
   }
 
