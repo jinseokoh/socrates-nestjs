@@ -120,7 +120,7 @@ export class ConnectionRemarksController {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '관리자) 댓글 soft 삭제' })
+  @ApiOperation({ description: '댓글 soft 삭제' })
   @Delete(':connectionId/remarks/:remarkId')
   async remove(
     @Param('connectionId', ParseIntPipe) connectionId: number,

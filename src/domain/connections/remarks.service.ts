@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -15,16 +15,20 @@ import { FindOneOptions, Repository } from 'typeorm';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ClientProxy } from '@nestjs/microservices';
 import { UpdateRemarkDto } from 'src/domain/connections/dto/update-remark.dto';
+import { FcmService } from 'src/services/fcm/fcm.service';
 
 @Injectable()
 export class RemarksService {
+  private readonly logger = new Logger(RemarksService.name);
+
   constructor(
     @InjectRepository(Remark)
     private readonly repository: Repository<Remark>,
     @InjectRepository(Connection)
     private readonly connectionRepository: Repository<Connection>,
-    // @Inject(SlackService) private readonly slack: SlackService,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
+    // @Inject(SlackService) private readonly slack: SlackService,
+    private readonly fcmService: FcmService,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -32,29 +36,31 @@ export class RemarksService {
   //?-------------------------------------------------------------------------//
 
   async create(dto: CreateRemarkDto): Promise<Remark> {
-    // validation
-    try {
-      const connection = await this.connectionRepository.findOneOrFail({
-        where: {
-          id: dto.connectionId,
-        },
-      });
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
     // creation
     const remark = await this.repository.save(this.repository.create(dto));
-    // fetch remark w/ user to emit SSE
-    const remarkWithUser = await this.findById(remark.id, ['user']);
+    const remarkWithUser = await this.findById(remark.id, [
+      'user',
+      'connection',
+      'connection.user',
+    ]);
     console.log('remarkWithUser', remarkWithUser);
     // emit SSE
     this.redisClient.emit('sse.add_connection', remarkWithUser);
 
-    // const connectionTitle = connection.title.replace(/[\<\>]/g, '');
-    // await this.slack.postMessage({
-    //   channel: 'major',
-    //   text: `[${process.env.NODE_ENV}-api] 📝 댓글 : <${process.env.ADMIN_URL}/connections/show/${connection.id}|${connectionTitle}>`,
-    // });
+    //? 푸시노티 push notification
+    // const fbToken = threadWithUser.meetup.user.pushToken;
+    // const notification = {
+    //   title: 'MeSo',
+    //   body: '모임에 댓글이 달렸습니다.',
+    // };
+    // this.fcmService.sendToToken(fbToken, notification);
+
+    this.connectionRepository.increment(
+      { id: dto.connectionId },
+      `remarkCount`,
+      1,
+    );
+
     return remarkWithUser;
   }
 
@@ -154,8 +160,17 @@ export class RemarksService {
   //?-------------------------------------------------------------------------//
 
   async softRemove(id: number): Promise<Remark> {
-    const remark = await this.findById(id);
-    return await this.repository.softRemove(remark);
+    try {
+      const remark = await this.findById(id);
+      await this.repository.softRemove(remark);
+      await this.connectionRepository.manager.query(
+        `UPDATE connection SET remarkCount = remarkCount - 1 WHERE id = ? AND remarkCount > 0`,
+        [id],
+      );
+      return remark;
+    } catch (e) {
+      this.logger.log(e);
+    }
   }
 
   async remove(id: number): Promise<Remark> {

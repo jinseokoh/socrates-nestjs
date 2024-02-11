@@ -1040,7 +1040,8 @@ GROUP BY userId HAVING userId = ?',
         `INSERT IGNORE INTO reaction (userId, connectionId, ${emotion}) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(userId), connectionId = VALUES(connectionId), ${emotion} = VALUES(${emotion})`,
         [userId, connectionId, true],
       );
-      if (affectedRows > 1) { // returns 2 if updated
+      if (affectedRows > 1) {
+        // returns 2 if updated
         await this.connectionRepository.increment(
           { id: connectionId },
           `${emotion}Count`,
@@ -1070,7 +1071,8 @@ GROUP BY userId HAVING userId = ?',
         `UPDATE reaction SET ${emotion} = ? WHERE userId = ? AND connectionId = ?`,
         [false, userId, connectionId],
       );
-      if (changedRows > 0) { // returns 1 if updated
+      if (changedRows > 0) {
+        // returns 1 if updated
         await this.reactionRepository.manager.query(
           `UPDATE connection SET ${emotion}Count = ${emotion}Count - 1 WHERE id = ? AND ${emotion}Count > 0`,
           [connectionId],
