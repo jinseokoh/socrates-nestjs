@@ -62,20 +62,22 @@ export class RemarksService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  async findAll(
-    connectionId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Remark>> {
+  async findAll(query: PaginateQuery): Promise<Paginated<Remark>> {
     const queryBuilder = this.repository
       .createQueryBuilder('remark')
       .innerJoinAndSelect('remark.user', 'user')
-      .where('remark.connection = :connectionId', { connectionId });
+      .leftJoinAndSelect('remark.children', 'children')
+      .leftJoinAndSelect('children.user', 'ruser')
+      .where('remark.parentId IS NULL')
+      .andWhere('remark.deletedAt IS NULL');
 
     const config: PaginateConfig<Remark> = {
       sortableColumns: ['id'],
+      searchableColumns: ['body'],
       defaultLimit: 20,
-      defaultSortBy: [['id', 'ASC']],
+      defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
+        meetupId: [FilterOperator.EQ],
         isFlagged: [FilterOperator.EQ],
       },
     };
@@ -108,6 +110,7 @@ export class RemarksService {
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
       filterableColumns: {
+        isFlagged: [FilterOperator.EQ],
         // userId: [FilterOperator.EQ, FilterOperator.IN],
       },
     };

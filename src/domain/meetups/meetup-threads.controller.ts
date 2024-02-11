@@ -88,7 +88,7 @@ export class MeetupThreadsController {
   }
 
   //? 답글 리스트, 최상단 부모는 리턴되지 않음.
-  @ApiOperation({ description: '답글(A) 리스트 w/ Pagination' })
+  @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':meetupId/threads/:threadId')
   async getAnswersById(
@@ -103,10 +103,10 @@ export class MeetupThreadsController {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '질문 수정' })
+  @ApiOperation({ description: '댓글 수정' })
   @Patch(':meetupId/threads/:threadId')
   async update(
-    @CurrentUserId() userId: number,
+    // @CurrentUserId() userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Param('threadId', ParseIntPipe) threadId: number,
     @Body() dto: UpdateThreadDto,
@@ -118,10 +118,10 @@ export class MeetupThreadsController {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '질문 soft 삭제' })
+  @ApiOperation({ description: '댓글 soft 삭제' })
   @Delete(':meetupId/threads/:threadId')
   async remove(
-    @CurrentUserId() userId: number,
+    // @CurrentUserId() userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Param('threadId', ParseIntPipe) threadId: number,
   ): Promise<Thread> {

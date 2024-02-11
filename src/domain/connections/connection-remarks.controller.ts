@@ -76,28 +76,30 @@ export class ConnectionRemarksController {
   @PaginateQueryOptions()
   @Get(':connectionId/remarks')
   async getRemarks(
-    @Param('connectionId') connectionId: number,
+    @Param('connectionId', ParseIntPipe) connectionId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Remark>> {
-    return await this.remarksService.findAll(connectionId, query);
+    const queryParams = {
+      ...query,
+      ...{
+        filter: {
+          connectionId: `$eq:${connectionId}`,
+        },
+      },
+    };
+
+    return await this.remarksService.findAll(queryParams);
   }
 
   @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':connectionId/remarks/:remarkId')
   async getRemarksById(
-    @Param('connectionId') connectionId: number,
-    @Param('remarkId') remarkId: number,
+    @Param('connectionId', ParseIntPipe) connectionId: number,
+    @Param('remarkId', ParseIntPipe) remarkId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Remark>> {
     return await this.remarksService.findAllById(connectionId, remarkId, query);
-  }
-
-  // [admin] specific logic for Report
-  @ApiOperation({ description: '[관리자] 댓글 상세보기' })
-  @Get(':connectionId/remarks/:remarkId')
-  async getRemarkById(@Param('remarkId') remarkId: number): Promise<Remark> {
-    return await this.remarksService.findById(remarkId, ['connection']);
   }
 
   //?-------------------------------------------------------------------------//
@@ -107,10 +109,11 @@ export class ConnectionRemarksController {
   @ApiOperation({ description: '댓글 수정' })
   @Patch(':connectionId/remarks/:remarkId')
   async update(
-    @Param('remarkId') id: number,
+    @Param('connectionId', ParseIntPipe) connectionId: number,
+    @Param('remarkId') remarkId: number,
     @Body() dto: UpdateRemarkDto,
   ): Promise<Remark> {
-    return await this.remarksService.update(id, dto);
+    return await this.remarksService.update(remarkId, dto);
   }
 
   //?-------------------------------------------------------------------------//
@@ -119,7 +122,10 @@ export class ConnectionRemarksController {
 
   @ApiOperation({ description: '관리자) 댓글 soft 삭제' })
   @Delete(':connectionId/remarks/:remarkId')
-  async remove(@Param('remarkId') id: number): Promise<Remark> {
-    return await this.remarksService.softRemove(id);
+  async remove(
+    @Param('connectionId', ParseIntPipe) connectionId: number,
+    @Param('remarkId') remarkId: number,
+  ): Promise<Remark> {
+    return await this.remarksService.softRemove(remarkId);
   }
 }

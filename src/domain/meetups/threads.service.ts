@@ -65,14 +65,16 @@ export class ThreadsService {
       .createQueryBuilder('thread')
       .innerJoinAndSelect('thread.user', 'user')
       .leftJoinAndSelect('thread.children', 'children')
-      .leftJoinAndSelect('children.user', 'childrenUser')
+      .leftJoinAndSelect('children.user', 'ruser')
       .where('thread.parentId IS NULL')
-      // .andWhere('children.isFlagged = :isFlagged', { isFlagged: false }); // makes all flagged thread disappear
       .andWhere('thread.deletedAt IS NULL');
+    // to make all flagged thread disappear
+    // .andWhere('children.isFlagged = :isFlagged', { isFlagged: false });
 
     const config: PaginateConfig<Thread> = {
       sortableColumns: ['id'],
       searchableColumns: ['body'],
+      defaultLimit: 20,
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         meetupId: [FilterOperator.EQ],
