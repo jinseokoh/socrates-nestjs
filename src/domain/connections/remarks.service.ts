@@ -165,7 +165,7 @@ export class RemarksService {
       await this.repository.softRemove(remark);
       await this.connectionRepository.manager.query(
         `UPDATE connection SET remarkCount = remarkCount - 1 WHERE id = ? AND remarkCount > 0`,
-        [id],
+        [remark.connectionId],
       );
       return remark;
     } catch (e) {

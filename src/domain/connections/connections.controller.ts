@@ -79,6 +79,7 @@ export class ConnectionsController {
       'dot',
       'remarks',
       'remarks.user',
+      'remarks.user.profile',
       'userReports',
       // 'userReactions',
       'user',
