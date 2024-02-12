@@ -84,7 +84,7 @@ export class RemarksService {
       defaultLimit: 20,
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
-        meetupId: [FilterOperator.EQ],
+        connectionId: [FilterOperator.EQ],
         isFlagged: [FilterOperator.EQ],
       },
     };
