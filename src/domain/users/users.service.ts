@@ -1,3 +1,4 @@
+import { Flag } from 'src/domain/users/entities/flag.entity';
 import {
   BadRequestException,
   ForbiddenException,
@@ -65,6 +66,7 @@ import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { User } from 'src/domain/users/entities/user.entity';
+import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
 
 @Injectable()
 export class UsersService {
@@ -1810,6 +1812,21 @@ WHERE `joinType` = ? AND `user`.id = ?',
     };
     // todo. remove dups
     // return { data: [...new Set(data)] };
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? 댓글 신고
+  //?-------------------------------------------------------------------------//
+
+  // [관리자] User 생성
+  async createFlag(dto: CreateFlagDto): Promise<Flag> {
+    const flag = new Flag({
+      message: dto.message,
+      entity: dto.entity,
+      entityId: dto.entityId,
+      userId: dto.userId,
+    });
+    return await this.dataSource.createQueryRunner().manager.save(flag);
   }
 
   //?-------------------------------------------------------------------------//

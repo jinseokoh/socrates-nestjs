@@ -32,6 +32,8 @@ import { UserImpressionsController } from 'src/domain/users/user-impressions.con
 import { UserLanguagesController } from 'src/domain/users/user-languages.controller';
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
+import { Flag } from 'src/domain/users/entities/flag.entity';
+import { UserFlagsController } from 'src/domain/users/user-flags.controller';
 
 @Module({
   imports: [
@@ -41,6 +43,7 @@ import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-s
       Like,
       Join,
       Hate,
+      Flag,
       Reaction,
       ReportConnection,
       ReportMeetup,
@@ -67,6 +70,7 @@ import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-s
   controllers: [
     UsersController,
     UserCategoriesController,
+    UserFlagsController,
     UserImpressionsController,
     UserLanguagesController,
     UserMeetupsController,

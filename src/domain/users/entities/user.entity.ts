@@ -34,6 +34,7 @@ import { Dot } from 'src/domain/connections/entities/dot.entity';
 import { ReportConnection } from 'src/domain/connections/entities/report_connection.entity';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
+import { Flag } from 'src/domain/users/entities/flag.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -213,6 +214,9 @@ export class User {
 
   @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.user)
   public languageSkills: LanguageSkill[];
+
+  @OneToMany(() => Flag, (flag) => flag.user)
+  public flags: Flag[];
 
   @OneToMany(() => Comment, (comment) => comment.user)
   public comments: Comment[];
