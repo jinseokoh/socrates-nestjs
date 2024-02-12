@@ -72,6 +72,7 @@ export class RemarksService {
     const queryBuilder = this.repository
       .createQueryBuilder('remark')
       .innerJoinAndSelect('remark.user', 'user')
+      .innerJoinAndSelect('user.profile', 'profile')
       .leftJoinAndSelect('remark.children', 'children')
       .leftJoinAndSelect('children.user', 'ruser')
       .where('remark.parentId IS NULL')
