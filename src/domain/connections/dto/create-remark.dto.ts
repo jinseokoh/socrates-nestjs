@@ -25,10 +25,12 @@ export class CreateRemarkDto {
 
   @ApiProperty({ description: '사용자 아이디' })
   @IsNumber()
+  @IsOptional()
   userId: number;
 
   @ApiProperty({ description: '관련 Connection 아이디' })
   @IsNumber()
+  @IsOptional()
   connectionId: number;
 
   @ApiProperty({ description: '상위 댓글 아이디', required: false })

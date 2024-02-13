@@ -25,10 +25,12 @@ export class CreateThreadDto {
 
   @ApiProperty({ description: '사용자 아이디' })
   @IsNumber()
+  @IsOptional()
   userId: number;
 
   @ApiProperty({ description: 'meetup 아이디' })
   @IsNumber()
+  @IsOptional()
   meetupId: number | null;
 
   @ApiProperty({ description: '상위 댓글 아이디', required: false })
