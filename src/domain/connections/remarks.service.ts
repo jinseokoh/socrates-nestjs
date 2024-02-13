@@ -100,6 +100,7 @@ export class RemarksService {
     const queryBuilder = this.repository
       .createQueryBuilder('remark')
       .leftJoinAndSelect('remark.user', 'user')
+      .leftJoinAndSelect('user', 'user.profile')
       .where('remark.connectionId = :connectionId', { connectionId })
       .andWhere('remark.parentId = :remarkId', { remarkId })
       // .andWhere(
