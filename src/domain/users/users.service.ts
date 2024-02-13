@@ -67,6 +67,8 @@ import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { User } from 'src/domain/users/entities/user.entity';
 import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
+import { Remark } from 'src/domain/connections/entities/remark.entity';
+import { Thread } from 'src/domain/meetups/entities/thread.entity';
 
 @Injectable()
 export class UsersService {
@@ -1826,7 +1828,28 @@ WHERE `joinType` = ? AND `user`.id = ?',
       entityId: dto.entityId,
       userId: dto.userId,
     });
-    return await this.dataSource.createQueryRunner().manager.save(flag);
+
+    // additionally, increment flagCount of each
+    try {
+      const record = await this.dataSource
+        .createQueryRunner()
+        .manager.save(flag);
+
+      if (dto.entity === 'remark') {
+        await this.dataSource
+          .getRepository(Remark)
+          .increment({ id: dto.entityId }, 'flagCount', 1);
+      }
+      if (dto.entity === 'thread') {
+        await this.dataSource
+          .getRepository(Thread)
+          .increment({ id: dto.entityId }, 'flagCount', 1);
+      }
+
+      return record;
+    } catch (e) {
+      throw e;
+    }
   }
 
   //?-------------------------------------------------------------------------//
