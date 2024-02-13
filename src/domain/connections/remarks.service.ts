@@ -74,7 +74,7 @@ export class RemarksService {
       .innerJoinAndSelect('remark.user', 'user')
       .innerJoinAndSelect('user.profile', 'profile')
       .leftJoinAndSelect('remark.children', 'children')
-      .leftJoinAndSelect('children.user', 'ruser')
+      .leftJoinAndSelect('children.user', 'replier')
       .where('remark.parentId IS NULL')
       .andWhere('remark.deletedAt IS NULL');
 
@@ -99,8 +99,8 @@ export class RemarksService {
   ): Promise<Paginated<Remark>> {
     const queryBuilder = this.repository
       .createQueryBuilder('remark')
-      .leftJoinAndSelect('remark.user', 'user')
-      .leftJoinAndSelect('user', 'user.profile')
+      .innerJoinAndSelect('remark.user', 'user')
+      .innerJoinAndSelect('user.profile', 'profile')
       .where('remark.connectionId = :connectionId', { connectionId })
       .andWhere('remark.parentId = :remarkId', { remarkId })
       // .andWhere(
