@@ -28,9 +28,13 @@ export class Remark {
   @ApiProperty({ description: 'like count' })
   likeCount: number;
 
-  @Column({ default: false })
-  @ApiProperty({ description: '신고여부' })
-  isFlagged: boolean;
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'flag count' })
+  flagCount: number;
+
+  @Column({ type: 'datetime', nullable: true })
+  @ApiProperty({ description: '1달 동안만 사용가능' })
+  expiredAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -30,13 +30,13 @@ export class Thread {
   @ApiProperty({ description: 'like count' })
   likeCount: number;
 
-  @Column({ default: false })
-  @ApiProperty({ description: '신고여부' })
-  isFlagged: boolean;
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'flag count' })
+  flagCount: number;
 
   @Column({ type: 'datetime', nullable: true })
-  @ApiProperty({ description: '모임장이 언제 읽었는지' })
-  readAt: Date | null;
+  @ApiProperty({ description: '1달 동안만 사용가능' })
+  expiredAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
