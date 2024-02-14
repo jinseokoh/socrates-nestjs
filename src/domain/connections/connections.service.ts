@@ -96,6 +96,11 @@ export class ConnectionsService {
         ? await this.repository.findOneOrFail({
             where: { id },
             relations,
+            order: {
+              remarks: {
+                id: 'DESC',
+              },
+            },
           })
         : await this.repository.findOneOrFail({
             where: { id },
