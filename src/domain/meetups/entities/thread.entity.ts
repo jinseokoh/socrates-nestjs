@@ -50,7 +50,6 @@ export class Thread {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
   userId: number | null; // to make it available to Repository.
 
@@ -62,7 +61,6 @@ export class Thread {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
   meetupId: number | null; // to make it available to Repository.
 
@@ -76,7 +74,6 @@ export class Thread {
   // data structure ref)
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
-  // @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
   parentId: number | null;
 
