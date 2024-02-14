@@ -61,7 +61,6 @@ export class Profile {
   @Column({ type: 'int', unsigned: true, default: 0 })
   joinCount: number;
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true, default: 0 })
   payCount: number;
 
