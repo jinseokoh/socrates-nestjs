@@ -187,6 +187,11 @@ export class MeetupsService {
         ? await this.repository.findOneOrFail({
             where: { id },
             relations,
+            order: {
+              threads: {
+                id: 'DESC',
+              },
+            },
           })
         : await this.repository.findOneOrFail({
             where: { id },
