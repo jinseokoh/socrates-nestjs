@@ -28,6 +28,10 @@ export class Friendship {
   @ApiProperty({ description: 'message' })
   message: string | null;
 
+  @Column({ default: true })
+  @ApiProperty({ description: 'is anonymous?' })
+  isAnonymous: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 
