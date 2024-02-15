@@ -60,6 +60,22 @@ export class DotsService {
     });
   }
 
+  async findById(id: number, relations: string[] = []): Promise<Dot> {
+    try {
+      return relations.length > 0
+        ? await this.repository.findOneOrFail({
+            where: { id },
+            relations,
+          })
+        : await this.repository.findOneOrFail({
+            where: { id },
+          });
+    } catch (e) {
+      this.logger.error(e);
+      throw new NotFoundException('entity not found');
+    }
+  }
+
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//

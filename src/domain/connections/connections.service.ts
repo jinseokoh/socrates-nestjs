@@ -17,6 +17,7 @@ import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { DataSource, Repository } from 'typeorm';
 import { CreateConnectionDto } from 'src/domain/connections/dto/create-connection.dto';
 import { LoremIpsum } from 'lorem-ipsum';
+import { Dot } from 'src/domain/connections/entities/dot.entity';
 
 @Injectable()
 export class ConnectionsService {
@@ -25,6 +26,8 @@ export class ConnectionsService {
   constructor(
     @InjectRepository(Connection)
     private readonly repository: Repository<Connection>,
+    @InjectRepository(Dot)
+    private readonly dotRepository: Repository<Dot>,
     private dataSource: DataSource, // for transaction
   ) {}
 
@@ -34,8 +37,17 @@ export class ConnectionsService {
 
   async create(dto: CreateConnectionDto): Promise<Connection> {
     try {
-      const entity = await this.repository.save(this.repository.create(dto));
-      return await this.findById(entity.id, ['dot']);
+      const dot = await this.dotRepository.findOne({
+        where: {
+          id: dto.dotId,
+        },
+      });
+      const connection = await this.repository.save(
+        this.repository.create(dto),
+      );
+      connection['dot'] = dot;
+
+      return connection;
     } catch (e) {
       throw new BadRequestException();
     }
@@ -48,17 +60,30 @@ export class ConnectionsService {
   @ApiOperation({ description: 'create connection! not dot.' })
   async upsert(dto: CreateConnectionDto): Promise<void> {
     try {
-      await this.repository.upsert(
-        [
-          {
-            userId: dto.userId,
-            dotId: dto.dotId,
-            answer: dto.answer,
-          },
-        ],
-        ['userId', 'dotId'],
+      //! somehow the following repository.upsert() method gives off a weird error
+      //! TypeORMError: Cannot update entity because entity id is not set in the entity
+      //! need to investigate further in a later time.
+      // await this.repository.upsert(
+      //   [
+      //     {
+      //       userId: dto.userId,
+      //       dotId: dto.dotId,
+      //       answer: dto.answer,
+      //     },
+      //   ],
+      //   ['userId', 'dotId'],
+      // );
+      await this.repository.manager.query(
+        'INSERT IGNORE INTO `connection` \
+(userId, dotId, answer) VALUES (?, ?, ?) \
+ON DUPLICATE KEY UPDATE \
+userId = VALUES(`userId`), \
+dotId = VALUES(`dotId`), \
+answer = VALUES(`answer`)',
+        [dto.userId, dto.dotId, dto.answer],
       );
     } catch (e) {
+      console.error(dto, e);
       throw new BadRequestException();
     }
   }
@@ -91,16 +116,19 @@ export class ConnectionsService {
 
   // Meetup 상세보기
   async findById(id: number, relations: string[] = []): Promise<Connection> {
+    const includedRemarks = relations.includes('remarks');
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
             where: { id },
             relations,
-            order: {
-              remarks: {
-                id: 'DESC',
-              },
-            },
+            order: includedRemarks
+              ? {
+                  remarks: {
+                    id: 'DESC',
+                  },
+                }
+              : undefined,
           })
         : await this.repository.findOneOrFail({
             where: { id },

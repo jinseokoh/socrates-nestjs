@@ -52,7 +52,7 @@ export class ConnectionsController {
     @Body() dto: CreateConnectionDto,
   ): Promise<void> {
     try {
-      await this.connectionsService.create({ ...dto, userId });
+      await this.connectionsService.upsert({ ...dto, userId });
     } catch (e) {
       throw new BadRequestException();
     }
