@@ -108,7 +108,7 @@ export class ConnectionsController {
     return connection.userReactions ?? [];
   }
 
-  @ApiOperation({ description: 'Connection 상세보기' })
+  @ApiOperation({ description: '이 회원의 Connection 리스트 전부 보기' })
   @Get('users/:id')
   async getConnectionByUserId(@Param('id') id: number): Promise<Connection[]> {
     return await this.connectionsService.findByUserId(id);
