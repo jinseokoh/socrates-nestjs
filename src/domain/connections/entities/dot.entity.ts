@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DotStatus } from 'src/common/enums';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
+import { Plea } from 'src/domain/users/entities/plea.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -58,6 +59,9 @@ export class Dot {
 
   @OneToMany(() => Connection, (connection) => connection.dot)
   public connections: Connection[];
+
+  @OneToMany(() => Plea, (plea) => plea.dot)
+  public pleas: Plea[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo

@@ -29,7 +29,7 @@ import {
   FriendshipStatus,
 } from 'src/common/enums';
 import { AnyData, SignedUrl } from 'src/common/types';
-import { Brackets, DataSource, FindOneOptions, In, Not } from 'typeorm';
+import { DataSource, FindOneOptions, In, Not } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
@@ -69,6 +69,8 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
 import { Remark } from 'src/domain/connections/entities/remark.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
+import { Plea } from 'src/domain/users/entities/plea.entity';
+import { Dot } from 'src/domain/connections/entities/dot.entity';
 
 @Injectable()
 export class UsersService {
@@ -90,6 +92,8 @@ export class UsersService {
     private readonly meetupRepository: Repository<Meetup>,
     @InjectRepository(Connection)
     private readonly connectionRepository: Repository<Connection>,
+    @InjectRepository(Dot)
+    private readonly dotRepository: Repository<Dot>,
     @InjectRepository(Reaction)
     private readonly reactionRepository: Repository<Reaction>,
     @InjectRepository(Hate)
@@ -98,6 +102,8 @@ export class UsersService {
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Join)
     private readonly joinRepository: Repository<Join>,
+    @InjectRepository(Plea)
+    private readonly pleaRepository: Repository<Plea>,
     @InjectRepository(Friendship)
     private readonly friendshipRepository: Repository<Friendship>,
     @InjectRepository(ReportMeetup)
@@ -1589,6 +1595,47 @@ WHERE `joinType` = ? AND `user`.id = ?',
     };
 
     return await paginate(query, queryBuilder, config);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Plea Pivot
+  //?-------------------------------------------------------------------------//
+
+  // 발견요청 리스트에 추가
+  async attachToPleaPivot(
+    askingUserId: number,
+    askedUserId: number,
+    dotId: number,
+  ): Promise<Dot> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+    await queryRunner.manager.query(
+      'INSERT IGNORE INTO `plea` (askingUserId, askedUserId, dotId) VALUES (?, ?, ?)',
+      [askingUserId, askedUserId, dotId],
+    );
+
+    const dot = await this.dotRepository.findOneOrFail({
+      where: { id: dotId },
+      relations: ['pleas'],
+    });
+
+    return dot;
+  }
+
+  //--------------------------------------------------------------------------//
+
+  async getUniqueUsersPleaded(userId: number): Promise<User[]> {
+    const items = await this.pleaRepository
+      .createQueryBuilder('plea')
+      .innerJoinAndSelect('plea.askingUser', 'askingUser')
+      .where({
+        askedUserId: userId,
+      })
+      .groupBy('plea.askingUserId')
+      .getMany();
+
+    return items.map((v) => v.askingUser);
   }
 
   //?-------------------------------------------------------------------------//

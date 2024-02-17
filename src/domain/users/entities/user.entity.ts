@@ -35,6 +35,7 @@ import { ReportConnection } from 'src/domain/connections/entities/report_connect
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Plea } from 'src/domain/users/entities/plea.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -167,6 +168,12 @@ export class User {
   @OneToMany(() => Join, (join) => join.askedUser)
   public askedJoins: Join[];
 
+  @OneToMany(() => Plea, (plea) => plea.askingUser)
+  public askingPleas: Plea[];
+
+  @OneToMany(() => Plea, (plea) => plea.askedUser)
+  public askedPleas: Plea[];
+
   @OneToMany(() => Hate, (hate) => hate.sender)
   public usersHating: Hate[];
 
@@ -215,14 +222,14 @@ export class User {
   @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.user)
   public languageSkills: LanguageSkill[];
 
-  @OneToMany(() => Flag, (flag) => flag.user)
-  public flags: Flag[];
-
   @OneToMany(() => Comment, (comment) => comment.user)
   public comments: Comment[];
 
   @OneToMany(() => Remark, (remark) => remark.user)
   public remarks: Remark[];
+
+  @OneToMany(() => Flag, (flag) => flag.user)
+  public flags: Flag[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany

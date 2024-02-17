@@ -34,26 +34,30 @@ import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { UserFlagsController } from 'src/domain/users/user-flags.controller';
+import { Plea } from 'src/domain/users/entities/plea.entity';
+import { Dot } from 'src/domain/connections/entities/dot.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      User,
+      Profile,
+      Secret,
       Category,
       LanguageSkill,
+      Friendship,
+      Meetup,
       Like,
       Join,
+      ReportMeetup,
+      Plea,
       Hate,
       Flag,
+      Connection,
+      Dot,
       Reaction,
       ReportConnection,
-      ReportMeetup,
       ReportUser,
-      Secret,
-      Profile,
-      User,
-      Friendship,
-      Connection,
-      Meetup,
     ]),
     ThrottlerModule.forRoot([
       {

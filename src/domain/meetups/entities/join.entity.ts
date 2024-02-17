@@ -38,11 +38,10 @@ export class Join {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })
   askingUserId: number | null; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.id, {
+  @ManyToOne(() => User, (user) => user.askingJoins, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT',
@@ -50,11 +49,10 @@ export class Join {
   @JoinColumn({ name: 'askingUserId' })
   public askingUser!: User;
 
-  @Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })
   askedUserId: number | null; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.id, {
+  @ManyToOne(() => User, (user) => user.askedJoins, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT',

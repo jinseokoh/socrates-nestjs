@@ -23,6 +23,7 @@ import { CreateReactionDto } from 'src/domain/users/dto/create-reaction.dto';
 import { RemoveReactionDto } from 'src/domain/users/dto/remove-reaction.dto';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { GetReactionsDto } from 'src/domain/users/dto/get-reactions.dto';
+import { User } from 'src/domain/users/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -204,34 +205,27 @@ export class UserConnectionsController {
     );
   }
 
-  // @ApiOperation({ description: '참가신청 리스트에 추가' })
-  // @PaginateQueryOptions()
-  // @Post(':askingUserId/joins/:askedUserId/connections/:connectionId')
-  // async attachToJoinPivot(
-  //   @Param('askingUserId', ParseIntPipe) askingUserId: number,
-  //   @Param('askedUserId', ParseIntPipe) askedUserId: number,
-  //   @Param('connectionId', ParseIntPipe) connectionId: number,
-  //   @Body() dto: CreateJoinDto, // optional message, and skill
-  // ): Promise<AnyData> {
-  //   const connection = await this.usersService.attachToJoinPivot(
-  //     askingUserId,
-  //     askedUserId,
-  //     connectionId,
-  //     dto,
-  //   );
-  //   await this.usersService.upsertCategoryWithSkill(
-  //     askingUserId,
-  //     connection.subCategory,
-  //     dto.skill,
-  //   );
-  //   return {
-  //     data: 'ok',
-  //   };
-  // }
+  @ApiOperation({ description: '발견요청 리스트에 추가' })
+  @PaginateQueryOptions()
+  @Post(':askingUserId/pleas/:askedUserId/dots/:dotId')
+  async attachToPleaPivot(
+    @Param('askingUserId', ParseIntPipe) askingUserId: number,
+    @Param('askedUserId', ParseIntPipe) askedUserId: number,
+    @Param('dotId', ParseIntPipe) dotId: number,
+  ): Promise<AnyData> {
+    const dot = await this.usersService.attachToPleaPivot(
+      askingUserId,
+      askedUserId,
+      dotId,
+    );
+    return {
+      data: dot,
+    };
+  }
 
   // @ApiOperation({ description: '참가신청 승인/거부' })
   // @PaginateQueryOptions()
-  // @Patch(':askingUserId/joins/:askedUserId/connections/:connectionId')
+  // @Patch(':askingUserId/pleas/:askedUserId/connections/:connectionId')
   // async updateJoinToAcceptOrDeny(
   //   @Param('askingUserId', ParseIntPipe) askingUserId: number,
   //   @Param('askedUserId', ParseIntPipe) askedUserId: number,
@@ -298,9 +292,9 @@ export class UserConnectionsController {
   //   }; // as Paginated<Join>;
   // }
 
-  // @ApiOperation({ description: '초대받은 발견ID 리스트' })
-  // @Get(':userId/connectionids-invited')
-  // async getConnectionIdsInvited(@Param('userId') userId: number): Promise<AnyData> {
-  //   return this.usersService.getConnectionIdsInvited(userId);
-  // }
+  @ApiOperation({ description: '발견요청한 사용자 리스트' })
+  @Get(':userId/users-pleaded')
+  async getDotPleaded(@Param('userId') userId: number): Promise<User[]> {
+    return this.usersService.getUniqueUsersPleaded(userId);
+  }
 }

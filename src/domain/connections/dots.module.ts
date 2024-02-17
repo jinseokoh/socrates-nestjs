@@ -11,6 +11,7 @@ import { RemarksService } from 'src/domain/connections/remarks.service';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
+import { Plea } from 'src/domain/users/entities/plea.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Dot, Connection, Remark]),
