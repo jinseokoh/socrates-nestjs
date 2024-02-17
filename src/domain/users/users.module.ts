@@ -33,9 +33,13 @@ import { UserLanguagesController } from 'src/domain/users/user-languages.control
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
 import { Flag } from 'src/domain/users/entities/flag.entity';
-import { UserFlagsController } from 'src/domain/users/user-flags.controller';
 import { Plea } from 'src/domain/users/entities/plea.entity';
 import { Dot } from 'src/domain/connections/entities/dot.entity';
+import { UserFriendshipController } from 'src/domain/users/user-friendshp.controller';
+import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
+import { UsersConnectionService } from 'src/domain/users/users-connection.service';
+import { UsersMeetupService } from 'src/domain/users/users-meetup.service';
+import { UsersUserService } from 'src/domain/users/users-user.service';
 
 @Module({
   imports: [
@@ -70,15 +74,23 @@ import { Dot } from 'src/domain/connections/entities/dot.entity';
     FcmModule,
   ],
   exports: [UsersService],
-  providers: [UsersService, UserSubscriber, LanguageSkillSubscriber],
+  providers: [
+    UsersService,
+    UsersMeetupService,
+    UsersConnectionService,
+    UsersFriendshipService,
+    UsersUserService,
+    UserSubscriber,
+    LanguageSkillSubscriber,
+  ],
   controllers: [
     UsersController,
     UserCategoriesController,
-    UserFlagsController,
     UserImpressionsController,
     UserLanguagesController,
     UserMeetupsController,
     UserConnectionsController,
+    UserFriendshipController,
     UserUsersController,
     UserFcmController,
     UserSmsController,

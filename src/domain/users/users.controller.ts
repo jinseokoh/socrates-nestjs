@@ -42,6 +42,7 @@ import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SkipThrottle } from '@nestjs/throttler';
 import { SignedUrl, AnyData } from 'src/common/types';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
+import { initialUsername } from 'src/helpers/random-username';
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
@@ -55,7 +56,7 @@ export class UsersController {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '[관리자] User 생성' })
+  @ApiOperation({ description: 'User 생성' })
   @Post()
   async create(
     @Body(UniqueKeysPipe, HashPasswordPipe) dto: CreateUserDto,
@@ -67,7 +68,7 @@ export class UsersController {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: 'User 리스트 w/ Pagination' })
+  @ApiOperation({ description: 'User 리스트 (paginated)' })
   @UseInterceptors(AvatarInterceptor)
   @UsePipes(new ValidationPipe({ transform: true }))
   @PaginateQueryOptions()
@@ -118,23 +119,13 @@ export class UsersController {
   @Get(':id/username')
   getInitialUsername(@Param('id', ParseIntPipe) id: number): AnyData {
     return {
-      data: this.usersService.getInitialUsername(id),
+      data: initialUsername(id),
     };
   }
 
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//
-
-  // extend functionality to be able to update other related models as well
-  @ApiOperation({ description: '[관리자] User 갱신' })
-  @Patch('admin/:userId')
-  async updateExtended(
-    @Param('userId') userId: number,
-    @Body() body: any,
-  ): Promise<User> {
-    return await this.usersService.updateExtended(userId, body);
-  }
 
   @ApiOperation({ description: 'User 갱신' })
   @Patch(':userId')
@@ -177,8 +168,7 @@ export class UsersController {
     return await this.usersService.changePassword(userId, dto);
   }
 
-  // Technically, `profile` is a different model.
-  // but, it's tightly coupled with `user` model
+  // note that `profile` is tightly coupled with `user` model
   @ApiOperation({ description: 'User 와 연계된 Profile 갱신' })
   @Patch(':userId/profile')
   async updateProfile(
@@ -224,9 +214,10 @@ export class UsersController {
     return await this.usersService.getSignedUrl(id, dto);
   }
 
-  //--------------------------------------------------------------------------//
-  // Some extra endpoints
-  //--------------------------------------------------------------------------//
+  //?-------------------------------------------------------------------------//
+  //? OTP
+  //?-------------------------------------------------------------------------//
+
   @ApiOperation({ description: 'OTP 발송' })
   @HttpCode(HttpStatus.OK)
   @Post('otp')
@@ -236,27 +227,4 @@ export class UsersController {
       content: dto.body,
     });
   }
-
-  // @ApiOperation({ description: '신한사주 올해의 운세' })
-  // @HttpCode(HttpStatus.OK)
-  // @Post('yearly')
-  // async askYearly(
-  //   @Body(YearlyFortunePipe) dto: YearlyFortuneDto,
-  // ): Promise<any> {
-  //   return await this.usersService.askYearly(dto);
-  // }
-
-  // @ApiOperation({ description: '신한사주 오늘의 운세' })
-  // @HttpCode(HttpStatus.OK)
-  // @Post('daily')
-  // async askDaily(@Body(DailyFortunePipe) dto: DailyFortuneDto): Promise<any> {
-  //   return await this.usersService.askDaily(dto);
-  // }
-
-  // @ApiOperation({ description: '신한궁합' })
-  // @HttpCode(HttpStatus.OK)
-  // @Post('love')
-  // async askLove(@Body(LoveFortunePipe) dto: LoveFortuneDto): Promise<any> {
-  //   return await this.usersService.askLove(dto);
-  // }
 }

@@ -14,19 +14,23 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { AnyData } from 'src/common/types';
-import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
+import { UsersMeetupService } from 'src/domain/users/users-meetup.service';
+import { UsersService } from 'src/domain/users/users.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UserMeetupsController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly usersMeetupService: UsersMeetupService,
+) {}
 
   //?-------------------------------------------------------------------------//
   //? 내가 만든 모임 리스트
@@ -39,7 +43,7 @@ export class UserMeetupsController {
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Meetup>> {
-    return await this.usersService.getMyMeetups(userId, query);
+    return await this.usersMeetupService.getMyMeetups(userId, query);
   }
 
   //?-------------------------------------------------------------------------//
@@ -58,7 +62,7 @@ export class UserMeetupsController {
 
     console.log(userId, meetupId);
     try {
-      await this.usersService.attachToLikePivot(userId, meetupId);
+      await this.usersMeetupService.attachToLikePivot(userId, meetupId);
       return {
         data: 'ok',
       };
@@ -77,7 +81,7 @@ export class UserMeetupsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.detachFromLikePivot(userId, meetupId);
+      await this.usersMeetupService.detachFromLikePivot(userId, meetupId);
       return {
         data: 'ok',
       };
@@ -86,17 +90,15 @@ export class UserMeetupsController {
     }
   }
 
-  @ApiOperation({ description: '내가 찜한 모임 리스트' })
+  @ApiOperation({ description: '내가 찜한 모임 리스트 (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/meetups-liked')
   async getMeetupsLikedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Meetup>> {
-    const { data, meta, links } = await this.usersService.getMeetupsLikedByMe(
-      userId,
-      query,
-    );
+    const { data, meta, links } =
+      await this.usersMeetupService.getMeetupsLikedByMe(userId, query);
 
     return {
       data: data.map((v) => v.meetup),
@@ -105,20 +107,20 @@ export class UserMeetupsController {
     } as Paginated<Meetup>;
   }
 
-  @ApiOperation({ description: '내가 찜한 모임ID 리스트' })
+  @ApiOperation({ description: '내가 찜한 모임ID 리스트 (all; 최대30)' })
   @PaginateQueryOptions()
   @Get(':userId/meetupids-liked')
   async getMeetupIdsLikedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
-    return this.usersService.getMeetupIdsLikedByMe(userId);
+    return { data: this.usersMeetupService.getMeetupIdsLikedByMe(userId) };
   }
 
   //?-------------------------------------------------------------------------//
-  //? MeetupReport Pivot
+  //? ReportMeetup Pivot
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '나의 블락 리스트에 추가' })
+  @ApiOperation({ description: '차단한 모임 리스트에 추가' })
   @Post(':userId/meetups-reported/:meetupId')
   async attachToMeetupReportPivot(
     @Param('userId', ParseIntPipe) userId: number,
@@ -129,7 +131,7 @@ export class UserMeetupsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.attachToReportMeetupPivot(
+      await this.usersMeetupService.attachToReportMeetupPivot(
         userId,
         meetupId,
         message,
@@ -143,7 +145,7 @@ export class UserMeetupsController {
     }
   }
 
-  @ApiOperation({ description: '나의 블락 리스트에서 삭제' })
+  @ApiOperation({ description: '차단한 모임 리스트에서 삭제' })
   @Delete(':userId/meetups-reported/:meetupId')
   async detachFromReportMeetupPivot(
     @Param('userId', ParseIntPipe) userId: number,
@@ -153,7 +155,10 @@ export class UserMeetupsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.detachFromReportMeetupPivot(userId, meetupId);
+      await this.usersMeetupService.detachFromReportMeetupPivot(
+        userId,
+        meetupId,
+      );
       return {
         data: 'ok',
       };
@@ -162,7 +167,7 @@ export class UserMeetupsController {
     }
   }
 
-  @ApiOperation({ description: '내가 블락한 모임 리스트' })
+  @ApiOperation({ description: '내가 차단한 모임 리스트 (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/meetups-reported')
   async getMeetupsReportedByMe(
@@ -170,7 +175,7 @@ export class UserMeetupsController {
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Meetup>> {
     const { data, meta, links } =
-      await this.usersService.getMeetupsReportedByMe(userId, query);
+      await this.usersMeetupService.getMeetupsReportedByMe(userId, query);
 
     return {
       data: data.map((v) => v.meetup),
@@ -179,20 +184,20 @@ export class UserMeetupsController {
     } as Paginated<Meetup>;
   }
 
-  @ApiOperation({ description: '내가 블락한 모임ID 리스트' })
+  @ApiOperation({ description: '내가 차단한 모임ID 리스트 (all)' })
   @PaginateQueryOptions()
   @Get(':userId/meetupids-reported')
   async getMeetupIdsReportdByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
-    return this.usersService.getMeetupIdsReportedByMe(userId);
+    return this.usersMeetupService.getMeetupIdsReportedByMe(userId);
   }
 
   //?-------------------------------------------------------------------------//
   //? Join Pivot
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '참가신청 리스트에 추가' })
+  @ApiOperation({ description: '모임신청 리스트에 추가' })
   @PaginateQueryOptions()
   @Post(':askingUserId/joins/:askedUserId/meetups/:meetupId')
   async attachToJoinPivot(
@@ -201,7 +206,7 @@ export class UserMeetupsController {
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() dto: CreateJoinDto, // optional message, and skill
   ): Promise<AnyData> {
-    const meetup = await this.usersService.attachToJoinPivot(
+    const meetup = await this.usersMeetupService.attachToJoinPivot(
       askingUserId,
       askedUserId,
       meetupId,
@@ -217,7 +222,7 @@ export class UserMeetupsController {
     };
   }
 
-  @ApiOperation({ description: '참가신청 승인/거부' })
+  @ApiOperation({ description: '모임신청 승인/거부' })
   @PaginateQueryOptions()
   @Patch(':askingUserId/joins/:askedUserId/meetups/:meetupId')
   async updateJoinToAcceptOrDeny(
@@ -227,7 +232,7 @@ export class UserMeetupsController {
     @Body() dto: AcceptOrDenyDto,
   ): Promise<AnyData> {
     try {
-      await this.usersService.updateJoinToAcceptOrDeny(
+      await this.usersMeetupService.updateJoinToAcceptOrDeny(
         askingUserId,
         askedUserId,
         meetupId,
@@ -242,42 +247,33 @@ export class UserMeetupsController {
     }
   }
 
-  @ApiOperation({ description: '보낸 신청 리스트' })
+  @ApiOperation({ description: '내가 신청(request)한 모임 리스트 (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/meetups-requested')
   async getMeetupsRequested(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Join>> {
-    const { data, meta, links } = await this.usersService.getMeetupsRequested(
-      userId,
-      query,
-    );
-
-    return {
-      data: data,
-      meta: meta,
-      links: links,
-    }; // as Paginated<Join>;
+    return this.usersMeetupService.getMeetupsRequested(userId, query);
   }
 
-  @ApiOperation({ description: '신청한 모임ID 리스트' })
+  @ApiOperation({ description: '내가 신청한 모임ID 리스트 (all)' })
   @Get(':userId/meetupids-requested')
   async getMeetupIdsToJoin(@Param('userId') userId: number): Promise<AnyData> {
-    return this.usersService.getMeetupIdsRequested(userId);
+    return { data: this.usersMeetupService.getMeetupIdsRequested(userId) };
   }
 
-  @ApiOperation({ description: '받은 초대 리스트' })
+  @ApiOperation({
+    description: '내가 초대(invitation)받은 모임 리스트 (paginated)',
+  })
   @PaginateQueryOptions()
   @Get(':userId/meetups-invited')
   async getMeetupsInvited(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Join>> {
-    const { data, meta, links } = await this.usersService.getMeetupsInvited(
-      userId,
-      query,
-    );
+    const { data, meta, links } =
+      await this.usersMeetupService.getMeetupsInvited(userId, query);
 
     return {
       data: data,
@@ -286,31 +282,9 @@ export class UserMeetupsController {
     }; // as Paginated<Join>;
   }
 
-  @ApiOperation({ description: '초대받은 모임ID 리스트' })
+  @ApiOperation({ description: '나를 초대한 모임ID 리스트 (all)' })
   @Get(':userId/meetupids-invited')
   async getMeetupIdsInvited(@Param('userId') userId: number): Promise<AnyData> {
-    return this.usersService.getMeetupIdsInvited(userId);
-  }
-
-  //--------------------------------------------------- @deprecated
-
-  @ApiOperation({ description: '내가 신청한 사용자 리스트' })
-  @PaginateQueryOptions()
-  @Get(':userId/users-requested')
-  async getUsersRequested(
-    @Param('userId') userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Join>> {
-    return await this.usersService.getUsersRequested(userId, query);
-  }
-
-  @ApiOperation({ description: '나를 초대한 사용자 리스트' })
-  @PaginateQueryOptions()
-  @Get(':userId/users-invited')
-  async getUsersInvited(
-    @Param('userId') userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Join>> {
-    return await this.usersService.getUsersInvited(userId, query);
+    return this.usersMeetupService.getMeetupIdsInvited(userId);
   }
 }

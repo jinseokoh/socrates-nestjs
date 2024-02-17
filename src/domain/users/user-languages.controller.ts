@@ -15,7 +15,6 @@ import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { LanguageSkillDto } from 'src/domain/users/dto/language-skill.dto';
-import { Interest } from 'src/domain/users/entities/interest.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { UsersService } from 'src/domain/users/users.service';
 

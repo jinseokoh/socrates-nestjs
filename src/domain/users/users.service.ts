@@ -26,7 +26,6 @@ import {
   JoinType,
   JoinStatus,
   Ledger as LedgerType,
-  FriendshipStatus,
 } from 'src/common/enums';
 import { AnyData, SignedUrl } from 'src/common/types';
 import { DataSource, FindOneOptions, In, Not } from 'typeorm';
@@ -36,7 +35,6 @@ import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { ConfigService } from '@nestjs/config';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
-import { CreateFriendRequestDto } from 'src/domain/users/dto/create-friend-request.dto';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
@@ -92,20 +90,12 @@ export class UsersService {
     private readonly meetupRepository: Repository<Meetup>,
     @InjectRepository(Connection)
     private readonly connectionRepository: Repository<Connection>,
-    @InjectRepository(Dot)
-    private readonly dotRepository: Repository<Dot>,
-    @InjectRepository(Reaction)
-    private readonly reactionRepository: Repository<Reaction>,
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Join)
     private readonly joinRepository: Repository<Join>,
-    @InjectRepository(Plea)
-    private readonly pleaRepository: Repository<Plea>,
-    @InjectRepository(Friendship)
-    private readonly friendshipRepository: Repository<Friendship>,
     @InjectRepository(ReportMeetup)
     private readonly reportMeetupRepository: Repository<ReportMeetup>,
     @InjectRepository(ReportConnection)
@@ -127,57 +117,16 @@ export class UsersService {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  // [관리자] User 생성
+  // User 생성
   async create(dto: CreateUserDto): Promise<User> {
     return await this.repository.save(this.repository.create(dto));
-  }
-
-  async createImpression(dto: CreateImpressionDto): Promise<number[]> {
-    const id = dto.userId;
-    try {
-      await this.repository.manager.query(
-        'INSERT IGNORE INTO `impression` \
-  (appearance, knowledge, confidence, humor, manner, posterId, userId) VALUES (?, ?, ?, ?, ?, ?, ?) \
-  ON DUPLICATE KEY UPDATE \
-  appearance = VALUES(`appearance`), \
-  knowledge = VALUES(`knowledge`), \
-  confidence = VALUES(`confidence`), \
-  humor = VALUES(`humor`), \
-  manner = VALUES(`manner`), \
-  posterId = VALUES(`posterId`), \
-  userId = VALUES(`userId`)',
-        [
-          dto.appearance,
-          dto.knowledge,
-          dto.confidence,
-          dto.humor,
-          dto.manner,
-          dto.posterId, // 평가하는 사용자
-          dto.userId, // 평가받는 사용자
-        ],
-      );
-
-      const user = await this.findById(id, ['impressions']);
-      if (user.impressions && user.impressions.length > 1) {
-        const impressions = await this.getImpressionAverageById(id);
-        // const dto = new UpdateProfileDto();
-        // dto.impressions = impressions;
-        // await this.updateProfile(id, dto);
-        return impressions;
-      } else {
-        return [];
-      }
-    } catch (e) {
-      this.logger.log(e);
-      throw new BadRequestException();
-    }
   }
 
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
 
-  // User 리스트 w/ Pagination
+  // User 리스트 (paginated)
   async findAll(query: PaginateQuery): Promise<Paginated<User>> {
     const queryBuilder = this.repository
       .createQueryBuilder('user')
@@ -195,31 +144,6 @@ export class UsersService {
     };
 
     return await paginate<User>(query, queryBuilder, config);
-  }
-
-  // User 상세보기 (w/ id)
-  async findUserDetailById(
-    id: number,
-    relations: string[] = [],
-  ): Promise<User> {
-    try {
-      const [data] = await this.repository.manager.query(
-        'SELECT \
-  (SELECT COUNT(*) FROM `follow` WHERE `followingId` = ?) AS followerCount, \
-  (SELECT COUNT(*) FROM `follow` WHERE `followerId` = ?) AS followingCount \
-  ',
-        [id, id],
-      );
-      const response = await this.repository.findOneOrFail({
-        where: { id },
-        relations,
-        withDeleted: true,
-      });
-
-      return response;
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
   }
 
   // User 상세보기 (w/ id)
@@ -245,73 +169,9 @@ export class UsersService {
     return await this.repository.findOne(params);
   }
 
-  // User 상세보기 (w/ id)
-  async getImpressionAverageById(id: number): Promise<number[]> {
-    try {
-      const [row] = await this.repository.manager.query(
-        'SELECT \
-AVG(appearance) AS appearance, \
-AVG(knowledge) AS knowledge, \
-AVG(confidence) AS confidence, \
-AVG(humor) AS humor, \
-AVG(manner) AS manner \
-FROM impression \
-GROUP BY userId HAVING userId = ?',
-        [id],
-      );
-
-      const data = [
-        +parseFloat(row['appearance']).toFixed(2),
-        +parseFloat(row['knowledge']).toFixed(2),
-        +parseFloat(row['confidence']).toFixed(2),
-        +parseFloat(row['humor']).toFixed(2),
-        +parseFloat(row['manner']).toFixed(2),
-      ];
-
-      this.logger.log(data);
-
-      return data;
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
-  }
-
-  getInitialUsername(id: number): string {
-    return initialUsername(id);
-  }
-
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//
-
-  // [관리자] User 갱신
-  async updateExtended(id: number, body: any): Promise<User> {
-    // avatar
-    if (!body.avatar) {
-      body.avatar = 'https://cdn.fleaauction.world/images/user.png';
-    }
-    // profile
-    const profileDto: UpdateProfileDto = new UpdateProfileDto();
-    Object.keys(body).filter((key) => {
-      if (key.startsWith('profile.') && body[key] !== null) {
-        const pKey = key.replace('profile.', '');
-        profileDto[pKey] =
-          typeof body[key] === 'string' ? body[key].trim() : body[key];
-      }
-    });
-    if (body.profileId > 0) {
-      const profile = await this.profileRepository.preload({
-        id: body.profileId,
-        ...profileDto,
-      });
-      await this.profileRepository.save(profile);
-    }
-
-    // user
-    const user = await this.repository.preload({ id, ...body });
-    const a = await this.repository.save(user);
-    return a;
-  }
 
   // User 갱신
   async update(id: number, dto: UpdateUserDto): Promise<User> {
@@ -319,8 +179,7 @@ GROUP BY userId HAVING userId = ?',
     return await this.repository.save(user);
   }
 
-  //? User 닉네임 갱신
-  //? 코인 비용이 발생할 수 있음.
+  //? User 닉네임 갱신 (비용이 발생할 수 있음)
   //! balance will be adjusted w/ ledger model event subscriber.
   //! using transaction using query runner
   async changeUsername(id: number, dto: ChangeUsernameDto): Promise<number> {
@@ -444,10 +303,6 @@ GROUP BY userId HAVING userId = ?',
     };
   }
 
-  //--------------------------------------------------------------------------//
-  // Removal logics when user closes his/her account
-  //--------------------------------------------------------------------------//
-
   async _hardRemovalOnFollow(id: number) {
     await this.repository.manager.query(
       'DELETE FROM follow WHERE followingId = ? OR followerId = ?',
@@ -470,17 +325,14 @@ GROUP BY userId HAVING userId = ?',
 
   // User 프로필사진 갱신
   async upload(id: number, file: Express.Multer.File): Promise<User> {
-    // see if id is valid
     await this.findById(id);
     const path = `local/users/${id}/${randomName('avatar')}`;
     try {
-      // image processing using Jimp
+      // image processing w/ Jimp and upload the result image to s3
       await this.s3Service.uploadWithResizing(file, path, 640);
     } catch (e) {
       this.logger.log(e);
     }
-    // upload the manipulated image to S3
-    // update users table
     const avatar = `${process.env.AWS_CLOUDFRONT_URL}/${path}`;
     return this.update(id, { avatar });
   }
@@ -572,10 +424,6 @@ GROUP BY userId HAVING userId = ?',
     }
   }
 
-  //?-------------------------------------------------------------------------//
-  //? OTP 관련 privates
-  //?-------------------------------------------------------------------------//
-
   _getCacheKey(key: string): string {
     return `${this.env}:user:${key}:key`;
   }
@@ -627,74 +475,79 @@ GROUP BY userId HAVING userId = ?',
   }
 
   //?-------------------------------------------------------------------------//
-  //? Connections
+  //? 첫인상
   //?-------------------------------------------------------------------------//
 
-  // 내가 만든 발견 리스트
-  async getMyConnections(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Connection>> {
-    const queryBuilder = this.connectionRepository
-      .createQueryBuilder('connection')
-      .innerJoinAndSelect('connection.dot', 'dot')
-      .innerJoinAndSelect('connection.user', 'user')
-      .leftJoinAndSelect('connection.remarks', 'remarks')
-      .where({
-        userId,
-      });
+  async createImpression(dto: CreateImpressionDto): Promise<number[]> {
+    const id = dto.userId;
+    try {
+      await this.repository.manager.query(
+        'INSERT IGNORE INTO `impression` \
+  (appearance, knowledge, confidence, humor, manner, posterId, userId) VALUES (?, ?, ?, ?, ?, ?, ?) \
+  ON DUPLICATE KEY UPDATE \
+  appearance = VALUES(`appearance`), \
+  knowledge = VALUES(`knowledge`), \
+  confidence = VALUES(`confidence`), \
+  humor = VALUES(`humor`), \
+  manner = VALUES(`manner`), \
+  posterId = VALUES(`posterId`), \
+  userId = VALUES(`userId`)',
+        [
+          dto.appearance,
+          dto.knowledge,
+          dto.confidence,
+          dto.humor,
+          dto.manner,
+          dto.posterId, // 평가하는 사용자
+          dto.userId, // 평가받는 사용자
+        ],
+      );
 
-    const config: PaginateConfig<Connection> = {
-      sortableColumns: ['createdAt'],
-      searchableColumns: ['answer'],
-      defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
-      filterableColumns: {
-        region: [FilterOperator.EQ, FilterOperator.IN],
-        category: [FilterOperator.EQ, FilterOperator.IN],
-        subCategory: [FilterOperator.EQ, FilterOperator.IN],
-        targetGender: [FilterOperator.EQ, FilterOperator.IN],
-        expiredAt: [FilterOperator.GTE, FilterOperator.LT],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
+      const user = await this.findById(id, ['impressions']);
+      if (user.impressions && user.impressions.length > 1) {
+        const impressions = await this.getImpressionAverageById(id);
+        // const dto = new UpdateProfileDto();
+        // dto.impressions = impressions;
+        // await this.updateProfile(id, dto);
+        return impressions;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      this.logger.log(e);
+      throw new BadRequestException();
+    }
   }
 
-  //?-------------------------------------------------------------------------//
-  //? Meetups
-  //?-------------------------------------------------------------------------//
+  // User 상세보기 (w/ id)
+  async getImpressionAverageById(id: number): Promise<number[]> {
+    try {
+      const [row] = await this.repository.manager.query(
+        'SELECT \
+AVG(appearance) AS appearance, \
+AVG(knowledge) AS knowledge, \
+AVG(confidence) AS confidence, \
+AVG(humor) AS humor, \
+AVG(manner) AS manner \
+FROM impression \
+GROUP BY userId HAVING userId = ?',
+        [id],
+      );
 
-  // 내가 만든 모임 리스트
-  async getMyMeetups(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Meetup>> {
-    const queryBuilder = this.meetupRepository
-      .createQueryBuilder('meetup')
-      .innerJoinAndSelect('meetup.venue', 'venue')
-      .innerJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('meetup.rooms', 'rooms')
-      .leftJoinAndSelect('rooms.user', 'participant')
-      .where({
-        userId,
-      });
+      const data = [
+        +parseFloat(row['appearance']).toFixed(2),
+        +parseFloat(row['knowledge']).toFixed(2),
+        +parseFloat(row['confidence']).toFixed(2),
+        +parseFloat(row['humor']).toFixed(2),
+        +parseFloat(row['manner']).toFixed(2),
+      ];
 
-    const config: PaginateConfig<Meetup> = {
-      sortableColumns: ['createdAt'],
-      searchableColumns: ['title'],
-      defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
-      filterableColumns: {
-        region: [FilterOperator.EQ, FilterOperator.IN],
-        category: [FilterOperator.EQ, FilterOperator.IN],
-        subCategory: [FilterOperator.EQ, FilterOperator.IN],
-        targetGender: [FilterOperator.EQ, FilterOperator.IN],
-        expiredAt: [FilterOperator.GTE, FilterOperator.LT],
-      },
-    };
+      this.logger.log(data);
 
-    return await paginate(query, queryBuilder, config);
+      return data;
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
   }
 
   //?-------------------------------------------------------------------------//
@@ -862,1059 +715,4 @@ GROUP BY userId HAVING userId = ?',
 
     return await this.getCategories(id);
   }
-
-  //?-------------------------------------------------------------------------//
-  //? 차단 (Hate)
-  //?-------------------------------------------------------------------------//
-
-  // 블락한 사용자 리스트에 추가
-  async attachUserIdToHatePivot(
-    senderId: number,
-    recipientId: number,
-    message: string,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `hate` (senderId, recipientId, message) VALUES (?, ?, ?)',
-      [senderId, recipientId, message],
-    );
-  }
-
-  // 블락한 사용자 리스트에서 삭제
-  async detachUserIdFromHatePivot(
-    senderId: number,
-    recipientId: number,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `hate` WHERE senderId = ? AND recipientId = ?',
-      [senderId, recipientId],
-    );
-  }
-
-  // 내가 블락한 사용자 리스트
-  async getUsersHatedByMe(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Hate>> {
-    const queryBuilder = this.hateRepository
-      .createQueryBuilder('hate')
-      .innerJoinAndSelect('hate.recipient', 'user')
-      .innerJoinAndSelect('user.profile', 'profile')
-      .where({
-        senderId: userId,
-      });
-
-    const config: PaginateConfig<Hate> = {
-      sortableColumns: ['recipientId'],
-      searchableColumns: ['message'],
-      defaultLimit: 20,
-      defaultSortBy: [['recipientId', 'ASC']],
-      filterableColumns: {},
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // 내가 블락하거나 나를 블락한 ids
-  async getUserIdsEitherHatingOrBeingHated(userId: number): Promise<AnyData> {
-    const rows = await this.repository.manager.query(
-      'SELECT senderId, recipientId \
-      FROM `hate` \
-      WHERE senderId = ? OR recipientId = ?',
-      [userId, userId],
-    );
-
-    const data = rows.map((v) => {
-      return v.senderId === userId ? v.recipientId : v.senderId;
-    });
-
-    return { data: [...new Set(data)] };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 신고 (ReportUser)
-  //?-------------------------------------------------------------------------//
-
-  // 블락한 사용자 리스트에 추가
-  async attachUserIdToReportUserPivot(
-    userId: number,
-    accusedUserId: number,
-    message: string | null,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `report_user` (userId, accusedUserId, message) VALUES (?, ?, ?)',
-      [userId, accusedUserId, message],
-    );
-  }
-
-  // 블락한 사용자 리스트에서 삭제
-  async detachUserIdFromReportUserPivot(
-    userId: number,
-    accusedUserId: number,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `report_user` WHERE userId = ? AND accusedUserId = ?',
-      [userId, accusedUserId],
-    );
-  }
-
-  // 내가 신고한 사용자 리스트 ( #todo. verify the logic )
-  async getUsersBeingReportedByMe(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<ReportUser>> {
-    const queryBuilder = this.reportUserRepository
-      .createQueryBuilder('reportUser')
-      .innerJoinAndSelect('reportUser.accusedUser', 'user')
-      .innerJoinAndSelect('user.profile', 'profile')
-      .where({
-        userId: userId,
-      });
-
-    const config: PaginateConfig<ReportUser> = {
-      sortableColumns: ['userId'],
-      searchableColumns: ['message'],
-      defaultLimit: 20,
-      defaultSortBy: [['accusedUserId', 'ASC']],
-      filterableColumns: {},
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // 내가 신고한 사용자 ids ( #todo. verify the logic )
-  async getUserIdsBeingReportedByMe(userId: number): Promise<AnyData> {
-    const rows = await this.repository.manager.query(
-      'SELECT userId, accusedUserId \
-      FROM `report` \
-      WHERE userId = ?',
-      [userId],
-    );
-
-    const data = rows.map((v) => {
-      return v.userId === userId ? v.accusedUserId : v.userId;
-    });
-
-    return { data: [...new Set(data)] };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //?  Reaction Pivot
-  //?-------------------------------------------------------------------------//
-
-  // 아이템 조회
-  async getReaction(userId: number, connectionId: number): Promise<Reaction> {
-    try {
-      return await this.reactionRepository.findOneOrFail({
-        where: { userId, connectionId },
-      });
-    } catch (e) {
-      //? in case of 404
-      return new Reaction({
-        userId: userId,
-        connectionId: connectionId,
-        sympathetic: false,
-        surprised: false,
-        humorous: false,
-        sad: false,
-        disgust: false,
-      });
-      this.logger.log(e);
-    }
-  }
-
-  // 내 리스트
-  async getReactions(userId: number, ids: number[]): Promise<Array<Reaction>> {
-    try {
-      const items = await this.reactionRepository
-        .createQueryBuilder()
-        .where('connectionId IN (:ids)', { ids: ids })
-        .andWhere('userId = :id', { id: userId })
-        .getMany();
-
-      return items;
-    } catch (e) {
-      this.logger.log(e);
-      throw e;
-    }
-  }
-
-  // 리스트에 추가
-  async attachToReactionPivot(
-    userId: number,
-    connectionId: number,
-    emotion: Emotion,
-  ): Promise<Reaction> {
-    // upsert reaction
-    try {
-      const { affectedRows } = await this.repository.manager.query(
-        `INSERT IGNORE INTO reaction (userId, connectionId, ${emotion}) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(userId), connectionId = VALUES(connectionId), ${emotion} = VALUES(${emotion})`,
-        [userId, connectionId, true],
-      );
-      if (affectedRows > 1) {
-        // returns 2 if updated
-        await this.connectionRepository.increment(
-          { id: connectionId },
-          `${emotion}Count`,
-          1,
-        );
-      }
-    } catch (e) {
-      this.logger.log(e);
-    }
-    // return reaction
-    return await this.reactionRepository.findOne({
-      where: {
-        userId,
-        connectionId,
-      },
-    });
-  }
-
-  // 리스트에서 삭제
-  async detachFromReactionPivot(
-    userId: number,
-    connectionId: number,
-    emotion: string,
-  ): Promise<Reaction> {
-    try {
-      const { changedRows } = await this.reactionRepository.manager.query(
-        `UPDATE reaction SET ${emotion} = ? WHERE userId = ? AND connectionId = ?`,
-        [false, userId, connectionId],
-      );
-      if (changedRows > 0) {
-        // returns 1 if updated
-        await this.reactionRepository.manager.query(
-          `UPDATE connection SET ${emotion}Count = ${emotion}Count - 1 WHERE id = ? AND ${emotion}Count > 0`,
-          [connectionId],
-        );
-      }
-    } catch (e) {
-      this.logger.log(e);
-    }
-    // return reaction
-    return await this.reactionRepository.findOne({
-      where: {
-        userId,
-        connectionId,
-      },
-    });
-  }
-
-  // 내가 찜한 모임 리스트
-  async getConnectionsReactedByMe(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Reaction>> {
-    const queryBuilder = this.reactionRepository
-      .createQueryBuilder('reaction')
-      .innerJoinAndSelect('reaction.connection', 'connection')
-      .innerJoinAndSelect('connection.dot', 'dot')
-      .innerJoinAndSelect('connection.user', 'user')
-      .leftJoinAndSelect('connection.userReactions', 'reactions')
-      .where({
-        userId,
-      });
-
-    const config: PaginateConfig<Reaction> = {
-      sortableColumns: ['connectionId'],
-      defaultLimit: 20,
-      defaultSortBy: [['connectionId', 'DESC']],
-      filterableColumns: {},
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? ReportConnection Pivot
-  //?-------------------------------------------------------------------------//
-
-  // 발견 블락 리스트에 추가
-  async attachToReportConnectionPivot(
-    userId: number,
-    connectionId: number,
-    message: string,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `report_connection` (userId, connectionId, message) VALUES (?, ?, ?)',
-      [userId, connectionId, message],
-    );
-    if (affectedRows > 0) {
-      await this.connectionRepository.increment(
-        { id: connectionId },
-        'reportCount',
-        1,
-      );
-    }
-  }
-
-  // 발견 블락 리스트에서 삭제
-  async detachFromReportConnectionPivot(
-    userId: number,
-    connectionId: number,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `report_connection` WHERE userId = ? AND connectionId = ?',
-      [userId, connectionId],
-    );
-    if (affectedRows > 0) {
-      // await this.connectionRrepository.decrement({ connectionId }, 'ReportConnectionCount', 1);
-      await this.repository.manager.query(
-        'UPDATE `connection` SET reportCount = reportCount - 1 WHERE id = ? AND reportCount > 0',
-        [connectionId],
-      );
-    }
-  }
-
-  // 내가 블락한 발견 리스트
-  async getConnectionsReportedByMe(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<ReportConnection>> {
-    const queryBuilder = this.reportConnectionRepository
-      .createQueryBuilder('report_connection')
-      .leftJoinAndSelect('report_connection.connection', 'connection')
-      .leftJoinAndSelect('connection.dot', 'dot')
-      .where({
-        userId,
-      });
-
-    const config: PaginateConfig<ReportConnection> = {
-      sortableColumns: ['connectionId'],
-      searchableColumns: ['connection.answer'],
-      defaultLimit: 20,
-      defaultSortBy: [['connectionId', 'DESC']],
-      filterableColumns: {},
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // 내가 블락한 발견 ID 리스트
-  async getConnectionIdsReportedByMe(userId: number): Promise<AnyData> {
-    const items = await this.repository.manager.query(
-      'SELECT connectionId \
-      FROM `user` INNER JOIN `report_connection` ON `user`.id = `report_connection`.userId \
-      WHERE `user`.id = ?',
-      [userId],
-    );
-
-    return {
-      data: items.map(({ connectionId }) => connectionId),
-    };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? Like Pivot
-  //?-------------------------------------------------------------------------//
-
-  // 찜 리스트에 추가
-  async attachToLikePivot(userId: number, meetupId: number): Promise<any> {
-    const [row] = await this.repository.query(
-      'SELECT COUNT(*) AS cnt FROM `like` WHERE userId = ?',
-      [userId],
-    );
-    const count = row.cnt;
-    if (+count > 30) {
-      throw new NotAcceptableException('reached maximum count');
-    }
-
-    const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `like` (userId, meetupId) VALUES (?, ?)',
-      [userId, meetupId],
-    );
-
-    if (affectedRows > 0) {
-      await this.meetupRepository.increment({ id: meetupId }, 'likeCount', 1);
-    }
-  }
-
-  // 찜 리스트에서 삭제
-  async detachFromLikePivot(userId: number, meetupId: number): Promise<any> {
-    const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `like` WHERE userId = ? AND meetupId = ?',
-      [userId, meetupId],
-    );
-    if (affectedRows > 0) {
-      // the following doesn't work at times.
-      // await this.meetupRrepository.decrement({ meetupId }, 'likeCount', 1);
-      //
-      // we need to make the likeCount always positive.
-      await this.repository.manager.query(
-        'UPDATE `meetup` SET likeCount = likeCount - 1 WHERE id = ? AND likeCount > 0',
-        [meetupId],
-      );
-    }
-  }
-
-  // 내가 찜한 모임 리스트
-  async getMeetupsLikedByMe(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Like>> {
-    const queryBuilder = this.likeRepository
-      .createQueryBuilder('like')
-      .innerJoinAndSelect('like.meetup', 'meetup')
-      .innerJoinAndSelect('meetup.venue', 'venue')
-      .innerJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('meetup.rooms', 'rooms')
-      .leftJoinAndSelect('rooms.user', 'participant')
-      .where({
-        userId,
-      });
-
-    const config: PaginateConfig<Like> = {
-      sortableColumns: ['meetupId'],
-      searchableColumns: ['meetup.title'],
-      defaultLimit: 20,
-      defaultSortBy: [['meetupId', 'ASC']],
-      filterableColumns: {},
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // 내가 찜한 모임 ID 리스트
-  async getMeetupIdsLikedByMe(userId: number): Promise<AnyData> {
-    const items = await this.repository.manager.query(
-      'SELECT meetupId \
-      FROM `user` INNER JOIN `like` ON `user`.id = `like`.userId \
-      WHERE `user`.id = ?',
-      [userId],
-    );
-
-    return {
-      data: items.map(({ meetupId }) => meetupId),
-    };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? Report Meetup Pivot
-  //?-------------------------------------------------------------------------//
-
-  // 모임 블락 리스트에 추가
-  async attachToReportMeetupPivot(
-    userId: number,
-    meetupId: number,
-    message: string,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `report_meetup` (userId, meetupId, message) VALUES (?, ?, ?)',
-      [userId, meetupId, message],
-    );
-    if (affectedRows > 0) {
-      await this.meetupRepository.increment({ id: meetupId }, 'reportCount', 1);
-    }
-  }
-
-  // 모임 블락 리스트에서 삭제
-  async detachFromReportMeetupPivot(
-    userId: number,
-    meetupId: number,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `report_meetup` WHERE userId = ? AND meetupId = ?',
-      [userId, meetupId],
-    );
-    if (affectedRows > 0) {
-      // await this.meetupRrepository.decrement({ meetupId }, 'reportCount', 1);
-      await this.repository.manager.query(
-        'UPDATE `meetup` SET reportCount = reportCount - 1 WHERE id = ? AND reportCount > 0',
-        [meetupId],
-      );
-    }
-  }
-
-  // 내가 블락한 모임 리스트
-  async getMeetupsReportedByMe(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<ReportMeetup>> {
-    const queryBuilder = this.reportMeetupRepository
-      .createQueryBuilder('reportMeetup')
-      .leftJoinAndSelect('reportMeetup.meetup', 'meetup')
-      .leftJoinAndSelect('meetup.venue', 'venue')
-      .where({
-        userId,
-      });
-
-    const config: PaginateConfig<ReportMeetup> = {
-      sortableColumns: ['meetupId'],
-      searchableColumns: ['meetup.title'],
-      defaultLimit: 20,
-      defaultSortBy: [['meetupId', 'DESC']],
-      filterableColumns: {},
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // 내가 블락한 모임 ID 리스트
-  async getMeetupIdsReportedByMe(userId: number): Promise<AnyData> {
-    const items = await this.repository.manager.query(
-      'SELECT meetupId \
-      FROM `user` INNER JOIN `report_meetup` ON `user`.id = `report_meetup`.userId \
-      WHERE `user`.id = ?',
-      [userId],
-    );
-
-    return {
-      data: items.map(({ meetupId }) => meetupId),
-    };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? Join Pivot
-  //?-------------------------------------------------------------------------//
-
-  // 신청리스트에 추가
-  async attachToJoinPivot(
-    askingUserId: number,
-    askedUserId: number,
-    meetupId: number,
-    dto: CreateJoinDto,
-  ): Promise<Meetup> {
-    const meetup = await this.meetupRepository.findOneOrFail({
-      where: { id: meetupId },
-      relations: ['joins'],
-    });
-
-    let joinType = JoinType.REQUEST;
-    if (meetup.userId == askedUserId) {
-      // 1. 방장에게 신청하는 경우, 30명 까지로 제한.
-      if (
-        meetup.joins.filter((v) => meetup.userId === v.askedUserId).length > 30
-      ) {
-        throw new NotAcceptableException('reached maximum count');
-      }
-      // await this.attachToLikePivot(askingUserId, meetupId);
-    } else {
-      // 2. 방장이 초대하는 경우, 갯수 제한 없음.
-      joinType = JoinType.INVITATION;
-    }
-
-    try {
-      await this.repository.manager.query(
-        'INSERT IGNORE INTO `join` (askingUserId, askedUserId, meetupId, message, skill, joinType) VALUES (?, ?, ?, ?, ?, ?)',
-        [askingUserId, askedUserId, meetupId, dto.message, dto.skill, joinType],
-      );
-      return meetup;
-    } catch (e) {
-      throw new BadRequestException('database has gone crazy.');
-    }
-  }
-
-  // 매치신청 승인/거부
-  async updateJoinToAcceptOrDeny(
-    askingUserId: number,
-    askedUserId: number,
-    meetupId: number,
-    status: JoinStatus,
-    joinType: JoinType,
-  ): Promise<void> {
-    await this.repository.manager.query(
-      'UPDATE `join` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
-      [status, askingUserId, askedUserId, meetupId],
-    );
-
-    //? room record 생성
-    if (status === JoinStatus.ACCEPTED) {
-      if (joinType === JoinType.REQUEST) {
-        // 모임 신청 (add askingUserId to `room`)
-        await this.repository.manager.query(
-          'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
-          ['guest', askingUserId, meetupId],
-        );
-      } else {
-        // 모임 초대 (add askedUserId to `room`)
-        await this.repository.manager.query(
-          'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
-          ['guest', askedUserId, meetupId],
-        );
-      }
-
-      const [{ max }] = await this.repository.manager.query(
-        'SELECT max FROM `meetup` WHERE id = ?',
-        [meetupId],
-      );
-      const [{ count }] = await this.repository.manager.query(
-        'SELECT COUNT(*) AS count FROM `room` WHERE meetupId = ?',
-        [meetupId],
-      );
-
-      if (max >= +count) {
-        await this.repository.manager.query(
-          'UPDATE `meetup` SET isFull = 1 WHERE id = ?',
-          [meetupId],
-        );
-      }
-    }
-  }
-
-  //? 신청(request)한 모임 리스트
-  async getMeetupsRequested(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Join>> {
-    const queryBuilder = this.joinRepository
-      .createQueryBuilder('join')
-      .innerJoinAndSelect('join.meetup', 'meetup')
-      .innerJoinAndSelect('meetup.venue', 'venue')
-      .innerJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('meetup.rooms', 'rooms')
-      .leftJoinAndSelect('rooms.user', 'participant')
-      .where({
-        joinType: JoinType.REQUEST,
-        askingUserId: userId,
-      });
-
-    const config: PaginateConfig<Join> = {
-      sortableColumns: ['meetupId'],
-      searchableColumns: ['meetup.title'],
-      defaultLimit: 20,
-      defaultSortBy: [['meetupId', 'DESC']],
-      filterableColumns: {},
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  //? 신청(request)한 모임ID 리스트
-  async getMeetupIdsRequested(userId: number): Promise<AnyData> {
-    const items = await this.repository.manager.query(
-      'SELECT meetupId FROM `join` \
-INNER JOIN `user` ON `user`.id = `join`.askingUserId \
-INNER JOIN `meetup` ON `meetup`.id = `join`.meetupId \
-WHERE `joinType` = ? AND `user`.id = ?',
-      [JoinType.REQUEST, userId],
-    );
-
-    return {
-      data: items.map(({ meetupId }) => meetupId),
-    };
-  }
-
-  //? 초대(invitation)받은 모임 리스트
-  async getMeetupsInvited(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Join>> {
-    const queryBuilder = this.joinRepository
-      .createQueryBuilder('join')
-      .innerJoinAndSelect('join.meetup', 'meetup')
-      .innerJoinAndSelect('meetup.venue', 'venue')
-      .innerJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('meetup.rooms', 'rooms')
-      .leftJoinAndSelect('rooms.user', 'participant')
-      .where({
-        joinType: JoinType.INVITATION,
-        askedUserId: userId,
-      });
-
-    const config: PaginateConfig<Join> = {
-      sortableColumns: ['meetupId'],
-      searchableColumns: ['meetup.title'],
-      defaultLimit: 20,
-      defaultSortBy: [['meetupId', 'DESC']],
-      filterableColumns: {},
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  //? 나를 초대한 모임ID 리스트
-  async getMeetupIdsInvited(userId: number): Promise<AnyData> {
-    const items = await this.repository.manager.query(
-      'SELECT meetupId FROM `join` \
-INNER JOIN `user` ON `user`.id = `join`.askedUserId \
-INNER JOIN `meetup` ON `meetup`.id = `join`.meetupId \
-WHERE `joinType` = ? AND `user`.id = ?',
-      [JoinType.INVITATION, userId],
-    );
-
-    return {
-      data: items.map(({ meetupId }) => meetupId),
-    };
-  }
-
-  //! 내가 신청한 사용자 리스트 (deprecated at the moment) : askedUser 나 meetup.user 나 동일하다.
-  async getUsersRequested(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Join>> {
-    const queryBuilder = this.joinRepository
-      .createQueryBuilder('join')
-      .innerJoinAndSelect('join.meetup', 'meetup')
-      .innerJoinAndSelect('meetup.venue', 'venue')
-      .leftJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('user.profile', 'profile')
-      .where({
-        joinType: JoinType.REQUEST,
-        askingUserId: userId,
-      });
-
-    const config: PaginateConfig<Join> = {
-      sortableColumns: ['meetupId'],
-      searchableColumns: ['meetup.title'],
-      defaultLimit: 20,
-      defaultSortBy: [['meetupId', 'DESC']],
-      filterableColumns: {
-        status: [FilterOperator.EQ],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  //! 나를 초대한 사용자 리스트 (deprecated at the moment) : askingUser 나 meetup.user 나 동일하다.
-  async getUsersInvited(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Join>> {
-    const queryBuilder = this.joinRepository
-      .createQueryBuilder('join')
-      .innerJoinAndSelect('join.meetup', 'meetup')
-      .innerJoinAndSelect('meetup.venue', 'venue')
-      .leftJoinAndSelect('join.askingUser', 'askingUser')
-      .leftJoinAndSelect('askingUser.profile', 'askingUserProfile')
-      // .leftJoinAndSelect('join.askedUser', 'askedUser')
-      // .leftJoinAndSelect('askedUser.profile', 'askedUserProfile')
-      .where({
-        joinType: JoinType.INVITATION,
-        askedUserId: userId,
-      });
-
-    const config: PaginateConfig<Join> = {
-      sortableColumns: ['meetupId'],
-      searchableColumns: ['meetup.title'],
-      defaultLimit: 20,
-      defaultSortBy: [['meetupId', 'DESC']],
-      filterableColumns: {
-        status: [FilterOperator.EQ],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? Plea Pivot
-  //?-------------------------------------------------------------------------//
-
-  // 발견요청 리스트에 추가
-  async attachToPleaPivot(
-    askingUserId: number,
-    askedUserId: number,
-    dotId: number,
-  ): Promise<Dot> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-
-    await queryRunner.manager.query(
-      'INSERT IGNORE INTO `plea` (askingUserId, askedUserId, dotId) VALUES (?, ?, ?)',
-      [askingUserId, askedUserId, dotId],
-    );
-
-    const dot = await this.dotRepository.findOneOrFail({
-      where: { id: dotId },
-      relations: ['pleas'],
-    });
-
-    return dot;
-  }
-
-  //--------------------------------------------------------------------------//
-
-  async getUniqueUsersPleaded(userId: number): Promise<User[]> {
-    const items = await this.pleaRepository
-      .createQueryBuilder('plea')
-      .innerJoinAndSelect('plea.askingUser', 'askingUser')
-      .where({
-        askedUserId: userId,
-      })
-      .groupBy('plea.askingUserId')
-      .getMany();
-
-    return items.map((v) => v.askingUser);
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? friendship
-  //?-------------------------------------------------------------------------//
-
-  //? 친구신청 생성 (코인 비용이 발생할 수 있음.)
-  //! balance will be adjusted w/ ledger model event subscriber.
-  //! using transaction using query runner
-  //! for hated(blocked) users, app needs to take care of 'em instead of server.
-  async createFriendship(
-    senderId: number,
-    recipientId: number,
-    dto: CreateFriendRequestDto,
-  ): Promise<number> {
-    let newBalance = 0;
-    // create a new query runner
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-
-    const friendshipCount = await queryRunner.manager.count(Friendship, {
-      where: [
-        { senderId: senderId, recipientId: recipientId },
-        { senderId: recipientId, recipientId: senderId },
-      ],
-    });
-    const sender = await queryRunner.manager.findOne(User, {
-      where: { id: senderId },
-      relations: [`profile`],
-    });
-    await queryRunner.startTransaction();
-
-    try {
-      if (friendshipCount > 0) {
-        throw new UnprocessableEntityException(`entity already exists`);
-      }
-      if (sender?.isBanned) {
-        throw new UnprocessableEntityException(`the user is banned`);
-      }
-      if (
-        sender.profile?.balance === null ||
-        sender.profile?.balance - dto.cost < 0
-      ) {
-        throw new BadRequestException(`insufficient balance`);
-      }
-      newBalance = sender.profile?.balance - dto.cost;
-      if (dto.cost > 0) {
-        const ledger = new Ledger({
-          credit: dto.cost,
-          ledgerType: LedgerType.CREDIT_SPEND,
-          balance: newBalance,
-          note: `친구신청요금 (user #${senderId})`,
-          userId: senderId,
-        });
-        await queryRunner.manager.save(ledger);
-      }
-      await queryRunner.manager.query(
-        'INSERT IGNORE INTO `friendship` (senderId, recipientId, message) VALUES (?, ?, ?)',
-        [senderId, recipientId, dto.message],
-      );
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
-    return newBalance;
-  }
-
-  // 친구신청 승인/보류
-  async updateFriendshipWithStatus(
-    senderId: number,
-    recipientId: number,
-    status: FriendshipStatus,
-  ): Promise<void> {
-    await this.repository.manager.query(
-      'UPDATE `friendship` SET status = ? WHERE senderId = ? AND recipientId = ?',
-      [status, senderId, recipientId],
-    );
-
-    const sender = await this.findById(senderId);
-    if (status === FriendshipStatus.ACCEPTED) {
-      if (sender.pushToken) {
-        const fbToken = sender.pushToken;
-        const notification = {
-          title: 'MeSo',
-          body: '상대방이 나의 친구신청을 승락했습니다.',
-        };
-        this.fcmService.sendToToken(fbToken, notification);
-      }
-    }
-    if (status === FriendshipStatus.PENDING) {
-      if (sender.pushToken) {
-        const fbToken = sender.pushToken;
-        const notification = {
-          title: 'MeSo',
-          body: '상대방이 나의 친구신청을 보류했습니다.',
-        };
-        this.fcmService.sendToToken(fbToken, notification);
-      }
-    }
-  }
-
-  // 친구신청 거절(삭제)
-  async deleteFriendship(senderId: number, recipientId: number): Promise<void> {
-    await this.repository.manager.query(
-      'DELETE FROM `friendship` WHERE senderId = ? AND recipientId = ?',
-      [senderId, recipientId],
-    );
-  }
-
-  //--------------------------------------------------------------------------//
-
-  // Paginated, 보낸 친구신청 리스트
-  async getFriendshipsSent(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Friendship>> {
-    const queryBuilder = this.friendshipRepository
-      .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.sender', 'sender')
-      .innerJoinAndSelect('friendship.recipient', 'recipient')
-      .innerJoinAndSelect('recipient.profile', 'profile')
-      .leftJoinAndSelect('friendship.dot', 'dot')
-      .where({
-        senderId: userId,
-        status: Not(FriendshipStatus.ACCEPTED),
-      });
-
-    const config: PaginateConfig<Friendship> = {
-      sortableColumns: ['createdAt', 'dotId'],
-      defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
-      filterableColumns: {
-        status: [FilterOperator.EQ],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // Paginated, 받은 친구신청 리스트
-  async getFriendshipsReceived(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Friendship>> {
-    const queryBuilder = this.friendshipRepository
-      .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.sender', 'sender')
-      .innerJoinAndSelect('sender.profile', 'profile')
-      .innerJoinAndSelect('friendship.recipient', 'recipient')
-      .leftJoinAndSelect('friendship.dot', 'dot')
-      .where({
-        recipientId: userId,
-        status: Not(FriendshipStatus.ACCEPTED),
-      });
-
-    const config: PaginateConfig<Friendship> = {
-      sortableColumns: ['createdAt', 'dotId'],
-      defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
-      filterableColumns: {
-        status: [FilterOperator.EQ],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // Paginated, 내 친구신청 리스트
-  async getMyFriendships(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Friendship>> {
-    const queryBuilder = this.friendshipRepository
-      .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.sender', 'sender')
-      .innerJoinAndSelect('sender.profile', 'sprofile')
-      .innerJoinAndSelect('friendship.recipient', 'recipient')
-      .innerJoinAndSelect('recipient.profile', 'rprofile')
-      .where([{ senderId: userId }, { recipientId: userId }]);
-
-    const config: PaginateConfig<Friendship> = {
-      sortableColumns: ['createdAt', 'dotId'],
-      defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
-      filterableColumns: {
-        status: [FilterOperator.EQ],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  //--------------------------------------------------------------------------//
-
-  async getFriendshipIds(userId: number): Promise<AnyData> {
-    const rows = await this.repository.manager.query(
-      'SELECT status, senderId, recipientId \
-      FROM `friendship` \
-      WHERE senderId = ? OR recipientId = ?',
-      [userId, userId],
-    );
-
-    const pendingIds = rows
-      .filter((v: any) => v.status !== 'accepted')
-      .map((v: any) => {
-        return v.senderId === userId ? v.recipientId : v.senderId;
-      });
-
-    const friendIds = rows
-      .filter((v: any) => v.status === 'accepted')
-      .map((v: any) => {
-        return v.senderId === userId ? v.recipientId : v.senderId;
-      });
-
-    return {
-      data: {
-        pendingIds,
-        friendIds,
-      },
-    };
-    // todo. remove dups
-    // return { data: [...new Set(data)] };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 댓글 신고
-  //?-------------------------------------------------------------------------//
-
-  // [관리자] User 생성
-  async createFlag(dto: CreateFlagDto): Promise<Flag> {
-    const flag = new Flag({
-      message: dto.message,
-      entity: dto.entity,
-      entityId: dto.entityId,
-      userId: dto.userId,
-    });
-
-    // additionally, increment flagCount of each
-    try {
-      const record = await this.dataSource
-        .createQueryRunner()
-        .manager.save(flag);
-
-      if (dto.entity === 'remark') {
-        await this.dataSource
-          .getRepository(Remark)
-          .increment({ id: dto.entityId }, 'flagCount', 1);
-      }
-      if (dto.entity === 'thread') {
-        await this.dataSource
-          .getRepository(Thread)
-          .increment({ id: dto.entityId }, 'flagCount', 1);
-      }
-
-      return record;
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 신한운세
-  //?-------------------------------------------------------------------------//
-
-  // // 올해의 운세보기
-  // async askYearly(dto: YearlyFortuneDto): Promise<any> {
-  //   return await this.crawlerService.askYearly(dto);
-  // }
-
-  // // 오늘의 운세보기
-  // async askDaily(dto: DailyFortuneDto): Promise<any> {
-  //   return await this.crawlerService.askDaily(dto);
-  // }
-
-  // // 궁합보기
-  // async askLove(dto: LoveFortuneDto): Promise<any> {
-  //   return await this.crawlerService.askLove(dto);
-  // }
 }

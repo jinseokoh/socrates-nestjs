@@ -15,71 +15,42 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { AnyData } from 'src/common/types';
-import { UsersService } from 'src/domain/users/users.service';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreateReactionDto } from 'src/domain/users/dto/create-reaction.dto';
 import { RemoveReactionDto } from 'src/domain/users/dto/remove-reaction.dto';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
-import { GetReactionsDto } from 'src/domain/users/dto/get-reactions.dto';
 import { User } from 'src/domain/users/entities/user.entity';
+import { UsersConnectionService } from 'src/domain/users/users-connection.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UserConnectionsController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersConnectionService: UsersConnectionService,
+  ) {}
 
   //?-------------------------------------------------------------------------//
   //? 내가 만든 발견 리스트
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '내가 만든 발견 리스트' })
+  @ApiOperation({ description: '내가 만든 발견 리스트 (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/connections')
   async getMyConnections(
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Connection>> {
-    return await this.usersService.getMyConnections(userId, query);
+    return await this.usersConnectionService.getMyConnections(userId, query);
   }
 
   //?-------------------------------------------------------------------------//
-  //? Reaction Pivot
+  //? ReportConnection Pivot
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '내가 찜한 발견 리스트' })
-  @PaginateQueryOptions()
-  @Get(':userId/connections-reacted')
-  async getConnectionsReactedByMe(
-    @Param('userId') userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Connection>> {
-    const { data, meta, links } =
-      await this.usersService.getConnectionsReactedByMe(userId, query);
-
-    return {
-      data: data.map((v) => v.connection),
-      meta: meta,
-      links: links,
-    } as Paginated<Connection>;
-  }
-
-  // @ApiOperation({ description: '내가 찜한 발견ID 리스트' })
-  // @PaginateQueryOptions()
-  // @Get(':userId/connectionids-liked')
-  // async getConnectionIdsLikedByMe(
-  //   @Param('userId') userId: number,
-  // ): Promise<AnyData> {
-  //   return this.usersService.getConnectionIdsLikedByMe(userId);
-  // }
-
-  //?-------------------------------------------------------------------------//
-  //? Connection Report Pivot
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '나의 블락 리스트에 추가' })
+  @ApiOperation({ description: '차단한 발견 리스트에 추가' })
   @Post(':userId/connections-reported/:connectionId')
   async attachToConnectionReportPivot(
     @Param('userId', ParseIntPipe) userId: number,
@@ -90,7 +61,7 @@ export class UserConnectionsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.attachToReportConnectionPivot(
+      await this.usersConnectionService.attachToReportConnectionPivot(
         userId,
         connectionId,
         message,
@@ -104,7 +75,7 @@ export class UserConnectionsController {
     }
   }
 
-  @ApiOperation({ description: '나의 블락 리스트에서 삭제' })
+  @ApiOperation({ description: '차단한 발견 리스트에서 삭제' })
   @Delete(':userId/connections-reported/:connectionId')
   async detachFromConnectionReportPivot(
     @Param('userId', ParseIntPipe) userId: number,
@@ -114,7 +85,7 @@ export class UserConnectionsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersService.detachFromReportConnectionPivot(
+      await this.usersConnectionService.detachFromReportConnectionPivot(
         userId,
         connectionId,
       );
@@ -126,7 +97,7 @@ export class UserConnectionsController {
     }
   }
 
-  @ApiOperation({ description: '내가 블락한 발견 리스트' })
+  @ApiOperation({ description: '내가 차단한 발견 리스트 (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/connections-reported')
   async getConnectionsReportedByMe(
@@ -134,7 +105,10 @@ export class UserConnectionsController {
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Connection>> {
     const { data, meta, links } =
-      await this.usersService.getConnectionsReportedByMe(userId, query);
+      await this.usersConnectionService.getConnectionsReportedByMe(
+        userId,
+        query,
+      );
 
     return {
       data: data.map((v) => v.connection),
@@ -143,39 +117,20 @@ export class UserConnectionsController {
     } as Paginated<Connection>;
   }
 
-  @ApiOperation({ description: '내가 블락한 발견ID 리스트' })
+  @ApiOperation({ description: '내가 차단한 발견ID 리스트 (all)' })
   @PaginateQueryOptions()
   @Get(':userId/connectionids-reported')
   async getConnectionIdsReportedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
-    return this.usersService.getConnectionIdsReportedByMe(userId);
+    return {
+      data: this.usersConnectionService.getConnectionIdsReportedByMe(userId),
+    };
   }
 
   //?-------------------------------------------------------------------------//
-  //? User Reaction to Connection Pivot
+  //? Reaction Pivot
   //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '발견 reaction' })
-  @PaginateQueryOptions()
-  @Get(':userId/connections/:connectionId')
-  async getReaction(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('connectionId', ParseIntPipe) connectionId: number,
-  ): Promise<Reaction> {
-    return await this.usersService.getReaction(userId, connectionId);
-  }
-
-  @ApiOperation({ description: '발견 reaction 리스트' })
-  @Get(':userId/reactions')
-  async getReactions(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Query('ids', new ParseArrayPipe({ items: Number, separator: ',' }))
-    ids: number[],
-  ): Promise<Array<Reaction>> {
-    // console.log(dto);
-    return await this.usersService.getReactions(userId, ids);
-  }
 
   @ApiOperation({ description: '발견 reaction 리스트에 추가' })
   @Post(':userId/connections/:connectionId')
@@ -184,7 +139,7 @@ export class UserConnectionsController {
     @Param('connectionId', ParseIntPipe) connectionId: number,
     @Body() dto: CreateReactionDto, // optional message, and skill
   ): Promise<Reaction> {
-    return await this.usersService.attachToReactionPivot(
+    return await this.usersConnectionService.attachToReactionPivot(
       userId,
       connectionId,
       dto.emotion,
@@ -198,12 +153,56 @@ export class UserConnectionsController {
     @Param('connectionId', ParseIntPipe) connectionId: number,
     @Body() dto: RemoveReactionDto, // optional message, and skill
   ): Promise<Reaction> {
-    return await this.usersService.detachFromReactionPivot(
+    return await this.usersConnectionService.detachFromReactionPivot(
       userId,
       connectionId,
       dto.emotion,
     );
   }
+
+  @ApiOperation({ description: '발견 reaction 조회' })
+  @PaginateQueryOptions()
+  @Get(':userId/connections/:connectionId')
+  async getReaction(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('connectionId', ParseIntPipe) connectionId: number,
+  ): Promise<Reaction> {
+    return await this.usersConnectionService.getReaction(userId, connectionId);
+  }
+
+  @ApiOperation({ description: '발견 reaction 리스트 (all)' })
+  @Get(':userId/reactions')
+  async getReactions(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('ids', new ParseArrayPipe({ items: Number, separator: ',' }))
+    ids: number[],
+  ): Promise<Array<Reaction>> {
+    return await this.usersConnectionService.getReactions(userId, ids);
+  }
+
+  @ApiOperation({ description: '내가 반응한 발견 리스트 (paginated)' })
+  @PaginateQueryOptions()
+  @Get(':userId/connections-reacted')
+  async getConnectionsReactedByMe(
+    @Param('userId') userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Connection>> {
+    const { data, meta, links } =
+      await this.usersConnectionService.getConnectionsReactedByMe(
+        userId,
+        query,
+      );
+
+    return {
+      data: data.map((v) => v.connection),
+      meta: meta,
+      links: links,
+    } as Paginated<Connection>;
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? Plea Pivot (어쩌면 will be deprecated)
+  //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '발견요청 리스트에 추가' })
   @PaginateQueryOptions()
@@ -213,7 +212,7 @@ export class UserConnectionsController {
     @Param('askedUserId', ParseIntPipe) askedUserId: number,
     @Param('dotId', ParseIntPipe) dotId: number,
   ): Promise<AnyData> {
-    const dot = await this.usersService.attachToPleaPivot(
+    const dot = await this.usersConnectionService.attachToPleaPivot(
       askingUserId,
       askedUserId,
       dotId,
@@ -223,78 +222,9 @@ export class UserConnectionsController {
     };
   }
 
-  // @ApiOperation({ description: '참가신청 승인/거부' })
-  // @PaginateQueryOptions()
-  // @Patch(':askingUserId/pleas/:askedUserId/connections/:connectionId')
-  // async updateJoinToAcceptOrDeny(
-  //   @Param('askingUserId', ParseIntPipe) askingUserId: number,
-  //   @Param('askedUserId', ParseIntPipe) askedUserId: number,
-  //   @Param('connectionId', ParseIntPipe) connectionId: number,
-  //   @Body() dto: AcceptOrDenyDto,
-  // ): Promise<AnyData> {
-  //   try {
-  //     await this.usersService.updateJoinToAcceptOrDeny(
-  //       askingUserId,
-  //       askedUserId,
-  //       connectionId,
-  //       dto.status,
-  //       dto.joinType,
-  //     );
-  //     return {
-  //       data: 'ok',
-  //     };
-  //   } catch (e) {
-  //     throw new BadRequestException();
-  //   }
-  // }
-
-  // @ApiOperation({ description: '보낸 신청 리스트' })
-  // @PaginateQueryOptions()
-  // @Get(':userId/connections-requested')
-  // async getConnectionsRequested(
-  //   @Param('userId') userId: number,
-  //   @Paginate() query: PaginateQuery,
-  // ): Promise<Paginated<Join>> {
-  //   const { data, meta, links } = await this.usersService.getConnectionsRequested(
-  //     userId,
-  //     query,
-  //   );
-
-  //   return {
-  //     data: data,
-  //     meta: meta,
-  //     links: links,
-  //   }; // as Paginated<Join>;
-  // }
-
-  // @ApiOperation({ description: '신청한 발견ID 리스트' })
-  // @Get(':userId/connectionids-requested')
-  // async getConnectionIdsToJoin(@Param('userId') userId: number): Promise<AnyData> {
-  //   return this.usersService.getConnectionIdsRequested(userId);
-  // }
-
-  // @ApiOperation({ description: '받은 초대 리스트' })
-  // @PaginateQueryOptions()
-  // @Get(':userId/connections-invited')
-  // async getConnectionsInvited(
-  //   @Param('userId') userId: number,
-  //   @Paginate() query: PaginateQuery,
-  // ): Promise<Paginated<Join>> {
-  //   const { data, meta, links } = await this.usersService.getConnectionsInvited(
-  //     userId,
-  //     query,
-  //   );
-
-  //   return {
-  //     data: data,
-  //     meta: meta,
-  //     links: links,
-  //   }; // as Paginated<Join>;
-  // }
-
   @ApiOperation({ description: '발견요청한 사용자 리스트' })
   @Get(':userId/users-pleaded')
   async getDotPleaded(@Param('userId') userId: number): Promise<User[]> {
-    return this.usersService.getUniqueUsersPleaded(userId);
+    return this.usersConnectionService.getUniqueUsersPleaded(userId);
   }
 }
