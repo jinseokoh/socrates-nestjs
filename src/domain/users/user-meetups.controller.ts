@@ -113,7 +113,10 @@ export class UserMeetupsController {
   async getMeetupIdsLikedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
-    return { data: this.usersMeetupService.getMeetupIdsLikedByMe(userId) };
+    const data: number[] = await this.usersMeetupService.getMeetupIdsLikedByMe(
+      userId,
+    );
+    return { data };
   }
 
   //?-------------------------------------------------------------------------//

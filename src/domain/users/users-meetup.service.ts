@@ -163,6 +163,8 @@ export class UsersMeetupService {
       [userId],
     );
 
+    console.log(items.map(({ meetupId }) => meetupId));
+
     return items.map(({ meetupId }) => meetupId);
   }
 
