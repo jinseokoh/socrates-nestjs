@@ -123,8 +123,11 @@ export class UserConnectionsController {
   async getConnectionIdsReportedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
+    const data = await this.usersConnectionService.getConnectionIdsReportedByMe(
+      userId,
+    );
     return {
-      data: this.usersConnectionService.getConnectionIdsReportedByMe(userId),
+      data,
     };
   }
 
@@ -225,6 +228,6 @@ export class UserConnectionsController {
   @ApiOperation({ description: '발견요청한 사용자 리스트' })
   @Get(':userId/users-pleaded')
   async getDotPleaded(@Param('userId') userId: number): Promise<User[]> {
-    return this.usersConnectionService.getUniqueUsersPleaded(userId);
+    return await this.usersConnectionService.getUniqueUsersPleaded(userId);
   }
 }
