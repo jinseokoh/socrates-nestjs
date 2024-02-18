@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { Public } from 'src/common/decorators/public.decorator';
 import { ConnectionsService } from 'src/domain/connections/connections.service';
 import { CreateConnectionDto } from 'src/domain/connections/dto/create-connection.dto';
+import { UpdateConnectionDto } from 'src/domain/connections/dto/update-connection.dto';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 
@@ -112,6 +114,19 @@ export class ConnectionsController {
   @Get('users/:id')
   async getConnectionByUserId(@Param('id') id: number): Promise<Connection[]> {
     return await this.connectionsService.findByUserId(id);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? UPDATE
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '발견글 수정' })
+  @Patch(':id')
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateConnectionDto,
+  ): Promise<Connection> {
+    return await this.connectionsService.update(id, dto);
   }
 
   //?-------------------------------------------------------------------------//

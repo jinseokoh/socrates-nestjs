@@ -18,6 +18,7 @@ import { DataSource, Repository } from 'typeorm';
 import { CreateConnectionDto } from 'src/domain/connections/dto/create-connection.dto';
 import { LoremIpsum } from 'lorem-ipsum';
 import { Dot } from 'src/domain/connections/entities/dot.entity';
+import { UpdateConnectionDto } from 'src/domain/connections/dto/update-connection.dto';
 
 @Injectable()
 export class ConnectionsService {
@@ -153,6 +154,18 @@ answer = VALUES(`answer`)',
       this.logger.error(e);
       throw new NotFoundException('entity not found');
     }
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? UPDATE
+  //?-------------------------------------------------------------------------//
+
+  async update(id: number, dto: UpdateConnectionDto): Promise<Connection> {
+    const connection = await this.repository.preload({ id, ...dto });
+    if (!connection) {
+      throw new NotFoundException(`entity not found`);
+    }
+    return await this.repository.save(connection);
   }
 
   //?-------------------------------------------------------------------------//
