@@ -193,7 +193,7 @@ export class UserMeetupsController {
   async getMeetupIdsReportdByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
-    return this.usersMeetupService.getMeetupIdsReportedByMe(userId);
+    return await this.usersMeetupService.getMeetupIdsReportedByMe(userId);
   }
 
   //?-------------------------------------------------------------------------//
@@ -257,13 +257,14 @@ export class UserMeetupsController {
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Join>> {
-    return this.usersMeetupService.getMeetupsRequested(userId, query);
+    return await this.usersMeetupService.getMeetupsRequested(userId, query);
   }
 
   @ApiOperation({ description: '내가 신청한 모임ID 리스트 (all)' })
   @Get(':userId/meetupids-requested')
   async getMeetupIdsToJoin(@Param('userId') userId: number): Promise<AnyData> {
-    return { data: this.usersMeetupService.getMeetupIdsRequested(userId) };
+    const data = await this.usersMeetupService.getMeetupIdsRequested(userId);
+    return { data };
   }
 
   @ApiOperation({
@@ -288,6 +289,6 @@ export class UserMeetupsController {
   @ApiOperation({ description: '나를 초대한 모임ID 리스트 (all)' })
   @Get(':userId/meetupids-invited')
   async getMeetupIdsInvited(@Param('userId') userId: number): Promise<AnyData> {
-    return this.usersMeetupService.getMeetupIdsInvited(userId);
+    return await this.usersMeetupService.getMeetupIdsInvited(userId);
   }
 }
