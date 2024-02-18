@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { DotStatus } from 'src/common/enums';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { Plea } from 'src/domain/users/entities/plea.entity';
@@ -7,6 +8,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
@@ -53,6 +55,10 @@ export class Dot {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Exclude()
+  @DeleteDateColumn()
+  deletedAt: Date | null;
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany using one-to-many
