@@ -14,8 +14,15 @@ import {
 @Entity()
 export class Plea {
   @Column({ default: false })
-  @ApiProperty({ description: 'is Complete?' })
-  isComplete: boolean;
+  @ApiProperty({ description: 'is read?' })
+  isRead: boolean;
+
+  @Column({ type: 'tinyint', unsigned: true, nullable: true })
+  reward: number | null;
+
+  @Column({ type: 'datetime' })
+  @ApiProperty({ description: 'expiration date' })
+  expiredAt: Date;
 
   @CreateDateColumn()
   createdAt: Date;
