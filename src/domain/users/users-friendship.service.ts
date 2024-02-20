@@ -17,7 +17,7 @@ import { Ledger as LedgerType, FriendshipStatus } from 'src/common/enums';
 import { AnyData } from 'src/common/types';
 import { DataSource, In, Not } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import { CreateFriendRequestDto } from 'src/domain/users/dto/create-friend-request.dto';
+import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto';
 import { FcmService } from 'src/services/fcm/fcm.service';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
@@ -52,7 +52,7 @@ export class UsersFriendshipService {
   async createFriendship(
     senderId: number,
     recipientId: number,
-    dto: CreateFriendRequestDto,
+    dto: CreateFriendshipDto,
   ): Promise<number> {
     let newBalance = 0;
     // create a new query runner
@@ -96,8 +96,8 @@ export class UsersFriendshipService {
         await queryRunner.manager.save(ledger);
       }
       await queryRunner.manager.query(
-        'INSERT IGNORE INTO `friendship` (senderId, recipientId, message) VALUES (?, ?, ?)',
-        [senderId, recipientId, dto.message],
+        'INSERT IGNORE INTO `friendship` (senderId, recipientId, requestFrom, message) VALUES (?, ?, ?, ?)',
+        [senderId, recipientId, dto.requestFrom, dto.message],
       );
       await queryRunner.commitTransaction();
     } catch (err) {

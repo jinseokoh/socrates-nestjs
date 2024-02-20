@@ -18,7 +18,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
 import { FriendshipStatus } from 'src/common/enums';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { CreateFriendRequestDto } from 'src/domain/users/dto/create-friend-request.dto';
+import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto';
 import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -39,7 +39,7 @@ export class UserFriendshipController {
   async createFriendship(
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
-    @Body() dto: CreateFriendRequestDto,
+    @Body() dto: CreateFriendshipDto,
   ): Promise<AnyData> {
     const balance = await this.usersFriendshipService.createFriendship(
       senderId,
