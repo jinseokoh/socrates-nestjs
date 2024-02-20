@@ -24,6 +24,7 @@ export * from './rate';
 export * from './region';
 export * from './religion';
 export * from './report';
+export * from './request-from';
 export * from './role';
 export * from './subcategory';
 export * from './time';

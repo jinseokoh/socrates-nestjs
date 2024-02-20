@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
-import { FriendshipStatus } from 'src/common/enums';
+import { FriendshipStatus, RequestFrom } from 'src/common/enums';
 import { Dot } from 'src/domain/connections/entities/dot.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -28,9 +27,13 @@ export class Friendship {
   @ApiProperty({ description: 'message' })
   message: string | null;
 
-  @Column({ default: true })
-  @ApiProperty({ description: 'is anonymous?' })
-  isAnonymous: boolean;
+  @Column({
+    type: 'enum',
+    enum: RequestFrom,
+    default: RequestFrom.CONNECTION,
+  })
+  @ApiProperty({ description: 'PROFILE|CONNECTION' })
+  requestFrom: RequestFrom;
 
   @CreateDateColumn()
   createdAt: Date;
