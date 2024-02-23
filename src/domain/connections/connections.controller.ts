@@ -74,6 +74,7 @@ export class ConnectionsController {
     return await this.connectionsService.findAll(query);
   }
 
+  //? the commenting out relations can be ignored to reduce the amount of response
   @ApiOperation({ description: 'Connection 상세보기' })
   @Get(':id')
   async getConnectionById(@Param('id') id: number): Promise<Connection> {
@@ -91,8 +92,8 @@ export class ConnectionsController {
       'user.connections.user',
       'user.connections.remarks',
       'user.connections.remarks.user',
-      'user.sentFriendships',
-      'user.receivedFriendships',
+      // 'user.sentFriendships',
+      // 'user.receivedFriendships',
     ]);
   }
 
