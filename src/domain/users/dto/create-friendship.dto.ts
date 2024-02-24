@@ -23,8 +23,8 @@ export class CreateFriendshipDto {
   @IsNumber()
   cost: number;
 
-  @ApiProperty({ description: '신청자가 읽을 수 있는 발견글 아이디 리스트' })
+  @ApiProperty({ description: '신청자가 읽을 수 있는 dotId 리스트' })
   @IsOptional()
   @IsArray()
-  connectionIds: number[];
+  dotIds: number[];
 }
