@@ -46,7 +46,6 @@ export class RemarksService {
     console.log('remarkWithUser', remarkWithUser);
     // emit SSE
     this.redisClient.emit('sse.add_connection', remarkWithUser);
-
     //? 푸시노티 push notification
     // const fbToken = threadWithUser.meetup.user.pushToken;
     // const notification = {

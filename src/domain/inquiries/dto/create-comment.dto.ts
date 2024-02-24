@@ -6,6 +6,16 @@ export class CreateCommentDto {
   @IsString()
   body: string;
 
+  @ApiProperty({ description: 'like count' })
+  @IsNumber()
+  @IsOptional()
+  likeCount: number | null;
+
+  @ApiProperty({ description: 'flag count' })
+  @IsNumber()
+  @IsOptional()
+  flagCount: number | null;
+
   @ApiProperty({ description: '사용자 아이디' })
   @IsNumber()
   @IsOptional()
@@ -15,4 +25,9 @@ export class CreateCommentDto {
   @IsNumber()
   @IsOptional()
   inquiryId: number | null;
+
+  @ApiProperty({ description: '상위 댓글 아이디', required: false })
+  @IsNumber()
+  @IsOptional()
+  parentId?: number | null;
 }

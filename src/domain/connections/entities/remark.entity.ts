@@ -1,4 +1,3 @@
-import { Exclude } from 'class-transformer';
 import { User } from 'src/domain/users/entities/user.entity';
 
 import {
@@ -56,16 +55,13 @@ export class Remark {
   })
   user: User;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
-
   @Column({ type: 'int', unsigned: true })
   connectionId: number; // to make it available to Repository.
 
   @ManyToOne(() => Connection, (connection) => connection.remarks, {
     onDelete: 'CASCADE',
   })
-  connection?: Connection;
+  connection: Connection;
 
   //**--------------------------------------------------------------------------*/
   //** one to many (self recursive relations)

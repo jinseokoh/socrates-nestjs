@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Sse,
@@ -53,30 +54,29 @@ export class InquiryCommentsController {
   @PaginateQueryOptions()
   @Get(':inquiryId/comments')
   async getComments(
-    @Param('inquiryId') inquiryId: number,
+    @Param('inquiryId', ParseIntPipe) inquiryId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Comment>> {
-    return await this.commentsService.findAll(inquiryId, query);
+    const queryParams = {
+      ...query,
+      ...{
+        filter: {
+          inquiryId: `$eq:${inquiryId}`,
+        },
+      },
+    };
+    return await this.commentsService.findAll(queryParams);
   }
 
-  @ApiOperation({ description: '대댓글 리스트 w/ Pagination' })
+  @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':inquiryId/comments/:commentId')
   async getCommentsById(
-    @Param('inquiryId') inquiryId: number,
-    @Param('commentId') commentId: number,
+    @Param('inquiryId', ParseIntPipe) inquiryId: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Comment>> {
     return await this.commentsService.findAllById(inquiryId, commentId, query);
-  }
-
-  // [admin] specific logic for Report
-  @ApiOperation({ description: '[관리자] 댓글 상세보기' })
-  @Get(':inquiryId/comments/:commentId')
-  async getCommentById(
-    @Param('commentId') commentId: number,
-  ): Promise<Comment> {
-    return await this.commentsService.findById(commentId, ['inquiry']);
   }
 
   //?-------------------------------------------------------------------------//
@@ -98,7 +98,10 @@ export class InquiryCommentsController {
 
   @ApiOperation({ description: '관리자) 댓글 soft 삭제' })
   @Delete(':inquiryId/comments/:commentId')
-  async remove(@Param('commentId') id: number): Promise<Comment> {
+  async remove(
+    @Param('inquiryId', ParseIntPipe) inquiryId: number,
+    @Param('commentId') id: number,
+  ): Promise<Comment> {
     return await this.commentsService.softRemove(id);
   }
 }

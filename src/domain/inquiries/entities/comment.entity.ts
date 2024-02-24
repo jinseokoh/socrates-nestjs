@@ -1,4 +1,3 @@
-import { Exclude } from 'class-transformer';
 import { User } from 'src/domain/users/entities/user.entity';
 
 import {
@@ -6,7 +5,9 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -26,9 +27,9 @@ export class Comment {
   @ApiProperty({ description: 'like count' })
   likeCount: number;
 
-  @Column({ default: false })
-  @ApiProperty({ description: '신고여부' })
-  isFlagged: boolean;
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'flag count' })
+  flagCount: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -58,6 +59,24 @@ export class Comment {
     onDelete: 'CASCADE',
   })
   inquiry: Inquiry;
+
+  //**--------------------------------------------------------------------------*/
+  //** one to many (self recursive relations)
+  // data structure ref)
+  // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
+
+  // @Exclude()
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  parentId: number | null;
+
+  @OneToMany(() => Comment, (comment) => comment.parent)
+  children: Comment[];
+
+  @ManyToOne(() => Comment, (Comment) => Comment.children, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'parentId' })
+  parent: Comment;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

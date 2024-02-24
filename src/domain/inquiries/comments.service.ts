@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -18,12 +18,13 @@ import { UpdateCommentDto } from 'src/domain/inquiries/dto/update-comment.dto';
 
 @Injectable()
 export class CommentsService {
+  private readonly logger = new Logger(CommentsService.name);
+
   constructor(
     @InjectRepository(Comment)
     private readonly repository: Repository<Comment>,
     @InjectRepository(Inquiry)
     private readonly inquiryRepository: Repository<Inquiry>,
-    // @Inject(SlackService) private readonly slack: SlackService,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
   ) {}
 
@@ -32,29 +33,17 @@ export class CommentsService {
   //?-------------------------------------------------------------------------//
 
   async create(dto: CreateCommentDto): Promise<Comment> {
-    // validation
-    try {
-      const inquiry = await this.inquiryRepository.findOneOrFail({
-        where: {
-          id: dto.inquiryId,
-        },
-      });
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
     // creation
     const comment = await this.repository.save(this.repository.create(dto));
-    // fetch comment w/ user to emit SSE
-    const commentWithUser = await this.findById(comment.id, ['user']);
+    const commentWithUser = await this.findById(comment.id, [
+      'user',
+      'inquiry',
+      'inquiry.user',
+    ]);
     console.log('commentWithUser', commentWithUser);
-    // emit SSE
-    this.redisClient.emit('sse.add_inquiry', commentWithUser);
 
-    // const inquiryTitle = inquiry.title.replace(/[\<\>]/g, '');
-    // await this.slack.postMessage({
-    //   channel: 'major',
-    //   text: `[${process.env.NODE_ENV}-api] 📝 댓글 : <${process.env.ADMIN_URL}/inquirys/show/${inquiry.id}|${inquiryTitle}>`,
-    // });
+    this.inquiryRepository.increment({ id: dto.inquiryId }, `remarkCount`, 1);
+
     return commentWithUser;
   }
 
@@ -62,20 +51,23 @@ export class CommentsService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  async findAll(
-    inquiryId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Comment>> {
+  async findAll(query: PaginateQuery): Promise<Paginated<Comment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
-      .where('comment.inquiry = :inquiryId', { inquiryId });
+      .innerJoinAndSelect('user.profile', 'profile')
+      .leftJoinAndSelect('comment.children', 'children')
+      .leftJoinAndSelect('children.user', 'replier')
+      .where('remark.parentId IS NULL')
+      .andWhere('remark.deletedAt IS NULL');
 
     const config: PaginateConfig<Comment> = {
       sortableColumns: ['id'],
+      searchableColumns: ['body'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
       filterableColumns: {
+        inquiryId: [FilterOperator.EQ],
         isFlagged: [FilterOperator.EQ],
       },
     };
@@ -90,7 +82,8 @@ export class CommentsService {
   ): Promise<Paginated<Comment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('comment')
-      .leftJoinAndSelect('comment.user', 'user')
+      .innerJoinAndSelect('comment.user', 'user')
+      .innerJoinAndSelect('user.profile', 'profile')
       .where('comment.inquiryId = :inquiryId', { inquiryId })
       .andWhere('comment.parentId = :commentId', { commentId })
       // .andWhere(
@@ -108,6 +101,7 @@ export class CommentsService {
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
       filterableColumns: {
+        isFlagged: [FilterOperator.EQ],
         // userId: [FilterOperator.EQ, FilterOperator.IN],
       },
     };
@@ -152,7 +146,12 @@ export class CommentsService {
 
   async softRemove(id: number): Promise<Comment> {
     const comment = await this.findById(id);
-    return await this.repository.softRemove(comment);
+    await this.repository.softRemove(comment);
+    await this.inquiryRepository.manager.query(
+      `UPDATE inquiry SET commentCount = commentCount - 1 WHERE id = ? AND commentCount > 0`,
+      [comment.inquiryId],
+    );
+    return comment;
   }
 
   async remove(id: number): Promise<Comment> {
