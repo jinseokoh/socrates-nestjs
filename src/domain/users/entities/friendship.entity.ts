@@ -35,12 +35,6 @@ export class Friendship {
   @ApiProperty({ description: 'PROFILE|CONNECTION' })
   requestFrom: RequestFrom;
 
-  //? in case you need to store info about which ones are diposable. you can do that w/ this.
-  @Column({ type: 'json', nullable: true })
-  @ApiProperty({ description: 'readable dot Ids' })
-  @IsArray()
-  dotIds: number[] | null;
-
   @CreateDateColumn()
   createdAt: Date;
 

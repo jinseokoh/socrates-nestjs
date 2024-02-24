@@ -96,8 +96,8 @@ export class UsersFriendshipService {
         await queryRunner.manager.save(ledger);
       }
       await queryRunner.manager.query(
-        'INSERT IGNORE INTO `friendship` (senderId, recipientId, requestFrom, message, dotIds) VALUES (?, ?, ?, ?, ?)',
-        [senderId, recipientId, dto.requestFrom, dto.message, dto.dotIds],
+        'INSERT IGNORE INTO `friendship` (senderId, recipientId, requestFrom, message) VALUES (?, ?, ?, ?)',
+        [senderId, recipientId, dto.requestFrom, dto.message],
       );
       await queryRunner.commitTransaction();
     } catch (err) {

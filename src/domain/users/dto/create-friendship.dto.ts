@@ -22,9 +22,4 @@ export class CreateFriendshipDto {
   @ApiProperty({ description: '친구신청 비용' })
   @IsNumber()
   cost: number;
-
-  @ApiProperty({ description: '신청자가 읽을 수 있는 dotId 리스트' })
-  @IsOptional()
-  @IsArray()
-  dotIds: number[];
 }
