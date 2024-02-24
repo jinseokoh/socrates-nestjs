@@ -165,7 +165,6 @@ export class UsersFriendshipService {
       .innerJoinAndSelect('friendship.sender', 'sender')
       .innerJoinAndSelect('sender.profile', 'profile')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
-      .leftJoinAndSelect('friendship.dot', 'dot')
       .where({
         recipientId: userId,
         status: Not(FriendshipStatus.ACCEPTED),
@@ -193,7 +192,6 @@ export class UsersFriendshipService {
       .innerJoinAndSelect('friendship.sender', 'sender')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .innerJoinAndSelect('recipient.profile', 'profile')
-      .leftJoinAndSelect('friendship.dot', 'dot')
       .where({
         senderId: userId,
         status: Not(FriendshipStatus.ACCEPTED),
