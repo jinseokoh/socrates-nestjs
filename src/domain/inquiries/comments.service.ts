@@ -58,8 +58,8 @@ export class CommentsService {
       .innerJoinAndSelect('user.profile', 'profile')
       .leftJoinAndSelect('comment.children', 'children')
       .leftJoinAndSelect('children.user', 'replier')
-      .where('remark.parentId IS NULL')
-      .andWhere('remark.deletedAt IS NULL');
+      .where('comment.parentId IS NULL')
+      .andWhere('comment.deletedAt IS NULL');
 
     const config: PaginateConfig<Comment> = {
       sortableColumns: ['id'],
