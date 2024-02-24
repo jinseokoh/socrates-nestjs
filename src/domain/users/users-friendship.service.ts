@@ -96,8 +96,14 @@ export class UsersFriendshipService {
         await queryRunner.manager.save(ledger);
       }
       await queryRunner.manager.query(
-        'INSERT IGNORE INTO `friendship` (senderId, recipientId, requestFrom, message) VALUES (?, ?, ?, ?)',
-        [senderId, recipientId, dto.requestFrom, dto.message],
+        'INSERT IGNORE INTO `friendship` (senderId, recipientId, requestFrom, message, connectionIds) VALUES (?, ?, ?, ?, ?)',
+        [
+          senderId,
+          recipientId,
+          dto.requestFrom,
+          dto.message,
+          dto.connectionIds,
+        ],
       );
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -172,7 +178,7 @@ export class UsersFriendshipService {
       });
 
     const config: PaginateConfig<Friendship> = {
-      sortableColumns: ['createdAt', 'dotId'],
+      sortableColumns: ['createdAt'],
       defaultLimit: 20,
       defaultSortBy: [['createdAt', 'DESC']],
       filterableColumns: {
@@ -200,7 +206,7 @@ export class UsersFriendshipService {
       });
 
     const config: PaginateConfig<Friendship> = {
-      sortableColumns: ['createdAt', 'dotId'],
+      sortableColumns: ['createdAt'],
       defaultLimit: 20,
       defaultSortBy: [['createdAt', 'DESC']],
       filterableColumns: {
@@ -225,7 +231,7 @@ export class UsersFriendshipService {
       .where([{ senderId: userId }, { recipientId: userId }]);
 
     const config: PaginateConfig<Friendship> = {
-      sortableColumns: ['createdAt', 'dotId'],
+      sortableColumns: ['createdAt'],
       defaultLimit: 20,
       defaultSortBy: [['createdAt', 'DESC']],
       filterableColumns: {

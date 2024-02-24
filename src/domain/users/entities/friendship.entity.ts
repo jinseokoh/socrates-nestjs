@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsArray } from 'class-validator';
 import { FriendshipStatus, RequestFrom } from 'src/common/enums';
 import { Dot } from 'src/domain/connections/entities/dot.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -35,6 +36,12 @@ export class Friendship {
   @ApiProperty({ description: 'PROFILE|CONNECTION' })
   requestFrom: RequestFrom;
 
+  //? in case you need to store info about which ones are diposable. you can do that w/ this.
+  @Column({ type: 'json', nullable: true })
+  @ApiProperty({ description: 'disposable/readable connection Ids' })
+  @IsArray()
+  connectionIds: number[] | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -62,14 +69,6 @@ export class Friendship {
   })
   @JoinColumn({ name: 'recipientId' })
   public recipient!: User;
-
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  dotId: number | null; // to make it available to Repository.
-
-  @ManyToOne(() => Dot, (dot) => dot.friendships, {
-    onDelete: 'SET NULL',
-  })
-  dot?: Dot;
 
   //?-------------------------------------------------------------------------?/
   //? constructor

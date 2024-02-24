@@ -78,12 +78,6 @@ export class Dot {
   @ManyToOne(() => User, (user) => user.dots, {})
   user: User | null;
 
-  //**--------------------------------------------------------------------------*/
-  //** 1-to-many hasMany
-
-  @OneToMany(() => Friendship, (friendship) => friendship.dot)
-  friendships: Friendship[];
-
   //?-------------------------------------------------------------------------?/
   //? constructor
 
