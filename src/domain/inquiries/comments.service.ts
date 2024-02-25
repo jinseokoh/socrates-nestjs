@@ -147,10 +147,11 @@ export class CommentsService {
   async softRemove(id: number): Promise<Comment> {
     const comment = await this.findById(id);
     await this.repository.softRemove(comment);
-    await this.inquiryRepository.manager.query(
-      `UPDATE inquiry SET commentCount = commentCount - 1 WHERE id = ? AND commentCount > 0`,
-      [comment.inquiryId],
-    );
+    // no column named commentCount. just remove it. that's all.
+    // await this.inquiryRepository.manager.query(
+    //   `UPDATE inquiry SET commentCount = commentCount - 1 WHERE id = ? AND commentCount > 0`,
+    //   [comment.inquiryId],
+    // );
     return comment;
   }
 
