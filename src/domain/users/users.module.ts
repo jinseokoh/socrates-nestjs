@@ -40,28 +40,32 @@ import { UsersFriendshipService } from 'src/domain/users/users-friendship.servic
 import { UsersConnectionService } from 'src/domain/users/users-connection.service';
 import { UsersMeetupService } from 'src/domain/users/users-meetup.service';
 import { UsersUserService } from 'src/domain/users/users-user.service';
+import { UserLedgersController } from 'src/domain/users/user-ledgers.controller';
+import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
+import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      User,
-      Profile,
-      Secret,
       Category,
-      LanguageSkill,
-      Friendship,
-      Meetup,
-      Like,
-      Join,
-      ReportMeetup,
-      Plea,
-      Hate,
-      Flag,
       Connection,
       Dot,
+      Flag,
+      Friendship,
+      Hate,
+      Join,
+      LanguageSkill,
+      Ledger,
+      Like,
+      Meetup,
+      Plea,
+      Profile,
       Reaction,
       ReportConnection,
+      ReportMeetup,
       ReportUser,
+      Secret,
+      User,
     ]),
     ThrottlerModule.forRoot([
       {
@@ -76,9 +80,10 @@ import { UsersUserService } from 'src/domain/users/users-user.service';
   exports: [UsersService],
   providers: [
     UsersService,
-    UsersMeetupService,
     UsersConnectionService,
     UsersFriendshipService,
+    UsersLedgerService,
+    UsersMeetupService,
     UsersUserService,
     UserSubscriber,
     LanguageSkillSubscriber,
@@ -88,6 +93,7 @@ import { UsersUserService } from 'src/domain/users/users-user.service';
     UserCategoriesController,
     UserImpressionsController,
     UserLanguagesController,
+    UserLedgersController,
     UserMeetupsController,
     UserConnectionsController,
     UserFriendshipController,
