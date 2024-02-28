@@ -9,7 +9,7 @@ export const MessageSchema = new Schema(
       required: true,
     },
     id: {
-      type: String, // in the format of `msg_{unixtimestamp}_{userid}`
+      type: String, // in the form of `msg_{unixtimestamp}_{userid}`
       rangeKey: true,
       required: true,
     },

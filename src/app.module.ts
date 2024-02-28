@@ -28,6 +28,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
 import { SocketIoModule } from './websockets/socketio.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { AlertsModule } from 'src/domain/alerts/alerts.module';
 
 @Module({
   imports: [
@@ -106,6 +107,7 @@ import { join } from 'path';
     }),
     FcmModule,
     NaverModule,
+    AlertsModule,
     AuthModule,
     CareersModule,
     CategoriesModule,

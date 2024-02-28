@@ -21,7 +21,7 @@ export class CreateMessageDto {
   @IsNumber()
   userId: number;
 
-  @ApiProperty({ description: '메시지 id (msg_xxx_userId)', required: true })
+  @ApiProperty({ description: '메시지 id (msg_xxxxxx_userId)', required: true })
   @IsString()
   @IsOptional()
   id: string;
