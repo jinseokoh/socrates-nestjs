@@ -1,4 +1,4 @@
-export enum AlertType {
+export enum AlarmType {
   GENERAL = 'general',
   MEETUP = 'meetup',
   CONNECTION = 'connection',

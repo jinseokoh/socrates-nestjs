@@ -1,6 +1,6 @@
-import { AlertType } from 'src/common/enums';
+import { AlarmType } from 'src/common/enums';
 
-export interface IAlertKey {
+export interface IAlarmKey {
   userId: number; // partition key
   id: string | null; // sort key
 }
@@ -13,8 +13,8 @@ export interface ISender {
   age: number | null;
 }
 
-export interface IAlert extends IAlertKey {
-  alertType: AlertType;
+export interface IAlarm extends IAlarmKey {
+  alarmType: AlarmType;
   message: string | null;
   link: string | null;
   user: ISender | null;

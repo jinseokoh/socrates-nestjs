@@ -9,29 +9,29 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { CreateAlertDto } from 'src/domain/alerts/dto/create-alert.dto';
-import { AlertsService } from 'src/domain/alerts/alerts.service';
-import { IAlert, IAlertKey } from 'src/domain/alerts/entities/alert.interface';
+import { CreateAlarmDto } from 'src/domain/alarms/dto/create-alarm.dto';
+import { AlarmsService } from 'src/domain/alarms/alarms.service';
+import { IAlarm, IAlarmKey } from 'src/domain/alarms/entities/alarm.interface';
 
-@Controller('alerts')
-export class AlertsController {
-  constructor(private readonly alertsService: AlertsService) {}
+@Controller('alarms')
+export class AlarmsController {
+  constructor(private readonly alarmsService: AlarmsService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: 'Alert 생성' })
+  @ApiOperation({ description: 'Alarm 생성' })
   @Post()
-  async create(@Body() createAlertDto: CreateAlertDto): Promise<IAlert> {
-    return await this.alertsService.create(createAlertDto);
+  async create(@Body() createAlarmDto: CreateAlarmDto): Promise<IAlarm> {
+    return await this.alarmsService.create(createAlarmDto);
   }
 
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: 'Alert 리스트' })
+  @ApiOperation({ description: 'Alarm 리스트' })
   @Get(':userId')
   async fetch(
     @Param('userId', ParseIntPipe) userId: number,
@@ -45,7 +45,7 @@ export class AlertsController {
       : null;
 
     console.log(`userId =`, userId, `lastKey =`, lastKey ?? 'null'); // todo. remove this log
-    const res = await this.alertsService.fetch(userId, lastKey);
+    const res = await this.alarmsService.fetch(userId, lastKey);
     console.log(`res`, res); // todo. remove this log
 
     return {
@@ -59,7 +59,7 @@ export class AlertsController {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: 'Alert 삭제' })
+  @ApiOperation({ description: 'Alarm 삭제' })
   @Delete(':userId/:id')
   async delete(
     @Param('userId', ParseIntPipe) userId: number,
@@ -68,9 +68,9 @@ export class AlertsController {
     const key = {
       userId: userId,
       id: id,
-    } as IAlertKey;
+    } as IAlarmKey;
 
-    await this.alertsService.delete(key);
+    await this.alarmsService.delete(key);
     return {
       data: 'ok',
     };

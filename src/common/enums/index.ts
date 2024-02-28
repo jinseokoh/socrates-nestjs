@@ -1,5 +1,5 @@
 // export * from './availability'; // unused
-export * from './alert-type';
+export * from './alarm-type';
 export * from './career';
 export * from './category';
 export * from './content-type';

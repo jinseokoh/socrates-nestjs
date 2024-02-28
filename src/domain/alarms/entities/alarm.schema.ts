@@ -1,7 +1,7 @@
 import { Schema } from 'dynamoose';
-import { AlertType } from 'src/common/enums';
+import { AlarmType } from 'src/common/enums';
 
-export const AlertSchema = new Schema(
+export const AlarmSchema = new Schema(
   {
     userId: {
       type: Number,
@@ -13,14 +13,14 @@ export const AlertSchema = new Schema(
       rangeKey: true,
       required: true,
     },
-    alertType: {
-      type: String, // AlertType,
+    alarmType: {
+      type: String, // AlarmType,
       enum: [
-        AlertType.GENERAL,
-        AlertType.MEETUP,
-        AlertType.CONNECTION,
-        AlertType.FRIENDSHIP,
-        AlertType.INQUIRY,
+        AlarmType.GENERAL,
+        AlarmType.MEETUP,
+        AlarmType.CONNECTION,
+        AlarmType.FRIENDSHIP,
+        AlarmType.INQUIRY,
       ],
     },
     message: {
@@ -76,4 +76,4 @@ export const AlertSchema = new Schema(
   },
 );
 
-// console.log('hashKey:', AlertSchema.hashKey);
+// console.log('hashKey:', AlarmSchema.hashKey);

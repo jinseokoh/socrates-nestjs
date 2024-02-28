@@ -6,10 +6,10 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { AlertType } from 'src/common/enums';
-import { ISender } from 'src/domain/alerts/entities/alert.interface';
+import { AlarmType } from 'src/common/enums';
+import { ISender } from 'src/domain/alarms/entities/alarm.interface';
 
-export class CreateAlertDto {
+export class CreateAlarmDto {
   @ApiProperty({ description: '사용자 id', required: true })
   @IsNumber()
   userId: number;
@@ -25,23 +25,23 @@ export class CreateAlertDto {
 
   @ApiProperty({
     description: 'type',
-    default: AlertType.GENERAL,
+    default: AlarmType.GENERAL,
     required: true,
   })
-  @IsEnum(AlertType)
-  alertType: AlertType;
+  @IsEnum(AlarmType)
+  alarmType: AlarmType;
 
-  @ApiProperty({ description: 'TextAlert 용 payload', required: true })
+  @ApiProperty({ description: 'TextAlarm 용 payload', required: true })
   @IsString()
   @IsOptional()
   message: string;
 
-  @ApiProperty({ description: 'TextAlert 용 payload', required: false })
+  @ApiProperty({ description: 'TextAlarm 용 payload', required: false })
   @IsString()
   @IsOptional()
   link: string | null;
 
-  @ApiProperty({ description: 'ImageAlert 용 payload', required: false })
+  @ApiProperty({ description: 'ImageAlarm 용 payload', required: false })
   @IsObject()
   @IsOptional()
   user: ISender | null;

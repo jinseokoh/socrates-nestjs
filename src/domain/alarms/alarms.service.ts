@@ -1,31 +1,31 @@
-import { CreateAlertDto } from './dto/create-alert.dto';
+import { CreateAlarmDto } from './dto/create-alarm.dto';
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { SortOrder } from 'dynamoose/dist/General';
 import { InjectModel, Model } from 'nestjs-dynamoose';
-import { UpdateAlertDto } from 'src/domain/alerts/dto/update-alert.dto';
-import { IAlert, IAlertKey } from 'src/domain/alerts/entities/alert.interface';
+import { UpdateAlarmDto } from 'src/domain/alarms/dto/update-alarm.dto';
+import { IAlarm, IAlarmKey } from 'src/domain/alarms/entities/alarm.interface';
 import * as moment from 'moment';
 
 const LIMIT = 10;
 
 @Injectable()
-export class AlertsService {
+export class AlarmsService {
   constructor(
-    @InjectModel('Alert')
-    private readonly model: Model<IAlert, IAlertKey>,
+    @InjectModel('Alarm')
+    private readonly model: Model<IAlarm, IAlarmKey>,
   ) {}
 
   //? notice that even if you provide createdAt and updatedAt in the payload
   //? dynamodb will ignore them and record the timestamps with its own value.
   //?
-  async create(dto: CreateAlertDto): Promise<IAlert> {
+  async create(dto: CreateAlarmDto): Promise<IAlarm> {
     const timestampInMilliseconds = moment().valueOf();
     const id = `msg_${timestampInMilliseconds}`;
     //! as for the expiration, needs to be in seconds format (not milliseconds)
     const expires = moment().add(10, 'minutes').unix();
     try {
-      const alert = await this.model.create({ ...dto, id, expires });
-      return alert;
+      const alarm = await this.model.create({ ...dto, id, expires });
+      return alarm;
     } catch (error) {
       console.error(`[dynamodb] error`, error);
       throw new BadRequestException(error);
@@ -35,7 +35,7 @@ export class AlertsService {
   //? notice that records will be sorted by range key, which is id
   //? (in msg_xx_## format string; xx is milliseconds).
   //?
-  async fetch(userId: number, lastKey: IAlertKey | null): Promise<any> {
+  async fetch(userId: number, lastKey: IAlarmKey | null): Promise<any> {
     try {
       return lastKey
         ? await this.model
@@ -57,7 +57,7 @@ export class AlertsService {
     }
   }
 
-  async findById(key: IAlertKey): Promise<IAlert> {
+  async findById(key: IAlarmKey): Promise<IAlarm> {
     try {
       return this.model.get(key);
     } catch (error) {
@@ -66,7 +66,7 @@ export class AlertsService {
     }
   }
 
-  async update(key: IAlertKey, dto: UpdateAlertDto): Promise<IAlert> {
+  async update(key: IAlarmKey, dto: UpdateAlarmDto): Promise<IAlarm> {
     try {
       return this.model.update(key, dto);
     } catch (error) {
@@ -75,7 +75,7 @@ export class AlertsService {
     }
   }
 
-  async delete(key: IAlertKey): Promise<any> {
+  async delete(key: IAlarmKey): Promise<any> {
     try {
       return this.model.delete(key);
     } catch (error) {
