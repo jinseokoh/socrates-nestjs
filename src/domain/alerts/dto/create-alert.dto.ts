@@ -14,7 +14,11 @@ export class CreateAlertDto {
   @IsNumber()
   userId: number;
 
-  @ApiProperty({ description: '메시지 id (msg_xxxxxx)', required: true })
+  // 빈칸으로 남겨두면 자동생성
+  @ApiProperty({
+    description: '메시지 id (msg_xxxxxx_userId)',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   id: string;
@@ -42,18 +46,12 @@ export class CreateAlertDto {
   @IsOptional()
   user: ISender | null;
 
-  @ApiProperty({ description: 'ttl', required: false })
+  // 빈칸으로 남겨두면 자동생성
+  @ApiProperty({
+    description: 'ttl',
+    required: false,
+  })
   @IsNumber()
   @IsOptional()
   expires: number;
-
-  @ApiProperty({ description: 'createdAt', required: true })
-  @IsNumber()
-  // @IsOptional()
-  createdAt: number;
-
-  @ApiProperty({ description: 'updatedAt' })
-  @IsNumber()
-  @IsOptional()
-  updatedAt: number;
 }

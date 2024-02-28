@@ -25,14 +25,14 @@ export class MessagesService {
     private readonly s3Service: S3Service,
   ) {}
 
-  //?
-  //? notice that even if you provide createdAt and/or updatedAt in the payload
-  //? dynamodb will ignore them and timestamp the record with its own value.
+  //? notice that even if you provide createdAt and updatedAt in the payload
+  //? dynamodb will ignore them and record the timestamps with its own value.
   //?
   async create(dto: CreateMessageDto): Promise<IMessage> {
-    const createdAt = !dto.createdAt ? moment().valueOf() : dto.createdAt;
-    const id = !dto.id ? `msg_${createdAt}_${dto.userId}` : dto.id;
-    const expires = moment().add(10, 'minutes').unix(); // unix timestamp in seconds!!!!!!!!!!!!!!!!!!!!!! todo. change the TTL value
+    const timestampInMilliseconds = moment().valueOf();
+    const id = `msg_${timestampInMilliseconds}_${dto.userId}`;
+    //! as for the expiration, needs to be in seconds format (not milliseconds)
+    const expires = moment().add(30, 'days').unix();
     try {
       const message = await this.model.create({ ...dto, id, expires });
       return message;

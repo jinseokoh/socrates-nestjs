@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -10,9 +9,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import * as moment from 'moment';
-import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { SignedUrl } from 'src/common/types';
 import { CreateAlertDto } from 'src/domain/alerts/dto/create-alert.dto';
 import { AlertsService } from 'src/domain/alerts/alerts.service';
 import { IAlert, IAlertKey } from 'src/domain/alerts/entities/alert.interface';
@@ -48,7 +44,7 @@ export class AlertsController {
         }
       : null;
 
-    console.log(`lastId`, lastId, `lastKey`, lastKey); // todo. remove this log
+    console.log(`userId =`, userId, `lastKey =`, lastKey ?? 'null'); // todo. remove this log
     const res = await this.alertsService.fetch(userId, lastKey);
     console.log(`res`, res); // todo. remove this log
 
@@ -78,21 +74,5 @@ export class AlertsController {
     return {
       data: 'ok',
     };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? UPLOAD
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
-  @Post('image/url')
-  async getSignedUrl(
-    @CurrentUserId() userId: number,
-    @Body('mimeType') mimeType: string,
-  ): Promise<SignedUrl> {
-    if (mimeType) {
-      return await this.alertsService.getSignedUrl(userId, mimeType);
-    }
-    throw new BadRequestException('mimeType is missing');
   }
 }

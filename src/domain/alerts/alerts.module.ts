@@ -6,6 +6,9 @@ import { AlertSchema } from 'src/domain/alerts/entities/alert.schema';
 import { S3Module } from 'src/services/aws/s3.module';
 // import { AlertsGateway } from 'src/domain/alerts/alerts.gateway';
 // removed alert gateway as we exploit SSE instead of websocket
+
+//! With correct module configuration, the local dynamoDB is populated automatically
+//! as soon as executing any creation method.
 @Module({
   imports: [
     DynamooseModule.forFeature([
