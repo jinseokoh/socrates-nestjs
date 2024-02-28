@@ -42,9 +42,8 @@ export class MessagesService {
     }
   }
 
-  //?
-  //? notice that records will be sorted by range key, which, in this case, is
-  //? id, the string value.
+  //? notice that records will be sorted by range key, which is id
+  //? (in msg_xx_## format string; xx is milliseconds ## is userId).
   //?
   async fetch(meetupId: number, lastKey: IMessageKey | null): Promise<any> {
     try {
