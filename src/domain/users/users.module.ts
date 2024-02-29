@@ -43,6 +43,8 @@ import { UsersUserService } from 'src/domain/users/users-user.service';
 import { UserLedgersController } from 'src/domain/users/user-ledgers.controller';
 import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
+import { UserPleaController } from 'src/domain/users/user-plea.controller';
+import { UsersPleaService } from 'src/domain/users/users-plea.service';
 
 @Module({
   imports: [
@@ -80,10 +82,11 @@ import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
   exports: [UsersService],
   providers: [
     UsersService,
-    UsersConnectionService,
-    UsersFriendshipService,
     UsersLedgerService,
     UsersMeetupService,
+    UsersConnectionService,
+    UsersFriendshipService,
+    UsersPleaService,
     UsersUserService,
     UserSubscriber,
     LanguageSkillSubscriber,
@@ -97,6 +100,7 @@ import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
     UserMeetupsController,
     UserConnectionsController,
     UserFriendshipController,
+    UserPleaController,
     UserUsersController,
     UserFcmController,
     UserSmsController,

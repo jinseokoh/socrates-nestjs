@@ -21,10 +21,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { CreateReactionDto } from 'src/domain/users/dto/create-reaction.dto';
 import { RemoveReactionDto } from 'src/domain/users/dto/remove-reaction.dto';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
-import { User } from 'src/domain/users/entities/user.entity';
 import { UsersConnectionService } from 'src/domain/users/users-connection.service';
-import { CreatePleaDto } from 'src/domain/users/dto/create-plea.dto';
-import { Plea } from 'src/domain/users/entities/plea.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -203,34 +200,5 @@ export class UserConnectionsController {
       meta: meta,
       links: links,
     } as Paginated<Connection>;
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? Plea Pivot (어쩌면 will be deprecated)
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '발견요청 리스트에 추가' })
-  @PaginateQueryOptions()
-  @Post(':senderId/pleas/:recipientId/dots/:dotId')
-  async attachToPleaPivot(
-    @Param('senderId', ParseIntPipe) senderId: number,
-    @Param('recipientId', ParseIntPipe) recipientId: number,
-    @Param('dotId', ParseIntPipe) dotId: number,
-    @Body() dto: CreatePleaDto,
-  ): Promise<Plea> {
-    const newDto = {
-      ...dto,
-      senderId,
-      recipientId,
-      dotId,
-    };
-
-    return await this.usersConnectionService.attachToPleaPivot(newDto);
-  }
-
-  @ApiOperation({ description: '발견요청한 사용자 리스트' })
-  @Get(':userId/users-pleaded')
-  async getDotPleaded(@Param('userId') userId: number): Promise<User[]> {
-    return await this.usersConnectionService.getUniqueUsersPleaded(userId);
   }
 }
