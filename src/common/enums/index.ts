@@ -21,6 +21,7 @@ export * from './message-type';
 export * from './party-type';
 // export * from './payment-method'; // unused
 export * from './personality';
+export * from './plea-status';
 export * from './rate';
 export * from './region';
 export * from './religion';

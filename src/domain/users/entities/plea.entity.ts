@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PleaStatus } from 'src/common/enums';
 import { Dot } from 'src/domain/connections/entities/dot.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -21,6 +22,14 @@ import {
 export class Plea {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   public id: number;
+
+  @Column({
+    type: 'enum',
+    enum: PleaStatus,
+    default: PleaStatus.NILL,
+  })
+  @ApiProperty({ description: 'ACCEPTED|PENDING|NILL' })
+  status: PleaStatus;
 
   @Column({ default: false })
   @ApiProperty({ description: 'is read?' })
