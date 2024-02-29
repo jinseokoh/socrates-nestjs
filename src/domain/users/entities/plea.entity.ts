@@ -35,15 +35,15 @@ export class Plea {
   @ApiProperty({ description: 'is read?' })
   isRead: boolean;
 
-  @Column({ length: 64, nullable: true })
-  message: string | null;
-
   @Column({ type: 'tinyint', unsigned: true, nullable: true })
   reward: number | null;
 
-  @Column({ type: 'datetime' })
-  @ApiProperty({ description: 'expiration date' })
-  expiredAt: Date;
+  @Column({ length: 64, nullable: true })
+  message: string | null;
+
+  @Column({ type: 'datetime', nullable: true })
+  @ApiProperty({ description: '1달 동안만 사용가능' })
+  expiredAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
