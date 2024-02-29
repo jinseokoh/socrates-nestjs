@@ -23,6 +23,8 @@ import { RemoveReactionDto } from 'src/domain/users/dto/remove-reaction.dto';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { UsersConnectionService } from 'src/domain/users/users-connection.service';
+import { CreatePleaDto } from 'src/domain/users/dto/create-plea.dto';
+import { Plea } from 'src/domain/users/entities/plea.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -209,20 +211,21 @@ export class UserConnectionsController {
 
   @ApiOperation({ description: '발견요청 리스트에 추가' })
   @PaginateQueryOptions()
-  @Post(':askingUserId/pleas/:askedUserId/dots/:dotId')
+  @Post(':senderId/pleas/:recipientId/dots/:dotId')
   async attachToPleaPivot(
-    @Param('askingUserId', ParseIntPipe) askingUserId: number,
-    @Param('askedUserId', ParseIntPipe) askedUserId: number,
+    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
     @Param('dotId', ParseIntPipe) dotId: number,
-  ): Promise<AnyData> {
-    const dot = await this.usersConnectionService.attachToPleaPivot(
-      askingUserId,
-      askedUserId,
+    @Body() dto: CreatePleaDto,
+  ): Promise<Plea> {
+    const newDto = {
+      ...dto,
+      senderId,
+      recipientId,
       dotId,
-    );
-    return {
-      data: dot,
     };
+
+    return await this.usersConnectionService.attachToPleaPivot(newDto);
   }
 
   @ApiOperation({ description: '발견요청한 사용자 리스트' })

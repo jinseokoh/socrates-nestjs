@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
 import { JoinStatus, JoinType } from 'src/common/enums';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -52,6 +51,12 @@ export class Join {
   @PrimaryColumn({ type: 'int', unsigned: true })
   askedUserId: number | null; // to make it available to Repository.
 
+  @PrimaryColumn({ type: 'int', unsigned: true })
+  public meetupId!: number;
+
+  //? -------------------------------------------------------------------------/
+  //? many-to-many belongsToMany using many-to-one
+
   @ManyToOne(() => User, (user) => user.askedJoins, {
     nullable: false,
     onUpdate: 'CASCADE',
@@ -60,9 +65,6 @@ export class Join {
   @JoinColumn({ name: 'askedUserId' })
   public askedUser!: User;
 
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  public meetupId!: number;
-
   @ManyToOne(() => Meetup, (meetup) => meetup.id, {
     nullable: false,
     onUpdate: 'CASCADE',
@@ -70,4 +72,11 @@ export class Join {
   })
   @JoinColumn({ name: 'meetupId' })
   public meetup!: Meetup;
+
+  //? -------------------------------------------------------------------------/
+  //? constructor
+
+  constructor(partial: Partial<Join>) {
+    Object.assign(this, partial);
+  }
 }

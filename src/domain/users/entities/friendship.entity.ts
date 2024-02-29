@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray } from 'class-validator';
 import { FriendshipStatus, RequestFrom } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -44,6 +43,12 @@ export class Friendship {
   @PrimaryColumn({ type: 'int', unsigned: true })
   senderId: number; // to make it available to Repository.
 
+  @PrimaryColumn({ type: 'int', unsigned: true })
+  recipientId: number; // to make it available to Repository.
+
+  //? -------------------------------------------------------------------------/
+  //? many-to-many belongsToMany using many-to-one
+
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'CASCADE',
@@ -51,9 +56,6 @@ export class Friendship {
   })
   @JoinColumn({ name: 'senderId' })
   public sender!: User;
-
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  recipientId: number; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
@@ -63,7 +65,7 @@ export class Friendship {
   @JoinColumn({ name: 'recipientId' })
   public recipient!: User;
 
-  //?-------------------------------------------------------------------------?/
+  //? -------------------------------------------------------------------------/
   //? constructor
 
   constructor(partial: Partial<Friendship>) {

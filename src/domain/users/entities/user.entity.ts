@@ -159,6 +159,21 @@ export class User {
   })
   dots: Dot[];
 
+  @OneToMany(() => Connection, (connection) => connection.user)
+  public connections: Connection[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  public comments: Comment[];
+
+  @OneToMany(() => Remark, (remark) => remark.user)
+  public remarks: Remark[];
+
+  @OneToMany(() => Impression, (impression) => impression.user)
+  public impressions: Impression[];
+
+  @OneToMany(() => Flag, (flag) => flag.user)
+  public flags: Flag[];
+
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany using one-to-many
 
@@ -168,11 +183,11 @@ export class User {
   @OneToMany(() => Join, (join) => join.askedUser)
   public askedJoins: Join[];
 
-  @OneToMany(() => Plea, (plea) => plea.askingUser)
-  public askingPleas: Plea[];
+  @OneToMany(() => ReportUser, (reportUser) => reportUser.user)
+  public accusingReports: ReportUser[];
 
-  @OneToMany(() => Plea, (plea) => plea.askedUser)
-  public askedPleas: Plea[];
+  @OneToMany(() => ReportUser, (reportUser) => reportUser.accusedUser)
+  public accusedReports: ReportUser[];
 
   @OneToMany(() => Hate, (hate) => hate.sender)
   public usersHating: Hate[];
@@ -180,11 +195,11 @@ export class User {
   @OneToMany(() => Hate, (hate) => hate.recipient)
   public usersHated: Hate[];
 
-  @OneToMany(() => ReportUser, (reportUser) => reportUser.user)
-  public accusingReports: ReportUser[];
+  @OneToMany(() => Plea, (plea) => plea.sender)
+  public sentPleas: Plea[];
 
-  @OneToMany(() => ReportUser, (reportUser) => reportUser.accusedUser)
-  public accusedReports: ReportUser[];
+  @OneToMany(() => Plea, (plea) => plea.recipient)
+  public receivedPleas: Plea[];
 
   @OneToMany(() => Friendship, (friendship) => friendship.sender)
   public sentFriendships: Friendship[];
@@ -205,9 +220,6 @@ export class User {
   public categoriesInterested: Interest[];
 
   @OneToMany(() => Connection, (connection) => connection.user)
-  public connections: Connection[];
-
-  @OneToMany(() => Connection, (connection) => connection.user)
   public connectionsReacted: Reaction[];
 
   @OneToMany(
@@ -216,20 +228,8 @@ export class User {
   )
   public connectionsReported: ReportConnection[];
 
-  @OneToMany(() => Impression, (impression) => impression.user)
-  public impressions: Impression[];
-
   @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.user)
   public languageSkills: LanguageSkill[];
-
-  @OneToMany(() => Comment, (comment) => comment.user)
-  public comments: Comment[];
-
-  @OneToMany(() => Remark, (remark) => remark.user)
-  public remarks: Remark[];
-
-  @OneToMany(() => Flag, (flag) => flag.user)
-  public flags: Flag[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany

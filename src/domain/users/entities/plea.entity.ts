@@ -7,15 +7,27 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
+@Unique('sender_id_recipient_id_dot_id_key', [
+  'senderId',
+  'recipientId',
+  'dotId',
+])
 export class Plea {
+  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
+  public id: number;
+
   @Column({ default: false })
   @ApiProperty({ description: 'is read?' })
   isRead: boolean;
+
+  @Column({ length: 64, nullable: true })
+  message: string | null;
 
   @Column({ type: 'tinyint', unsigned: true, nullable: true })
   reward: number | null;
@@ -30,30 +42,33 @@ export class Plea {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  askingUserId: number | null; // to make it available to Repository.
+  @Column({ type: 'int', unsigned: true })
+  senderId: number;
 
-  @ManyToOne(() => User, (user) => user.askingPleas, {
+  @Column({ type: 'int', unsigned: true })
+  recipientId: number;
+
+  @Column({ type: 'int', unsigned: true })
+  dotId: number;
+
+  //? -------------------------------------------------------------------------/
+  //? many-to-many belongsToMany using many-to-one
+
+  @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'askingUserId' })
-  public askingUser: User;
+  @JoinColumn({ name: 'senderId' })
+  public sender!: User;
 
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  askedUserId: number | null;
-
-  @ManyToOne(() => User, (user) => user.askedPleas, {
+  @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'askedUserId' })
-  public askedUser: User;
-
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  public dotId: number;
+  @JoinColumn({ name: 'recipientId' })
+  public recipient!: User;
 
   @ManyToOne(() => Dot, (dot) => dot.id, {
     nullable: false,
@@ -62,4 +77,11 @@ export class Plea {
   })
   @JoinColumn({ name: 'dotId' })
   public dot: Dot;
+
+  //? -------------------------------------------------------------------------/
+  //? constructor
+
+  constructor(partial: Partial<Plea>) {
+    Object.assign(this, partial);
+  }
 }

@@ -18,6 +18,7 @@ import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Plea } from 'src/domain/users/entities/plea.entity';
 import { Dot } from 'src/domain/connections/entities/dot.entity';
+import { CreatePleaDto } from 'src/domain/users/dto/create-plea.dto';
 
 @Injectable()
 export class UsersConnectionService {
@@ -292,37 +293,24 @@ export class UsersConnectionService {
   //?-------------------------------------------------------------------------//
 
   // 발견요청 리스트에 추가
-  async attachToPleaPivot(
-    askingUserId: number,
-    askedUserId: number,
-    dotId: number,
-  ): Promise<Dot> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-
-    await queryRunner.manager.query(
-      'INSERT IGNORE INTO `plea` (askingUserId, askedUserId, dotId) VALUES (?, ?, ?)',
-      [askingUserId, askedUserId, dotId],
+  async attachToPleaPivot(dto: CreatePleaDto): Promise<Plea> {
+    const plea = await this.pleaRepository.save(
+      this.pleaRepository.create(dto),
     );
 
-    const dot = await this.dotRepository.findOneOrFail({
-      where: { id: dotId },
-      relations: ['pleas'],
-    });
-
-    return dot;
+    return plea;
   }
 
   async getUniqueUsersPleaded(userId: number): Promise<User[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
-      .innerJoinAndSelect('plea.askingUser', 'askingUser')
+      .innerJoinAndSelect('plea.sender', 'sender')
       .where({
         askedUserId: userId,
       })
-      .groupBy('plea.askingUserId')
+      .groupBy('plea.senderId')
       .getMany();
 
-    return items.map((v) => v.askingUser);
+    return items.map((v) => v.sender);
   }
 }

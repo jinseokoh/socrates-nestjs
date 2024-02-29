@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -16,10 +15,10 @@ export class Flag {
   id: number;
 
   @Column({ length: 64, nullable: false })
-  message: string | null;
+  message: string;
 
   @Column({ length: 32, nullable: false })
-  entity: string | null;
+  entity: string;
 
   @Column({ type: 'int', unsigned: false })
   entityId: number;
@@ -39,12 +38,11 @@ export class Flag {
   @ApiProperty({ description: 'deletedAt' })
   deletedAt: Date | null;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
-
-  @Exclude()
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
+
+  //? -------------------------------------------------------------------------/
+  //? many-to-one belongsTo
 
   @ManyToOne(() => User, (user) => user.flags, {
     onDelete: 'CASCADE',
