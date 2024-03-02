@@ -95,18 +95,30 @@ export class UsersPleaService {
     }
   }
 
-  async getPleasForThisUser(
-    senderId: number,
-    recipientId: number,
-  ): Promise<Plea[]> {
+  async getMyReceivedPleas(myId: number, userId: number): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.sender', 'sender')
       .innerJoinAndSelect('plea.recipient', 'recipient')
       .innerJoinAndSelect('plea.dot', 'dot')
       .where({
-        senderId: senderId,
-        recipientId: recipientId,
+        senderId: userId,
+        recipientId: myId,
+      })
+      .getMany();
+
+    return items;
+  }
+
+  async getMySentPleas(myId: number, userId: number): Promise<Plea[]> {
+    const items = await this.pleaRepository
+      .createQueryBuilder('plea')
+      .innerJoinAndSelect('plea.sender', 'sender')
+      .innerJoinAndSelect('plea.recipient', 'recipient')
+      .innerJoinAndSelect('plea.dot', 'dot')
+      .where({
+        senderId: myId,
+        recipientId: userId,
       })
       .getMany();
 

@@ -45,16 +45,25 @@ export class UserPleaController {
     return await this.usersPleaService.createPlea(newDto);
   }
 
-  @ApiOperation({ description: '내가 이 사용자에게 보낸 요청 리스트' })
-  @Get(':senderId/pleas/:recipientId')
-  async getPleasForThisUser(
+  @ApiOperation({ description: '내가 이 사용자에게 받은 요청 리스트' })
+  @Get(':senderId/pleas-from/:recipientId')
+  async getMyReceivedPleas(
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<Plea[]> {
-    return await this.usersPleaService.getPleasForThisUser(
+    return await this.usersPleaService.getMyReceivedPleas(
       senderId,
       recipientId,
     );
+  }
+
+  @ApiOperation({ description: '내가 이 사용자에게 보낸 요청 리스트' })
+  @Get(':senderId/pleas-to/:recipientId')
+  async getMySentPleas(
+    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
+  ): Promise<Plea[]> {
+    return await this.usersPleaService.getMySentPleas(senderId, recipientId);
   }
 
   @ApiOperation({ description: '내게 요청한 사용자 리스트' })
