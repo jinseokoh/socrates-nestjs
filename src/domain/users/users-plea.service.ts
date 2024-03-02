@@ -101,6 +101,9 @@ export class UsersPleaService {
   ): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
+      .innerJoinAndSelect('plea.sender', 'sender')
+      .innerJoinAndSelect('plea.recipient', 'recipient')
+      .innerJoinAndSelect('plea.dot', 'dot')
       .where({
         senderId: senderId,
         recipientId: recipientId,
