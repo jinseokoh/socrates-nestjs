@@ -26,7 +26,7 @@ export class Plea {
   @Column({
     type: 'enum',
     enum: PleaStatus,
-    default: PleaStatus.NILL,
+    default: PleaStatus.INIT,
   })
   @ApiProperty({ description: 'ACCEPTED|PENDING|NILL' })
   status: PleaStatus;

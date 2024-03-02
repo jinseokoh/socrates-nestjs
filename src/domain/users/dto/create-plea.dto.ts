@@ -28,7 +28,7 @@ export class CreatePleaDto {
 
   @ApiProperty({
     description: 'status',
-    default: PleaStatus.NILL,
+    default: PleaStatus.INIT,
     required: true,
   })
   @IsEnum(PleaStatus)
