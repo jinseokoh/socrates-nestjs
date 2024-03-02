@@ -7,7 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Ledger as LedgerType } from 'src/common/enums';
+import { LedgerType } from 'src/common/enums';
 export class CreateLedgerDto {
   @ApiProperty({ description: '증가', required: true })
   @Type(() => Number)

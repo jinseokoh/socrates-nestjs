@@ -13,9 +13,9 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { Ledger as LedgerType, FriendshipStatus } from 'src/common/enums';
+import { LedgerType, FriendshipStatus } from 'src/common/enums';
 import { AnyData } from 'src/common/types';
-import { DataSource, In, Not } from 'typeorm';
+import { DataSource, Not } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto';
 import { FcmService } from 'src/services/fcm/fcm.service';
@@ -47,7 +47,7 @@ export class UsersFriendshipService {
 
   //? 친구신청 생성 (코인 비용이 발생할 수 있음.)
   //! balance will be adjusted w/ ledger model event subscriber.
-  //! using transaction using query runner
+  //! starts a new transaction using query runner.
   //! for hated(blocked) users, app needs to take care of 'em instead of server.
   async createFriendship(
     senderId: number,

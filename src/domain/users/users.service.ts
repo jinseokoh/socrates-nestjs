@@ -1,11 +1,9 @@
-import { Flag } from 'src/domain/users/entities/flag.entity';
 import {
   BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
   Logger,
-  NotAcceptableException,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -21,40 +19,23 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import {
-  Emotion,
-  JoinType,
-  JoinStatus,
-  Ledger as LedgerType,
-} from 'src/common/enums';
-import { AnyData, SignedUrl } from 'src/common/types';
-import { DataSource, FindOneOptions, In, Not } from 'typeorm';
+import { LedgerType } from 'src/common/enums';
+import { SignedUrl } from 'src/common/types';
+import { DataSource, FindOneOptions, In } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { ConfigService } from '@nestjs/config';
-import { Connection } from 'src/domain/connections/entities/connection.entity';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
-import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
 import { FcmService } from 'src/services/fcm/fcm.service';
-import { Friendship } from 'src/domain/users/entities/friendship.entity';
-import { Hate } from 'src/domain/users/entities/hate.entity';
-import { initialUsername } from 'src/helpers/random-username';
 import { Interest } from 'src/domain/users/entities/interest.entity';
-import { Join } from 'src/domain/meetups/entities/join.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
-import { Like } from 'src/domain/meetups/entities/like.entity';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { randomName } from 'src/helpers/random-filename';
-import { Reaction } from 'src/domain/connections/entities/reaction.entity';
-import { ReportConnection } from 'src/domain/connections/entities/report_connection.entity';
-import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
-import { ReportUser } from 'src/domain/users/entities/report_user.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { S3Service } from 'src/services/aws/s3.service';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
@@ -64,11 +45,6 @@ import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { User } from 'src/domain/users/entities/user.entity';
-import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
-import { Remark } from 'src/domain/connections/entities/remark.entity';
-import { Thread } from 'src/domain/meetups/entities/thread.entity';
-import { Plea } from 'src/domain/users/entities/plea.entity';
-import { Dot } from 'src/domain/connections/entities/dot.entity';
 
 @Injectable()
 export class UsersService {
@@ -86,22 +62,6 @@ export class UsersService {
     private readonly languageSkillRepository: Repository<LanguageSkill>,
     @InjectRepository(Secret)
     private readonly secretRepository: Repository<Secret>,
-    @InjectRepository(Meetup)
-    private readonly meetupRepository: Repository<Meetup>,
-    @InjectRepository(Connection)
-    private readonly connectionRepository: Repository<Connection>,
-    @InjectRepository(Hate)
-    private readonly hateRepository: Repository<Hate>,
-    @InjectRepository(Like)
-    private readonly likeRepository: Repository<Like>,
-    @InjectRepository(Join)
-    private readonly joinRepository: Repository<Join>,
-    @InjectRepository(ReportMeetup)
-    private readonly reportMeetupRepository: Repository<ReportMeetup>,
-    @InjectRepository(ReportConnection)
-    private readonly reportConnectionRepository: Repository<ReportConnection>,
-    @InjectRepository(ReportUser)
-    private readonly reportUserRepository: Repository<ReportUser>,
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     @Inject(SmsClient) private readonly smsClient: SmsClient, // naver

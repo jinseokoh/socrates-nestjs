@@ -15,7 +15,7 @@ export * from './interest';
 export * from './join-status';
 export * from './join-type';
 export * from './keyword';
-export * from './ledger';
+export * from './ledger-type';
 export * from './meetup-type';
 export * from './message-type';
 export * from './party-type';

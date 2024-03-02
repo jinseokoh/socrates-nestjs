@@ -1,4 +1,4 @@
-import { Ledger as LedgerType } from 'src/common/enums';
+import { LedgerType } from 'src/common/enums';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import {

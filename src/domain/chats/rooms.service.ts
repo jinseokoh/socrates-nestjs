@@ -15,7 +15,7 @@ import {
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { CreateRoomDto } from 'src/domain/chats/dto/create-room.dto';
 import { UpdateRoomDto } from 'src/domain/chats/dto/update-room.dto';
-import { Ledger as LedgerType } from 'src/common/enums';
+import { LedgerType } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import { ChangeRoomIsPaidDto } from 'src/domain/chats/dto/change-room-is-paid.dto';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
