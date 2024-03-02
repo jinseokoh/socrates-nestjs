@@ -26,7 +26,7 @@ export class UserPleaController {
   //? Plea Pivot (어쩌면 will be deprecated)
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '발견요청 리스트에 추가' })
+  @ApiOperation({ description: '요청 생성' })
   @PaginateQueryOptions()
   @Post(':senderId/pleas/:recipientId/dots/:dotId')
   async attachToPleaPivot(
@@ -45,9 +45,23 @@ export class UserPleaController {
     return await this.usersPleaService.createPlea(newDto);
   }
 
-  @ApiOperation({ description: '발견요청한 사용자 리스트' })
+  @ApiOperation({ description: '내가 이 사용자에게 보낸 요청 리스트' })
+  @Get(':senderId/pleas/:recipientId')
+  async getPleasForThisUser(
+    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
+  ): Promise<Plea[]> {
+    return await this.usersPleaService.getPleasForThisUser(
+      senderId,
+      recipientId,
+    );
+  }
+
+  @ApiOperation({ description: '내게 요청한 사용자 리스트' })
   @Get(':userId/users-pleaded')
-  async getDotPleaded(@Param('userId') userId: number): Promise<User[]> {
+  async getUniqueUsersPleaded(
+    @Param('userId') userId: number,
+  ): Promise<User[]> {
     return await this.usersPleaService.getUniqueUsersPleaded(userId);
   }
 }

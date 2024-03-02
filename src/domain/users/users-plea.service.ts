@@ -95,12 +95,27 @@ export class UsersPleaService {
     }
   }
 
+  async getPleasForThisUser(
+    senderId: number,
+    recipientId: number,
+  ): Promise<Plea[]> {
+    const items = await this.pleaRepository
+      .createQueryBuilder('plea')
+      .where({
+        senderId: senderId,
+        recipientId: recipientId,
+      })
+      .getMany();
+
+    return items;
+  }
+
   async getUniqueUsersPleaded(userId: number): Promise<User[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.sender', 'sender')
       .where({
-        askedUserId: userId,
+        recipientId: userId,
       })
       .groupBy('plea.senderId')
       .getMany();
