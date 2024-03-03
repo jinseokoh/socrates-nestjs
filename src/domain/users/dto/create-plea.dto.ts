@@ -2,6 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { PleaStatus } from 'src/common/enums';
 export class CreatePleaDto {
+  @ApiProperty({ description: 'id' })
+  @IsNumber()
+  @IsOptional()
+  id: number;
+
   @ApiProperty({ description: 'senderId' })
   @IsNumber()
   @IsOptional()

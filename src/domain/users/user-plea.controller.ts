@@ -21,7 +21,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { PleaStatus } from 'src/common/enums';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@SkipThrottle()
+// @SkipThrottle()
 @Controller('users')
 export class UserPleaController {
   constructor(private readonly usersPleaService: UsersPleaService) {}
@@ -78,7 +78,7 @@ export class UserPleaController {
     return await this.usersPleaService.getUniqueUsersPleaded(userId);
   }
 
-  @ApiOperation({ description: '친구신청 승인/보류' })
+  @ApiOperation({ description: '요청 상태변경' })
   @Patch('pleas/:id')
   async updatePlea(
     @Param('id', ParseIntPipe) id: number,
@@ -91,13 +91,22 @@ export class UserPleaController {
     }
   }
 
-  @ApiOperation({ description: '친구신청 거절/삭제' })
+  @ApiOperation({ description: '요청 삭제' })
+  @Delete('pleas/:id')
+  async deletePlea(@Param('id', ParseIntPipe) id: number): Promise<Plea> {
+    try {
+      return await this.usersPleaService.delete(id);
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
+
+  @ApiOperation({ description: '요청 삭제' })
   @Delete(':senderId/pleas/:recipientId')
-  async deletePlea(
+  async deletePleas(
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<void> {
-    console.log('controller!!!!!!!!!!!');
     try {
       await this.usersPleaService.deletePleas(senderId, recipientId);
     } catch (e) {

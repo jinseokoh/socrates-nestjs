@@ -152,12 +152,18 @@ export class UsersPleaService {
     if (!plea) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.repository.save(plea);
+    return await this.pleaRepository.save(plea);
   }
 
   //--------------------------------------------------------------------------//
   // Delete
   //--------------------------------------------------------------------------//
+
+  async delete(id: number): Promise<Plea> {
+    const plea = await this.pleaRepository.findOneOrFail({ where: { id } });
+    console.log(plea);
+    return await this.pleaRepository.softRemove(plea);
+  }
 
   async deletePleas(senderId: number, recipientId: number): Promise<void> {
     console.log('delete pleas');
@@ -165,7 +171,7 @@ export class UsersPleaService {
 
     console.log(pleas);
     await Promise.all(
-      pleas.map(async (v: Plea) => await this.repository.softDelete(v.id)),
+      pleas.map(async (v: Plea) => await this.pleaRepository.softDelete(v.id)),
     );
   }
 
