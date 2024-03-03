@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   Logger,
+  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,9 +11,9 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { Plea } from 'src/domain/users/entities/plea.entity';
 import { CreatePleaDto } from 'src/domain/users/dto/create-plea.dto';
 import { DataSource } from 'typeorm';
-import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
-import { LedgerType } from 'src/common/enums';
+import { LedgerType, PleaStatus } from 'src/common/enums';
+import { UpdatePleaDto } from 'src/domain/users/dto/update-plea.dto';
 
 @Injectable()
 export class UsersPleaService {
@@ -30,7 +31,10 @@ export class UsersPleaService {
   //? Plea Pivot
   //?-------------------------------------------------------------------------//
 
-  //? 발견요청 리스트에 추가
+  //--------------------------------------------------------------------------//
+  // Create
+  //--------------------------------------------------------------------------//
+
   //! balance will be adjusted w/ ledger model event subscriber.
   //! starts a new transaction using query runner.
   //! for hated(blocked) users, app needs to take care of 'em instead of server.
@@ -39,7 +43,7 @@ export class UsersPleaService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
 
-    const friendshipCount = await queryRunner.manager.count(Friendship, {
+    const friendshipCount = await queryRunner.manager.count(Plea, {
       where: [
         { senderId: dto.senderId, recipientId: dto.recipientId },
         { senderId: dto.recipientId, recipientId: dto.senderId },
@@ -95,6 +99,10 @@ export class UsersPleaService {
     }
   }
 
+  //--------------------------------------------------------------------------//
+  // Read
+  //--------------------------------------------------------------------------//
+
   async getMyReceivedPleas(myId: number, userId: number): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
@@ -124,6 +132,44 @@ export class UsersPleaService {
 
     return items;
   }
+
+  async findByIds(senderId: number, recipientId: number): Promise<Plea[]> {
+    try {
+      return await this.pleaRepository.find({
+        where: { senderId, recipientId },
+      });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  //--------------------------------------------------------------------------//
+  // Update
+  //--------------------------------------------------------------------------//
+
+  async update(id: number, dto: UpdatePleaDto): Promise<Plea> {
+    const plea = await this.pleaRepository.preload({ id, ...dto });
+    if (!plea) {
+      throw new NotFoundException(`entity not found`);
+    }
+    return await this.repository.save(plea);
+  }
+
+  //--------------------------------------------------------------------------//
+  // Delete
+  //--------------------------------------------------------------------------//
+
+  async deletePleas(senderId: number, recipientId: number): Promise<void> {
+    console.log('delete pleas');
+    const pleas = await this.findByIds(senderId, recipientId);
+
+    console.log(pleas);
+    await Promise.all(
+      pleas.map(async (v: Plea) => await this.repository.softDelete(v.id)),
+    );
+  }
+
+  //--------------------------------------------------------------------------//
 
   async getUniqueUsersPleaded(userId: number): Promise<User[]> {
     const items = await this.pleaRepository

@@ -1,10 +1,13 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
@@ -15,6 +18,7 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { CreatePleaDto } from 'src/domain/users/dto/create-plea.dto';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { User } from 'src/domain/users/entities/user.entity';
+import { PleaStatus } from 'src/common/enums';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -23,7 +27,7 @@ export class UserPleaController {
   constructor(private readonly usersPleaService: UsersPleaService) {}
 
   //?-------------------------------------------------------------------------//
-  //? Plea Pivot (어쩌면 will be deprecated)
+  //? Plea Pivot
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '요청 생성' })
@@ -72,5 +76,32 @@ export class UserPleaController {
     @Param('userId') userId: number,
   ): Promise<User[]> {
     return await this.usersPleaService.getUniqueUsersPleaded(userId);
+  }
+
+  @ApiOperation({ description: '친구신청 승인/보류' })
+  @Patch('pleas/:id')
+  async updatePlea(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('status') status: PleaStatus,
+  ): Promise<Plea> {
+    try {
+      return await this.usersPleaService.update(id, { status: status });
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
+
+  @ApiOperation({ description: '친구신청 거절/삭제' })
+  @Delete(':senderId/pleas/:recipientId')
+  async deletePlea(
+    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
+  ): Promise<void> {
+    console.log('controller!!!!!!!!!!!');
+    try {
+      await this.usersPleaService.deletePleas(senderId, recipientId);
+    } catch (e) {
+      throw new BadRequestException();
+    }
   }
 }
