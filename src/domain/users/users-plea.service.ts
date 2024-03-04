@@ -103,7 +103,22 @@ export class UsersPleaService {
   // Read
   //--------------------------------------------------------------------------//
 
-  async getMyReceivedPleas(myId: number, userId: number): Promise<Plea[]> {
+  async findByIds(senderId: number, recipientId: number): Promise<Plea[]> {
+    try {
+      return await this.pleaRepository.find({
+        where: { senderId, recipientId },
+      });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  //--------------------------------------------------------------------------//
+
+  async getMyReceivedPleasFromThisUser(
+    myId: number,
+    userId: number,
+  ): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.sender', 'sender')
@@ -118,7 +133,10 @@ export class UsersPleaService {
     return items;
   }
 
-  async getMySentPleas(myId: number, userId: number): Promise<Plea[]> {
+  async getMySentPleasToThisUser(
+    myId: number,
+    userId: number,
+  ): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.sender', 'sender')
@@ -133,14 +151,32 @@ export class UsersPleaService {
     return items;
   }
 
-  async findByIds(senderId: number, recipientId: number): Promise<Plea[]> {
-    try {
-      return await this.pleaRepository.find({
-        where: { senderId, recipientId },
-      });
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
+  //--------------------------------------------------------------------------//
+
+  async getMyReceivedPleas(userId: number): Promise<Plea[]> {
+    const items = await this.pleaRepository
+      .createQueryBuilder('plea')
+      .innerJoinAndSelect('plea.sender', 'sender')
+      .where({
+        recipientId: userId,
+      })
+      .groupBy('plea.senderId')
+      .getMany();
+
+    return items;
+  }
+
+  async getMySentPleas(userId: number): Promise<Plea[]> {
+    const items = await this.pleaRepository
+      .createQueryBuilder('plea')
+      .innerJoinAndSelect('plea.recipient', 'recipient')
+      .where({
+        senderId: userId,
+      })
+      .groupBy('plea.recipientId')
+      .getMany();
+
+    return items;
   }
 
   //--------------------------------------------------------------------------//

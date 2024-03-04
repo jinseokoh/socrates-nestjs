@@ -51,11 +51,11 @@ export class UserPleaController {
 
   @ApiOperation({ description: '내가 이 사용자에게 받은 요청 리스트' })
   @Get(':senderId/pleas-from/:recipientId')
-  async getMyReceivedPleas(
+  async getMyReceivedPleasFromThisUser(
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<Plea[]> {
-    return await this.usersPleaService.getMyReceivedPleas(
+    return await this.usersPleaService.getMyReceivedPleasFromThisUser(
       senderId,
       recipientId,
     );
@@ -63,19 +63,34 @@ export class UserPleaController {
 
   @ApiOperation({ description: '내가 이 사용자에게 보낸 요청 리스트' })
   @Get(':senderId/pleas-to/:recipientId')
-  async getMySentPleas(
+  async getMySentPleasToThisUser(
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<Plea[]> {
-    return await this.usersPleaService.getMySentPleas(senderId, recipientId);
+    return await this.usersPleaService.getMySentPleasToThisUser(
+      senderId,
+      recipientId,
+    );
   }
 
-  @ApiOperation({ description: '내게 요청한 사용자 리스트' })
-  @Get(':userId/users-pleaded')
-  async getUniqueUsersPleaded(
-    @Param('userId') userId: number,
-  ): Promise<User[]> {
-    return await this.usersPleaService.getUniqueUsersPleaded(userId);
+  @ApiOperation({
+    description: '내가 모든 사용자에게 받은 요청 리스트 grouped by sender',
+  })
+  @Get(':senderId/pleas-from')
+  async getMyReceivedPleas(
+    @Param('senderId', ParseIntPipe) senderId: number,
+  ): Promise<Plea[]> {
+    return await this.usersPleaService.getMyReceivedPleas(senderId);
+  }
+
+  @ApiOperation({
+    description: '내가 모든 사용자에게 보낸 요청 리스트 grouped by recipient',
+  })
+  @Get(':senderId/pleas-to')
+  async getMySentPleas(
+    @Param('senderId', ParseIntPipe) senderId: number,
+  ): Promise<Plea[]> {
+    return await this.usersPleaService.getMySentPleas(senderId);
   }
 
   @ApiOperation({ description: '요청 상태변경' })
@@ -101,7 +116,7 @@ export class UserPleaController {
     }
   }
 
-  @ApiOperation({ description: '요청 삭제' })
+  @ApiOperation({ description: '요청들 삭제' })
   @Delete(':senderId/pleas/:recipientId')
   async deletePleas(
     @Param('senderId', ParseIntPipe) senderId: number,
