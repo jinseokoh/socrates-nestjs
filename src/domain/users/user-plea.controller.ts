@@ -49,51 +49,56 @@ export class UserPleaController {
     return await this.usersPleaService.createPlea(newDto);
   }
 
-  @ApiOperation({ description: '내가 이 사용자에게 받은 요청 리스트' })
-  @Get(':senderId/pleas-from/:recipientId')
-  async getMyReceivedPleasFromThisUser(
-    @Param('senderId', ParseIntPipe) senderId: number,
-    @Param('recipientId', ParseIntPipe) recipientId: number,
-  ): Promise<Plea[]> {
-    return await this.usersPleaService.getMyReceivedPleasFromThisUser(
-      senderId,
-      recipientId,
-    );
-  }
-
-  @ApiOperation({ description: '내가 이 사용자에게 보낸 요청 리스트' })
-  @Get(':senderId/pleas-to/:recipientId')
-  async getMySentPleasToThisUser(
-    @Param('senderId', ParseIntPipe) senderId: number,
-    @Param('recipientId', ParseIntPipe) recipientId: number,
-  ): Promise<Plea[]> {
-    return await this.usersPleaService.getMySentPleasToThisUser(
-      senderId,
-      recipientId,
-    );
-  }
+  //--------------------------------------------------------------------------//
+  // Read
+  //--------------------------------------------------------------------------//
 
   @ApiOperation({
     description: '내가 모든 사용자에게 받은 요청 리스트 grouped by sender',
   })
-  @Get(':senderId/pleas-from')
+  @Get(':myId/pleas-from')
   async getMyReceivedPleas(
-    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('myId', ParseIntPipe) myId: number,
   ): Promise<Plea[]> {
-    return await this.usersPleaService.getMyReceivedPleas(senderId);
+    return await this.usersPleaService.getMyReceivedPleas(myId);
   }
 
   @ApiOperation({
     description: '내가 모든 사용자에게 보낸 요청 리스트 grouped by recipient',
   })
-  @Get(':senderId/pleas-to')
+  @Get(':myId/pleas-to')
   async getMySentPleas(
-    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('myId', ParseIntPipe) myId: number,
   ): Promise<Plea[]> {
-    return await this.usersPleaService.getMySentPleas(senderId);
+    return await this.usersPleaService.getMySentPleas(myId);
   }
 
-  @ApiOperation({ description: '요청 상태변경' })
+  @ApiOperation({ description: '내가 이 사용자에게 받은 요청 리스트' })
+  @Get(':myId/pleas-from/:userId')
+  async getMyReceivedPleasFromThisUser(
+    @Param('myId', ParseIntPipe) myId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<Plea[]> {
+    return await this.usersPleaService.getMyReceivedPleasFromThisUser(
+      myId,
+      userId,
+    );
+  }
+
+  @ApiOperation({ description: '내가 이 사용자에게 보낸 요청 리스트' })
+  @Get(':myId/pleas-to/:userId')
+  async getMySentPleasToThisUser(
+    @Param('myId', ParseIntPipe) myId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<Plea[]> {
+    return await this.usersPleaService.getMySentPleasToThisUser(myId, userId);
+  }
+
+  //--------------------------------------------------------------------------//
+  // Update
+  //--------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '요청 상태 변경' })
   @Patch('pleas/:id')
   async updatePlea(
     @Param('id', ParseIntPipe) id: number,
@@ -105,6 +110,10 @@ export class UserPleaController {
       throw new BadRequestException();
     }
   }
+
+  //--------------------------------------------------------------------------//
+  // Delete
+  //--------------------------------------------------------------------------//
 
   @ApiOperation({ description: '요청 삭제' })
   @Delete('pleas/:id')

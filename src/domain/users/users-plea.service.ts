@@ -125,8 +125,8 @@ export class UsersPleaService {
       .innerJoinAndSelect('plea.recipient', 'recipient')
       .innerJoinAndSelect('plea.dot', 'dot')
       .where({
-        senderId: userId,
-        recipientId: myId,
+        senderId: myId,
+        recipientId: userId,
       })
       .getMany();
 
@@ -153,12 +153,12 @@ export class UsersPleaService {
 
   //--------------------------------------------------------------------------//
 
-  async getMyReceivedPleas(userId: number): Promise<Plea[]> {
+  async getMyReceivedPleas(myId: number): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.sender', 'sender')
       .where({
-        recipientId: userId,
+        recipientId: myId,
       })
       .groupBy('plea.senderId')
       .getMany();
@@ -166,12 +166,12 @@ export class UsersPleaService {
     return items;
   }
 
-  async getMySentPleas(userId: number): Promise<Plea[]> {
+  async getMySentPleas(myId: number): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.recipient', 'recipient')
       .where({
-        senderId: userId,
+        senderId: myId,
       })
       .groupBy('plea.recipientId')
       .getMany();
