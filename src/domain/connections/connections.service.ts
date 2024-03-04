@@ -43,12 +43,31 @@ export class ConnectionsService {
           id: dto.dotId,
         },
       });
-      const connection = await this.repository.save(
-        this.repository.create(dto),
-      );
-      connection['dot'] = dot;
+      const connection = await this.repository.findOne({
+        where: {
+          userId: dto.userId,
+          dotId: dto.dotId,
+        },
+      });
+      if (connection) {
+        await this.repository.manager.query(
+          'INSERT IGNORE INTO `connection` \
+  (userId, dotId, answer) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE \
+  userId = VALUES(`userId`), \
+  dotId = VALUES(`dotId`), \
+  answer = VALUES(`answer`)',
+          [dto.userId, dto.dotId, dto.answer],
+        );
+        connection['answer'] = dto.answer;
+        return connection;
+      } else {
+        const connection = await this.repository.save(
+          this.repository.create(dto),
+        );
+        connection['dot'] = dot;
 
-      return connection;
+        return connection;
+      }
     } catch (e) {
       console.log(e);
       throw new BadRequestException();
