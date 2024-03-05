@@ -122,11 +122,10 @@ export class UsersPleaService {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.sender', 'sender')
-      .innerJoinAndSelect('plea.recipient', 'recipient')
       .innerJoinAndSelect('plea.dot', 'dot')
       .where({
-        senderId: myId,
-        recipientId: userId,
+        senderId: userId,
+        recipientId: myId,
       })
       .getMany();
 
@@ -139,7 +138,6 @@ export class UsersPleaService {
   ): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
-      .innerJoinAndSelect('plea.sender', 'sender')
       .innerJoinAndSelect('plea.recipient', 'recipient')
       .innerJoinAndSelect('plea.dot', 'dot')
       .where({
