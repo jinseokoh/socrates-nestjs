@@ -382,47 +382,47 @@ export class DotsService {
       }),
       //! 슬픔 ✅
       new Dot({
-        slug: 'sad',
+        slug: 'sorrow',
         question: '가족이나 친구와의 갈등 상황이 있었을때 어떻게 화해 했나요?',
         isActive: true,
         status: DotStatus.FIXED,
       }),
       new Dot({
-        slug: 'sad',
+        slug: 'sorrow',
         question:
           '과거의 아픈 기억을 통해 얻게 된 교훈이나 동기부여가 있다면 이야기 해주세요.',
         isActive: true,
         status: DotStatus.FIXED,
       }),
       new Dot({
-        slug: 'sad',
+        slug: 'sorrow',
         question:
           '현재 우울감이나 슬픔을 느끼고 있다면, 그 이유에 대해 이야기 해주세요.',
         isActive: true,
         status: DotStatus.FIXED,
       }),
       new Dot({
-        slug: 'sad',
+        slug: 'sorrow',
         question:
           '혼자 울었던 때가 있었다면, 언제였고, 무슨 일이 있었는지 이야기 해주세요.',
         isActive: true,
         status: DotStatus.FIXED,
       }),
       new Dot({
-        slug: 'sad',
+        slug: 'sorrow',
         question: '가족 중 누구의 죽음에 가장 슬퍼할 것 같은가요? 그 이유는?',
         isActive: true,
         status: DotStatus.FIXED,
       }),
       new Dot({
-        slug: 'sad',
+        slug: 'sorrow',
         question:
           '내가 우울함을 느낄때, 우울함 극복에 도움이 되는 나만의 힐링 방법이 있나요?',
         isActive: true,
         status: DotStatus.FIXED,
       }),
       new Dot({
-        slug: 'sad',
+        slug: 'sorrow',
         question:
           '과거의 어떤 일에 대한 슬픈 기억이 여전히 가슴 아프게 남아있다면, 어떤 것이 있나요?',
         isActive: true,
@@ -430,21 +430,21 @@ export class DotsService {
       }),
       new Dot({
         // !!!!!
-        slug: 'sad',
+        slug: 'sorrow',
         question: '',
         isActive: true,
         status: DotStatus.FIXED,
       }),
       new Dot({
         // !!!!!
-        slug: 'sad',
+        slug: 'sorrow',
         question: '',
         isActive: true,
         status: DotStatus.FIXED,
       }),
       new Dot({
         // !!!!!
-        slug: 'sad',
+        slug: 'sorrow',
         question: '',
         isActive: true,
         status: DotStatus.FIXED,
