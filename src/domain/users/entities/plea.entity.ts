@@ -34,8 +34,8 @@ export class Plea {
   status: PleaStatus;
 
   @Column({ default: false })
-  @ApiProperty({ description: 'is read?' })
-  isRead: boolean;
+  @ApiProperty({ description: 'is responded?' })
+  isResponded: boolean;
 
   @Column({ type: 'tinyint', unsigned: true, nullable: true })
   reward: number | null;
@@ -45,7 +45,7 @@ export class Plea {
 
   @Column({ type: 'datetime', nullable: true })
   @ApiProperty({ description: '1달 동안만 사용가능' })
-  expiredAt: Date | null;
+  readAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;

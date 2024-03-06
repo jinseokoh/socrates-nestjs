@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { PleaStatus } from 'src/common/enums';
 export class CreatePleaDto {
   @ApiProperty({ description: 'id' })
@@ -22,15 +28,6 @@ export class CreatePleaDto {
   @IsOptional()
   dotId: number;
 
-  @ApiProperty({ description: '요청시 사례 비용' })
-  @IsNumber()
-  reward: number;
-
-  @ApiProperty({ description: '요청시 보내는 글; optional' })
-  @IsString()
-  @IsOptional()
-  message?: string;
-
   @ApiProperty({
     description: 'status',
     default: PleaStatus.INIT,
@@ -39,4 +36,18 @@ export class CreatePleaDto {
   @IsEnum(PleaStatus)
   @IsOptional()
   status: PleaStatus;
+
+  @ApiProperty({ description: 'recipientId' })
+  @IsBoolean()
+  @IsOptional()
+  isResponded: boolean;
+
+  @ApiProperty({ description: '요청시 사례 비용' })
+  @IsNumber()
+  reward: number;
+
+  @ApiProperty({ description: '요청시 보내는 글; optional' })
+  @IsString()
+  @IsOptional()
+  message?: string;
 }
