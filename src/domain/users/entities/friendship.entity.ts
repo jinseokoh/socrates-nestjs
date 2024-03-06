@@ -31,7 +31,7 @@ export class Friendship {
     enum: RequestFrom,
     default: RequestFrom.CONNECTION,
   })
-  @ApiProperty({ description: 'PROFILE|CONNECTION' })
+  @ApiProperty({ description: 'connection|profile|plea' })
   requestFrom: RequestFrom;
 
   @CreateDateColumn()

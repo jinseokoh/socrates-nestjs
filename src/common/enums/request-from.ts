@@ -1,4 +1,5 @@
 export enum RequestFrom {
-  PROFILE = 'profile',
   CONNECTION = 'connection',
+  PLEA = 'plea',
+  PROFILE = 'profile',
 }
