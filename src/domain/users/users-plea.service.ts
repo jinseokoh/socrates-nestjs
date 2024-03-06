@@ -14,6 +14,7 @@ import { DataSource } from 'typeorm';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { LedgerType, PleaStatus } from 'src/common/enums';
 import { UpdatePleaDto } from 'src/domain/users/dto/update-plea.dto';
+import { Friendship } from 'src/domain/users/entities/friendship.entity';
 
 @Injectable()
 export class UsersPleaService {
@@ -43,7 +44,7 @@ export class UsersPleaService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
 
-    const friendshipCount = await queryRunner.manager.count(Plea, {
+    const friendshipCount = await queryRunner.manager.count(Friendship, {
       where: [
         { senderId: dto.senderId, recipientId: dto.recipientId },
         { senderId: dto.recipientId, recipientId: dto.senderId },
