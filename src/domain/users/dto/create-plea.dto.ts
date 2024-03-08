@@ -28,6 +28,11 @@ export class CreatePleaDto {
   @IsOptional()
   dotId: number;
 
+  @ApiProperty({ description: 'connectionId' })
+  @IsNumber()
+  @IsOptional()
+  connectionId?: number | null;
+
   @ApiProperty({
     description: 'status',
     default: PleaStatus.INIT,
@@ -36,11 +41,6 @@ export class CreatePleaDto {
   @IsEnum(PleaStatus)
   @IsOptional()
   status: PleaStatus;
-
-  @ApiProperty({ description: 'recipientId' })
-  @IsBoolean()
-  @IsOptional()
-  isResponded: boolean;
 
   @ApiProperty({ description: '요청시 사례 비용' })
   @IsNumber()

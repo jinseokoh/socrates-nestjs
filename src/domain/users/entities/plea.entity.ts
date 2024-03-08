@@ -33,10 +33,6 @@ export class Plea {
   @ApiProperty({ description: 'ACCEPTED|PENDING|NILL' })
   status: PleaStatus;
 
-  @Column({ default: false })
-  @ApiProperty({ description: 'is responded?' })
-  isResponded: boolean;
-
   @Column({ type: 'tinyint', unsigned: true, nullable: true })
   reward: number | null;
 
@@ -65,6 +61,10 @@ export class Plea {
 
   @Column({ type: 'int', unsigned: true })
   dotId: number;
+
+  // only if user answered the dot question.
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  connectionId: number | null;
 
   //? -------------------------------------------------------------------------/
   //? many-to-many belongsToMany using many-to-one
