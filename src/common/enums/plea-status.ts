@@ -1,7 +1,7 @@
 export enum PleaStatus {
-  INIT = 'init', // 요청보냄
-  PENDING = 'pending', // 요청답변작성 > friendship 발송 (from recipient to sender)
-  DENIED = 'denied', // 요청답변거절 > sender 에게 reward - 1 환불
-  ACCEPTED = 'accepted', // recipient 에게 reward 지급
-  CANCELED = 'canceled', // sender 에게 reward - 1 환불
+  INIT = 'init', // 요청접수 > sender 에게 reward 차감
+  DENIED = 'denied', // 요청거절 > sender 에게 reward - 1 환불
+  PENDING = 'pending', // 요청수락 > friendship 발송 (from recipient to sender)
+  CANCELED = 'canceled', // 친구거절 > sender 에게 reward - 1 환불
+  ACCEPTED = 'accepted', // 친구등록 > recipient 에게 reward 지급
 }

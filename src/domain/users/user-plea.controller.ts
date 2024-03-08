@@ -19,6 +19,7 @@ import { CreatePleaDto } from 'src/domain/users/dto/create-plea.dto';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { User } from 'src/domain/users/entities/user.entity';
 import { PleaStatus } from 'src/common/enums';
+import { UpdatePleaDto } from 'src/domain/users/dto/update-plea.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 // @SkipThrottle()
@@ -102,10 +103,10 @@ export class UserPleaController {
   @Patch('pleas/:id')
   async updatePlea(
     @Param('id', ParseIntPipe) id: number,
-    @Body('status') status: PleaStatus,
+    @Body() dto: UpdatePleaDto,
   ): Promise<Plea> {
     try {
-      return await this.usersPleaService.update(id, { status: status });
+      return await this.usersPleaService.update(id, dto);
     } catch (e) {
       throw new BadRequestException();
     }
