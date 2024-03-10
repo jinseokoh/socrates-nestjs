@@ -55,7 +55,7 @@ export class UsersPleaService {
       if (friendship.status === FriendshipStatus.ACCEPTED) {
         throw new UnprocessableEntityException(`already in a relationship`);
       } else {
-        // friendship 이미 존재
+        // friendship already exists
         throw new UnprocessableEntityException(`entity already exists`);
       }
     }
@@ -78,14 +78,14 @@ export class UsersPleaService {
     // initialize
     const newBalance = sender.profile?.balance - dto.reward;
 
-    // transaction starts from here
-    await queryRunner.startTransaction();
     try {
+      await queryRunner.startTransaction();
+
       const ledger = new Ledger({
         credit: dto.reward,
         ledgerType: LedgerType.CREDIT_ESCROW,
         balance: newBalance,
-        note: `요청 사례금 (보내는 사람, #${dto.senderId})`,
+        note: `요청.사례금 (user: #${dto.senderId})`,
         userId: dto.senderId,
       });
       await queryRunner.manager.save(ledger);
@@ -97,11 +97,9 @@ export class UsersPleaService {
 
       return plea;
     } catch (err) {
-      // console.log(err.code);
       await queryRunner.rollbackTransaction();
-
       if (err.code === 'ER_DUP_ENTRY') {
-        // plea 이미 존재
+        // plea already exists
         throw new UnprocessableEntityException(`entity already exists`);
       }
       throw err;

@@ -40,15 +40,12 @@ export class UserFriendshipController {
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body() dto: CreateFriendshipDto,
-  ): Promise<AnyData> {
-    const balance = await this.usersFriendshipService.createFriendship(
+  ): Promise<Friendship> {
+    return await this.usersFriendshipService.createFriendship({
+      ...dto,
       senderId,
       recipientId,
-      dto,
-    );
-    return {
-      data: balance,
-    };
+    });
   }
 
   @ApiOperation({ description: '친구신청 승인/보류' })

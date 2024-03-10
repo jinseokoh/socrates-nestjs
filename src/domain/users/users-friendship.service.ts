@@ -52,64 +52,76 @@ export class UsersFriendshipService {
   //! balance will be adjusted w/ ledger model event subscriber.
   //! starts a new transaction using query runner.
   //! for hated(blocked) users, app needs to take care of 'em instead of server.
-  async createFriendship(
-    senderId: number,
-    recipientId: number,
-    dto: CreateFriendshipDto,
-  ): Promise<number> {
-    let newBalance = 0;
+  async createFriendship(dto: CreateFriendshipDto): Promise<Friendship> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
 
-    const friendshipCount = await queryRunner.manager.count(Friendship, {
+    // validation checks
+    const friendship = await queryRunner.manager.findOne(Friendship, {
       where: [
-        { senderId: senderId, recipientId: recipientId },
-        { senderId: recipientId, recipientId: senderId },
+        { senderId: dto.senderId, recipientId: dto.recipientId },
+        { senderId: dto.recipientId, recipientId: dto.senderId },
       ],
     });
-    const sender = await queryRunner.manager.findOne(User, {
-      where: { id: senderId },
-      relations: [`profile`],
-    });
-    await queryRunner.startTransaction();
-
-    try {
-      if (friendshipCount > 0) {
+    if (friendship) {
+      if (friendship.status === FriendshipStatus.ACCEPTED) {
+        throw new UnprocessableEntityException(`already in a relationship`);
+      } else {
+        // friendship 이미 존재
         throw new UnprocessableEntityException(`entity already exists`);
       }
-      if (sender?.isBanned) {
-        throw new UnprocessableEntityException(`the user is banned`);
-      }
-      if (
-        sender.profile?.balance === null ||
-        sender.profile?.balance - dto.cost < 0
-      ) {
-        throw new BadRequestException(`insufficient balance`);
-      }
-      newBalance = sender.profile?.balance - dto.cost;
+    }
+
+    // validation checks
+    const sender = await queryRunner.manager.findOne(User, {
+      where: { id: dto.senderId },
+      relations: [`profile`],
+    });
+    if (sender?.isBanned) {
+      throw new UnprocessableEntityException(`the user is banned`);
+    }
+    if (
+      sender.profile?.balance === null ||
+      sender.profile?.balance - dto.cost < 0
+    ) {
+      throw new BadRequestException(`insufficient balance`);
+    }
+
+    // initialize
+    const newBalance = sender.profile?.balance - dto.cost;
+
+    try {
+      await queryRunner.startTransaction();
       if (dto.cost > 0) {
         const ledger = new Ledger({
           credit: dto.cost,
           ledgerType: LedgerType.CREDIT_SPEND,
           balance: newBalance,
-          note: `친구신청요금 (user #${senderId})`,
-          userId: senderId,
+          note: `친구.신청료 (user: #${dto.senderId})`,
+          userId: dto.senderId,
         });
         await queryRunner.manager.save(ledger);
       }
-      await queryRunner.manager.query(
+      const friendship = await queryRunner.manager.query(
         'INSERT IGNORE INTO `friendship` (senderId, recipientId, requestFrom, message, pleaId) VALUES (?, ?, ?, ?, ?)',
-        [senderId, recipientId, dto.requestFrom, dto.message, dto.pleaId],
+        [
+          dto.senderId,
+          dto.recipientId,
+          dto.requestFrom,
+          dto.message,
+          dto.pleaId,
+        ],
       );
       await queryRunner.commitTransaction();
+
+      return friendship;
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
     } finally {
       await queryRunner.release();
     }
-    return newBalance;
   }
 
   // 친구신청 승인/보류
@@ -156,6 +168,12 @@ export class UsersFriendshipService {
   // - plea softDelete
   // - refund
   async deleteFriendship(senderId: number, recipientId: number): Promise<void> {
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+
+
     const friendship = await this.friendshipRepository.findOne({
       where: {
         senderId: senderId,

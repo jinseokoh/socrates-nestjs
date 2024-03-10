@@ -40,14 +40,12 @@ export class UserPleaController {
     @Param('dotId', ParseIntPipe) dotId: number,
     @Body() dto: CreatePleaDto,
   ): Promise<Plea> {
-    const newDto = {
+    return await this.usersPleaService.createPlea({
       ...dto,
       senderId,
       recipientId,
       dotId,
-    };
-
-    return await this.usersPleaService.createPlea(newDto);
+    });
   }
 
   //--------------------------------------------------------------------------//
