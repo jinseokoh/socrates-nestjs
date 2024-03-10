@@ -32,4 +32,9 @@ export class CreateFriendshipDto {
   @IsEnum(FriendshipStatus)
   @IsOptional()
   status: FriendshipStatus;
+
+  @ApiProperty({ description: 'plea Id' })
+  @IsNumber()
+  @IsOptional()
+  pleaId: number | null;
 }
