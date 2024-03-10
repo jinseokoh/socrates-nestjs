@@ -58,7 +58,7 @@ export class UsersFriendshipService {
     await queryRunner.connect();
 
     // validation checks
-    const friendship = await queryRunner.manager.findOne(Friendship, {
+    const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
       where: [
         { senderId: dto.senderId, recipientId: dto.recipientId },
         { senderId: dto.recipientId, recipientId: dto.senderId },
@@ -74,7 +74,7 @@ export class UsersFriendshipService {
     }
 
     // validation checks
-    const sender = await queryRunner.manager.findOne(User, {
+    const sender = await queryRunner.manager.findOneOrFail(User, {
       where: { id: dto.senderId },
       relations: [`profile`],
     });
@@ -164,7 +164,7 @@ export class UsersFriendshipService {
   // 친구신청 보낸 사람이 취소
   // # case 2
   // 요청글 보낸사람 (plea 의 recipientId) 이 답글작성 상태에서 보낸 친구신청 (friendship 의 senderId) 거부시
-  // - 친구신청의 recipientId 와 연계 plea 모델의 recipientId 가 같은지 확인
+  // - friendship 모델의 recipientId == plea 모델의 senderId
   // - plea softDelete
   // - refund
   async deleteFriendship(senderId: number, recipientId: number): Promise<void> {
@@ -172,38 +172,60 @@ export class UsersFriendshipService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
 
+    // validation checks
+    const recipient = await queryRunner.manager.findOneOrFail(User, {
+      where: { id: recipientId },
+      relations: [`profile`],
+    });
 
-
-    const friendship = await this.friendshipRepository.findOne({
+    // validation check
+    const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
       where: {
         senderId: senderId,
         recipientId: recipientId,
       },
     });
     if (friendship.pleaId) {
-      const plea = await this.pleaRepository.findOne({
+      const plea = await queryRunner.manager.findOneOrFail(Plea, {
         where: {
           id: friendship.pleaId,
         },
       });
+
       if (plea.status === PleaStatus.PENDING) {
-        await this.pleaRepository.softDelete(plea.id);
-        const refundAmount = plea.reward - 1;
+        await queryRunner.manager.getRepository(Plea).softDelete(plea.id);
+        const newBalance = recipient.profile?.balance + plea.reward - 1;
 
         const ledger = new Ledger({
-          debit: refundAmount,
+          debit: plea.reward - 1,
           ledgerType: LedgerType.DEBIT_REFUND,
           balance: newBalance,
-          note: `요청 사례금 환불 ()`,
-          userId: dto.senderId,
+          note: `요청 사례금 환불 (user: #${recipientId})`,
+          userId: recipientId,
         });
+        await queryRunner.manager.save(ledger);
       }
+      if (plea.status === PleaStatus.CANCELED) {
+        await queryRunner.manager.getRepository(Plea).softDelete(plea.id);
+        const newBalance = recipient.profile?.balance + plea.reward - 1;
+
+        const ledger = new Ledger({
+          debit: plea.reward - 1,
+          ledgerType: LedgerType.DEBIT_REFUND,
+          balance: newBalance,
+          note: `요청 사례금 환불 (user: #${recipientId})`,
+          userId: recipientId,
+        });
+        await queryRunner.manager.save(ledger);
+      }
+
     }
 
     await this.repository.manager.query(
       'DELETE FROM `friendship` WHERE senderId = ? AND recipientId = ?',
       [senderId, recipientId],
     );
+
   }
 
   //--------------------------------------------------------------------------//
