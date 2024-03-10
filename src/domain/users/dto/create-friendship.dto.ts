@@ -36,5 +36,5 @@ export class CreateFriendshipDto {
   @ApiProperty({ description: 'plea Id' })
   @IsNumber()
   @IsOptional()
-  pleaId: number | null;
+  pleaId?: number;
 }

@@ -13,7 +13,7 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { LedgerType, FriendshipStatus } from 'src/common/enums';
+import { LedgerType, FriendshipStatus, PleaStatus } from 'src/common/enums';
 import { AnyData } from 'src/common/types';
 import { DataSource, Not } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -23,6 +23,7 @@ import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
+import { Plea } from 'src/domain/users/entities/plea.entity';
 
 @Injectable()
 export class UsersFriendshipService {
@@ -34,6 +35,8 @@ export class UsersFriendshipService {
     private readonly repository: Repository<User>,
     @InjectRepository(Friendship)
     private readonly friendshipRepository: Repository<Friendship>,
+    @InjectRepository(Plea)
+    private readonly pleaRepository: Repository<Plea>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private readonly fcmService: FcmService,
     private dataSource: DataSource, // for transaction
@@ -145,8 +148,40 @@ export class UsersFriendshipService {
     }
   }
 
-  // 친구신청 거절/삭제
+  // # case 1
+  // 친구신청 보낸 사람이 취소
+  // # case 2
+  // 요청글 보낸사람 (plea 의 recipientId) 이 답글작성 상태에서 보낸 친구신청 (friendship 의 senderId) 거부시
+  // - 친구신청의 recipientId 와 연계 plea 모델의 recipientId 가 같은지 확인
+  // - plea softDelete
+  // - refund
   async deleteFriendship(senderId: number, recipientId: number): Promise<void> {
+    const friendship = await this.friendshipRepository.findOne({
+      where: {
+        senderId: senderId,
+        recipientId: recipientId,
+      },
+    });
+    if (friendship.pleaId) {
+      const plea = await this.pleaRepository.findOne({
+        where: {
+          id: friendship.pleaId,
+        },
+      });
+      if (plea.status === PleaStatus.PENDING) {
+        await this.pleaRepository.softDelete(plea.id);
+        const refundAmount = plea.reward - 1;
+
+        const ledger = new Ledger({
+          debit: refundAmount,
+          ledgerType: LedgerType.DEBIT_REFUND,
+          balance: newBalance,
+          note: `요청 사례금 환불 ()`,
+          userId: dto.senderId,
+        });
+      }
+    }
+
     await this.repository.manager.query(
       'DELETE FROM `friendship` WHERE senderId = ? AND recipientId = ?',
       [senderId, recipientId],
