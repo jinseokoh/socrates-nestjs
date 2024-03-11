@@ -190,6 +190,14 @@ export class UsersPleaService {
   // Update
   //--------------------------------------------------------------------------//
 
+  // API 호출 시나리오
+  // case 3) 요청보낸 사용자가 [받은친구신청] 리스트에서 거절
+  //         바로 환불처리보단, 기록을 남기는 의미로 요청상태를 갱신후에 
+  //         Ledger = 요청보낸 사용자에게 reward-1 환불
+  // case 4) 요청받은 사용자가 reward 지급받은 이후, 24 시간 안에 친구해제
+  //         Ledger = 요청받은 사용자에게 reward 차감 (무효처리)
+  //         Ledger = 요청보낸 사용자에게 reward-1 환불
+  //
   async update(id: number, dto: UpdatePleaDto): Promise<Plea> {
     const plea = await this.pleaRepository.preload({ id, ...dto });
     if (!plea) {
@@ -202,10 +210,49 @@ export class UsersPleaService {
   // Delete
   //--------------------------------------------------------------------------//
 
+  // API 호출 시나리오
+  // case 1) 요청받은 사용자가 요청 init 상태에서, 답글작성 거절
+  //         Ledger = 요청보낸 사용자에게 reward-1 환불
+  // case 2) 다른 경우 환불 처리 필요없음.
+  //
   async delete(id: number): Promise<Plea> {
-    const plea = await this.pleaRepository.findOneOrFail({ where: { id } });
-    console.log(plea);
-    return await this.pleaRepository.softRemove(plea);
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+    try {
+      await queryRunner.startTransaction();
+      const plea = await queryRunner.manager.findOneOrFail(Plea, {
+        where: {
+          id: id,
+        },
+        relations: ['sender', 'sender.profile'],
+      });
+      if (plea.status === PleaStatus.INIT) {
+        const newBalance = plea.sender.profile?.balance + plea.reward - 1;
+
+        const ledger = new Ledger({
+          debit: plea.reward - 1,
+          ledgerType: LedgerType.DEBIT_REFUND,
+          balance: newBalance,
+          note: `요청 사례금 환불 (user: #${plea.sender.id})`,
+          userId: plea.sender.id,
+        });
+        await queryRunner.manager.save(ledger);
+      }
+
+      const removed = await queryRunner.manager
+        .getRepository(Plea)
+        .softDelete(id);
+      await queryRunner.commitTransaction();
+
+      return removed as unknown as Plea;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async deletePleas(senderId: number, recipientId: number): Promise<void> {

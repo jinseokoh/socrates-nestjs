@@ -221,19 +221,6 @@ export class UsersFriendshipService {
           });
           await queryRunner.manager.save(ledger);
         }
-        if (plea.status === PleaStatus.CANCELED) {
-          await queryRunner.manager.getRepository(Plea).softDelete(plea.id);
-          const newBalance = recipient.profile?.balance + plea.reward - 1;
-
-          const ledger = new Ledger({
-            debit: plea.reward - 1,
-            ledgerType: LedgerType.DEBIT_REFUND,
-            balance: newBalance,
-            note: `요청 사례금 환불 (user: #${recipientId})`,
-            userId: recipientId,
-          });
-          await queryRunner.manager.save(ledger);
-        }
       }
       await this.repository.manager.query(
         'DELETE FROM `friendship` WHERE senderId = ? AND recipientId = ?',
