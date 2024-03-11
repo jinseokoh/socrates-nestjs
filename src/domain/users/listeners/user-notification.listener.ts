@@ -1,15 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { FriendRequestApprovalEvent } from 'src/domain/users/events/friend-request-approval.event';
+import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { FcmService } from 'src/services/fcm/fcm.service';
 
 @Injectable()
-export class UsersFriendshipListener {
-  private readonly logger = new Logger(UsersFriendshipListener.name);
+export class UserNotificationListener {
+  private readonly logger = new Logger(UserNotificationListener.name);
   constructor(private readonly fcmService: FcmService) {}
 
-  @OnEvent('friendRequest.approval')
-  handleOrderCreatedEvent(event: FriendRequestApprovalEvent) {
+  @OnEvent('user.notified')
+  handleOrderCreatedEvent(event: UserNotificationEvent) {
     const fbToken = event.token;
     const config = event.options.hasOwnProperty(event.name)
       ? event.options[event.name]

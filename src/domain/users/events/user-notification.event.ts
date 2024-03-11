@@ -1,4 +1,4 @@
-export class FriendRequestApprovalEvent {
+export class UserNotificationEvent {
   name:
     | 'meetupLike'
     | 'meetupThread'

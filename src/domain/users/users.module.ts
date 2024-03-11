@@ -45,7 +45,7 @@ import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { UserPleaController } from 'src/domain/users/user-plea.controller';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
-import { UsersFriendshipListener } from 'src/domain/users/listeners/users-friendship.listener';
+import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
 
 @Module({
   imports: [
@@ -91,7 +91,7 @@ import { UsersFriendshipListener } from 'src/domain/users/listeners/users-friend
     UsersUserService,
     UserSubscriber,
     LanguageSkillSubscriber,
-    UsersFriendshipListener,
+    UserNotificationListener,
   ],
   controllers: [
     UsersController,
