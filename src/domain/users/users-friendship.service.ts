@@ -45,8 +45,12 @@ export class UsersFriendshipService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? friendship
+  //? Friendship Pivot
   //?-------------------------------------------------------------------------//
+
+  // -------------------------------------------------------------------------//
+  // Create
+  // -------------------------------------------------------------------------//
 
   //? 친구신청 생성 (코인 비용이 발생할 수 있음.)
   //! balance will be adjusted w/ ledger model event subscriber.
@@ -104,7 +108,8 @@ export class UsersFriendshipService {
         await queryRunner.manager.save(ledger);
       }
       const friendship = await queryRunner.manager.query(
-        'INSERT IGNORE INTO `friendship` (senderId, recipientId, requestFrom, message, pleaId) VALUES (?, ?, ?, ?, ?)',
+        'INSERT IGNORE INTO `friendship` \
+        (senderId, recipientId, requestFrom, message, pleaId) VALUES (?, ?, ?, ?, ?)',
         [
           dto.senderId,
           dto.recipientId,
@@ -160,13 +165,21 @@ export class UsersFriendshipService {
     }
   }
 
-  // # case 1
-  // 친구신청 보낸 사람이 취소
-  // # case 2
-  // 요청글 보낸사람 (plea 의 recipientId) 이 답글작성 상태에서 보낸 친구신청 (friendship 의 senderId) 거부시
-  // - friendship 모델의 recipientId == plea 모델의 senderId
-  // - plea softDelete
-  // - refund
+  // -------------------------------------------------------------------------//
+  // Delete
+  // -------------------------------------------------------------------------//
+
+  // API 호출 시나리오
+  // case 1) 친구신청 보낸 사용자가 [보낸친구신청] 리스트에서 취소
+  //         Ledger = 변화 없음
+  // case 2) 요청받은 사용자가 답글작성 후 (자동으로 친구신청이 보내진 후) [보낸친구신청] 리스트에서 취소
+  //         Ledger = 요청보낸 사용자에게 reward-1 환불
+  // case 3) 요청보낸 사용자가 [받은친구신청] 리스트에서 거절
+  //         Ledger = 요청보낸 사용자에게 reward-1 환불
+  // case 4) 요청받은 사용자가 reward 지급받은 이후, 24 시간 안에 친구해제
+  //         Ledger = 요청받은 사용자에게 reward 차감 (무효처리)
+  //         Ledger = 요청보낸 사용자에게 reward-1 환불
+  //
   async deleteFriendship(senderId: number, recipientId: number): Promise<void> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
@@ -185,47 +198,55 @@ export class UsersFriendshipService {
         recipientId: recipientId,
       },
     });
-    if (friendship.pleaId) {
-      const plea = await queryRunner.manager.findOneOrFail(Plea, {
-        where: {
-          id: friendship.pleaId,
-        },
-      });
 
-      if (plea.status === PleaStatus.PENDING) {
-        await queryRunner.manager.getRepository(Plea).softDelete(plea.id);
-        const newBalance = recipient.profile?.balance + plea.reward - 1;
-
-        const ledger = new Ledger({
-          debit: plea.reward - 1,
-          ledgerType: LedgerType.DEBIT_REFUND,
-          balance: newBalance,
-          note: `요청 사례금 환불 (user: #${recipientId})`,
-          userId: recipientId,
+    try {
+      await queryRunner.startTransaction();
+      if (friendship.pleaId) {
+        const plea = await queryRunner.manager.findOneOrFail(Plea, {
+          where: {
+            id: friendship.pleaId,
+          },
         });
-        await queryRunner.manager.save(ledger);
-      }
-      if (plea.status === PleaStatus.CANCELED) {
-        await queryRunner.manager.getRepository(Plea).softDelete(plea.id);
-        const newBalance = recipient.profile?.balance + plea.reward - 1;
 
-        const ledger = new Ledger({
-          debit: plea.reward - 1,
-          ledgerType: LedgerType.DEBIT_REFUND,
-          balance: newBalance,
-          note: `요청 사례금 환불 (user: #${recipientId})`,
-          userId: recipientId,
-        });
-        await queryRunner.manager.save(ledger);
-      }
+        if (plea.status === PleaStatus.PENDING) {
+          await queryRunner.manager.getRepository(Plea).softDelete(plea.id);
+          const newBalance = recipient.profile?.balance + plea.reward - 1;
 
+          const ledger = new Ledger({
+            debit: plea.reward - 1,
+            ledgerType: LedgerType.DEBIT_REFUND,
+            balance: newBalance,
+            note: `요청 사례금 환불 (user: #${recipientId})`,
+            userId: recipientId,
+          });
+          await queryRunner.manager.save(ledger);
+        }
+        if (plea.status === PleaStatus.CANCELED) {
+          await queryRunner.manager.getRepository(Plea).softDelete(plea.id);
+          const newBalance = recipient.profile?.balance + plea.reward - 1;
+
+          const ledger = new Ledger({
+            debit: plea.reward - 1,
+            ledgerType: LedgerType.DEBIT_REFUND,
+            balance: newBalance,
+            note: `요청 사례금 환불 (user: #${recipientId})`,
+            userId: recipientId,
+          });
+          await queryRunner.manager.save(ledger);
+        }
+      }
+      await this.repository.manager.query(
+        'DELETE FROM `friendship` WHERE senderId = ? AND recipientId = ?',
+        [senderId, recipientId],
+      );
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-
-    await this.repository.manager.query(
-      'DELETE FROM `friendship` WHERE senderId = ? AND recipientId = ?',
-      [senderId, recipientId],
-    );
-
   }
 
   //--------------------------------------------------------------------------//
