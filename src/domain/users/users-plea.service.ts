@@ -191,12 +191,10 @@ export class UsersPleaService {
   //--------------------------------------------------------------------------//
 
   // API 호출 시나리오
-  // case 3) 요청보낸 사용자가 [받은친구신청] 리스트에서 거절
-  //         바로 환불처리보단, 기록을 남기는 의미로 요청상태를 갱신후에 
-  //         Ledger = 요청보낸 사용자에게 reward-1 환불
-  // case 4) 요청받은 사용자가 reward 지급받은 이후, 24 시간 안에 친구해제
-  //         Ledger = 요청받은 사용자에게 reward 차감 (무효처리)
-  //         Ledger = 요청보낸 사용자에게 reward-1 환불
+  // case 1) 요청받은 사용자가 [받은요청] > [프로필 > 발견] > [답변작성] 에서 완료시
+  //         status 가 init 에서 pending 으로 전환
+  // case 2) 친구신청 받은 사용자가 [받은친구신청] 에서 친구 수락시
+  //         status 가 pending 에서 accepted 로 전환
   //
   async update(id: number, dto: UpdatePleaDto): Promise<Plea> {
     const plea = await this.pleaRepository.preload({ id, ...dto });
@@ -220,33 +218,34 @@ export class UsersPleaService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
 
+    // validation checks
+    const plea = await queryRunner.manager.findOneOrFail(Plea, {
+      where: {
+        id: id,
+      },
+      relations: ['sender', 'sender.profile'],
+    });
+
     try {
       await queryRunner.startTransaction();
-      const plea = await queryRunner.manager.findOneOrFail(Plea, {
-        where: {
-          id: id,
-        },
-        relations: ['sender', 'sender.profile'],
-      });
       if (plea.status === PleaStatus.INIT) {
+        // plea.reward - 1 환불
         const newBalance = plea.sender.profile?.balance + plea.reward - 1;
-
         const ledger = new Ledger({
           debit: plea.reward - 1,
           ledgerType: LedgerType.DEBIT_REFUND,
           balance: newBalance,
-          note: `요청 사례금 환불 (user: #${plea.sender.id})`,
+          note: `요청 사례금 환불 (user: #${plea.sender.id}, plea: #${plea.id})`,
           userId: plea.sender.id,
         });
         await queryRunner.manager.save(ledger);
       }
 
-      const removed = await queryRunner.manager
-        .getRepository(Plea)
-        .softDelete(id);
+      // soft-delete plea
+      await queryRunner.manager.getRepository(Plea).softDelete(id);
       await queryRunner.commitTransaction();
 
-      return removed as unknown as Plea;
+      return plea;
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;

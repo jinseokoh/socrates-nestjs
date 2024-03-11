@@ -48,7 +48,7 @@ export class UserFriendshipController {
     });
   }
 
-  @ApiOperation({ description: '친구신청 승인/보류' })
+  @ApiOperation({ description: '친구신청 수락' })
   @PaginateQueryOptions()
   @Patch(':senderId/friendships/:recipientId')
   async updateFriendshipWithStatus(
@@ -70,7 +70,7 @@ export class UserFriendshipController {
     }
   }
 
-  @ApiOperation({ description: '친구신청 거절/삭제' })
+  @ApiOperation({ description: '친구신청 삭제' })
   @PaginateQueryOptions()
   @Delete(':senderId/friendships/:recipientId')
   async deleteFriendship(

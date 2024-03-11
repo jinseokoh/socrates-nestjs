@@ -36,7 +36,7 @@ export class CreateFriendshipDto {
 
   @ApiProperty({
     description: 'status',
-    default: FriendshipStatus.NILL,
+    default: FriendshipStatus.PENDING,
     required: true,
   })
   @IsEnum(FriendshipStatus)

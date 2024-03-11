@@ -129,40 +129,87 @@ export class UsersFriendshipService {
     }
   }
 
-  // 친구신청 승인/보류
+  // -------------------------------------------------------------------------//
+  // Update
+  // -------------------------------------------------------------------------//
+
+  //! 친구신청 수락할때만
   async updateFriendshipWithStatus(
     senderId: number,
     recipientId: number,
     status: FriendshipStatus,
   ): Promise<void> {
-    await this.repository.manager.query(
-      'UPDATE `friendship` SET status = ? WHERE senderId = ? AND recipientId = ?',
-      [status, senderId, recipientId],
-    );
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
 
-    const sender = await this.repository.findOneOrFail({
-      where: { id: senderId },
+    // validation
+    const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
+      where: {
+        senderId: senderId,
+        recipientId: recipientId,
+      },
+      relations: ['sender', 'sender.profile', 'plea'],
     });
-    if (status === FriendshipStatus.ACCEPTED) {
-      if (sender.pushToken) {
-        const fbToken = sender.pushToken;
-        const notification = {
-          title: 'MeSo',
-          body: '상대방이 나의 친구신청을 승락했습니다.',
-        };
-        this.fcmService.sendToToken(fbToken, notification);
+
+    try {
+      await queryRunner.startTransaction();
+
+      if (
+        friendship.plea &&
+        friendship.plea.status === PleaStatus.PENDING &&
+        status === FriendshipStatus.ACCEPTED
+      ) {
+        // update plea.status to ACCEPTED
+        await this.repository.manager.query(
+          'UPDATE `plea` SET status = ? WHERE id = ?',
+          [PleaStatus.ACCEPTED, friendship.plea.id],
+        );
+        // plea.reward 를 friendship sender (= plea recipient) 에게 100% 제공
+        const newBalance =
+          friendship.sender.profile?.balance + friendship.plea.reward;
+        const ledger = new Ledger({
+          debit: friendship.plea.reward,
+          ledgerType: LedgerType.DEBIT_REWARD,
+          balance: newBalance,
+          note: `요청 사례금 제공 (user: #${friendship.sender.id}, plea: #${friendship.plea.id})`,
+          userId: friendship.sender.id,
+        });
+        await queryRunner.manager.save(ledger);
+        // soft-delete plea
+        await queryRunner.manager
+          .getRepository(Plea)
+          .softDelete(friendship.plea.id);
       }
+
+      await this.repository.manager.query(
+        'UPDATE `friendship` SET status = ? WHERE senderId = ? AND recipientId = ?',
+        [status, senderId, recipientId],
+      );
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-    if (status === FriendshipStatus.PENDING) {
-      if (sender.pushToken) {
-        const fbToken = sender.pushToken;
-        const notification = {
-          title: 'MeSo',
-          body: '상대방이 나의 친구신청을 보류했습니다.',
-        };
-        this.fcmService.sendToToken(fbToken, notification);
-      }
-    }
+
+    // const sender = await this.repository.findOneOrFail({
+    //   where: { id: senderId },
+    // });
+    // if (status === FriendshipStatus.ACCEPTED) {
+    //   // see if this friendship comes with plea
+    //   // - plea 이면 senderId 에게 plea.reward 전달
+    //   if (sender.pushToken) {
+    //     const fbToken = sender.pushToken;
+    //     const notification = {
+    //       title: 'MeSo',
+    //       body: '상대방이 나의 친구신청을 수락했습니다.',
+    //     };
+    //     this.fcmService.sendToToken(fbToken, notification);
+    //   }
+    // }
   }
 
   // -------------------------------------------------------------------------//

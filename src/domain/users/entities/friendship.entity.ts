@@ -19,9 +19,9 @@ export class Friendship {
   @Column({
     type: 'enum',
     enum: FriendshipStatus,
-    default: FriendshipStatus.NILL,
+    default: FriendshipStatus.PENDING,
   })
-  @ApiProperty({ description: 'ACCEPTED|PENDING|NILL' })
+  @ApiProperty({ description: 'init|pending|accepted' })
   status: FriendshipStatus;
 
   @Column({ length: 64, nullable: true })
