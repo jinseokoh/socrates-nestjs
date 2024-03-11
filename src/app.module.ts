@@ -15,6 +15,7 @@ import { CategoriesModule } from 'src/domain/categories/categories.module';
 import { ContentsModule } from 'src/domain/contents/contents.module';
 import { ChatsModule } from 'src/domain/chats/chats.module';
 import { DotsModule } from 'src/domain/connections/dots.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MeetupsModule } from 'src/domain/meetups/meetups.module';
 import { UsersModule } from 'src/domain/users/users.module';
 import { NaverModule } from 'src/services/naver/naver.module';
@@ -32,6 +33,7 @@ import { AlarmsModule } from 'src/domain/alarms/alarms.module';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],

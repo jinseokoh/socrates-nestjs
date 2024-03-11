@@ -24,6 +24,8 @@ import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Plea } from 'src/domain/users/entities/plea.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { FriendAttachedEvent } from 'src/domain/users/events/friend-attached.event';
 
 @Injectable()
 export class UsersFriendshipService {
@@ -35,10 +37,9 @@ export class UsersFriendshipService {
     private readonly repository: Repository<User>,
     @InjectRepository(Friendship)
     private readonly friendshipRepository: Repository<Friendship>,
-    @InjectRepository(Plea)
-    private readonly pleaRepository: Repository<Plea>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private readonly fcmService: FcmService,
+    private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
@@ -144,13 +145,16 @@ export class UsersFriendshipService {
     await queryRunner.connect();
 
     // validation
-    const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
-      where: {
-        senderId: senderId,
-        recipientId: recipientId,
+    const friendship = await queryRunner.manager.findOneOrFail<Friendship>(
+      Friendship,
+      {
+        where: {
+          senderId: senderId,
+          recipientId: recipientId,
+        },
+        relations: ['sender', 'sender.profile', 'plea'],
       },
-      relations: ['sender', 'sender.profile', 'plea'],
-    });
+    );
 
     try {
       await queryRunner.startTransaction();
@@ -188,7 +192,32 @@ export class UsersFriendshipService {
       );
 
       await queryRunner.commitTransaction();
+
+      const event = new FriendAttachedEvent();
+      event.token = friendship.sender?.pushToken;
+      event.options = friendship.sender?.profile?.options ?? {
+        meetupLike: false, // 모임 찜
+        meetupThread: false, // 모임 댓글
+        meetupRequest: false, // 모임신청
+        meetupRequestApproval: false, // 모임신청 승인
+        meetupInviteApproval: false, // 모임초대 승인
+        connectionReaction: false, // 발견 공감
+        connectionRemark: false, // 발견 댓글
+        friendRequest: false, // 친구 신청
+        friendRequestApproval: false, // 친구신청 승인
+        friendRequestFeedback: false, // 친구신청 발견글 요청
+        friendMeetupSubmit: false, // 친구가 모임 등록
+        friendConnectionSubmit: false, // 친구가 발견글 등록
+      };
+      event.notification = {
+        title: 'MeSo',
+        body: friendship.plea
+          ? `답글을 요청한 상대방이 친구관계를 수락하여, ${friendship.plea.reward}코인을 제공했습니다.`
+          : '상대방이 나의 친구신청을 수락했습니다.',
+      };
+      this.eventEmitter.emit('friend.attached', event);
     } catch (err) {
+      console.error(err);
       await queryRunner.rollbackTransaction();
       throw err;
     } finally {
