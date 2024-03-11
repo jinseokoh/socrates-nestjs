@@ -95,6 +95,12 @@ export class UsersFriendshipService {
         throw new BadRequestException(`insufficient balance`);
       }
 
+      // validation ----------------------------------------------------------//
+      const recipient = await queryRunner.manager.findOneOrFail(User, {
+        where: { id: dto.recipientId },
+        relations: [`profile`],
+      });
+
       // initialize
       const newBalance = sender.profile?.balance - dto.cost;
       if (dto.cost > 0) {
@@ -121,19 +127,12 @@ export class UsersFriendshipService {
       await queryRunner.commitTransaction();
 
       // notification with event listener ------------------------------------//
-      if (
-        friendship.status == FriendshipStatus.PENDING &&
-        status == FriendshipStatus.ACCEPTED
-      ) {
-        const event = new UserNotificationEvent();
-        event.name = 'friendRequestApproval';
-        event.token = friendship.sender?.pushToken;
-        event.options = friendship.sender?.profile?.options ?? {};
-        event.body = friendship.plea
-          ? `답글을 요청한 상대방이 친구관계를 수락하여, ${friendship.plea.reward}코인을 제공했습니다.`
-          : '상대방이 나의 친구신청을 수락했습니다.';
-        this.eventEmitter.emit('user.notified', event);
-      }
+      const event = new UserNotificationEvent();
+      event.name = 'friendRequest';
+      event.token = recipient.pushToken;
+      event.options = recipient.profile?.options ?? {};
+      event.body = `${sender.username}님이 나에게 친구신청을 보냈습니다. ${dto.message}`;
+      this.eventEmitter.emit('user.notified', event);
 
       return friendship;
     } catch (error) {
@@ -172,7 +171,7 @@ export class UsersFriendshipService {
           senderId: senderId,
           recipientId: recipientId,
         },
-        relations: ['sender', 'sender.profile', 'plea'],
+        relations: ['sender', 'sender.profile', 'recipient', 'plea'],
       });
 
       if (
@@ -219,8 +218,8 @@ export class UsersFriendshipService {
         event.token = friendship.sender?.pushToken;
         event.options = friendship.sender?.profile?.options ?? {};
         event.body = friendship.plea
-          ? `답글을 요청한 상대방이 친구관계를 수락하여, ${friendship.plea.reward}코인을 제공했습니다.`
-          : '상대방이 나의 친구신청을 수락했습니다.';
+          ? `답글을 요청한 ${friendship.recipient.username}님과 친구가 되어, ${friendship.plea.reward}코인을 받았습니다.`
+          : `${friendship.recipient.username}님이 나의 친구신청을 수락했습니다.`;
         this.eventEmitter.emit('user.notified', event);
       }
     } catch (error) {
@@ -239,7 +238,9 @@ export class UsersFriendshipService {
   // Delete
   // -------------------------------------------------------------------------//
 
-  // API 호출 시나리오
+  //! 친구신청 삭제 (using transaction)
+  //! profile balance will be adjusted w/ ledger model event subscriber.
+  // 시나리오
   // case 1) 친구신청 보낸 사용자가 [보낸친구신청] 리스트에서 취소
   //         Ledger = 변화 없음
   // case 2) 요청받은 사용자가 답글작성 후 (자동으로 친구신청이 보내진 후) [보낸친구신청] 리스트에서 취소
@@ -253,54 +254,56 @@ export class UsersFriendshipService {
   async deleteFriendship(senderId: number, recipientId: number): Promise<void> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-
-    // validation checks
-    const recipient = await queryRunner.manager.findOneOrFail(User, {
-      where: { id: recipientId },
-      relations: [`profile`],
-    });
-
-    // validation check
-    const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
-      where: {
-        senderId: senderId,
-        recipientId: recipientId,
-      },
-    });
 
     try {
+      await queryRunner.connect();
       await queryRunner.startTransaction();
-      if (friendship.pleaId) {
-        const plea = await queryRunner.manager.findOneOrFail(Plea, {
-          where: {
-            id: friendship.pleaId,
-          },
+
+      // validation ----------------------------------------------------------//
+      const recipient = await queryRunner.manager.findOneOrFail(User, {
+        where: { id: recipientId },
+        relations: [`profile`],
+      });
+
+      // validation ----------------------------------------------------------//
+      const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
+        where: {
+          senderId: senderId,
+          recipientId: recipientId,
+        },
+        relations: ['sender', 'sender.profile', 'recipient', 'plea'],
+      });
+
+      if (friendship.plea && friendship.plea.status === PleaStatus.PENDING) {
+        await queryRunner.manager
+          .getRepository(Plea)
+          .softDelete(friendship.plea.id);
+        const newBalance =
+          recipient.profile?.balance + friendship.plea.reward - 1;
+
+        const ledger = new Ledger({
+          debit: friendship.plea.reward - 1,
+          ledgerType: LedgerType.DEBIT_REFUND,
+          balance: newBalance,
+          note: `요청.사례금환불 +${friendship.plea.reward} 🪙  (user: #${recipient.id}, plea: #${friendship.plea.id})`,
+          userId: recipientId,
         });
-
-        if (plea.status === PleaStatus.PENDING) {
-          await queryRunner.manager.getRepository(Plea).softDelete(plea.id);
-          const newBalance = recipient.profile?.balance + plea.reward - 1;
-
-          const ledger = new Ledger({
-            debit: plea.reward - 1,
-            ledgerType: LedgerType.DEBIT_REFUND,
-            balance: newBalance,
-            note: `요청 사례금 환불 (user: #${recipientId})`,
-            userId: recipientId,
-          });
-          await queryRunner.manager.save(ledger);
-        }
+        await queryRunner.manager.save(ledger);
       }
+
       await this.repository.manager.query(
         'DELETE FROM `friendship` WHERE senderId = ? AND recipientId = ?',
         [senderId, recipientId],
       );
 
       await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException();
+      } else {
+        await queryRunner.rollbackTransaction();
+      }
+      throw new BadRequestException(error.name ?? error.toString());
     } finally {
       await queryRunner.release();
     }
