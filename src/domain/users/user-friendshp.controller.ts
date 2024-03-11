@@ -56,18 +56,14 @@ export class UserFriendshipController {
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body('status') status: FriendshipStatus,
   ): Promise<AnyData> {
-    try {
-      await this.usersFriendshipService.updateFriendshipWithStatus(
-        senderId,
-        recipientId,
-        status,
-      );
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    await this.usersFriendshipService.updateFriendshipWithStatus(
+      senderId,
+      recipientId,
+      status,
+    );
+    return {
+      data: 'ok',
+    };
   }
 
   @ApiOperation({ description: '친구신청 삭제' })
@@ -77,14 +73,10 @@ export class UserFriendshipController {
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<AnyData> {
-    try {
-      await this.usersFriendshipService.deleteFriendship(senderId, recipientId);
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    await this.usersFriendshipService.deleteFriendship(senderId, recipientId);
+    return {
+      data: 'ok',
+    };
   }
 
   //--------------------------------------------------------------------------//

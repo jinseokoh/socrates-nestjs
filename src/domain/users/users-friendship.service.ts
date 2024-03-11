@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,14 +19,13 @@ import { AnyData } from 'src/common/types';
 import { DataSource, Not } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto';
-import { FcmService } from 'src/services/fcm/fcm.service';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Plea } from 'src/domain/users/entities/plea.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { FriendAttachedEvent } from 'src/domain/users/events/friend-attached.event';
+import { FriendRequestApprovalEvent } from 'src/domain/users/events/friend-request-approval.event';
 
 @Injectable()
 export class UsersFriendshipService {
@@ -38,7 +38,7 @@ export class UsersFriendshipService {
     @InjectRepository(Friendship)
     private readonly friendshipRepository: Repository<Friendship>,
     @Inject(ConfigService) private configService: ConfigService, // global
-    private readonly fcmService: FcmService,
+    
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
   ) {
@@ -142,22 +142,18 @@ export class UsersFriendshipService {
   ): Promise<void> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
 
-    // validation
-    const friendship = await queryRunner.manager.findOneOrFail<Friendship>(
-      Friendship,
-      {
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      // validation
+      const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
         where: {
           senderId: senderId,
           recipientId: recipientId,
         },
         relations: ['sender', 'sender.profile', 'plea'],
-      },
-    );
-
-    try {
-      await queryRunner.startTransaction();
+      });
 
       if (
         friendship.plea &&
@@ -176,7 +172,7 @@ export class UsersFriendshipService {
           debit: friendship.plea.reward,
           ledgerType: LedgerType.DEBIT_REWARD,
           balance: newBalance,
-          note: `요청 사례금 제공 (user: #${friendship.sender.id}, plea: #${friendship.plea.id})`,
+          note: `요청 사례금 수입 (user: #${friendship.sender.id}, plea: #${friendship.plea.id})`,
           userId: friendship.sender.id,
         });
         await queryRunner.manager.save(ledger);
@@ -193,52 +189,27 @@ export class UsersFriendshipService {
 
       await queryRunner.commitTransaction();
 
-      const event = new FriendAttachedEvent();
-      event.token = friendship.sender?.pushToken;
-      event.options = friendship.sender?.profile?.options ?? {
-        meetupLike: false, // 모임 찜
-        meetupThread: false, // 모임 댓글
-        meetupRequest: false, // 모임신청
-        meetupRequestApproval: false, // 모임신청 승인
-        meetupInviteApproval: false, // 모임초대 승인
-        connectionReaction: false, // 발견 공감
-        connectionRemark: false, // 발견 댓글
-        friendRequest: false, // 친구 신청
-        friendRequestApproval: false, // 친구신청 승인
-        friendRequestFeedback: false, // 친구신청 발견글 요청
-        friendMeetupSubmit: false, // 친구가 모임 등록
-        friendConnectionSubmit: false, // 친구가 발견글 등록
-      };
-      event.notification = {
-        title: 'MeSo',
-        body: friendship.plea
+      // notification with event listener
+      if (friendship.status == FriendshipStatus.PENDING && status == FriendshipStatus.ACCEPTED) {
+        const event = new FriendRequestApprovalEvent();
+        event.name = 'friendRequestApproval';
+        event.token = friendship.sender?.pushToken;
+        event.options = friendship.sender?.profile?.options ?? {};
+        event.body = friendship.plea
           ? `답글을 요청한 상대방이 친구관계를 수락하여, ${friendship.plea.reward}코인을 제공했습니다.`
-          : '상대방이 나의 친구신청을 수락했습니다.',
-      };
-      this.eventEmitter.emit('friend.attached', event);
-    } catch (err) {
-      console.error(err);
-      await queryRunner.rollbackTransaction();
-      throw err;
+          : '상대방이 나의 친구신청을 수락했습니다.';
+        this.eventEmitter.emit('friendRequest.approval', event);
+      }
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException();
+      } else {
+        await queryRunner.rollbackTransaction();
+      }
+      throw new BadRequestException(error.name);
     } finally {
       await queryRunner.release();
     }
-
-    // const sender = await this.repository.findOneOrFail({
-    //   where: { id: senderId },
-    // });
-    // if (status === FriendshipStatus.ACCEPTED) {
-    //   // see if this friendship comes with plea
-    //   // - plea 이면 senderId 에게 plea.reward 전달
-    //   if (sender.pushToken) {
-    //     const fbToken = sender.pushToken;
-    //     const notification = {
-    //       title: 'MeSo',
-    //       body: '상대방이 나의 친구신청을 수락했습니다.',
-    //     };
-    //     this.fcmService.sendToToken(fbToken, notification);
-    //   }
-    // }
   }
 
   // -------------------------------------------------------------------------//
