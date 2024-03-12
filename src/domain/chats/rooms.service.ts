@@ -141,10 +141,10 @@ export class RoomsService {
     await queryRunner.startTransaction();
     try {
       if (!user) {
-        throw new NotFoundException(`the user is not found`);
+        throw new NotFoundException(`user not found`);
       }
       if (!room) {
-        throw new NotFoundException(`the room is not found`);
+        throw new NotFoundException(`entity not found`);
       }
       if (
         user.profile?.balance === null ||

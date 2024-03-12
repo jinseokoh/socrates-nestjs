@@ -120,7 +120,7 @@ export class UsersService {
             withDeleted: true,
           });
     } catch (e) {
-      throw new NotFoundException('entity not found');
+      throw new NotFoundException('user not found');
     }
   }
 
@@ -157,13 +157,13 @@ export class UsersService {
     await queryRunner.startTransaction();
     try {
       if (count > 0) {
-        throw new UnprocessableEntityException(`the username is taken`);
+        throw new UnprocessableEntityException(`a taken username`);
       }
       if (!user) {
-        throw new NotFoundException(`the user is not found`);
+        throw new NotFoundException(`user not found`);
       }
       if (user?.isBanned) {
-        throw new UnprocessableEntityException(`the user is banned`);
+        throw new UnprocessableEntityException(`a banned user`);
       }
       if (
         user.profile?.balance === null ||
@@ -479,7 +479,7 @@ export class UsersService {
     }
   }
 
-  // User 상세보기 (w/ id)
+  // 첫인상 평균 보기 (w/ id)
   async getImpressionAverageById(id: number): Promise<number[]> {
     try {
       const [row] = await this.repository.manager.query(

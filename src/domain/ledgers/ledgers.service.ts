@@ -44,10 +44,10 @@ export class LedgersService {
       relations: [`profile`],
     });
     if (!user) {
-      throw new NotFoundException(`the user is not found`);
+      throw new NotFoundException(`user not found`);
     }
     if (!user?.isBanned) {
-      throw new UnprocessableEntityException(`the user is banned`);
+      throw new UnprocessableEntityException(`a banned user`);
     }
     this.logger.log(dto);
     return await this.repository.save(this.repository.create(dto));
@@ -60,10 +60,10 @@ export class LedgersService {
       relations: [`profile`],
     });
     if (!user) {
-      throw new NotFoundException(`the user is not found`);
+      throw new NotFoundException(`user not found`);
     }
     if (!user?.isBanned) {
-      throw new UnprocessableEntityException(`the user is banned`);
+      throw new UnprocessableEntityException(`a banned user`);
     }
     if (
       user.profile?.balance == null ||

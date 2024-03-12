@@ -56,7 +56,7 @@ export class UsersPleaService {
       });
       if (friendship) {
         if (friendship.status === FriendshipStatus.ACCEPTED) {
-          throw new UnprocessableEntityException(`already in a relationship`);
+          throw new UnprocessableEntityException(`in a relationship`);
         } else {
           // friendship already exists
           throw new UnprocessableEntityException(`entity exists`);
@@ -69,7 +69,7 @@ export class UsersPleaService {
         relations: [`profile`],
       });
       if (sender?.isBanned) {
-        throw new UnprocessableEntityException(`the user is banned`);
+        throw new UnprocessableEntityException(`a banned user`);
       }
       if (
         sender.profile?.balance === null ||
@@ -105,7 +105,7 @@ export class UsersPleaService {
       } else {
         await queryRunner.rollbackTransaction();
       }
-      throw new BadRequestException(error.name ?? error.toString());
+      throw error;
     } finally {
       await queryRunner.release();
     }

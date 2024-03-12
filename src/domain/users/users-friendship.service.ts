@@ -73,7 +73,7 @@ export class UsersFriendshipService {
       });
       if (friendship) {
         if (friendship.status === FriendshipStatus.ACCEPTED) {
-          throw new UnprocessableEntityException(`already in a relationship`);
+          throw new UnprocessableEntityException(`in a relationship`);
         } else {
           // friendship 이미 존재
           throw new UnprocessableEntityException(`entity exists`);
@@ -86,7 +86,7 @@ export class UsersFriendshipService {
         relations: [`profile`],
       });
       if (sender?.isBanned) {
-        throw new UnprocessableEntityException(`the user is banned`);
+        throw new UnprocessableEntityException(`a banned user`);
       }
       if (
         sender.profile?.balance === null ||
@@ -137,11 +137,11 @@ export class UsersFriendshipService {
       return friendship;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException();
+        throw new NotFoundException(`user not found`);
       } else {
         await queryRunner.rollbackTransaction();
       }
-      throw new BadRequestException(error.name ?? error.toString());
+      throw error;
     } finally {
       await queryRunner.release();
     }
@@ -224,7 +224,7 @@ export class UsersFriendshipService {
       }
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException();
+        throw new NotFoundException('entity not found');
       } else {
         await queryRunner.rollbackTransaction();
       }
@@ -299,7 +299,7 @@ export class UsersFriendshipService {
       await queryRunner.commitTransaction();
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException();
+        throw new NotFoundException('entity not found');
       } else {
         await queryRunner.rollbackTransaction();
       }

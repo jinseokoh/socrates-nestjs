@@ -96,7 +96,7 @@ export class UsersMeetupService {
     );
     const count = row.cnt;
     if (+count > 30) {
-      throw new NotAcceptableException('reached maximum count');
+      throw new NotAcceptableException('max limit reached');
     }
 
     const { affectedRows } = await this.repository.manager.query(
@@ -265,7 +265,7 @@ export class UsersMeetupService {
       if (
         meetup.joins.filter((v) => meetup.userId === v.askedUserId).length > 30
       ) {
-        throw new NotAcceptableException('reached maximum count');
+        throw new NotAcceptableException('max limit reached');
       }
       // await this.attachToLikePivot(askingUserId, meetupId);
     } else {

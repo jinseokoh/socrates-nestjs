@@ -8,8 +8,8 @@ export class UserNotificationListener {
   private readonly logger = new Logger(UserNotificationListener.name);
   constructor(private readonly fcmService: FcmService) {}
 
-  @OnEvent('user.notified')
-  handleOrderCreatedEvent(event: UserNotificationEvent) {
+  @OnEvent('user.notified', { async: true })
+  async handleOrderCreatedEvent(event: UserNotificationEvent): Promise<void> {
     const fbToken = event.token;
     const config = event.options.hasOwnProperty(event.name)
       ? event.options[event.name]
@@ -20,7 +20,7 @@ export class UserNotificationListener {
     };
     if (fbToken && config) {
       try {
-        this.fcmService.sendToToken(fbToken, notification);
+        await this.fcmService.sendToToken(fbToken, notification);
       } catch (e) {
         this.logger.error(e);
       }

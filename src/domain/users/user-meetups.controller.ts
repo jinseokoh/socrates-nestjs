@@ -23,6 +23,7 @@ import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
 import { UsersMeetupService } from 'src/domain/users/users-meetup.service';
 import { UsersService } from 'src/domain/users/users.service';
 
+// todo. move all the try catch from controller layer to service layer
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
