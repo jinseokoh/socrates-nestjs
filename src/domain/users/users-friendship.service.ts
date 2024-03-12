@@ -65,7 +65,7 @@ export class UsersFriendshipService {
       await queryRunner.startTransaction();
 
       // validation ----------------------------------------------------------//
-      const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
+      const friendship = await queryRunner.manager.findOne(Friendship, {
         where: [
           { senderId: dto.senderId, recipientId: dto.recipientId },
           { senderId: dto.recipientId, recipientId: dto.senderId },
@@ -260,18 +260,18 @@ export class UsersFriendshipService {
       await queryRunner.startTransaction();
 
       // validation ----------------------------------------------------------//
-      const recipient = await queryRunner.manager.findOneOrFail(User, {
-        where: { id: recipientId },
-        relations: [`profile`],
-      });
-
-      // validation ----------------------------------------------------------//
       const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
         where: {
           senderId: senderId,
           recipientId: recipientId,
         },
-        relations: ['sender', 'sender.profile', 'recipient', 'plea'],
+        relations: [
+          'sender',
+          'sender.profile',
+          'recipient',
+          'recipient.profile',
+          'plea',
+        ],
       });
 
       if (friendship.plea && friendship.plea.status === PleaStatus.PENDING) {
@@ -279,13 +279,13 @@ export class UsersFriendshipService {
           .getRepository(Plea)
           .softDelete(friendship.plea.id);
         const newBalance =
-          recipient.profile?.balance + friendship.plea.reward - 1;
+          friendship.recipient.profile?.balance + friendship.plea.reward - 1;
 
         const ledger = new Ledger({
           debit: friendship.plea.reward - 1,
           ledgerType: LedgerType.DEBIT_REFUND,
           balance: newBalance,
-          note: `요청.사례금환불 +${friendship.plea.reward} 🪙  (user: #${recipient.id}, plea: #${friendship.plea.id})`,
+          note: `요청.사례금환불 +${friendship.plea.reward} 🪙  (user: #${friendship.recipient.id}, plea: #${friendship.plea.id})`,
           userId: recipientId,
         });
         await queryRunner.manager.save(ledger);

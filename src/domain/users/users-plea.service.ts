@@ -211,6 +211,7 @@ export class UsersPleaService {
   // Delete
   //--------------------------------------------------------------------------//
 
+  //! 요청 삭제 (using transaction)
   // API 호출 시나리오
   // case 1) 요청받은 사용자가 요청 init 상태에서, 답글작성 거절
   //         Ledger = 요청보낸 사용자에게 reward-1 환불
@@ -219,18 +220,19 @@ export class UsersPleaService {
   async delete(id: number): Promise<Plea> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-
-    // validation checks
-    const plea = await queryRunner.manager.findOneOrFail(Plea, {
-      where: {
-        id: id,
-      },
-      relations: ['sender', 'sender.profile'],
-    });
 
     try {
+      await queryRunner.connect();
       await queryRunner.startTransaction();
+
+      // validation checks
+      const plea = await queryRunner.manager.findOneOrFail(Plea, {
+        where: {
+          id: id,
+        },
+        relations: ['sender', 'sender.profile'],
+      });
+
       if (plea.status === PleaStatus.INIT) {
         // plea.reward - 1 환불
         const newBalance = plea.sender.profile?.balance + plea.reward - 1;
@@ -249,9 +251,13 @@ export class UsersPleaService {
       await queryRunner.commitTransaction();
 
       return plea;
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException();
+      } else {
+        await queryRunner.rollbackTransaction();
+      }
+      throw new BadRequestException(error.name ?? error.toString());
     } finally {
       await queryRunner.release();
     }
