@@ -48,7 +48,7 @@ export class UsersPleaService {
       await queryRunner.startTransaction();
 
       // validation ----------------------------------------------------------//
-      const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
+      const friendship = await queryRunner.manager.findOne(Friendship, {
         where: [
           { senderId: dto.senderId, recipientId: dto.recipientId },
           { senderId: dto.recipientId, recipientId: dto.senderId },
