@@ -56,7 +56,7 @@ export class UsersFriendshipService {
   //! 친구신청 생성 (using transaction)
   //! profile balance will be adjusted w/ ledger model event subscriber.
   //! for hated(blocked) users, app needs to take care of 'em instead of server.
-  async createFriendship(dto: CreateFriendshipDto): Promise<Friendship> {
+  async createFriendship(dto: CreateFriendshipDto): Promise<void> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -133,8 +133,6 @@ export class UsersFriendshipService {
       event.options = recipient.profile?.options ?? {};
       event.body = `${sender.username}님이 나에게 친구신청을 보냈습니다. ${dto.message}`;
       this.eventEmitter.emit('user.notified', event);
-
-      return friendship;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`user not found`);

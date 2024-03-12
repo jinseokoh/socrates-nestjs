@@ -40,7 +40,7 @@ export class UserFriendshipController {
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body() dto: CreateFriendshipDto,
-  ): Promise<Friendship> {
+  ): Promise<void> {
     return await this.usersFriendshipService.createFriendship({
       ...dto,
       senderId,
