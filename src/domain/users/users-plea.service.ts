@@ -36,50 +36,50 @@ export class UsersPleaService {
   // Create
   // -------------------------------------------------------------------------//
 
+  //! 요청 생성 (using transaction)
   //! profile's balance will be adjusted w/ ledger model event subscriber.
-  //! - starts a new transaction using data source and query runner.
   //! - for hated(blocked) users, client needs to take care of 'em. (instead of server.)
   async createPlea(dto: CreatePleaDto): Promise<Plea> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-
-    // validation checks
-    const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
-      where: [
-        { senderId: dto.senderId, recipientId: dto.recipientId },
-        { senderId: dto.recipientId, recipientId: dto.senderId },
-      ],
-    });
-    if (friendship) {
-      if (friendship.status === FriendshipStatus.ACCEPTED) {
-        throw new UnprocessableEntityException(`already in a relationship`);
-      } else {
-        // friendship already exists
-        throw new UnprocessableEntityException(`entity already exists`);
-      }
-    }
-
-    // validation checks
-    const sender = await queryRunner.manager.findOneOrFail(User, {
-      where: { id: dto.senderId },
-      relations: [`profile`],
-    });
-    if (sender?.isBanned) {
-      throw new UnprocessableEntityException(`the user is banned`);
-    }
-    if (
-      sender.profile?.balance === null ||
-      sender.profile?.balance - dto.reward < 0
-    ) {
-      throw new BadRequestException(`insufficient balance`);
-    }
-
-    // initialize
-    const newBalance = sender.profile?.balance - dto.reward;
 
     try {
+      await queryRunner.connect();
       await queryRunner.startTransaction();
+
+      // validation ----------------------------------------------------------//
+      const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
+        where: [
+          { senderId: dto.senderId, recipientId: dto.recipientId },
+          { senderId: dto.recipientId, recipientId: dto.senderId },
+        ],
+      });
+      if (friendship) {
+        if (friendship.status === FriendshipStatus.ACCEPTED) {
+          throw new UnprocessableEntityException(`already in a relationship`);
+        } else {
+          // friendship already exists
+          throw new UnprocessableEntityException(`entity already exists`);
+        }
+      }
+
+      // validation ----------------------------------------------------------//
+      const sender = await queryRunner.manager.findOneOrFail(User, {
+        where: { id: dto.senderId },
+        relations: [`profile`],
+      });
+      if (sender?.isBanned) {
+        throw new UnprocessableEntityException(`the user is banned`);
+      }
+      if (
+        sender.profile?.balance === null ||
+        sender.profile?.balance - dto.reward < 0
+      ) {
+        throw new BadRequestException(`insufficient balance`);
+      }
+
+      // initialize
+      const newBalance = sender.profile?.balance - dto.reward;
 
       const ledger = new Ledger({
         credit: dto.reward,
@@ -96,13 +96,16 @@ export class UsersPleaService {
       await queryRunner.commitTransaction();
 
       return plea;
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      if (err.code === 'ER_DUP_ENTRY') {
+    } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
         // plea already exists
         throw new UnprocessableEntityException(`entity already exists`);
+      } else if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException();
+      } else {
+        await queryRunner.rollbackTransaction();
       }
-      throw err;
+      throw new BadRequestException(error.name ?? error.toString());
     } finally {
       await queryRunner.release();
     }
