@@ -36,23 +36,24 @@ export class Connection {
   reportCount: number; // 신고
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'sympatheticCount' })
-  sympatheticCount: number; // 감정) reaction #1
+  @ApiProperty({ description: 'sympathyCount' })
+  sympathyCount: number; // 감정) reaction #1
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'laughterCount' })
-  humorousCount: number; // 감정) reaction #2
+  @ApiProperty({ description: 'smileCount' })
+  smileCount: number; // 감정) reaction #2
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'surpriseCount' })
-  surprisedCount: number; // 감정) reaction #3
+  surpriseCount: number; // 감정) reaction #3
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'sadCount' })
-  sadCount: number; // 감정) reaction #4
+  @ApiProperty({ description: 'sorryCount' })
+  sorryCount: number; // 감정) reaction #4
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  disgustCount: number; // 감정) reaction #5
+  @ApiProperty({ description: 'uneasyCount' })
+  uneasyCount: number; // 감정) reaction #5
 
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })

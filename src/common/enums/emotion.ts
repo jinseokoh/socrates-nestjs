@@ -1,7 +1,7 @@
 export enum Emotion {
-  SYMPATHETIC = 'sympathetic', // 공감
-  SURPRISED = 'surprised', // 놀람
-  HUMOROUS = 'humorous', // ㅎㅎ
-  SAD = 'sad', // 슬픔
-  DISGUST = 'disgust', // 불쾌
+  SYMPATHY = 'sympathy', // 공감
+  SMILE = 'smile', // ㅎㅎ
+  SURPRISE = 'surprised', // 놀람
+  SORRY = 'sorry', // 안쓰럽고 유감
+  UNEASY = 'uneasy', // 불쾌
 }

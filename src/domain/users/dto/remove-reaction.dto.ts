@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional } from 'class-validator';
 import { Emotion } from 'src/common/enums/emotion';
 export class RemoveReactionDto {
-  @ApiProperty({ description: 'emotion', default: Emotion.SYMPATHETIC })
+  @ApiProperty({ description: 'emotion', default: Emotion.SYMPATHY })
   @IsEnum(Emotion)
   emotion: Emotion;
 

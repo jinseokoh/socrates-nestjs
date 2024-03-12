@@ -14,19 +14,19 @@ export class Reaction {
   public connectionId: number;
 
   @Column({ default: false })
-  sympathetic: boolean;
+  sympathy: boolean;
 
   @Column({ default: false })
-  surprised: boolean;
+  smile: boolean;
 
   @Column({ default: false })
-  humorous: boolean;
+  surprise: boolean;
 
   @Column({ default: false })
-  sad: boolean;
+  sorry: boolean;
 
   @Column({ default: false })
-  disgust: boolean;
+  uneasy: boolean;
 
   @ManyToOne(() => User, (user) => user.connectionsReacted)
   public user: User;

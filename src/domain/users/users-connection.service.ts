@@ -235,11 +235,11 @@ export class UsersConnectionService {
       return new Reaction({
         userId: userId,
         connectionId: connectionId,
-        sympathetic: false,
-        surprised: false,
-        humorous: false,
-        sad: false,
-        disgust: false,
+        sympathy: false,
+        smile: false,
+        surprise: false,
+        sorry: false,
+        uneasy: false,
       });
     }
   }

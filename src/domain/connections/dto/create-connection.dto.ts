@@ -29,25 +29,25 @@ export class CreateConnectionDto {
   @ApiProperty({ description: 'count' })
   @IsNumber()
   @IsOptional()
-  sympatheticCount: number | null;
+  sympathyCount: number | null;
 
   @ApiProperty({ description: 'count' })
   @IsNumber()
   @IsOptional()
-  humorousCount: number | null;
+  smileCount: number | null;
 
   @ApiProperty({ description: 'count' })
   @IsNumber()
   @IsOptional()
-  surprisedCount: number | null;
+  surpriseCount: number | null;
 
   @ApiProperty({ description: 'count' })
   @IsNumber()
   @IsOptional()
-  sadCount: number | null;
+  sorryCount: number | null;
 
   @ApiProperty({ description: 'count' })
   @IsNumber()
   @IsOptional()
-  disgustCount: number | null;
+  uneasyCount: number | null;
 }
