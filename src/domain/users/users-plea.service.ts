@@ -59,7 +59,7 @@ export class UsersPleaService {
           throw new UnprocessableEntityException(`already in a relationship`);
         } else {
           // friendship already exists
-          throw new UnprocessableEntityException(`entity already exists`);
+          throw new UnprocessableEntityException(`entity exists`);
         }
       }
 
@@ -99,7 +99,7 @@ export class UsersPleaService {
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         // plea already exists
-        throw new UnprocessableEntityException(`entity already exists`);
+        throw new UnprocessableEntityException(`entity exists`);
       } else if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException();
       } else {

@@ -76,7 +76,7 @@ export class UsersFriendshipService {
           throw new UnprocessableEntityException(`already in a relationship`);
         } else {
           // friendship 이미 존재
-          throw new UnprocessableEntityException(`entity already exists`);
+          throw new UnprocessableEntityException(`entity exists`);
         }
       }
 
