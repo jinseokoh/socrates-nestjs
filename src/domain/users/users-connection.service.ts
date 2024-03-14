@@ -11,14 +11,15 @@ import { Emotion } from 'src/common/enums';
 import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Connection } from 'src/domain/connections/entities/connection.entity';
-import { FcmService } from 'src/services/fcm/fcm.service';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { ReportConnection } from 'src/domain/connections/entities/report_connection.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Plea } from 'src/domain/users/entities/plea.entity';
-import { Dot } from 'src/domain/connections/entities/dot.entity';
 import { CreatePleaDto } from 'src/domain/users/dto/create-plea.dto';
+import { UpsertReactionDto } from 'src/domain/users/dto/upsert-reaction.dto';
+import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UsersConnectionService {
@@ -30,8 +31,6 @@ export class UsersConnectionService {
     private readonly repository: Repository<User>,
     @InjectRepository(Connection)
     private readonly connectionRepository: Repository<Connection>,
-    @InjectRepository(Dot)
-    private readonly dotRepository: Repository<Dot>,
     @InjectRepository(Reaction)
     private readonly reactionRepository: Repository<Reaction>,
     @InjectRepository(Plea)
@@ -39,7 +38,7 @@ export class UsersConnectionService {
     @InjectRepository(ReportConnection)
     private readonly reportConnectionRepository: Repository<ReportConnection>,
     @Inject(ConfigService) private configService: ConfigService, // global
-    private readonly fcmService: FcmService,
+    private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
@@ -161,6 +160,81 @@ export class UsersConnectionService {
   //?-------------------------------------------------------------------------//
   //?  Reaction Pivot
   //?-------------------------------------------------------------------------//
+
+  async upsertReaction(dto: UpsertReactionDto): Promise<void> {
+    // upsert reaction
+    try {
+      if (
+        dto.sympathy === false &&
+        dto.smile === false &&
+        dto.surprise === false &&
+        dto.sorry === false &&
+        dto.uneasy === false
+      ) {
+        await this.repository.manager.query(
+          `DELETE FROM reaction WHERE userId = ? AND connectionId = ?`,
+          [dto.userId, dto.connectionId],
+        );
+      } else {
+        await this.repository.manager.query(
+          `INSERT IGNORE INTO reaction (userId, connectionId, sympathy, smile, surprise, sorry, uneasy) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE userId = VALUES(userId), connectionId = VALUES(connectionId), sympathy = VALUES(sympathy), smile = VALUES(smile), surprise = VALUES(surprise), sorry = VALUES(sorry), uneasy = VALUES(uneasy)`,
+          [
+            dto.userId,
+            dto.connectionId,
+            dto.sympathy,
+            dto.smile,
+            dto.surprise,
+            dto.sorry,
+            dto.uneasy,
+          ],
+        );
+
+        // fetch data for notification recipient
+        const connection = await this.repository.manager.findOneOrFail(
+          Connection,
+          {
+            where: { id: dto.connectionId },
+            relations: [`user`, `user.profile`],
+          },
+        );
+
+        // notification with event listener ------------------------------------//
+        const event = new UserNotificationEvent();
+        event.name = 'connectionReaction';
+        event.token = connection.user.pushToken;
+        event.options = connection.user.profile?.options ?? {};
+        event.body = `누군가 나의 발견글에 공감표시를 남겼습니다.`;
+        this.eventEmitter.emit('user.notified', event);
+      }
+
+      // fetch count
+      const [res] = await this.repository.manager.query(
+        `SELECT SUM(sympathy) AS sympathyCount, SUM(smile) AS smileCount, SUM(surprise) AS surpriseCount, SUM(sorry) AS sorryCount, SUM(uneasy) AS uneasyCount FROM reaction WHERE connectionId = ?`,
+        [dto.connectionId],
+      );
+      // update count
+      await this.repository.manager.query(
+        `INSERT IGNORE INTO connection (id, sympathyCount, smileCount, surpriseCount, sorryCount, uneasyCount) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id = VALUES(id), sympathyCount = VALUES(sympathyCount), smileCount = VALUES(smileCount), surpriseCount = VALUES(surpriseCount), sorryCount = VALUES(sorryCount), uneasyCount = VALUES(uneasyCount)`,
+        [
+          dto.connectionId,
+          +res.sympathyCount,
+          +res.smileCount,
+          +res.surpriseCount,
+          +res.sorryCount,
+          +res.uneasyCount,
+        ],
+      );
+    } catch (e) {
+      this.logger.log(e);
+    }
+    // return reaction
+    // return await this.reactionRepository.findOne({
+    //   where: {
+    //     userId: dto.userId,
+    //     connectionId: dto.connectionId,
+    //   },
+    // });
+  }
 
   // 발견 reaction 리스트에 추가
   async attachToReactionPivot(

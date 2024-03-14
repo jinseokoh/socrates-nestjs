@@ -9,6 +9,7 @@ import {
   ParseArrayPipe,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   UseInterceptors,
 } from '@nestjs/common';
@@ -22,6 +23,7 @@ import { CreateReactionDto } from 'src/domain/users/dto/create-reaction.dto';
 import { RemoveReactionDto } from 'src/domain/users/dto/remove-reaction.dto';
 import { Reaction } from 'src/domain/connections/entities/reaction.entity';
 import { UsersConnectionService } from 'src/domain/users/users-connection.service';
+import { UpsertReactionDto } from 'src/domain/users/dto/upsert-reaction.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -133,6 +135,20 @@ export class UserConnectionsController {
   //?-------------------------------------------------------------------------//
   //? Reaction Pivot
   //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: '발견 reaction 리스트에 추가' })
+  @Put(':userId/connections/:connectionId')
+  async upsertReaction(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('connectionId', ParseIntPipe) connectionId: number,
+    @Body() dto: UpsertReactionDto, // optional message, and skill
+  ): Promise<Reaction> {
+    return await this.usersConnectionService.upsertReaction({
+      ...dto,
+      userId: userId,
+      connectionId: connectionId,
+    });
+  }
 
   @ApiOperation({ description: '발견 reaction 리스트에 추가' })
   @Post(':userId/connections/:connectionId')
