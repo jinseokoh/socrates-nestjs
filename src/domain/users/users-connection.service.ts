@@ -236,7 +236,7 @@ export class UsersConnectionService {
     // });
   }
 
-  // 발견 reaction 리스트에 추가
+  //! @deprecated; 발견 reaction 리스트에 추가
   async attachToReactionPivot(
     userId: number,
     connectionId: number,
@@ -268,7 +268,7 @@ export class UsersConnectionService {
     });
   }
 
-  // 발견 reaction 리스트에서 삭제
+  //! @deprecated; 발견 reaction 리스트에서 삭제
   async detachFromReactionPivot(
     userId: number,
     connectionId: number,
@@ -298,7 +298,7 @@ export class UsersConnectionService {
     });
   }
 
-  // 발견 reaction 조회
+  //? 특정 발견글에 대한 나의 reaction 조회
   async getReaction(userId: number, connectionId: number): Promise<Reaction> {
     try {
       return await this.reactionRepository.findOneOrFail({
@@ -318,7 +318,7 @@ export class UsersConnectionService {
     }
   }
 
-  // 발견 reaction 리스트 (all)
+  //? list of 발견글들에 대한 나의 리액션들 (use case 는? 딱히 안 떠오르는데?)
   async getReactions(
     userId: number,
     connectionIds: number[],

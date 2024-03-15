@@ -84,16 +84,14 @@ export class ConnectionsController {
       'remarks.user',
       'remarks.user.profile',
       'userReports',
-      // 'userReactions',
+      'userReactions',
       'user',
       'user.profile',
       'user.connections',
       'user.connections.dot',
-      'user.connections.user',
       'user.connections.remarks',
       'user.connections.remarks.user',
       // 'user.sentFriendships',
-      // 'user.receivedFriendships',
     ]);
   }
 

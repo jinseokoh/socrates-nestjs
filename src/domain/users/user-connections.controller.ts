@@ -150,6 +150,7 @@ export class UserConnectionsController {
     });
   }
 
+  //! @deprecated
   @ApiOperation({ description: '발견 reaction 리스트에 추가' })
   @Post(':userId/connections/:connectionId')
   async attachToReactionPivot(
@@ -164,6 +165,7 @@ export class UserConnectionsController {
     );
   }
 
+  //! @deprecated
   @ApiOperation({ description: '발견 reaction 리스트에서 삭제' })
   @Delete(':userId/connections/:connectionId')
   async detachToReactionPivot(
@@ -178,6 +180,7 @@ export class UserConnectionsController {
     );
   }
 
+  //? 특정 발견글에 대한 나의 reaction 조회
   @ApiOperation({ description: '발견 reaction 조회' })
   @PaginateQueryOptions()
   @Get(':userId/connections/:connectionId')
@@ -188,6 +191,7 @@ export class UserConnectionsController {
     return await this.usersConnectionService.getReaction(userId, connectionId);
   }
 
+  //? list of 발견글들에 대한 나의 리액션들 (use case 는? 딱히 안 떠오르는데?)
   @ApiOperation({ description: '발견 reaction 리스트 (all)' })
   @Get(':userId/reactions')
   async getReactions(
