@@ -31,4 +31,8 @@ export class UpsertReactionDto {
   @ApiProperty({ description: 'uneasy' })
   @IsBoolean()
   uneasy: boolean;
+
+  @ApiProperty({ description: 'isNewReaction' })
+  @IsBoolean()
+  isNewReaction: boolean;
 }

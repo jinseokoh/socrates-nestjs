@@ -188,7 +188,6 @@ export class UsersConnectionService {
             dto.uneasy,
           ],
         );
-
         // fetch data for notification recipient
         const connection = await this.repository.manager.findOneOrFail(
           Connection,
@@ -197,14 +196,15 @@ export class UsersConnectionService {
             relations: [`user`, `user.profile`],
           },
         );
-
         // notification with event listener ------------------------------------//
-        const event = new UserNotificationEvent();
-        event.name = 'connectionReaction';
-        event.token = connection.user.pushToken;
-        event.options = connection.user.profile?.options ?? {};
-        event.body = `누군가 나의 발견글에 공감표시를 남겼습니다.`;
-        this.eventEmitter.emit('user.notified', event);
+        if (dto.isNewReaction) {
+          const event = new UserNotificationEvent();
+          event.name = 'connectionReaction';
+          event.token = connection.user.pushToken;
+          event.options = connection.user.profile?.options ?? {};
+          event.body = `누군가 나의 발견글에 공감표시를 남겼습니다.`;
+          this.eventEmitter.emit('user.notified', event);
+        }
       }
 
       // fetch count
