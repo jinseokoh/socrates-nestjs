@@ -324,49 +324,77 @@ export class UsersMeetupService {
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
+
+      await queryRunner.manager.query(
+        'UPDATE `join` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
+        [status, askingUserId, askedUserId, meetupId],
+      );
+
+      //? room record 생성
+      if (status === JoinStatus.ACCEPTED) {
+        if (joinType === JoinType.REQUEST) {
+          // 모임 신청 (add askingUserId to `room`) 수락
+          await queryRunner.manager.query(
+            'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
+            ['guest', askingUserId, meetupId],
+          );
+        } else {
+          // 모임 초대 (add askedUserId to `room`) 수락
+          await queryRunner.manager.query(
+            'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
+            ['guest', askedUserId, meetupId],
+          );
+        }
+
+        const [{ max }] = await queryRunner.manager.query(
+          'SELECT max FROM `meetup` WHERE id = ?',
+          [meetupId],
+        );
+        const [{ count }] = await queryRunner.manager.query(
+          'SELECT COUNT(*) AS count FROM `room` WHERE meetupId = ?',
+          [meetupId],
+        );
+
+        if (max >= +count) {
+          await queryRunner.manager.query(
+            'UPDATE `meetup` SET isFull = 1 WHERE id = ?',
+            [meetupId],
+          );
+        } else {
+          throw new BadRequestException(`no vacancy`);
+        }
+        await queryRunner.commitTransaction();
+      }
+
+      // notification with event listener ------------------------------------//
+      const event = new UserNotificationEvent();
+      if (joinType === JoinType.REQUEST) {
+        const recipient = await queryRunner.manager.findOneOrFail(User, {
+          where: { id: askingUserId },
+          relations: [`profile`],
+        });
+
+        event.name = 'meetupRequestApproval';
+        event.token = recipient.pushToken;
+        event.options = recipient.profile?.options ?? {};
+        event.body = `모임장이 나의 참가신청을 수락했습니다.`;
+      } else {
+        const recipient = await queryRunner.manager.findOneOrFail(User, {
+          where: { id: askingUserId },
+          relations: [`profile`],
+        });
+
+        event.name = 'meetupRequestApproval';
+        event.token = recipient.pushToken;
+        event.options = recipient.profile?.options ?? {};
+        event.body = `상대방이 내 모임으로의 초대를 수락했습니다.`;
+      }
+      this.eventEmitter.emit('user.notified', event);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
       await queryRunner.release();
-    }
-
-    await this.repository.manager.query(
-      'UPDATE `join` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
-      [status, askingUserId, askedUserId, meetupId],
-    );
-
-    //? room record 생성
-    if (status === JoinStatus.ACCEPTED) {
-      if (joinType === JoinType.REQUEST) {
-        // 모임 신청 (add askingUserId to `room`) 수락
-        await this.repository.manager.query(
-          'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
-          ['guest', askingUserId, meetupId],
-        );
-      } else {
-        // 모임 초대 (add askedUserId to `room`) 수락
-        await this.repository.manager.query(
-          'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
-          ['guest', askedUserId, meetupId],
-        );
-      }
-
-      const [{ max }] = await this.repository.manager.query(
-        'SELECT max FROM `meetup` WHERE id = ?',
-        [meetupId],
-      );
-      const [{ count }] = await this.repository.manager.query(
-        'SELECT COUNT(*) AS count FROM `room` WHERE meetupId = ?',
-        [meetupId],
-      );
-
-      if (max >= +count) {
-        await this.repository.manager.query(
-          'UPDATE `meetup` SET isFull = 1 WHERE id = ?',
-          [meetupId],
-        );
-      }
     }
   }
 

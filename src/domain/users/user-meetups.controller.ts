@@ -237,20 +237,16 @@ export class UserMeetupsController {
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() dto: AcceptOrDenyDto,
   ): Promise<AnyData> {
-    try {
-      await this.usersMeetupService.updateJoinToAcceptOrDeny(
-        askingUserId,
-        askedUserId,
-        meetupId,
-        dto.status,
-        dto.joinType,
-      );
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    await this.usersMeetupService.updateJoinToAcceptOrDeny(
+      askingUserId,
+      askedUserId,
+      meetupId,
+      dto.status,
+      dto.joinType,
+    );
+    return {
+      data: 'ok',
+    };
   }
 
   @ApiOperation({ description: '내가 신청(request)한 모임 리스트 (paginated)' })
