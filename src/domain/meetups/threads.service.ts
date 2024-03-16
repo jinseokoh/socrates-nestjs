@@ -13,10 +13,12 @@ import { SignedUrl } from 'src/common/types';
 import { CreateThreadDto } from 'src/domain/meetups/dto/create-thread.dto';
 import { UpdateThreadDto } from 'src/domain/meetups/dto/update-thread.dto';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
+import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
-import { FcmService } from 'src/services/fcm/fcm.service';
 import { Repository } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
 @Injectable()
 export class ThreadsService {
   constructor(
@@ -24,7 +26,7 @@ export class ThreadsService {
     private readonly repository: Repository<Thread>,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     private readonly s3Service: S3Service,
-    private readonly fcmService: FcmService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -35,21 +37,20 @@ export class ThreadsService {
     // creation
     const thread = await this.repository.save(this.repository.create(dto));
 
-    //? 푸시노티 push notification
+    // fetch data for notification recipient
     const threadWithUser = await this.findById(thread.id, [
       'user',
       'meetup',
       'meetup.user',
+      'meetup.user.profile',
     ]);
-    console.log('threadWithUser', threadWithUser);
-
-    //? 푸시노티 push notification
-    const fbToken = threadWithUser.meetup.user.pushToken;
-    const notification = {
-      title: 'MeSo',
-      body: '모임에 댓글이 달렸습니다.',
-    };
-    this.fcmService.sendToToken(fbToken, notification);
+    // notification with event listener ------------------------------------//
+    const event = new UserNotificationEvent();
+    event.name = 'meetupThread';
+    event.token = threadWithUser.meetup.user.pushToken;
+    event.options = threadWithUser.meetup.user.profile?.options ?? {};
+    event.body = `${threadWithUser.meetup.title} 모임에 댓글이 달렸습니다.`;
+    this.eventEmitter.emit('user.notified', event);
 
     // notify slack
     return threadWithUser;
