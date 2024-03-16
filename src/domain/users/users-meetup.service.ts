@@ -14,9 +14,9 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { JoinType, JoinStatus } from 'src/common/enums';
 import { AnyData } from 'src/common/types';
-import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { Join } from 'src/domain/meetups/entities/join.entity';
@@ -27,6 +27,7 @@ import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class UsersMeetupService {
@@ -45,8 +46,8 @@ export class UsersMeetupService {
     @InjectRepository(ReportMeetup)
     private readonly reportMeetupRepository: Repository<ReportMeetup>,
     @Inject(ConfigService) private configService: ConfigService, // global
-    @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     private eventEmitter: EventEmitter2,
+    private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
   }
@@ -273,7 +274,7 @@ export class UsersMeetupService {
   ): Promise<Meetup> {
     const meetup = await this.meetupRepository.findOneOrFail({
       where: { id: meetupId },
-      relations: ['joins'],
+      relations: ['joins', 'user', 'user.profile'],
     });
 
     let joinType = JoinType.REQUEST;
@@ -295,6 +296,15 @@ export class UsersMeetupService {
         'INSERT IGNORE INTO `join` (askingUserId, askedUserId, meetupId, message, skill, joinType) VALUES (?, ?, ?, ?, ?, ?)',
         [askingUserId, askedUserId, meetupId, dto.message, dto.skill, joinType],
       );
+
+      // notification with event listener ------------------------------------//
+      const event = new UserNotificationEvent();
+      event.name = 'meetupRequest';
+      event.token = meetup.user.pushToken;
+      event.options = meetup.user.profile?.options ?? {};
+      event.body = `누군가 ${meetup.title} 모임에 참가신청 했습니다.`;
+      this.eventEmitter.emit('user.notified', event);
+
       return meetup;
     } catch (e) {
       throw new BadRequestException('database has gone crazy.');
@@ -309,6 +319,18 @@ export class UsersMeetupService {
     status: JoinStatus,
     joinType: JoinType,
   ): Promise<void> {
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+
     await this.repository.manager.query(
       'UPDATE `join` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
       [status, askingUserId, askedUserId, meetupId],
@@ -317,13 +339,13 @@ export class UsersMeetupService {
     //? room record 생성
     if (status === JoinStatus.ACCEPTED) {
       if (joinType === JoinType.REQUEST) {
-        // 모임 신청 (add askingUserId to `room`)
+        // 모임 신청 (add askingUserId to `room`) 수락
         await this.repository.manager.query(
           'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
           ['guest', askingUserId, meetupId],
         );
       } else {
-        // 모임 초대 (add askedUserId to `room`)
+        // 모임 초대 (add askedUserId to `room`) 수락
         await this.repository.manager.query(
           'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
           ['guest', askedUserId, meetupId],

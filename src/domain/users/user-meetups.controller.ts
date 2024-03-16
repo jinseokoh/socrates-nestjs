@@ -210,12 +210,14 @@ export class UserMeetupsController {
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() dto: CreateJoinDto, // optional message, and skill
   ): Promise<AnyData> {
+    // 모임신청 생성
     const meetup = await this.usersMeetupService.attachToJoinPivot(
       askingUserId,
       askedUserId,
       meetupId,
       dto,
     );
+    // user's interests 추가
     await this.usersService.upsertCategoryWithSkill(
       askingUserId,
       meetup.subCategory,
@@ -226,7 +228,7 @@ export class UserMeetupsController {
     };
   }
 
-  @ApiOperation({ description: '모임신청 승인/거부' })
+  @ApiOperation({ description: '모임신청 수락/거부' })
   @PaginateQueryOptions()
   @Patch(':askingUserId/joins/:askedUserId/meetups/:meetupId')
   async updateJoinToAcceptOrDeny(
