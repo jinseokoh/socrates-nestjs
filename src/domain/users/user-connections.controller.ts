@@ -137,7 +137,7 @@ export class UserConnectionsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '발견 reaction 리스트에 추가' })
-  @Put(':userId/connections/:connectionId')
+  @Post(':userId/connections/:connectionId')
   async upsertReaction(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('connectionId', ParseIntPipe) connectionId: number,
@@ -152,7 +152,7 @@ export class UserConnectionsController {
 
   //! @deprecated
   @ApiOperation({ description: '발견 reaction 리스트에 추가' })
-  @Post(':userId/connections/:connectionId')
+  @Put(':userId/connections/:connectionId')
   async attachToReactionPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('connectionId', ParseIntPipe) connectionId: number,
@@ -191,7 +191,7 @@ export class UserConnectionsController {
     return await this.usersConnectionService.getReaction(userId, connectionId);
   }
 
-  //? list of 발견글들에 대한 나의 리액션들 (use case 는? 딱히 안 떠오르는데?)
+  //? list of 발견글들에 대한 나의 리액션들 (use case 는? 딱히 안 떠오르는데? almost deprecated)
   @ApiOperation({ description: '발견 reaction 리스트 (all)' })
   @Get(':userId/reactions')
   async getReactions(
