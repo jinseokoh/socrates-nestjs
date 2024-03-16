@@ -128,11 +128,6 @@ export class CreateMeetupDto {
   @IsOptional()
   hasQa: boolean;
 
-  @ApiProperty({ description: '영리 모임 여부', default: false })
-  @IsBoolean()
-  @IsOptional()
-  isPro: boolean;
-
   @ApiProperty({ description: '빈자리 여부', default: false })
   @IsBoolean()
   @IsOptional()

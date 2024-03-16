@@ -146,10 +146,6 @@ export class Meetup {
   hasQa: boolean;
 
   @Column({ default: false })
-  @ApiProperty({ description: 'is pro meetup?' })
-  isPro: boolean;
-
-  @Column({ default: false })
   @ApiProperty({ description: 'is full' })
   isFull: boolean;
 
