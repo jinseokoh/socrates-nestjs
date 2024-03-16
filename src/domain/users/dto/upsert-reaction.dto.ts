@@ -32,7 +32,9 @@ export class UpsertReactionDto {
   @IsBoolean()
   uneasy: boolean;
 
-  @ApiProperty({ description: 'isNewReaction' })
+  @ApiProperty({
+    description: 'isNewReaction; notifying user if this value is true',
+  })
   @IsBoolean()
   isNewReaction: boolean;
 }

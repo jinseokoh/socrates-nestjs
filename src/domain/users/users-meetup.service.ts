@@ -25,6 +25,8 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
+import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UsersMeetupService {
@@ -44,6 +46,7 @@ export class UsersMeetupService {
     private readonly reportMeetupRepository: Repository<ReportMeetup>,
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
+    private eventEmitter: EventEmitter2,
   ) {
     this.env = this.configService.get('nodeEnv');
   }
@@ -103,6 +106,20 @@ export class UsersMeetupService {
       'INSERT IGNORE INTO `like` (userId, meetupId) VALUES (?, ?)',
       [userId, meetupId],
     );
+
+    // fetch data for notification recipient
+    const meetup = await this.repository.manager.findOneOrFail(Meetup, {
+      where: { id: meetupId },
+      relations: [`user`, `user.profile`],
+    });
+    // notification with event listener ------------------------------------//
+    // todo. fine tune notifying logic to dedup the same id
+    const event = new UserNotificationEvent();
+    event.name = 'meetupLike';
+    event.token = meetup.user.pushToken;
+    event.options = meetup.user.profile?.options ?? {};
+    event.body = `누군가 나의 모임글을 찜했습니다.`;
+    this.eventEmitter.emit('user.notified', event);
 
     if (affectedRows > 0) {
       await this.meetupRepository.increment({ id: meetupId }, 'likeCount', 1);
