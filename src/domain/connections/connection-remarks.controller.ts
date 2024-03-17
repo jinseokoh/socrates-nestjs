@@ -32,12 +32,12 @@ export class ConnectionRemarksController {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '댓글 등록' })
+  @ApiOperation({ description: '댓글 생성' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
   @Post(':connectionId/remarks')
-  async create(
+  async createRemark(
     @CurrentUserId() userId: number,
-    @Param('connectionId') connectionId: number,
+    @Param('connectionId', ParseIntPipe) connectionId: number,
     @Body() dto: CreateRemarkDto,
   ): Promise<any> {
     return await this.remarksService.create({

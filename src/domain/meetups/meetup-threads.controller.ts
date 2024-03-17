@@ -33,7 +33,7 @@ export class MeetupThreadsController {
 
   @ApiOperation({ description: '댓글 생성' })
   @Post(':meetupId/threads')
-  async createQuestion(
+  async createThread(
     @CurrentUserId() userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() dto: CreateThreadDto,

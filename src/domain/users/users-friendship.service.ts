@@ -39,8 +39,8 @@ export class UsersFriendshipService {
     private readonly friendshipRepository: Repository<Friendship>,
     @Inject(ConfigService) private configService: ConfigService, // global
 
-    private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
+    private eventEmitter: EventEmitter2,
   ) {
     this.env = this.configService.get('nodeEnv');
   }
@@ -54,8 +54,8 @@ export class UsersFriendshipService {
   // -------------------------------------------------------------------------//
 
   //! 친구신청 생성 (using transaction)
-  //! profile balance will be adjusted w/ ledger model event subscriber.
-  //! for hated(blocked) users, app needs to take care of 'em instead of server.
+  //! profile's balance will be adjusted w/ ledger model event subscriber.
+  //! - for hated(blocked) users, app needs to take care of 'em instead of server.
   async createFriendship(dto: CreateFriendshipDto): Promise<void> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();

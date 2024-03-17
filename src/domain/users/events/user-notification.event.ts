@@ -10,7 +10,7 @@ export class UserNotificationEvent {
     | 'friendMeetupSubmit'
     | 'meetupInviteApproval'
     | 'friendRequestApproval'
-    | 'friendRequestFeedback'
+    | 'friendRequestPlea'
     | 'meetupRequestApproval'
     | 'friendConnectionSubmit';
   token: string | null;

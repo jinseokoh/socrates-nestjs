@@ -15,6 +15,8 @@ import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { FriendshipStatus, LedgerType, PleaStatus } from 'src/common/enums';
 import { UpdatePleaDto } from 'src/domain/users/dto/update-plea.dto';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 
 @Injectable()
 export class UsersPleaService {
@@ -26,6 +28,7 @@ export class UsersPleaService {
     @InjectRepository(Plea)
     private readonly pleaRepository: Repository<Plea>,
     private dataSource: DataSource, // for transaction
+    private eventEmitter: EventEmitter2,
   ) {}
 
   //? ------------------------------------------------------------------------//
@@ -78,9 +81,14 @@ export class UsersPleaService {
         throw new BadRequestException(`insufficient balance`);
       }
 
+      // validation ----------------------------------------------------------//
+      const recipient = await queryRunner.manager.findOneOrFail(User, {
+        where: { id: dto.recipientId },
+        relations: [`profile`],
+      });
+
       // initialize
       const newBalance = sender.profile?.balance - dto.reward;
-
       const ledger = new Ledger({
         credit: dto.reward,
         ledgerType: LedgerType.CREDIT_ESCROW,
@@ -94,6 +102,14 @@ export class UsersPleaService {
         this.pleaRepository.create(dto),
       );
       await queryRunner.commitTransaction();
+
+      // notification with event listener ------------------------------------//
+      const event = new UserNotificationEvent();
+      event.name = 'friendRequestPlea';
+      event.token = recipient.pushToken;
+      event.options = recipient.profile?.options ?? {};
+      event.body = `${sender.username}님이 나에게 발견글 작성 요청을 보냈습니다. ${dto.message}`;
+      this.eventEmitter.emit('user.notified', event);
 
       return plea;
     } catch (error) {

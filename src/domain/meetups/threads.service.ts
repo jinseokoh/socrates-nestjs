@@ -18,12 +18,15 @@ import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 
 @Injectable()
 export class ThreadsService {
   constructor(
     @InjectRepository(Thread)
     private readonly repository: Repository<Thread>,
+    @InjectRepository(Meetup)
+    private readonly meetupRepository: Repository<Meetup>,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     private readonly s3Service: S3Service,
     private eventEmitter: EventEmitter2,
@@ -51,6 +54,8 @@ export class ThreadsService {
     event.options = threadWithUser.meetup.user.profile?.options ?? {};
     event.body = `${threadWithUser.meetup.title} 모임에 댓글이 달렸습니다.`;
     this.eventEmitter.emit('user.notified', event);
+
+    // this.meetupRepository.increment({ id: dto.meetupId }, `threadCount`, 1);
 
     // notify slack
     return threadWithUser;

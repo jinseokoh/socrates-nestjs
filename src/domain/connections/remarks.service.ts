@@ -15,7 +15,8 @@ import { FindOneOptions, Repository } from 'typeorm';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ClientProxy } from '@nestjs/microservices';
 import { UpdateRemarkDto } from 'src/domain/connections/dto/update-remark.dto';
-import { FcmService } from 'src/services/fcm/fcm.service';
+import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class RemarksService {
@@ -28,7 +29,7 @@ export class RemarksService {
     private readonly connectionRepository: Repository<Connection>,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     // @Inject(SlackService) private readonly slack: SlackService,
-    private readonly fcmService: FcmService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -38,21 +39,21 @@ export class RemarksService {
   async create(dto: CreateRemarkDto): Promise<Remark> {
     // creation
     const remark = await this.repository.save(this.repository.create(dto));
+
+    // fetch data for notification recipient
     const remarkWithUser = await this.findById(remark.id, [
       'user',
       'connection',
       'connection.user',
+      'connection.user.profile',
     ]);
-    console.log('remarkWithUser', remarkWithUser);
-    // emit SSE
-    this.redisClient.emit('sse.add_connection', remarkWithUser);
-    //? 푸시노티 push notification
-    // const fbToken = threadWithUser.meetup.user.pushToken;
-    // const notification = {
-    //   title: 'MeSo',
-    //   body: '모임에 댓글이 달렸습니다.',
-    // };
-    // this.fcmService.sendToToken(fbToken, notification);
+    // notification with event listener ------------------------------------//
+    const event = new UserNotificationEvent();
+    event.name = 'connectionRemark';
+    event.token = remarkWithUser.connection.user.pushToken;
+    event.options = remarkWithUser.connection.user.profile?.options ?? {};
+    event.body = `누군가 내 발견글에 댓글을 남겼습니다.`;
+    this.eventEmitter.emit('user.notified', event);
 
     this.connectionRepository.increment(
       { id: dto.connectionId },

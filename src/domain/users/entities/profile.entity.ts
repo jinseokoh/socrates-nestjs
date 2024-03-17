@@ -104,7 +104,7 @@ export class Profile {
       connectionRemark: false, // 발견 댓글
       friendRequest: false, // 친구 신청
       friendRequestApproval: false, // 친구신청 승인
-      friendRequestFeedback: false, // 친구신청 발견글 요청
+      friendRequestPlea: false, // 친구신청 발견글 요청
       friendMeetupSubmit: false, // 친구가 모임 등록
       friendConnectionSubmit: false, // 친구가 발견글 등록
     };
