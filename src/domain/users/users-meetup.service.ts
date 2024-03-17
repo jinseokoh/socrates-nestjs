@@ -28,6 +28,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DataSource } from 'typeorm';
+import { Room } from 'src/domain/chats/entities/room.entity';
 
 @Injectable()
 export class UsersMeetupService {
@@ -319,6 +320,7 @@ export class UsersMeetupService {
     status: JoinStatus,
     joinType: JoinType,
   ): Promise<void> {
+    let meetupChatOpen = false;
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
     try {
@@ -347,49 +349,60 @@ export class UsersMeetupService {
         }
 
         const [{ max }] = await queryRunner.manager.query(
-          'SELECT max FROM `meetup` WHERE id = ?',
-          [meetupId],
+          'SELECT max FROM `meetup` WHERE id = ?', [meetupId],
         );
         const [{ count }] = await queryRunner.manager.query(
-          'SELECT COUNT(*) AS count FROM `room` WHERE meetupId = ?',
-          [meetupId],
+          'SELECT COUNT(*) AS count FROM `room` WHERE meetupId = ?', [meetupId],
         );
-
-        if (max >= +count) {
+        if (max > +count) {
+          // no need to do anything.
+        } else if (max === +count) {
           await queryRunner.manager.query(
             'UPDATE `meetup` SET isFull = 1 WHERE id = ?',
             [meetupId],
           );
-        } else {
+          meetupChatOpen = true;
+        } else { // forget it. we have no rooms left.
           throw new BadRequestException(`no vacancy`);
         }
         await queryRunner.commitTransaction();
       }
 
-      // notification with event listener ------------------------------------//
-      const event = new UserNotificationEvent();
-      if (joinType === JoinType.REQUEST) {
+      if (status === JoinStatus.ACCEPTED) {
         const recipient = await queryRunner.manager.findOneOrFail(User, {
           where: { id: askingUserId },
           relations: [`profile`],
         });
-
-        event.name = 'meetupRequestApproval';
-        event.token = recipient.pushToken;
-        event.options = recipient.profile?.options ?? {};
-        event.body = `모임장이 나의 참가신청을 수락했습니다.`;
-      } else {
-        const recipient = await queryRunner.manager.findOneOrFail(User, {
-          where: { id: askingUserId },
-          relations: [`profile`],
-        });
-
-        event.name = 'meetupRequestApproval';
-        event.token = recipient.pushToken;
-        event.options = recipient.profile?.options ?? {};
-        event.body = `상대방이 내 모임으로의 초대를 수락했습니다.`;
+        // notification with event listener ----------------------------------//
+        const event = new UserNotificationEvent();
+        if (joinType === JoinType.REQUEST) {
+          event.name = 'meetupRequestApproval';
+          event.token = recipient.pushToken;
+          event.options = recipient.profile?.options ?? {};
+          event.body = `모임장이 나의 참가신청을 수락했습니다.`;
+        } else {
+          event.name = 'meetupRequestApproval';
+          event.token = recipient.pushToken;
+          event.options = recipient.profile?.options ?? {};
+          event.body = `상대방이 내 모임으로의 초대를 수락했습니다.`;
+        }
+        this.eventEmitter.emit('user.notified', event);
+        // notification with event listener ----------------------------------//
+        if (meetupChatOpen) {
+          const meetup = await queryRunner.manager.findOneOrFail(Meetup, {
+            where: { id: meetupId },
+            relations: [`rooms`, `rooms.user`, `rooms.user.profile`],
+          });
+          meetup.rooms.map((v: Room) => {
+            const event = new UserNotificationEvent();
+            event.name = 'meetupChatOpen';
+            event.token = v.user.pushToken;
+            event.options = v.user.profile?.options ?? {};
+            event.body = `${meetup.title} 모임 참가자가 모두 확정되어 채팅방이 열립니다.`;
+            this.eventEmitter.emit('user.notified', event);
+          });
+        }
       }
-      this.eventEmitter.emit('user.notified', event);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
