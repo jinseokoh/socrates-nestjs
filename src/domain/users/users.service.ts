@@ -10,6 +10,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import * as moment from 'moment';
+import 'moment-timezone';
 import * as random from 'randomstring';
 import {
   FilterOperator,
@@ -258,7 +259,7 @@ export class UsersService {
       // await this.softRemove(id);
     } catch (e) {
       console.log(e);
-      throw new BadRequestException('already deleted');
+      throw new BadRequestException();
     }
 
     // this.slack.send(
@@ -404,15 +405,17 @@ export class UsersService {
   async _voidPersonalInformation(id: number): Promise<any> {
     const user = await this.findById(id);
 
-    const username = `탈퇴회원(${user.username})`;
-    const realname = user.realname.slice(0, -1) + '*';
+    const realname =
+      user.realname && user.realname.length > 1
+        ? user.realname.slice(0, -1) + '*'
+        : `n/a`;
     const email = user.email.replace(/@/g, 'at').replace(/\./g, 'dot');
     const phone = user.phone && user.phone.length > 4 ? user.phone : '---n/a';
-    const dob = moment(user.dob).startOf('year').toDate();
-    user.username = `---${username}`;
-    user.email = `---${email}`;
-    user.phone = `---${phone.substring(3)}`;
-    user.realname = `---${realname}`;
+    const dob = moment(user.dob).startOf('year').tz('Asia/Seoul').toDate();
+    user.username = `탈퇴회원(${user.username})`;
+    user.email = `- ${email}`;
+    user.phone = `- ${phone.substring(3)}`;
+    user.realname = `- ${realname}`;
     user.dob = dob;
     await this.repository.save(user);
 
