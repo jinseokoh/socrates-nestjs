@@ -43,8 +43,6 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
             friendRequest: false, // 친구 신청
             friendRequestApproval: false, // 친구신청 승인
             friendRequestPlea: false, // 친구신청 발견글 요청
-            friendMeetupSubmit: false, // 친구가 모임 등록
-            friendConnectionSubmit: false, // 친구가 발견글 등록
           },
         },
       ])

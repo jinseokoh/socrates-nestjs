@@ -349,10 +349,12 @@ export class UsersMeetupService {
         }
 
         const [{ max }] = await queryRunner.manager.query(
-          'SELECT max FROM `meetup` WHERE id = ?', [meetupId],
+          'SELECT max FROM `meetup` WHERE id = ?',
+          [meetupId],
         );
         const [{ count }] = await queryRunner.manager.query(
-          'SELECT COUNT(*) AS count FROM `room` WHERE meetupId = ?', [meetupId],
+          'SELECT COUNT(*) AS count FROM `room` WHERE meetupId = ?',
+          [meetupId],
         );
         if (max > +count) {
           // no need to do anything.
@@ -362,7 +364,8 @@ export class UsersMeetupService {
             [meetupId],
           );
           meetupChatOpen = true;
-        } else { // forget it. we have no rooms left.
+        } else {
+          // forget it. we have no rooms left.
           throw new BadRequestException(`no vacancy`);
         }
         await queryRunner.commitTransaction();
@@ -381,7 +384,7 @@ export class UsersMeetupService {
           event.options = recipient.profile?.options ?? {};
           event.body = `모임장이 나의 참가신청을 수락했습니다.`;
         } else {
-          event.name = 'meetupRequestApproval';
+          event.name = 'meetupInviteApproval';
           event.token = recipient.pushToken;
           event.options = recipient.profile?.options ?? {};
           event.body = `상대방이 내 모임으로의 초대를 수락했습니다.`;

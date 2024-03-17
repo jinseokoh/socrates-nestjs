@@ -243,11 +243,11 @@ export class UsersService {
       // private information 변경
       await this._voidPersonalInformation(id);
 
-      // update user model
-      user.pushToken = dto.reason;
-      user.isActive = false;
-      user.isBanned = false;
-      await this.repository.save(user);
+      // // update user model
+      // user.pushToken = dto.reason;
+      // user.isActive = false;
+      // user.isBanned = false;
+      // await this.repository.save(user);
 
       await this.softRemove(id);
     } catch (e) {
@@ -272,10 +272,16 @@ export class UsersService {
 
   async _voidPersonalInformation(id: number): Promise<any> {
     const user = await this.findById(id);
-    const email = user.email;
-    const phone = user.phone;
-    user.email = `${email}.deleted`;
+    const username = `떠나간${user.username}`;
+    const realname = user.realname.slice(0, -1) + '*';
+    const email = user.email.replace(/@/g, 'at').replace(/\./g, 'dot');
+    const phone = user.phone && user.phone.length > 4 ? user.phone : '---n/a';
+    const dob = moment(user.dob).subtract(100, 'year').toDate();
+    user.username = `---${username}`;
+    user.email = `---${email}`;
     user.phone = `---${phone.substring(3)}`;
+    user.realname = `---${realname}`;
+    user.dob = dob;
     await this.repository.save(user);
   }
 

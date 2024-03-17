@@ -4,15 +4,14 @@ export class UserNotificationEvent {
     | 'meetupThread'
     | 'friendRequest'
     | 'meetupRequest'
-    | 'meetupChatOpen'
-    | 'connectionRemark'
-    | 'connectionReaction'
-    | 'friendMeetupSubmit'
-    | 'meetupInviteApproval'
-    | 'friendRequestApproval'
-    | 'friendRequestPlea'
     | 'meetupRequestApproval'
-    | 'friendConnectionSubmit';
+    | 'meetupInviteApproval'
+    | 'meetupChatOpen'
+    | 'connectionReaction'
+    | 'connectionRemark'
+    | 'friendRequest'
+    | 'friendRequestApproval'
+    | 'friendRequestPlea';
   token: string | null;
   options: object;
   body: string;
