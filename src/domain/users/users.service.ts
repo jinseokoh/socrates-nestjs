@@ -236,21 +236,28 @@ export class UsersService {
   async quit(id: number, dto: DeleteUserDto): Promise<any> {
     const user = await this.findById(id);
     try {
-      // following 관계 hard 삭제
-      await this._hardRemovalOnFollow(id);
-      // stock comment soft 삭제 (commeted out for now)
-      // await this._softRemovalOnStockComments(id);
-      // private information 변경
+      await this._deleteComment(id);
+      await this._deleteConnection(id);
+      await this._deleteFlag(id);
+      await this._deleteHate(id);
+      await this._deleteInquiry(id);
+      await this._deleteJoin(id);
+      await this._deleteLanguage(id);
+      await this._deleteLedger(id);
+      await this._deleteLike(id);
+      await this._deleteMeetup(id);
+      await this._deletePlea(id);
+      await this._deleteProfile(id);
+      await this._deleteProvider(id);
+      await this._deleteRemark(id);
+      await this._deleteReportConnection(id);
+      await this._deleteReportMeetup(id);
+      await this._deleteReportUser(id);
+      await this._deleteThread(id);
       await this._voidPersonalInformation(id);
-
-      // // update user model
-      // user.pushToken = dto.reason;
-      // user.isActive = false;
-      // user.isBanned = false;
-      // await this.repository.save(user);
-
-      await this.softRemove(id);
+      // await this.softRemove(id);
     } catch (e) {
+      console.log(e);
       throw new BadRequestException('already deleted');
     }
 
@@ -263,26 +270,156 @@ export class UsersService {
     };
   }
 
-  async _hardRemovalOnFollow(id: number) {
+  async _deleteComment(id: number) {
     await this.repository.manager.query(
-      'DELETE FROM follow WHERE followingId = ? OR followerId = ?',
+      'UPDATE `comment` SET deletedAt=NOW() WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteConnection(id: number) {
+    await this.repository.manager.query(
+      'UPDATE `connection` SET deletedAt=NOW() WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteFlag(id: number) {
+    await this.repository.manager.query('DELETE FROM `flag` WHERE userId = ?', [
+      id,
+    ]);
+  }
+  async _deleteFriendship(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `friendship` WHERE senderId = ? OR recipientId = ?',
       [id, id],
+    );
+  }
+  async _deleteHate(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `hate` WHERE senderId = ? OR recipientId = ?',
+      [id, id],
+    );
+  }
+  async _deleteImpression(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `impression` WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteInquiry(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `inquiry` WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteInterest(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `interest` WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteJoin(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `join` WHERE askingUserId = ? OR askedUserId = ?',
+      [id, id],
+    );
+  }
+  async _deleteLanguage(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `language_skill` WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteLedger(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `ledger` WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteLike(id: number) {
+    await this.repository.manager.query('DELETE FROM `like` WHERE userId = ?', [
+      id,
+    ]);
+  }
+  async _deleteMeetup(id: number) {
+    await this.repository.manager.query(
+      'UPDATE `meetup` SET deletedAt=NOW() WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deletePlea(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `plea` WHERE senderId = ? OR recipientId = ?',
+      [id, id],
+    );
+  }
+  async _deleteProfile(id: number) {
+    await this.repository.manager.query(
+      'UPDATE `profile` SET balance=0, bio=NULL, mbti=NULL, region=NULL, occupation=NULL, education=NULL,fyis=NULL,images=NULL WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteProvider(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `provider` WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteReaction(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `reaction` WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteRemark(id: number) {
+    await this.repository.manager.query(
+      'UPDATE `remark` SET deletedAt=NOW() WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteReportConnection(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `report_connection` WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteReportMeetup(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `report_meetup` WHERE userId = ?',
+      [id],
+    );
+  }
+  async _deleteReportUser(id: number) {
+    await this.repository.manager.query(
+      'DELETE FROM `report_user` WHERE userId = ? OR accusedUserId = ?',
+      [id, id],
+    );
+  }
+  async _deleteThread(id: number) {
+    await this.repository.manager.query(
+      'UPDATE `thread` SET deletedAt=NOW() WHERE userId = ?',
+      [id],
     );
   }
 
   async _voidPersonalInformation(id: number): Promise<any> {
     const user = await this.findById(id);
-    const username = `떠나간${user.username}`;
+
+    const username = `탈퇴회원(${user.username})`;
     const realname = user.realname.slice(0, -1) + '*';
     const email = user.email.replace(/@/g, 'at').replace(/\./g, 'dot');
     const phone = user.phone && user.phone.length > 4 ? user.phone : '---n/a';
-    const dob = moment(user.dob).subtract(100, 'year').toDate();
+    const dob = moment(user.dob).startOf('year').toDate();
     user.username = `---${username}`;
     user.email = `---${email}`;
     user.phone = `---${phone.substring(3)}`;
     user.realname = `---${realname}`;
     user.dob = dob;
     await this.repository.save(user);
+
+    await this.repository.manager.query(
+      'UPDATE `user` SET career=NULL,avatar=NULL,pushToken=NULL,refreshTokenHash=NULL,isActive=0 WHERE id = ?',
+      [id],
+    );
   }
 
   //?-------------------------------------------------------------------------//

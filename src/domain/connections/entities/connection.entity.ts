@@ -8,6 +8,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ManyToMany,
   ManyToOne,
@@ -62,6 +63,9 @@ export class Connection {
   @UpdateDateColumn()
   @ApiProperty({ description: 'updatedAt' })
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date | null;
 
   //*-------------------------------------------------------------------------*/
   //* 1-to-many hasMany

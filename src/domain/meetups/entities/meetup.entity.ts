@@ -168,7 +168,6 @@ export class Meetup {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Exclude()
   @DeleteDateColumn()
   deletedAt: Date | null;
 
