@@ -255,7 +255,7 @@ export class UsersService {
       await this._deleteReportMeetup(id);
       await this._deleteReportUser(id);
       await this._deleteThread(id);
-      await this._voidPersonalInformation(id);
+      await this._voidPersonalInformation(id, dto.message ?? '');
       // await this.softRemove(id);
     } catch (e) {
       console.log(e);
@@ -402,7 +402,7 @@ export class UsersService {
     );
   }
 
-  async _voidPersonalInformation(id: number): Promise<any> {
+  async _voidPersonalInformation(id: number, message: string): Promise<any> {
     const user = await this.findById(id);
 
     const realname =
@@ -420,8 +420,8 @@ export class UsersService {
     await this.repository.save(user);
 
     await this.repository.manager.query(
-      'UPDATE `user` SET career=NULL,avatar=NULL,pushToken=NULL,refreshTokenHash=NULL,isActive=0 WHERE id = ?',
-      [id],
+      'UPDATE `user` SET password=?,career=NULL,avatar=NULL,pushToken=NULL,refreshTokenHash=NULL,isActive=0 WHERE id = ?',
+      [message, id],
     );
   }
 

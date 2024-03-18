@@ -4,5 +4,5 @@ export class DeleteUserDto {
   @ApiProperty({ description: '탈퇴사유' })
   @IsString()
   @IsOptional()
-  reason: string | null;
+  message: string | null;
 }
