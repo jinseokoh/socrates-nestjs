@@ -15,11 +15,11 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
-import { ConnectionsService } from 'src/domain/connections/connections.service';
-import { CreateConnectionDto } from 'src/domain/connections/dto/create-connection.dto';
-import { UpdateConnectionDto } from 'src/domain/connections/dto/update-connection.dto';
-import { Connection } from 'src/domain/connections/entities/connection.entity';
-import { Reaction } from 'src/domain/connections/entities/reaction.entity';
+import { ConnectionsService } from 'src/domain/dots/connections.service';
+import { CreateConnectionDto } from 'src/domain/dots/dto/create-connection.dto';
+import { UpdateConnectionDto } from 'src/domain/dots/dto/update-connection.dto';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Reaction } from 'src/domain/dots/entities/reaction.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('connections')

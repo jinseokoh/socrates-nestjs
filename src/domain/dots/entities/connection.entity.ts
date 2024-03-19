@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ReportConnection } from 'src/domain/connections/entities/report_connection.entity';
-import { Dot } from 'src/domain/connections/entities/dot.entity';
-import { Reaction } from 'src/domain/connections/entities/reaction.entity';
-import { Remark } from 'src/domain/connections/entities/remark.entity';
+import { ReportConnection } from 'src/domain/dots/entities/report_connection.entity';
+import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { Reaction } from 'src/domain/dots/entities/reaction.entity';
+import { Remark } from 'src/domain/dots/entities/remark.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {

@@ -16,7 +16,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Connection } from 'src/domain/connections/entities/connection.entity';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
 
 @Entity()
 export class Inquiry {

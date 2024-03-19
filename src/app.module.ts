@@ -14,7 +14,7 @@ import { CareersModule } from 'src/domain/careers/careers.module';
 import { CategoriesModule } from 'src/domain/categories/categories.module';
 import { ContentsModule } from 'src/domain/contents/contents.module';
 import { ChatsModule } from 'src/domain/chats/chats.module';
-import { DotsModule } from 'src/domain/connections/dots.module';
+import { DotsModule } from 'src/domain/dots/dots.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MeetupsModule } from 'src/domain/meetups/meetups.module';
 import { UsersModule } from 'src/domain/users/users.module';

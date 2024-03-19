@@ -17,7 +17,7 @@ import { ReportUser } from 'src/domain/users/entities/report_user.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
-import { Remark } from 'src/domain/connections/entities/remark.entity';
+import { Remark } from 'src/domain/dots/entities/remark.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 
 @Injectable()

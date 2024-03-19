@@ -17,11 +17,11 @@ import { ApiOperation } from '@nestjs/swagger';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { AnyData } from 'src/common/types';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
-import { Connection } from 'src/domain/connections/entities/connection.entity';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreateReactionDto } from 'src/domain/users/dto/create-reaction.dto';
 import { RemoveReactionDto } from 'src/domain/users/dto/remove-reaction.dto';
-import { Reaction } from 'src/domain/connections/entities/reaction.entity';
+import { Reaction } from 'src/domain/dots/entities/reaction.entity';
 import { UsersConnectionService } from 'src/domain/users/users-connection.service';
 import { UpsertReactionDto } from 'src/domain/users/dto/upsert-reaction.dto';
 

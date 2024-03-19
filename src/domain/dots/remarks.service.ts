@@ -7,14 +7,14 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CreateRemarkDto } from 'src/domain/connections/dto/create-remark.dto';
+import { CreateRemarkDto } from 'src/domain/dots/dto/create-remark.dto';
 
-import { Connection } from 'src/domain/connections/entities/connection.entity';
-import { Remark } from 'src/domain/connections/entities/remark.entity';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Remark } from 'src/domain/dots/entities/remark.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ClientProxy } from '@nestjs/microservices';
-import { UpdateRemarkDto } from 'src/domain/connections/dto/update-remark.dto';
+import { UpdateRemarkDto } from 'src/domain/dots/dto/update-remark.dto';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 

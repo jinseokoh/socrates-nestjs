@@ -12,10 +12,10 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
-import { DotsService } from 'src/domain/connections/dots.service';
-import { CreateDotDto } from 'src/domain/connections/dto/create-dot.dto';
-import { UpdateDotDto } from 'src/domain/connections/dto/update-dot.dto';
-import { Dot } from 'src/domain/connections/entities/dot.entity';
+import { DotsService } from 'src/domain/dots/dots.service';
+import { CreateDotDto } from 'src/domain/dots/dto/create-dot.dto';
+import { UpdateDotDto } from 'src/domain/dots/dto/update-dot.dto';
+import { Dot } from 'src/domain/dots/entities/dot.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('dots')
@@ -86,6 +86,7 @@ export class DotsController {
   //? SEED
   //?-------------------------------------------------------------------------//
 
+  @Public()
   @ApiOperation({ description: 'seed dots' })
   @Post('seed')
   async seedDots(): Promise<void> {

@@ -13,12 +13,12 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { Connection } from 'src/domain/connections/entities/connection.entity';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { DataSource, Repository } from 'typeorm';
-import { CreateConnectionDto } from 'src/domain/connections/dto/create-connection.dto';
+import { CreateConnectionDto } from 'src/domain/dots/dto/create-connection.dto';
 import { LoremIpsum } from 'lorem-ipsum';
-import { Dot } from 'src/domain/connections/entities/dot.entity';
-import { UpdateConnectionDto } from 'src/domain/connections/dto/update-connection.dto';
+import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { UpdateConnectionDto } from 'src/domain/dots/dto/update-connection.dto';
 
 @Injectable()
 export class ConnectionsService {
