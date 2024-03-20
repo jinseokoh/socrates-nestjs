@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
@@ -42,7 +42,7 @@ async function bootstrap() {
   // });
   // dynamoose.aws.ddb.set(ddb);
 
-  app.setGlobalPrefix('v1', { exclude: ['/'] });
+  // app.setGlobalPrefix('v1', { exclude: ['/'] });
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
   // app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalPipes(
@@ -62,6 +62,10 @@ async function bootstrap() {
     // databaseURL: 'https://flea-auction-dev.firebaseio.com',
   });
 
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
   app.enableCors();
   app.use(helmet());
   app.use(helmet.hidePoweredBy());
