@@ -3,7 +3,6 @@ import { Exclude } from 'class-transformer';
 import { DotStatus } from 'src/common/enums';
 import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { Plea } from 'src/domain/users/entities/plea.entity';
-import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -15,6 +14,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { IsArray } from 'class-validator';
+import { Choice } from 'src/domain/dots/entities/choice.entity';
 
 @Entity()
 export class Dot {
@@ -28,21 +29,29 @@ export class Dot {
   @ApiProperty({ description: 'question' })
   question: string;
 
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  answers: number;
-
-  @Column({ default: false })
-  @ApiProperty({ description: 'isActive' })
-  isActive: boolean;
-
   @Column({
     type: 'enum',
     enum: DotStatus,
-    default: DotStatus.PENDING,
+    default: DotStatus.SHORT_ANSWER,
     nullable: true,
   })
   @ApiProperty({ description: 'status' })
   status: DotStatus;
+
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: 'options' })
+  @IsArray()
+  options: string[] | null;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  viewCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  answerCount: number;
+
+  @Column({ default: false })
+  @ApiProperty({ description: 'allowMultiple' })
+  allowMultiple: boolean;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   up: number;
@@ -68,6 +77,9 @@ export class Dot {
 
   @OneToMany(() => Plea, (plea) => plea.dot)
   public pleas: Plea[];
+
+  @OneToMany(() => Choice, (choice) => choice.dot)
+  public choices: Choice[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo

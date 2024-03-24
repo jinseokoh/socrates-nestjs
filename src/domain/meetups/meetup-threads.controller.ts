@@ -91,7 +91,7 @@ export class MeetupThreadsController {
   @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':meetupId/threads/:threadId')
-  async getAnswersById(
+  async getThreadRepliesById(
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Param('threadId', ParseIntPipe) threadId: number,
     @Paginate() query: PaginateQuery,

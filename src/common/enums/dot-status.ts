@@ -1,4 +1,4 @@
 export enum DotStatus {
-  FIXED = 'fixed',
-  PENDING = 'pending',
+  MULTIPLE_CHOICE = 'multipleChoice',
+  SHORT_ANSWER = 'shortAnswer',
 }

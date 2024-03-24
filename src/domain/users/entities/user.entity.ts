@@ -36,6 +36,7 @@ import { Reaction } from 'src/domain/dots/entities/reaction.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Plea } from 'src/domain/users/entities/plea.entity';
+import { Choice } from 'src/domain/dots/entities/choice.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -212,6 +213,9 @@ export class User {
 
   @OneToMany(() => Like, (like) => like.user)
   public meetupsLiked: Like[];
+
+  @OneToMany(() => Choice, (choice) => choice.user)
+  public choices: Choice[];
 
   @OneToMany(() => ReportMeetup, (reportMeetup) => reportMeetup.user)
   public meetupReports: ReportMeetup[];
