@@ -605,8 +605,17 @@ export class DotsService {
         slug: 'pirate',
         question:
           '만일 당신의 삶이 영화로 만들어 진다면, 그 영화의 장르는 어떤 장르일까요? 그 이유는?',
-
-        status: DotStatus.SHORT_ANSWER,
+        status: DotStatus.MULTIPLE_CHOICE,
+        options: [
+          'SF 영화',
+          '액션 영화',
+          '코미디 영화',
+          '스릴러 영화',
+          '공포 영화',
+          '로맨스 영화',
+          '범죄 영화',
+          '판타지 영화',
+        ],
       }),
       new Dot({
         slug: 'pirate',
