@@ -7,7 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { DotStatus } from 'src/common/enums';
+import { QuestionType } from 'src/common/enums';
 
 export class CreateDotDto {
   @ApiProperty({ description: 'slug' })
@@ -18,9 +18,9 @@ export class CreateDotDto {
   @IsString()
   question: string;
 
-  @ApiProperty({ description: 'region', default: DotStatus.SHORT_ANSWER })
-  @IsEnum(DotStatus)
-  status: DotStatus;
+  @ApiProperty({ description: 'region', default: QuestionType.SHORT_ANSWER })
+  @IsEnum(QuestionType)
+  questionType: QuestionType;
 
   @ApiProperty({ description: 'options', default: [] })
   @IsArray()

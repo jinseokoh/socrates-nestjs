@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { DotStatus } from 'src/common/enums';
+import { QuestionType } from 'src/common/enums';
 import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { Plea } from 'src/domain/users/entities/plea.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -31,27 +31,27 @@ export class Dot {
 
   @Column({
     type: 'enum',
-    enum: DotStatus,
-    default: DotStatus.SHORT_ANSWER,
+    enum: QuestionType,
+    default: QuestionType.SHORT_ANSWER,
     nullable: true,
   })
-  @ApiProperty({ description: 'status' })
-  status: DotStatus;
+  @ApiProperty({ description: 'questionType' })
+  questionType: QuestionType;
 
   @Column('json', { nullable: true })
   @ApiProperty({ description: 'options' })
   @IsArray()
   options: string[] | null;
 
+  @Column({ default: false })
+  @ApiProperty({ description: 'allowMultiple' })
+  allowMultiple: boolean;
+
   @Column({ type: 'int', unsigned: true, default: 0 })
   viewCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   answerCount: number;
-
-  @Column({ default: false })
-  @ApiProperty({ description: 'allowMultiple' })
-  allowMultiple: boolean;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   up: number;
