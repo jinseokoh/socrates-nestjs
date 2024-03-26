@@ -45,7 +45,7 @@ export class DotsService {
 
   async findAll(query: PaginateQuery): Promise<Paginated<Dot>> {
     return await paginate(query, this.repository, {
-      relations: ['user', 'user.profile'],
+      relations: ['user'],
       sortableColumns: ['id', 'answerCount'],
       searchableColumns: ['slug'],
       defaultSortBy: [['id', 'DESC']],
