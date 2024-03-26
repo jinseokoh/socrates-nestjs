@@ -32,6 +32,11 @@ export class CreateDotDto {
   @IsOptional()
   allowMultiple: boolean;
 
+  @ApiProperty({ description: 'isActive', default: false })
+  @IsBoolean()
+  @IsOptional()
+  isActive: boolean;
+
   @ApiProperty({ description: '사용자 아이디' })
   @IsNumber()
   @IsOptional()

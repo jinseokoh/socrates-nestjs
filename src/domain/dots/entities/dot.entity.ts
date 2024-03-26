@@ -47,8 +47,9 @@ export class Dot {
   @ApiProperty({ description: 'allowMultiple' })
   allowMultiple: boolean;
 
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  viewCount: number;
+  @Column({ default: false })
+  @ApiProperty({ description: 'isActive' })
+  isActive: boolean;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   answerCount: number;
