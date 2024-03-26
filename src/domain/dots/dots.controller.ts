@@ -1,3 +1,4 @@
+import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import {
   BadRequestException,
   Body,
@@ -16,6 +17,7 @@ import { DotsService } from 'src/domain/dots/dots.service';
 import { CreateDotDto } from 'src/domain/dots/dto/create-dot.dto';
 import { UpdateDotDto } from 'src/domain/dots/dto/update-dot.dto';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('dots')
@@ -44,8 +46,16 @@ export class DotsController {
   //?-------------------------------------------------------------------------//
 
   @Public()
-  @ApiOperation({ description: 'Dot List' })
+  @ApiOperation({ description: 'Dot 리스트 w/ Pagination' })
+  @PaginateQueryOptions()
   @Get()
+  async findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Dot>> {
+    return await this.dotsService.findAll(query);
+  }
+
+  @Public()
+  @ApiOperation({ description: 'Dot List' })
+  @Get('/all')
   async getAll(): Promise<Array<Dot>> {
     return await this.dotsService.getAll();
   }

@@ -5,6 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  FilterOperator,
+  PaginateQuery,
+  Paginated,
+  paginate,
+} from 'nestjs-paginate';
 import { QuestionType } from 'src/common/enums';
 import { CreateDotDto } from 'src/domain/dots/dto/create-dot.dto';
 import { UpdateDotDto } from 'src/domain/dots/dto/update-dot.dto';
@@ -36,6 +42,19 @@ export class DotsService {
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
+
+  async findAll(query: PaginateQuery): Promise<Paginated<Dot>> {
+    return await paginate(query, this.repository, {
+      relations: ['user', 'user.profile'],
+      sortableColumns: ['id', 'answerCount'],
+      searchableColumns: ['slug'],
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {
+        isActive: [FilterOperator.EQ],
+        userId: [FilterOperator.EQ, FilterOperator.IN],
+      },
+    });
+  }
 
   // Dot 리스트
   async getAll(): Promise<Array<Dot>> {

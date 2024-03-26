@@ -8,7 +8,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
-  PaginateConfig,
   PaginateQuery,
   Paginated,
   paginate,
