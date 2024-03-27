@@ -108,6 +108,16 @@ export class DotsService {
   // Dot increment
   async thumbsUp(id: number): Promise<void> {
     await this.repository.increment({ id }, 'up', 1);
+    const dot = await this.findById(id);
+    const total = dot.up + dot.down;
+    if (total >= 50 && dot.up >= dot.down) {
+      await this.repository.manager.query(
+        'UPDATE `dot` SET isActive = 1 WHERE id = ?',
+        [id],
+      );
+    } else {
+      await this.repository.softDelete(id);
+    }
   }
 
   // Dot decrement
@@ -318,7 +328,7 @@ export class DotsService {
       new Dot({
         slug: 'cool',
         question:
-          '건강이 좋지 않았었는데 어떤 노력을 통해 그것을 극복한 경험이 있다면 어떤 것이 있나요?',
+          '내가 베풀었던 최고로 감동적인 친절이나 최고의 선행을 꼽자면 어떤 일이고, 언제 있었던 일인가요?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
