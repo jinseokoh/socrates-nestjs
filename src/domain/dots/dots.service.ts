@@ -110,13 +110,15 @@ export class DotsService {
     await this.repository.increment({ id }, 'up', 1);
     const dot = await this.findById(id);
     const total = dot.up + dot.down;
-    if (total >= 50 && dot.up >= dot.down) {
-      await this.repository.manager.query(
-        'UPDATE `dot` SET isActive = 1 WHERE id = ?',
-        [id],
-      );
-    } else {
-      await this.repository.softDelete(id);
+    if (total >= 50) {
+      if (dot.up < dot.down) {
+        await this.repository.softDelete(id);
+      } else {
+        await this.repository.manager.query(
+          'UPDATE `dot` SET isActive = 1 WHERE id = ?',
+          [id],
+        );
+      }
     }
   }
 
