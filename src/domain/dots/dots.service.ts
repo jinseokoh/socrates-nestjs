@@ -57,11 +57,20 @@ export class DotsService {
   }
 
   // Dot 리스트
-  async getAll(): Promise<Array<Dot>> {
+  async getActives(): Promise<Array<Dot>> {
     return await this.repository.find({
       relations: ['user'],
       where: {
-        questionType: Not(IsNull()),
+        isActive: true,
+      },
+    });
+  }
+
+  async getInactives(): Promise<Array<Dot>> {
+    return await this.repository.find({
+      relations: ['user'],
+      where: {
+        isActive: false,
       },
     });
   }
@@ -71,7 +80,7 @@ export class DotsService {
     return await this.repository.find({
       where: {
         slug: slug,
-        questionType: Not(IsNull()),
+        isActive: true,
       },
     });
   }

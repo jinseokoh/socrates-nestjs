@@ -54,10 +54,17 @@ export class DotsController {
   }
 
   @Public()
-  @ApiOperation({ description: 'Dot List' })
-  @Get('/all')
-  async getAll(): Promise<Array<Dot>> {
-    return await this.dotsService.getAll();
+  @ApiOperation({ description: 'all the active dots' })
+  @Get('/active')
+  async getActives(): Promise<Array<Dot>> {
+    return await this.dotsService.getActives();
+  }
+
+  @Public()
+  @ApiOperation({ description: 'all the active dots' })
+  @Get('/inactive')
+  async getInactives(): Promise<Array<Dot>> {
+    return await this.dotsService.getInactives();
   }
 
   @Public()
