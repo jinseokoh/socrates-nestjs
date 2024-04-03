@@ -13,6 +13,7 @@ import {
 } from 'src/domain/chats/entities/message.interface';
 import { randomName } from 'src/helpers/random-filename';
 import * as moment from 'moment';
+import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
 const LIMIT = 10;
 
@@ -99,11 +100,8 @@ export class MessagesService {
   //?-------------------------------------------------------------------------//
 
   // S3 직접 업로드를 위한 signedUrl 리턴
-  async getSignedUrl(
-    userId: number,
-    mimeType = 'image/jpeg',
-  ): Promise<SignedUrl> {
-    const fileUri = randomName('chat', mimeType);
+  async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
+    const fileUri = randomName(dto.name ?? 'chat', dto.mimeType);
     const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 

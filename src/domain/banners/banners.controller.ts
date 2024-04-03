@@ -22,6 +22,7 @@ import { BannersService } from 'src/domain/banners/banners.service';
 import { CreateBannerDto } from 'src/domain/banners/dto/create-banner.dto';
 import { UpdateBannerDto } from 'src/domain/banners/dto/update-banner.dto';
 import { multerOptions } from 'src/helpers/multer-options';
+import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('banners')
 export class BannersController {
@@ -106,11 +107,8 @@ export class BannersController {
   @Post(':id/images/url')
   async uploadUrl(
     @Param('id') id: number,
-    @Body('mimeType') mimeType: string,
+    @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
-    if (mimeType) {
-      return await this.bannersService.getSignedUrl(id, mimeType);
-    }
-    throw new BadRequestException('mimeType is missing');
+    return await this.bannersService.getSignedUrl(id, dto);
   }
 }

@@ -26,6 +26,7 @@ import {
 } from 'src/domain/chats/entities/message.interface';
 import { MessagesService } from 'src/domain/chats/messages.service';
 import { RoomsService } from 'src/domain/chats/rooms.service';
+import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 import { SseService } from 'src/services/sse/sse.service';
 
 @Controller('chats')
@@ -130,12 +131,9 @@ export class MessagesController {
   @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
   @Post('image/url')
   async getSignedUrl(
-    @CurrentUserId() userId: number,
-    @Body('mimeType') mimeType: string,
+    @CurrentUserId() id: number,
+    @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
-    if (mimeType) {
-      return await this.messagesService.getSignedUrl(userId, mimeType);
-    }
-    throw new BadRequestException('mimeType is missing');
+    return await this.messagesService.getSignedUrl(id, dto);
   }
 }

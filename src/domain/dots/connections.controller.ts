@@ -21,6 +21,7 @@ import { CreateConnectionDto } from 'src/domain/dots/dto/create-connection.dto';
 import { UpdateConnectionDto } from 'src/domain/dots/dto/update-connection.dto';
 import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { Reaction } from 'src/domain/dots/entities/reaction.entity';
+import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('connections')
@@ -137,12 +138,9 @@ export class ConnectionsController {
   @Post('image/url')
   async getSignedUrl(
     @CurrentUserId() id: number,
-    @Body('mimeType') mimeType: string,
+    @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
-    if (mimeType) {
-      return await this.connectionsService.getSignedUrl(id, mimeType);
-    }
-    throw new BadRequestException('mimeType is missing');
+    return await this.connectionsService.getSignedUrl(id, dto);
   }
 
   //?-------------------------------------------------------------------------//

@@ -30,6 +30,7 @@ import { S3Service } from 'src/services/aws/s3.service';
 import { In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Room } from 'src/domain/chats/entities/room.entity';
+import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 @Injectable()
 export class MeetupsService {
   private readonly logger = new Logger(MeetupsService.name);
@@ -286,11 +287,8 @@ export class MeetupsService {
   }
 
   // S3 직접 업로드를 위한 signedUrl 리턴
-  async getSignedUrl(
-    userId: number,
-    mimeType = 'image/jpeg',
-  ): Promise<SignedUrl> {
-    const fileUri = randomName('meetup', mimeType);
+  async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
+    const fileUri = randomName(dto.name ?? 'meetup', dto.mimeType);
     const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 

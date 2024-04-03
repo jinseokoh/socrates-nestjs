@@ -8,6 +8,7 @@ import { UpdateBannerDto } from 'src/domain/banners/dto/update-banner.dto';
 import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { Repository } from 'typeorm';
+import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 @Injectable()
 export class BannersService {
   constructor(
@@ -106,9 +107,9 @@ export class BannersService {
   //--------------------------------------------------------------------------//
 
   // s3 직접 업로드를 위한 signedUrl 리턴
-  async getSignedUrl(id: number, mimeType = 'image/jpeg'): Promise<SignedUrl> {
-    const fileUri = randomName('banner', mimeType);
-    const path = `${process.env.NODE_ENV}/banners/${id}/${fileUri}`;
+  async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
+    const fileUri = randomName(dto.name ?? 'banner', dto.mimeType);
+    const path = `${process.env.NODE_ENV}/banners/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
     return {

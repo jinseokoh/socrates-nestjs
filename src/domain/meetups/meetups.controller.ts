@@ -27,6 +27,7 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { multerOptions } from 'src/helpers/multer-options';
+import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
@@ -151,11 +152,8 @@ export class MeetupsController {
   @Post('image/url')
   async getSignedUrl(
     @CurrentUserId() id: number,
-    @Body('mimeType') mimeType: string,
+    @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
-    if (mimeType) {
-      return await this.meetupsService.getSignedUrl(id, mimeType);
-    }
-    throw new BadRequestException('mimeType is missing');
+    return await this.meetupsService.getSignedUrl(id, dto);
   }
 }

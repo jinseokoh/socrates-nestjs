@@ -19,6 +19,7 @@ import { CreateInquiryDto } from 'src/domain/inquiries/dto/create-inquiry.dto';
 import { UpdateInquiryDto } from 'src/domain/inquiries/dto/update-inquiry.dto';
 import { InquiriesService } from 'src/domain/inquiries/inquiries.service';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
+import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('inquiries')
@@ -93,11 +94,8 @@ export class InquiriesController {
   @Post('image/url')
   async getSignedUrl(
     @CurrentUserId() id: number,
-    @Body('mimeType') mimeType: string,
+    @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
-    if (mimeType) {
-      return await this.inquiriesService.getSignedUrl(id, mimeType);
-    }
-    throw new BadRequestException('mimeType is missing');
+    return await this.inquiriesService.getSignedUrl(id, dto);
   }
 }
