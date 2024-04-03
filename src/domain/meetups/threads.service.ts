@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -22,6 +22,8 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 
 @Injectable()
 export class ThreadsService {
+  private readonly logger = new Logger(ThreadsService.name);
+
   constructor(
     @InjectRepository(Thread)
     private readonly repository: Repository<Thread>,

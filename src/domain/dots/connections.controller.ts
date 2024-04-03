@@ -15,6 +15,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
+import { SignedUrl } from 'src/common/types';
 import { ConnectionsService } from 'src/domain/dots/connections.service';
 import { CreateConnectionDto } from 'src/domain/dots/dto/create-connection.dto';
 import { UpdateConnectionDto } from 'src/domain/dots/dto/update-connection.dto';
@@ -126,6 +127,22 @@ export class ConnectionsController {
     @Body() dto: UpdateConnectionDto,
   ): Promise<Connection> {
     return await this.connectionsService.update(id, dto);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? UPLOAD
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
+  @Post('image/url')
+  async getSignedUrl(
+    @CurrentUserId() id: number,
+    @Body('mimeType') mimeType: string,
+  ): Promise<SignedUrl> {
+    if (mimeType) {
+      return await this.connectionsService.getSignedUrl(id, mimeType);
+    }
+    throw new BadRequestException('mimeType is missing');
   }
 
   //?-------------------------------------------------------------------------//

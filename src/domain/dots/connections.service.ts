@@ -17,7 +17,10 @@ import { DataSource, Repository } from 'typeorm';
 import { CreateConnectionDto } from 'src/domain/dots/dto/create-connection.dto';
 import { LoremIpsum } from 'lorem-ipsum';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { S3Service } from 'src/services/aws/s3.service';
 import { UpdateConnectionDto } from 'src/domain/dots/dto/update-connection.dto';
+import { randomName } from 'src/helpers/random-filename';
+import { SignedUrl } from 'src/common/types';
 
 @Injectable()
 export class ConnectionsService {
@@ -29,6 +32,7 @@ export class ConnectionsService {
     @InjectRepository(Dot)
     private readonly dotRepository: Repository<Dot>,
     private dataSource: DataSource, // for transaction
+    private readonly s3Service: S3Service,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -189,6 +193,25 @@ answer = VALUES(`answer`)',
       throw new NotFoundException(`entity not found`);
     }
     return await this.repository.save(connection);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? UPLOAD
+  //?-------------------------------------------------------------------------//
+
+  // S3 직접 업로드를 위한 signedUrl 리턴
+  async getSignedUrl(
+    userId: number,
+    mimeType = 'image/jpeg',
+  ): Promise<SignedUrl> {
+    const fileUri = randomName('connection', mimeType);
+    const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
+    const url = await this.s3Service.generateSignedUrl(path);
+
+    return {
+      upload: url,
+      image: `https://cdn.fleaauction.world/${path}`,
+    };
   }
 
   //?-------------------------------------------------------------------------//
