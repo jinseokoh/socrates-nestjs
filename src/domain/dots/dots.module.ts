@@ -14,13 +14,20 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
 import { Poll } from 'src/domain/dots/entities/poll.entity';
 import { PollsService } from 'src/domain/dots/polls.service';
 import { PollsController } from 'src/domain/dots/polls.controller';
+import { ConnectionSubscriber } from 'src/domain/dots/subscribers/connection-subscriber';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Dot, Poll, Connection, Remark]),
     S3Module,
     FcmModule,
   ],
-  providers: [DotsService, PollsService, ConnectionsService, RemarksService],
+  providers: [
+    DotsService,
+    PollsService,
+    ConnectionsService,
+    RemarksService,
+    ConnectionSubscriber,
+  ],
   controllers: [
     DotsController,
     PollsController,

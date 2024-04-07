@@ -4,8 +4,11 @@ import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from 'src/app.controller';
 import * as redisStore from 'cache-manager-ioredis';
+import { join } from 'path';
+import { DataSource } from 'typeorm';
 import { DynamooseModule } from 'nestjs-dynamoose';
 import { getAwsDatabaseConfig } from 'src/common/config/aws-database';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { configuration } from 'src/common/config/configuration';
 import { IAwsConfig, IDatabaseConfig } from 'src/common/interfaces';
 import { AuthModule } from 'src/domain/auth/auth.module';
@@ -15,7 +18,6 @@ import { CategoriesModule } from 'src/domain/categories/categories.module';
 import { ContentsModule } from 'src/domain/contents/contents.module';
 import { ChatsModule } from 'src/domain/chats/chats.module';
 import { DotsModule } from 'src/domain/dots/dots.module';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MeetupsModule } from 'src/domain/meetups/meetups.module';
 import { UsersModule } from 'src/domain/users/users.module';
 import { NaverModule } from 'src/services/naver/naver.module';
@@ -23,13 +25,12 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { RedisModule } from 'src/services/redis/redis.module';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
-import { DataSource } from 'typeorm';
 import { LanguagesModule } from 'src/domain/languages/languages.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
 import { SocketIoModule } from './websockets/socketio.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { AlarmsModule } from 'src/domain/alarms/alarms.module';
+import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
 
 @Module({
   imports: [
@@ -115,6 +116,7 @@ import { AlarmsModule } from 'src/domain/alarms/alarms.module';
     CategoriesModule,
     DotsModule,
     ChatsModule,
+    LedgersModule,
     ContentsModule,
     InquiriesModule,
     LanguagesModule,

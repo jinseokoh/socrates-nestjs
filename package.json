@@ -1,7 +1,7 @@
 {
   "name": "socrates",
-  "version": "0.10.1",
-  "description": "an express application to take care of http requests",
+  "version": "0.04.4",
+  "description": "MeSo API server",
   "author": "jinseokoh@hotmail.com",
   "private": true,
   "license": "UNLICENSED",
@@ -53,7 +53,6 @@
     "@slack/webhook": "^6.1.0",
     "@socket.io/redis-adapter": "^8.2.1",
     "@travelerdev/nestjs-sentry": "^4.2.1",
-    "@types/cache-manager-ioredis": "^2.0.3",
     "amqp-connection-manager": "^4.1.13",
     "amqplib": "^0.10.3",
     "axios": "1.4.0",
@@ -77,7 +76,7 @@
     "moment-timezone": "^0.5.45",
     "mysql2": "^2.3.3",
     "nestjs-dynamoose": "^0.5.5",
-    "nestjs-paginate": "^8.1.4",
+    "nestjs-paginate": "^8.6.2",
     "nestjs-pino": "^3.2.0",
     "passport": "^0.6.0",
     "passport-firebase-jwt": "^1.2.1",
@@ -92,7 +91,7 @@
     "rxjs": "^7.8.1",
     "socket.io": "^4.7.2",
     "swagger-ui-express": "^4.6.3",
-    "typeorm": "^0.3.17"
+    "typeorm": "^0.3.20"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.2.1",
@@ -100,6 +99,7 @@
     "@nestjs/testing": "^10.2.10",
     "@types/bcrypt": "^5.0.0",
     "@types/cache-manager": "^4.0.2",
+    "@types/cache-manager-ioredis": "^2.0.3",
     "@types/cookie-parser": "^1.4.4",
     "@types/express": "^4.17.17",
     "@types/iconv": "^3.0.1",

@@ -22,7 +22,6 @@ export class LedgerSubscriber implements EntitySubscriberInterface<Ledger> {
   //! you need to use the same entityManager instance because of transactions.
   //! which means you should use event.manager. not event.connection.manager.
   async afterInsert(event: InsertEvent<Ledger>) {
-    // console.log(`~~~~~ Ledger model afterInsert subscriber triggered.`);
     if (event.entity.ledgerType === LedgerType.DEBIT_PURCHASE) {
       await event.manager
         .createQueryBuilder()

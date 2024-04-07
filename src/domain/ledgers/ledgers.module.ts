@@ -5,6 +5,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { LedgersController } from 'src/domain/ledgers/ledgers.controller';
 import { LedgersService } from 'src/domain/ledgers/ledgers.service';
 import { LedgerSubscriber } from 'src/domain/ledgers/subscribers/ledger-subscriber';
+
 @Module({
   imports: [TypeOrmModule.forFeature([Ledger, User])],
   exports: [LedgersService], // it's required when using LedgersService within other services
