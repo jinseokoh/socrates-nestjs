@@ -43,6 +43,10 @@ export class Dot {
   @IsArray()
   options: string[] | null;
 
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: 'options' })
+  aggregatedChoices: { [key: string]: number };
+
   @Column({ default: false })
   @ApiProperty({ description: 'allowMultiple' })
   allowMultiple: boolean;

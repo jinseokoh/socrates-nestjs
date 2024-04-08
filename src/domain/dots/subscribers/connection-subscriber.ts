@@ -20,13 +20,36 @@ export class ConnectionSubscriber
   }
 
   async afterInsert(event: InsertEvent<Connection>) {
-    await event.manager
-      .createQueryBuilder()
-      .update(Dot)
-      .set({
-        answerCount: () => 'answerCount + 1',
-      })
-      .where('id = :id', { id: event.entity.dotId })
-      .execute();
+    if (event.entity.choices === null) {
+      await event.manager
+        .createQueryBuilder()
+        .update(Dot)
+        .set({
+          answerCount: () => 'answerCount + 1',
+        })
+        .where('id = :id', { id: event.entity.dotId })
+        .execute();
+    } else {
+      const dot = await event.manager.getRepository(Dot).findOne({
+        where: {
+          id: event.entity.dotId,
+        },
+      });
+      if (dot) {
+        const aggregatedChoices = dot.aggregatedChoices || {};
+        event.entity.choices.forEach((v) => {
+          aggregatedChoices[v] = (aggregatedChoices[v] || 0) + 1;
+        });
+        await event.manager
+          .createQueryBuilder()
+          .update(Dot)
+          .set({
+            aggregatedChoices: aggregatedChoices,
+            answerCount: () => 'answerCount + 1',
+          })
+          .where('id = :id', { id: event.entity.dotId })
+          .execute();
+      }
+    }
   }
 }

@@ -17,6 +17,7 @@ import {
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
+import { IsArray } from 'class-validator';
 
 // a user can like meetup
 // https://github.com/typeorm/typeorm/issues/4653
@@ -26,12 +27,17 @@ export class Connection {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
+  @Column({ type: 'json', nullable: true })
+  @ApiProperty({ description: '객관식 답변' })
+  @IsArray()
+  choices: number[] | null;
+
   @Column({ type: 'text', nullable: false })
-  @ApiProperty({ description: '사용자 답변' })
+  @ApiProperty({ description: '주관식 답변' })
   answer: string;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  remarkCount: number; // 신고
+  remarkCount: number; // 댓글
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   reportCount: number; // 신고

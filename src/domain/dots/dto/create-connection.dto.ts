@@ -1,10 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateConnectionDto {
   @ApiProperty({ description: 'dot 답변' })
   @IsString()
   answer: string;
+
+  @ApiProperty({ description: 'dot 답변' })
+  @IsArray()
+  @IsOptional()
+  choices: number[];
 
   @ApiProperty({ description: 'dot 아이디' })
   @IsNumber()
