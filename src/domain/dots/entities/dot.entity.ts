@@ -15,7 +15,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { IsArray } from 'class-validator';
-import { Choice } from 'src/domain/dots/entities/choice.entity';
 
 @Entity()
 export class Dot {
@@ -43,20 +42,20 @@ export class Dot {
   @IsArray()
   options: string[] | null;
 
-  @Column('json', { nullable: true })
-  @ApiProperty({ description: 'options' })
-  aggregatedChoices: { [key: string]: number };
-
   @Column({ default: false })
   @ApiProperty({ description: 'allowMultiple' })
   allowMultiple: boolean;
 
-  @Column({ default: false })
-  @ApiProperty({ description: 'isActive' })
-  isActive: boolean;
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: 'options' })
+  aggregatedChoices: { [key: string]: number };
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   answerCount: number;
+
+  @Column({ default: false })
+  @ApiProperty({ description: 'isActive' })
+  isActive: boolean;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   up: number;
@@ -82,9 +81,6 @@ export class Dot {
 
   @OneToMany(() => Plea, (plea) => plea.dot)
   public pleas: Plea[];
-
-  @OneToMany(() => Choice, (choice) => choice.dot)
-  public choices: Choice[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo

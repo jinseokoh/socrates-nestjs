@@ -32,7 +32,7 @@ export class Connection {
   @IsArray()
   choices: number[] | null;
 
-  @Column({ type: 'text', nullable: false })
+  @Column({ type: 'text', nullable: true })
   @ApiProperty({ description: '주관식 답변' })
   answer: string;
 
