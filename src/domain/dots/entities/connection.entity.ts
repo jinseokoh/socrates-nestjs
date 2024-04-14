@@ -36,6 +36,11 @@ export class Connection {
   @ApiProperty({ description: '주관식 답변' })
   answer: string;
 
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: '이미지들' })
+  @IsArray()
+  images: string[] | null;
+
   @Column({ type: 'int', unsigned: true, default: 0 })
   remarkCount: number; // 댓글
 
