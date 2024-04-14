@@ -527,6 +527,13 @@ export class DotsService {
       new Dot({
         slug: 'saint',
         question:
+          '최근에 새로운 인사이트를 얻거나 감동을 받은 유튜브 영상을 공유해주세요. 내용 중 어떤 점이 좋았는지도.',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: false,
+      }),
+      new Dot({
+        slug: 'saint',
+        question:
           '최근에 발견했거나 읽었던 책 중에서 가장 유익한 책이 있다면 무엇인가요? 그 이유는?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,

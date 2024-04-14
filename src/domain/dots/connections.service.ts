@@ -132,6 +132,7 @@ answer = VALUES(`answer`)',
       filterableColumns: {
         dotId: [FilterOperator.EQ, FilterOperator.IN],
         userId: [FilterOperator.EQ, FilterOperator.IN],
+        uneasyCount: [FilterOperator.LT, FilterOperator.GT],
         'user.dob': [FilterOperator.GTE, FilterOperator.LT, FilterOperator.BTW],
         'user.gender': [FilterOperator.EQ],
         // 'dot.slug': [FilterOperator.EQ, FilterOperator.IN],
