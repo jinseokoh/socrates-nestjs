@@ -11,7 +11,7 @@ export class CreateConnectionDto {
   @IsString()
   answer: string;
 
-  @ApiProperty({ description: '이미지들 (string[])', required: false })
+  @ApiProperty({ description: '이미지들 (string[])' })
   @IsArray()
   @IsOptional()
   images: string[] | null;
@@ -55,7 +55,8 @@ export class CreateConnectionDto {
   @IsNumber()
   dotId: number;
 
-  @ApiProperty({ description: 'user 아이디', required: true })
+  @ApiProperty({ description: 'user 아이디' })
   @IsNumber()
+  @IsOptional()
   userId: number;
 }
