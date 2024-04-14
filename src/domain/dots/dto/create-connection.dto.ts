@@ -5,15 +5,16 @@ export class CreateConnectionDto {
   @ApiProperty({ description: 'dot 답변' })
   @IsArray()
   @IsOptional()
-  choices: number[];
+  choices: number[] | null;
 
   @ApiProperty({ description: 'dot 답변' })
   @IsString()
   answer: string;
 
-  @ApiProperty({ description: '이미지들 (string[])', required: true })
+  @ApiProperty({ description: '이미지들 (string[])', required: false })
   @IsArray()
-  images: string[];
+  @IsOptional()
+  images: string[] | null;
 
   @ApiProperty({ description: 'count' })
   @IsNumber()
@@ -50,13 +51,11 @@ export class CreateConnectionDto {
   @IsOptional()
   uneasyCount: number | null;
 
-  @ApiProperty({ description: 'dot 아이디' })
+  @ApiProperty({ description: 'dot 아이디', required: true })
   @IsNumber()
-  @IsOptional()
   dotId: number;
 
-  @ApiProperty({ description: 'user 아이디' })
+  @ApiProperty({ description: 'user 아이디', required: true })
   @IsNumber()
-  @IsOptional()
   userId: number;
 }
