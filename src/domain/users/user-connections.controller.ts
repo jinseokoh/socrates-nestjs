@@ -147,8 +147,8 @@ export class UserConnectionsController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('connectionId', ParseIntPipe) connectionId: number,
     @Body() dto: UpsertReactionDto,
-  ): Promise<void> {
-    await this.usersConnectionService.upsertReaction({
+  ): Promise<Connection> {
+    return await this.usersConnectionService.upsertReaction({
       ...dto,
       userId: userId,
       connectionId: connectionId,

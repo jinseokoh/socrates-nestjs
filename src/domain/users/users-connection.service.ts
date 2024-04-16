@@ -228,8 +228,8 @@ export class UsersConnectionService {
       // we save a database query by composing entity this way.
       return new Connection({
         id: dto.connectionId,
-        choices: null, // invalid but we don't care
         answer: '', // invalid but we don't care
+        choices: null, // invalid but we don't care
         images: null, // invalid but we don't care
         remarkCount: 0, // invalid but we don't care
         reportCount: 0, // invalid but we don't care
@@ -238,8 +238,8 @@ export class UsersConnectionService {
         surpriseCount: +res.surpriseCount,
         sorryCount: +res.sorryCount,
         uneasyCount: +res.uneasyCount,
-        dotId: 0, // invalid but we don't care
         userId: dto.userId,
+        dotId: 0, // invalid but we don't care
       });
     } catch (e) {
       this.logger.log(e);
