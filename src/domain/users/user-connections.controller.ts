@@ -136,12 +136,17 @@ export class UserConnectionsController {
   //? Reaction Pivot
   //?-------------------------------------------------------------------------//
 
+  //? this one has more than 1 responsibility
+  //? - we send notification to the poster if if isNewReaction is true (todo. need to improve the logic)
+  //? - update reaction entity itself (do we need to delete it if all 5 emotions are falsy?)
+  //? - update connection's reaction counts
+
   @ApiOperation({ description: '발견 reaction 리스트에 추가' })
   @Post(':userId/connections/:connectionId')
   async upsertReaction(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('connectionId', ParseIntPipe) connectionId: number,
-    @Body() dto: UpsertReactionDto, // optional message, and skill
+    @Body() dto: UpsertReactionDto,
   ): Promise<void> {
     await this.usersConnectionService.upsertReaction({
       ...dto,

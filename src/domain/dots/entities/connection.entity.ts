@@ -115,4 +115,11 @@ export class Connection {
 
   @ManyToMany(() => Inquiry, (inquiry) => inquiry.flaggedConnections)
   flaggedInquiries: Inquiry[];
+
+  //?-------------------------------------------------------------------------?/
+  //? constructor
+
+  constructor(partial: Partial<Connection>) {
+    Object.assign(this, partial);
+  }
 }

@@ -161,7 +161,7 @@ export class UsersConnectionService {
   //?  Reaction Pivot
   //?-------------------------------------------------------------------------//
 
-  async upsertReaction(dto: UpsertReactionDto): Promise<void> {
+  async upsertReaction(dto: UpsertReactionDto): Promise<Connection> {
     // upsert reaction
     try {
       if (
@@ -224,9 +224,27 @@ export class UsersConnectionService {
           +res.uneasyCount,
         ],
       );
+
+      // we save a database query by composing entity this way.
+      return new Connection({
+        id: dto.connectionId,
+        choices: null, // invalid but we don't care
+        answer: '', // invalid but we don't care
+        images: null, // invalid but we don't care
+        remarkCount: 0, // invalid but we don't care
+        reportCount: 0, // invalid but we don't care
+        sympathyCount: +res.sympathyCount,
+        smileCount: +res.smileCount,
+        surpriseCount: +res.surpriseCount,
+        sorryCount: +res.sorryCount,
+        uneasyCount: +res.uneasyCount,
+        dotId: 0, // invalid but we don't care
+        userId: dto.userId,
+      });
     } catch (e) {
       this.logger.log(e);
     }
+
     // return reaction
     // return await this.reactionRepository.findOne({
     //   where: {
