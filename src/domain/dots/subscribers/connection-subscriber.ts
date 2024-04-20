@@ -1,5 +1,6 @@
 import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { Profile } from 'src/domain/users/entities/profile.entity';
 import {
   DataSource,
   EntitySubscriberInterface,
@@ -21,6 +22,7 @@ export class ConnectionSubscriber
 
   async afterInsert(event: InsertEvent<Connection>) {
     if (event.entity.choices === null) {
+      //? shortAnswer
       await event.manager
         .createQueryBuilder()
         .update(Dot)
@@ -30,6 +32,7 @@ export class ConnectionSubscriber
         .where('id = :id', { id: event.entity.dotId })
         .execute();
     } else {
+      //? multiChoice
       const dot = await event.manager.getRepository(Dot).findOne({
         where: {
           id: event.entity.dotId,
@@ -51,5 +54,14 @@ export class ConnectionSubscriber
           .execute();
       }
     }
+    // const userId = event.entity.userId;
+    await event.manager
+      .createQueryBuilder()
+      .update(Profile)
+      .set({
+        postCount: () => 'postCount + 1',
+      })
+      .where('userId = :userId', { userId: event.entity.userId })
+      .execute();
   }
 }
