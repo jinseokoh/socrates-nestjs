@@ -305,7 +305,7 @@ export class DotsService {
       new Dot({
         slug: 'wow',
         question:
-          '오랜 기간 함께 했지만 사랑이 남아있지 않을 것 같다면, 헤어지겠습니까? 아니면 화해를 이끌어보겠습니까?',
+          '오랜 기간 함께 했지만 상대방의 단점이 크게 느껴지기 시작했다면, 빨리 헤어지는 것이 현명한 선택일까요?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -584,7 +584,7 @@ export class DotsService {
       new Dot({
         slug: 'yes',
         question:
-          '나의 이상형과 가장 비슷하거나 닮은꼴인 3명의 연애인 이름을 말해주세요.',
+          '나의 이상형과 가장 비슷하거나 닮은꼴인 3명의 연애인 이름을 말해주세요. 어떤 점이 이상형과 닮은 꼴인가요?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -710,14 +710,20 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         question:
-          '당신이 꾼 꿈 중에 아직도 잊혀지지않는 가장 이상한 꿈 내용은 무엇인지 말해주세요.',
+          '대마초를 합법화 하는 나라가 늘어나고 있습니다. 이에 대하여 나의 찬반 의견과 그 이유는?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        question: '동성애에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         question:
-          '대마초를 합법화 하는 나라가 늘어나고 있습니다. 이에 대하여 나의 찬반 의견과 그 이유는?',
+          '애인과 친구가 바람을 피웠다면 누구를 택할 것인가요? 그 이유는?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -738,13 +744,7 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         question:
-          '애인과 친구가 바람을 피웠다면 누구를 택할 것인가요? 그 이유는?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
-        question: '동성애에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
+          '당신이 꾼 꿈 중에 아직도 잊혀지지않는 가장 이상한 꿈 내용은 무엇인지 말해주세요.',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),

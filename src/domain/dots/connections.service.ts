@@ -55,14 +55,17 @@ export class ConnectionsService {
       });
       if (connection) {
         await this.repository.manager.query(
-          'INSERT IGNORE INTO `connection` \
-  (userId, dotId, answer) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE \
+          'INSERT IGNORE INTO `connection` (userId, dotId, choices, answer) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE \
   userId = VALUES(`userId`), \
   dotId = VALUES(`dotId`), \
+  choices = VALUES(`choices`), \
   answer = VALUES(`answer`)',
-          [dto.userId, dto.dotId, dto.answer],
+          [dto.userId, dto.dotId, JSON.stringify(dto.choices), dto.answer],
         );
+        connection['choices'] = dto.choices;
         connection['answer'] = dto.answer;
+        connection['dot'] = dot;
+
         return connection;
       } else {
         const connection = await this.repository.save(
