@@ -21,6 +21,7 @@ import { initialUsername } from 'src/helpers/random-username';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { Response as ExpressResponse } from 'express';
 import { CreateLedgerDto } from 'src/domain/ledgers/dto/create-ledger.dto';
+import { Role } from 'src/common/enums';
 
 //import { SesService } from 'src/services/aws/ses.service';
 

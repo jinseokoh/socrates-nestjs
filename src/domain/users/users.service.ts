@@ -410,14 +410,16 @@ export class UsersService {
       user.realname && user.realname.length > 1
         ? user.realname.slice(0, -1) + '*'
         : `n/a`;
-    const email = user.email.replace(/@/g, 'at').replace(/\./g, 'dot');
-    const phone = user.phone && user.phone.length > 4 ? user.phone : '---n/a';
-    const dob = moment(user.dob).startOf('year').tz('Asia/Seoul').toDate();
-    user.username = `탈퇴회원(${user.username})`;
-    user.email = `- ${email}`;
-    user.phone = `- ${phone.substring(3)}`;
-    user.realname = `- ${realname}`;
-    user.dob = dob;
+
+    const email = user.email.replace(/@/g, '*').replace(/\./g, ':');
+    const phone = user.phone && user.phone.length > 4 ? user.phone.substring(3) : 'n/a';
+    const postfix = random.generate({ length: 5, charset: 'numeric' });
+
+    user.username = `${user.username}(탈퇴)`; // unique key
+    user.email = `${email}:${postfix}`; // unique key
+    user.phone = `${phone}:${postfix}`; // unique key
+    user.realname = `${realname}`;
+    user.dob = moment(user.dob).startOf('year').tz('Asia/Seoul').toDate();
     await this.repository.save(user);
 
     await this.repository.manager.query(

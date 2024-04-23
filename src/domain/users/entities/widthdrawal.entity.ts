@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
