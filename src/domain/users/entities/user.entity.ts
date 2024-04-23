@@ -36,6 +36,7 @@ import { Reaction } from 'src/domain/dots/entities/reaction.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Plea } from 'src/domain/users/entities/plea.entity';
+import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -126,7 +127,11 @@ export class User {
   })
   profile: Profile;
 
-  //*-------------------------------------------------------------------------*/
+  @OneToOne(() => Withdrawal, (withdrawal) => withdrawal.user)
+  withdrawal: Withdrawal;
+
+  /*-------------------------------------------------------------------------*/
+
   //* 1-to-many hasMany
 
   @OneToMany(() => Ledger, (ledger) => ledger.user, {

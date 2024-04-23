@@ -144,7 +144,7 @@ export class AuthService {
         : null;
       await this.usersService.update(registeredUser.id, {
         refreshTokenHash,
-        isActive: true,
+        // isActive: true,
       });
 
       return tokens;
@@ -159,8 +159,10 @@ export class AuthService {
         : Gender.MALE
       : null;
     createUserDto.isActive = true;
+
+    //? 사용자 생성!
     const user = await this.usersService.create(createUserDto);
-    console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~ user created');
+
     await this.providersService.create({ ...dto, userId: user.id });
     const tokens = await this._getTokens(user);
     const refreshTokenHash = tokens.refreshToken

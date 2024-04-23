@@ -2,6 +2,7 @@ import { LedgerType } from 'src/common/enums';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { User } from 'src/domain/users/entities/user.entity';
+import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
 import {
   DataSource,
   EntitySubscriberInterface,
@@ -23,7 +24,6 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
   //! you need to use the same entityManager instance because of transactions.
   //! which means event.manager. not event.connection.manager.
   async afterInsert(event: InsertEvent<User>) {
-    // console.log(`~~~~~ User model afterInsert subscriber triggered.`);
     await event.manager
       .createQueryBuilder()
       .insert()
@@ -48,19 +48,33 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
       ])
       .execute();
 
-    await event.manager
+    const row = await event.manager
       .createQueryBuilder()
-      .insert()
-      .into(Ledger)
-      .values([
-        {
-          debit: 10,
-          balance: 10,
-          ledgerType: LedgerType.DEBIT_REWARD,
-          note: 'free 10 coins granted',
-          userId: event.entity.id,
-        },
-      ])
-      .execute();
+      .select('COUNT(*)', 'count')
+      .from(Withdrawal, 'withdrawal')
+      .where('withdrawal.email = :email', {
+        email: event.entity.email,
+      })
+      .getRawOne();
+    const isRejoinedUserAfterWithdrawal = parseInt(row.count) > 0;
+
+    if (!isRejoinedUserAfterWithdrawal) {
+      await event.manager
+        .createQueryBuilder()
+        .insert()
+        .into(Ledger)
+        .values([
+          {
+            debit: 10,
+            balance: 10,
+            ledgerType: LedgerType.DEBIT_REWARD,
+            note: 'free 10 coins granted',
+            userId: event.entity.id,
+          },
+        ])
+        .execute();
+    } else {
+      // welcome back. but no apples this time.
+    }
   }
 }

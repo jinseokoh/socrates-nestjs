@@ -249,7 +249,7 @@ export class UsersService {
       await this._deleteMeetup(id);
       await this._deletePlea(id);
       await this._deleteProfile(id);
-      // await this._deleteProvider(id);
+      await this._deleteProvider(id);
       await this._deleteRemark(id);
       await this._deleteReportConnection(id);
       await this._deleteReportMeetup(id);
@@ -404,6 +404,7 @@ export class UsersService {
 
   async _voidPersonalInformation(id: number, message: string): Promise<any> {
     const user = await this.findById(id);
+    const userEmail = user.email;
 
     const realname =
       user.realname && user.realname.length > 1
@@ -420,8 +421,19 @@ export class UsersService {
     await this.repository.save(user);
 
     await this.repository.manager.query(
-      'UPDATE `user` SET password=?,career=NULL,avatar=NULL,pushToken=NULL,refreshTokenHash=NULL,isActive=0 WHERE id = ?',
-      [message, id],
+      'UPDATE `user` SET password=NULL,career=NULL,avatar=NULL,pushToken=NULL,refreshTokenHash=NULL,isActive=0 WHERE id = ?',
+      [id],
+    );
+
+    // add a withdrawal entry
+    await this.repository.manager.query(
+      'INSERT IGNORE INTO `withdrawal` \
+(email, reason, userId) VALUES (?, ?, ?) \
+ON DUPLICATE KEY UPDATE \
+email = VALUES(`email`), \
+reason = VALUES(`reason`), \
+userId = VALUES(`userId`)',
+      [userEmail, message, id],
     );
   }
 
