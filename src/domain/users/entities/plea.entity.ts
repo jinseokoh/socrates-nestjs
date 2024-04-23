@@ -49,7 +49,6 @@ export class Plea {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Exclude()
   @DeleteDateColumn()
   deletedAt: Date | null;
 

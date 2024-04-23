@@ -43,7 +43,6 @@ export class Comment {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  // @Exclude()
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
 
@@ -65,7 +64,6 @@ export class Comment {
   // data structure ref)
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
-  // @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
   parentId: number | null;
 

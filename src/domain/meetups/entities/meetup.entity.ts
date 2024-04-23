@@ -174,7 +174,6 @@ export class Meetup {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
 
@@ -183,7 +182,6 @@ export class Meetup {
   })
   user?: User;
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true })
   venueId: number; // to make it available to Repository.
 

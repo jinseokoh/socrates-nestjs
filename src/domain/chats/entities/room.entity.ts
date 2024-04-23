@@ -59,7 +59,6 @@ export class Room {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //@Exclude()
   @Column({ type: 'int', unsigned: true })
   userId: number | null; // to make it available to Repository.
 
@@ -71,7 +70,6 @@ export class Room {
   @JoinColumn({ name: 'userId' })
   public user: User;
 
-  //@Exclude()
   @Column({ type: 'int', unsigned: true })
   public meetupId!: number;
 

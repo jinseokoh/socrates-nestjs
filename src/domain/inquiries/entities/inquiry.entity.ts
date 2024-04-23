@@ -58,7 +58,6 @@ export class Inquiry {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
   userId: number | null; // to make it available to Repository.
 

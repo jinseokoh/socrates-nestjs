@@ -8,13 +8,10 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
-  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 @Entity()
-@Unique('provider_name_provider_id_key', ['providerName', 'providerId'])
 export class Withdrawal {
-  @Exclude()
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
@@ -35,7 +32,6 @@ export class Withdrawal {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
   userId: number | null; // to make it available to Repository.
 

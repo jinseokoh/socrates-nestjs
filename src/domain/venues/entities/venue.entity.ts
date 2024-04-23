@@ -58,7 +58,6 @@ export class Venue {
   //** many-to-1 belongsToMany
 
   // it's not worth maintaining this relationship after all.
-  // @Exclude()
   // @Column({ type: 'uuid', length: 36 })
   // userId: string; // to make it available to Repository.
 

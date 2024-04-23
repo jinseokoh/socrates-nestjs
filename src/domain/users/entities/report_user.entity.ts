@@ -6,7 +6,6 @@ export class ReportUser {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  // @Exclude()
   @PrimaryColumn({ type: 'int', unsigned: true })
   public userId: number; // to make it available to Repository.
 
@@ -24,7 +23,6 @@ export class ReportUser {
   @JoinColumn({ name: 'userId' })
   public user!: User;
 
-  // @Exclude()
   @ManyToOne(() => User, (user) => user.accusedReports, {
     nullable: false,
     onUpdate: 'CASCADE',

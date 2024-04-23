@@ -64,18 +64,15 @@ export class Profile {
   @Column({ type: 'int', unsigned: true, default: 0 })
   payCount: number;
 
-  @Exclude()
   @CreateDateColumn()
   createdAt: Date;
 
-  @Exclude()
   @UpdateDateColumn()
   updatedAt: Date;
 
   //**--------------------------------------------------------------------------*/
   //** 1-to-1 belongsTo
 
-  @Exclude()
   @Column({ type: 'int', unsigned: true, nullable: true })
   userId: number | null; // to make it available to Repository.
 
