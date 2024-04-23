@@ -249,7 +249,7 @@ export class UsersService {
       await this._deleteMeetup(id);
       await this._deletePlea(id);
       await this._deleteProfile(id);
-      await this._deleteProvider(id);
+      // await this._deleteProvider(id);
       await this._deleteRemark(id);
       await this._deleteReportConnection(id);
       await this._deleteReportMeetup(id);
