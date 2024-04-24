@@ -159,7 +159,7 @@ export class AuthService {
         ? Gender.FEMALE
         : Gender.MALE
       : null;
-    createUserDto.isActive = true;
+    createUserDto.isActive = false; //! isActive is a flag for user verification
 
     //? 사용자 생성!
     const user = await this.usersService.create(createUserDto);
