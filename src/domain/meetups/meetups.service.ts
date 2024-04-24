@@ -67,6 +67,9 @@ export class MeetupsService {
       throw new BadRequestException(`not allowed to create`);
     }
 
+    // todo. hasQa 코인차감
+    // todo. insufficient balance
+
     //? 1) create model and the relationship
     const _meetup = this.repository.create(dto);
     const categories = await this._getCategoriesBySlug(dto.subCategory);
