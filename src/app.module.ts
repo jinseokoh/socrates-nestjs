@@ -64,7 +64,7 @@ import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
           subscribers: ['dist/**/*.subscriber{.ts,.js}'],
           entities: ['dist/**/*.entity{.ts,.js}'],
           synchronize: true,
-          timezone: 'Z',
+          timezone: 'local',
           bigNumberStrings: true,
           supportBigNumbers: true,
           logging: true,
