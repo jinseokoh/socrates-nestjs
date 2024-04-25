@@ -44,8 +44,6 @@ export class MeetupsController {
     @CurrentUserId() id: number,
     @Body() dto: CreateMeetupDto,
   ): Promise<Meetup> {
-    console.log(dto);
-
     const userId = dto.userId ? dto.userId : id;
     const expiredAt = dto.expiredAt
       ? dto.expiredAt

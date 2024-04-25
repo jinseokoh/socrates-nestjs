@@ -19,7 +19,6 @@ import { AnyData, SignedUrl } from 'src/common/types';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
@@ -27,7 +26,7 @@ import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
-import { In } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
@@ -47,17 +46,32 @@ export class MeetupsService {
     private readonly careerRepository: Repository<Career>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Thread)
-    private readonly threadRepository: Repository<Thread>,
     private readonly s3Service: S3Service,
+    private dataSource: DataSource, // for transaction
   ) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  // Meetup 생성
+  //! 모임 생성 (using transaction)
+  //! profile's balance will be adjusted w/ ledger model event subscriber.
   async create(dto: CreateMeetupDto): Promise<any> {
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`user not found`);
+      } else {
+        await queryRunner.rollbackTransaction();
+      }
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+
     const user = await this.userRepository.findOne({
       where: {
         id: dto.userId,
