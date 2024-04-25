@@ -89,7 +89,7 @@ export class UsersFriendshipService {
         throw new UnprocessableEntityException(`a banned user`);
       }
       if (
-        sender.profile?.balance === null ||
+        (dto.cost > 0 && sender.profile?.balance === null) ||
         sender.profile?.balance - dto.cost < 0
       ) {
         throw new BadRequestException(`insufficient balance`);

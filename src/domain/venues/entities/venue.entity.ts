@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Transform } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import {
   Column,
@@ -54,7 +54,7 @@ export class Venue {
   @ApiProperty({ description: '네이버 장소ID, 방구석은 `home${userId}`' })
   providerId: string;
 
-  //**--------------------------------------------------------------------------*/
+  //**------------------------------------------------------------------------*/
   //** many-to-1 belongsToMany
 
   // it's not worth maintaining this relationship after all.
@@ -66,9 +66,16 @@ export class Venue {
   // })
   // user: User;
 
-  //**--------------------------------------------------------------------------*/
+  //**------------------------------------------------------------------------*/
   //** 1-to-many hasMany
 
   @OneToMany(() => Meetup, (meetup) => meetup.venue)
   meetups: Meetup[];
+
+  //?-------------------------------------------------------------------------*/
+  //? constructor
+
+  constructor(partial: Partial<Venue>) {
+    Object.assign(this, partial);
+  }
 }

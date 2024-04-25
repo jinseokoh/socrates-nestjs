@@ -30,6 +30,8 @@ import { DataSource, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
+import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
+import { LedgerType } from 'src/common/enums';
 @Injectable()
 export class MeetupsService {
   private readonly logger = new Logger(MeetupsService.name);
@@ -56,11 +58,130 @@ export class MeetupsService {
 
   //! 모임 생성 (using transaction)
   //! profile's balance will be adjusted w/ ledger model event subscriber.
-  async create(dto: CreateMeetupDto): Promise<any> {
+  async create(dto: CreateMeetupDto): Promise<Meetup> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
+    const cost = dto.hasQa ? 1 : 0;
 
     try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const user = await queryRunner.manager.findOneOrFail(User, {
+        where: { id: dto.userId },
+        relations: [`profile`], //
+      });
+
+      if (user?.isBanned) {
+        throw new BadRequestException(`a banned user`); //
+      }
+      if (
+        (cost > 0 && user.profile?.balance === null) ||
+        user.profile?.balance - cost < 0
+      ) {
+        throw new BadRequestException(`insufficient balance`); //
+      }
+
+      let venue = await queryRunner.manager.findOne(Venue, {
+        where: {
+          providerId: dto.venue.providerId,
+        },
+      });
+      if (!venue) {
+        const v = new Venue({
+          image: dto.venue.image,
+          name: dto.venue.name,
+          address: dto.venue.address,
+          tags: dto.venue.tags,
+          latitude: dto.venue.latitude,
+          longitude: dto.venue.longitude,
+          providerId: dto.venue.providerId,
+        });
+        venue = await queryRunner.manager.save(v);
+      }
+
+      const careers = await queryRunner.manager.getRepository(Career).find({
+        where: { slug: In(dto.targetCareers) },
+      });
+
+      const category = await queryRunner.manager
+        .getRepository(Category)
+        .findOne({
+          where: { slug: dto.subCategory },
+        });
+
+      const ancestors = await queryRunner.manager
+        .getTreeRepository(Category)
+        .findAncestors(category);
+
+      const categories = ancestors
+        .filter((v: Category) => v.depth > 0) // remove root
+        .map((v: Category) => v);
+
+      //? 저장할 엔티티 생성
+      const m = new Meetup({
+        category: dto.category,
+        subCategory: dto.subCategory,
+        title: dto.title,
+        description: dto.description,
+        images: dto.images,
+        targetGender: dto.targetGender,
+        targetCareers: dto.targetCareers,
+        targetAge: dto.targetAge,
+        skill: dto.skill,
+        max: dto.max,
+        day: dto.day,
+        times: dto.times,
+        amount: dto.amount,
+        expenses: dto.expenses,
+        region: dto.region,
+        patron: dto.patron,
+        hasQa: dto.hasQa,
+        expiredAt: dto.expiredAt,
+        user: user,
+        venue: venue,
+        careers: careers,
+        categories: categories,
+      });
+
+      //? 생성된 엔티티를 queryRunner를 사용하여 저장
+      const meetup = await queryRunner.manager.save(m);
+
+      //? create a Ledger if needed
+      if (cost > 0) {
+        const newBalance = user.profile?.balance - cost;
+        const ledger = new Ledger({
+          credit: cost,
+          ledgerType: LedgerType.CREDIT_SPEND,
+          balance: newBalance,
+          note: `모임.생성료 -${cost} 🪙 (user: #${user.id}, meetup: #${meetup.id})`,
+          userId: user.id,
+        });
+        await queryRunner.manager.save(ledger);
+      }
+
+      //? create a Room
+      await queryRunner.manager.query(
+        'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
+        ['host', dto.userId, meetup.id],
+      );
+
+      //? update the User's Interests
+      if (category !== null) {
+        await queryRunner.manager.query(
+          'INSERT IGNORE INTO `interest` (userId, categoryId, skill) VALUES (?, ?, ?) \
+  ON DUPLICATE KEY UPDATE \
+  userId = VALUES(`userId`), \
+  categoryId = VALUES(`categoryId`), \
+  skill = VALUES(`skill`)',
+          [dto.userId, category.id, dto.skill],
+        );
+      }
+
+      //? 트랜잭션 커밋
+      await queryRunner.commitTransaction();
+
+      return meetup;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`user not found`);
@@ -71,61 +192,6 @@ export class MeetupsService {
     } finally {
       await queryRunner.release();
     }
-
-    const user = await this.userRepository.findOne({
-      where: {
-        id: dto.userId,
-      },
-    });
-    if (!user || user?.isBanned) {
-      throw new BadRequestException(`not allowed to create`);
-    }
-
-    // todo. hasQa 코인차감
-    // todo. insufficient balance
-
-    //? 1) create model and the relationship
-    const _meetup = this.repository.create(dto);
-    const categories = await this._getCategoriesBySlug(dto.subCategory);
-    const careers = await this._getCareersBySlugs(dto.targetCareers);
-    let venue = await this.venueRepository.findOne({
-      where: {
-        providerId: dto.venue.providerId,
-      },
-    });
-    if (!venue) {
-      venue = await this.venueRepository.save(
-        this.venueRepository.create(dto.venue),
-      );
-    }
-    _meetup.categories = categories;
-    _meetup.careers = careers;
-    _meetup.venue = venue;
-    const meetup = await this.repository.save(_meetup);
-
-    //? 2) insert a new room record
-    await this.repository.manager.query(
-      'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
-      ['host', dto.userId, meetup.id],
-    );
-
-    //? 3) update user's interests
-    const category = await this.categoryRepository.findOneBy({
-      slug: dto.subCategory,
-    });
-    if (category !== null) {
-      await this.repository.manager.query(
-        'INSERT IGNORE INTO `interest` \
-  (userId, categoryId, skill) VALUES (?, ?, ?) \
-  ON DUPLICATE KEY UPDATE \
-  userId = VALUES(`userId`), \
-  categoryId = VALUES(`categoryId`), \
-  skill = VALUES(`skill`)',
-        [dto.userId, category.id, dto.skill],
-      );
-    }
-
-    return meetup;
   }
 
   //--------------------------------------------------------------------------//

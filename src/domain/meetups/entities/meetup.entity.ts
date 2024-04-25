@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
 import {
   Day,
@@ -208,7 +207,7 @@ export class Meetup {
   @OneToMany(() => ReportMeetup, (reportMeetup) => reportMeetup.meetup)
   public userReports: ReportMeetup[];
 
-  //**--------------------------------------------------------------------------*/
+  //**------------------------------------------------------------------------*/
   //** many-to-many belongsToMany
 
   @ManyToMany(() => Career, (career) => career.meetups)
@@ -222,8 +221,8 @@ export class Meetup {
   @ManyToMany(() => Inquiry, (inquiry) => inquiry.flaggedMeetups)
   flaggedInquiries: Inquiry[];
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //?-------------------------------------------------------------------------*/
+  //? constructor
 
   constructor(partial: Partial<Meetup>) {
     Object.assign(this, partial);
