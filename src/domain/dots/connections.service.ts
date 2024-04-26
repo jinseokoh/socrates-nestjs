@@ -183,7 +183,6 @@ answer = VALUES(`answer`)',
         })
         .getMany();
     } catch (e) {
-      this.logger.error(e);
       throw new NotFoundException('entity not found');
     }
   }

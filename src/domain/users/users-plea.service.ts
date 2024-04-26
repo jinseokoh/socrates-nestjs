@@ -113,15 +113,13 @@ export class UsersPleaService {
 
       return plea;
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       if (error.code === 'ER_DUP_ENTRY') {
         // plea already exists
         throw new UnprocessableEntityException(`entity exists`);
-      } else if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException();
       } else {
-        await queryRunner.rollbackTransaction();
+        throw error;
       }
-      throw error;
     } finally {
       await queryRunner.release();
     }
@@ -268,12 +266,8 @@ export class UsersPleaService {
 
       return plea;
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException();
-      } else {
-        await queryRunner.rollbackTransaction();
-      }
-      throw new BadRequestException(error.name ?? error.toString());
+      await queryRunner.rollbackTransaction();
+      throw error;
     } finally {
       await queryRunner.release();
     }

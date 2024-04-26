@@ -183,11 +183,7 @@ export class MeetupsService {
 
       return meetup;
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`user not found`);
-      } else {
-        await queryRunner.rollbackTransaction();
-      }
+      await queryRunner.rollbackTransaction();
       throw error;
     } finally {
       await queryRunner.release();

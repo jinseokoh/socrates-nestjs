@@ -164,9 +164,9 @@ export class RoomsService {
       await queryRunner.manager.save(room);
       // commit transaction now:
       await queryRunner.commitTransaction();
-    } catch (err) {
+    } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw err;
+      throw error;
     } finally {
       await queryRunner.release();
     }

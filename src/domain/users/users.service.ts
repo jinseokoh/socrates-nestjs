@@ -187,9 +187,9 @@ export class UsersService {
       await queryRunner.manager.save(user);
       // commit transaction now:
       await queryRunner.commitTransaction();
-    } catch (err) {
+    } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw err;
+      throw error;
     } finally {
       await queryRunner.release();
     }

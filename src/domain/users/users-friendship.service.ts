@@ -134,12 +134,13 @@ export class UsersFriendshipService {
       event.body = `${sender.username}님이 나에게 친구신청을 보냈습니다. ${dto.message}`;
       this.eventEmitter.emit('user.notified', event);
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException(`user not found`);
-      } else {
-        await queryRunner.rollbackTransaction();
-      }
+      await queryRunner.rollbackTransaction();
       throw error;
+      // if (error.name === 'EntityNotFoundError') {
+      //   throw new NotFoundException(`user not found`);
+      // } else {
+      //   throw error;
+      // }
     } finally {
       await queryRunner.release();
     }
@@ -221,12 +222,8 @@ export class UsersFriendshipService {
         this.eventEmitter.emit('user.notified', event);
       }
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException('entity not found');
-      } else {
-        await queryRunner.rollbackTransaction();
-      }
-      throw new BadRequestException(error.name ?? error.toString());
+      await queryRunner.rollbackTransaction();
+      throw error;
     } finally {
       await queryRunner.release();
     }
@@ -296,12 +293,8 @@ export class UsersFriendshipService {
 
       await queryRunner.commitTransaction();
     } catch (error) {
-      if (error.name === 'EntityNotFoundError') {
-        throw new NotFoundException('entity not found');
-      } else {
-        await queryRunner.rollbackTransaction();
-      }
-      throw new BadRequestException(error.name ?? error.toString());
+      await queryRunner.rollbackTransaction();
+      throw error;
     } finally {
       await queryRunner.release();
     }
