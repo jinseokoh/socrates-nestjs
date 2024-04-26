@@ -15,9 +15,17 @@ export class Like {
   @Column({ length: 32, nullable: true })
   message: string | null;
 
-  @ManyToOne(() => User, (user) => user.meetupsLiked, { cascade: true })
+  @ManyToOne(() => User, (user) => user.meetupsLiked, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   public user: User;
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.usersLiked, { cascade: true })
+  @ManyToOne(() => Meetup, (meetup) => meetup.usersLiked, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   public meetup: Meetup;
 }

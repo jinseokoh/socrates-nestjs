@@ -57,11 +57,19 @@ export class Join {
   //? -------------------------------------------------------------------------/
   //? many-to-many belongsToMany using many-to-one
 
-  @ManyToOne(() => User, (user) => user.askedJoins, { cascade: true })
+  @ManyToOne(() => User, (user) => user.askedJoins, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'askedUserId' })
   public askedUser!: User;
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.id, { cascade: true })
+  @ManyToOne(() => Meetup, (meetup) => meetup.id, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'meetupId' })
   public meetup!: Meetup;
 

@@ -176,13 +176,21 @@ export class Meetup {
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.meetups, { cascade: true })
+  @ManyToOne(() => User, (user) => user.meetups, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   user?: User;
 
   @Column({ type: 'int', unsigned: true })
   venueId: number; // to make it available to Repository.
 
-  @ManyToOne(() => Venue, (venue) => venue.meetups, { cascade: true })
+  @ManyToOne(() => Venue, (venue) => venue.meetups, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   venue?: Venue;
 
   //**--------------------------------------------------------------------------*/
@@ -206,16 +214,20 @@ export class Meetup {
   //**------------------------------------------------------------------------*/
   //** many-to-many belongsToMany
 
-  @ManyToMany(() => Career, (career) => career.meetups, { cascade: true })
+  //! 이 정보는 meetup 이 삭제되더라도 지우지 않고 유지 하기로
+  @ManyToMany(() => Career, (career) => career.meetups)
   @JoinTable({ name: 'meetup_career' }) // owning side
   careers: Career[];
 
-  @ManyToMany(() => Category, (category) => category.meetups, { cascade: true })
+  //! 이 정보는 meetup 이 삭제되더라도 지우지 않고 유지 하기로
+  @ManyToMany(() => Category, (category) => category.meetups)
   @JoinTable({ name: 'meetup_category' }) // owning side
   categories: Category[];
 
   @ManyToMany(() => Inquiry, (inquiry) => inquiry.flaggedMeetups, {
-    cascade: true,
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
   })
   flaggedInquiries: Inquiry[];
 
