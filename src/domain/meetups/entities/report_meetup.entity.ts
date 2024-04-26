@@ -15,9 +15,9 @@ export class ReportMeetup {
   @Column({ length: 32, nullable: true })
   message: string | null;
 
-  @ManyToOne(() => User, (user) => user.meetupReports)
+  @ManyToOne(() => User, (user) => user.meetupReports, { cascade: true })
   public user: User;
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.userReports)
+  @ManyToOne(() => Meetup, (meetup) => meetup.userReports, { cascade: true })
   public meetup: Meetup;
 }

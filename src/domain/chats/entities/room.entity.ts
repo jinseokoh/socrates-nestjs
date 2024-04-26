@@ -62,11 +62,7 @@ export class Room {
   @Column({ type: 'int', unsigned: true })
   userId: number | null; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.id, {
-    nullable: false,
-    onUpdate: 'CASCADE',
-    // onDelete: 'RESTRICT',
-  })
+  @ManyToOne(() => User, (user) => user.id, , { cascade: true })
   @JoinColumn({ name: 'userId' })
   public user: User;
 

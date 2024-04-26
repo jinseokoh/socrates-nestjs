@@ -53,9 +53,7 @@ export class Thread {
   @Column({ type: 'int', unsigned: true, nullable: true })
   userId: number | null; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.threads, {
-    onDelete: 'SET NULL',
-  })
+  @ManyToOne(() => User, (user) => user.threads, { cascade: true })
   user: User;
 
   //**--------------------------------------------------------------------------*/
@@ -64,9 +62,7 @@ export class Thread {
   @Column({ type: 'int', unsigned: true, nullable: true })
   meetupId: number | null; // to make it available to Repository.
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.threads, {
-    onDelete: 'SET NULL',
-  })
+  @ManyToOne(() => Meetup, (meetup) => meetup.threads, { cascade: true })
   meetup: Meetup;
 
   //**--------------------------------------------------------------------------*/

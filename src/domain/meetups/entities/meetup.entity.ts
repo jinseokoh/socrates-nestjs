@@ -176,17 +176,13 @@ export class Meetup {
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.meetups, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => User, (user) => user.meetups, { cascade: true })
   user?: User;
 
   @Column({ type: 'int', unsigned: true })
   venueId: number; // to make it available to Repository.
 
-  @ManyToOne(() => Venue, (venue) => venue.meetups, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Venue, (venue) => venue.meetups, { cascade: true })
   venue?: Venue;
 
   //**--------------------------------------------------------------------------*/
@@ -210,15 +206,17 @@ export class Meetup {
   //**------------------------------------------------------------------------*/
   //** many-to-many belongsToMany
 
-  @ManyToMany(() => Career, (career) => career.meetups)
+  @ManyToMany(() => Career, (career) => career.meetups, { cascade: true })
   @JoinTable({ name: 'meetup_career' }) // owning side
   careers: Career[];
 
-  @ManyToMany(() => Category, (category) => category.meetups)
+  @ManyToMany(() => Category, (category) => category.meetups, { cascade: true })
   @JoinTable({ name: 'meetup_category' }) // owning side
   categories: Category[];
 
-  @ManyToMany(() => Inquiry, (inquiry) => inquiry.flaggedMeetups)
+  @ManyToMany(() => Inquiry, (inquiry) => inquiry.flaggedMeetups, {
+    cascade: true,
+  })
   flaggedInquiries: Inquiry[];
 
   //?-------------------------------------------------------------------------*/
