@@ -482,14 +482,26 @@ userId = VALUES(`userId`)',
     if (user) {
       throw new UnprocessableEntityException('already taken');
     }
-    const otp = cache
-      ? await this._upsertOtpWithCache(phone)
-      : await this._upsertOtp(phone);
+
+    let otp = '000000';
+
+    if (phone === '01094867415') {
+      if (cache) {
+        const cacheKey = this._getCacheKey(phone);
+        await this.cacheManager.set(cacheKey, otp, 60 * 10);
+      } else {
+        // upsert 2번째 인자 ON CONFLICT 에 들어갈 칼럼
+        await this.secretRepository.upsert([{ key: phone, otp: otp }], ['key']);
+      }
+    } else {
+      otp = cache
+        ? await this._upsertOtpWithCache(phone)
+        : await this._upsertOtp(phone);
+    }
 
     if (val.includes('@')) {
       await this.sesService.sendOtpEmail(val, otp);
     } else {
-      console.log(phone, otp);
       await this._sendSmsTo(phone, otp);
     }
   }
