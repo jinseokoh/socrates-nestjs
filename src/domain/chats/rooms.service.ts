@@ -125,26 +125,26 @@ export class RoomsService {
   async payRoomFee(dto: ChangeRoomIsPaidDto): Promise<Room> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    const user = await queryRunner.manager.findOne(User, {
-      where: { id: dto.userId },
-      relations: [`profile`],
-    });
-    const room = await queryRunner.manager.findOne(Room, {
-      where: {
-        meetupId: dto.meetupId,
-        userId: dto.userId,
-      },
-    });
-    const newBalance = user.profile?.balance - dto.costToUpdate;
 
-    await queryRunner.startTransaction();
     try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const user = await queryRunner.manager.findOne(User, {
+        where: { id: dto.userId },
+        relations: [`profile`],
+      });
+      const room = await queryRunner.manager.findOne(Room, {
+        where: {
+          meetupId: dto.meetupId,
+          userId: dto.userId,
+        },
+      });
       if (!user) {
         throw new NotFoundException(`user not found`);
       }
       if (!room) {
-        throw new NotFoundException(`entity not found`);
+        throw new NotFoundException(`room not found`);
       }
       if (
         user.profile?.balance === null ||
@@ -152,6 +152,10 @@ export class RoomsService {
       ) {
         throw new BadRequestException(`insufficient balance`);
       }
+
+      const newBalance = user.profile?.balance - dto.costToUpdate;
+      user.profile.balance = newBalance;
+
       const ledger = new Ledger({
         credit: dto.costToUpdate,
         ledgerType: LedgerType.CREDIT_SPEND,
@@ -161,16 +165,18 @@ export class RoomsService {
       });
       await queryRunner.manager.save(ledger);
       room.isPaid = true;
+      room.user = user;
       await queryRunner.manager.save(room);
       // commit transaction now:
       await queryRunner.commitTransaction();
+
+      return room;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
       await queryRunner.release();
     }
-    return { ...room, isPaid: true, user: user };
   }
 
   //?-------------------------------------------------------------------------//

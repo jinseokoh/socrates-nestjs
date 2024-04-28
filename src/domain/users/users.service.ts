@@ -143,20 +143,21 @@ export class UsersService {
   //? User 닉네임 갱신 (비용이 발생할 수 있음)
   //! balance will be adjusted w/ ledger model event subscriber.
   //! using transaction using query runner
-  async changeUsername(id: number, dto: ChangeUsernameDto): Promise<number> {
-    let newBalance = 0;
+  async changeUsername(id: number, dto: ChangeUsernameDto): Promise<User> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    const count = await queryRunner.manager.count(User, {
-      where: { username: dto.username },
-    });
-    const user = await queryRunner.manager.findOne(User, {
-      where: { id: id },
-      relations: [`profile`],
-    });
-    await queryRunner.startTransaction();
+    // let newBalance = 0;
     try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const count = await queryRunner.manager.count(User, {
+        where: { username: dto.username },
+      });
+      const user = await queryRunner.manager.findOne(User, {
+        where: { id: id },
+        relations: [`profile`],
+      });
       if (count > 0) {
         throw new UnprocessableEntityException(`a taken username`);
       }
@@ -172,7 +173,10 @@ export class UsersService {
       ) {
         throw new BadRequestException(`insufficient balance`);
       }
-      newBalance = user.profile?.balance - dto.costToUpdate;
+
+      const newBalance = user.profile?.balance - dto.costToUpdate;
+      user.profile.balance = newBalance;
+
       if (dto.costToUpdate > 0) {
         const ledger = new Ledger({
           credit: dto.costToUpdate,
@@ -184,16 +188,18 @@ export class UsersService {
         await queryRunner.manager.save(ledger);
       }
       user.username = dto.username;
+
       await queryRunner.manager.save(user);
       // commit transaction now:
       await queryRunner.commitTransaction();
+
+      return user;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
       await queryRunner.release();
     }
-    return newBalance;
   }
 
   // User 비밀번호 갱신

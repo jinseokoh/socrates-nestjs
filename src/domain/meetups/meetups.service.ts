@@ -69,18 +69,22 @@ export class MeetupsService {
 
       const user = await queryRunner.manager.findOneOrFail(User, {
         where: { id: dto.userId },
-        relations: [`profile`], //
+        relations: [`profile`],
       });
 
       if (user?.isBanned) {
         throw new BadRequestException(`a banned user`); //
       }
+
       if (
         (cost > 0 && user.profile?.balance === null) ||
         user.profile?.balance - cost < 0
       ) {
         throw new BadRequestException(`insufficient balance`); //
       }
+
+      const newBalance = user.profile?.balance - cost;
+      user.profile.balance = newBalance;
 
       let venue = await queryRunner.manager.findOne(Venue, {
         where: {
@@ -119,7 +123,7 @@ export class MeetupsService {
         .map((v: Category) => v);
 
       //? 저장할 엔티티 생성
-      const m = new Meetup({
+      const newMeetup = new Meetup({
         category: dto.category,
         subCategory: dto.subCategory,
         title: dto.title,
@@ -143,13 +147,13 @@ export class MeetupsService {
         careers: careers,
         categories: categories,
       });
+      newMeetup.user = user;
 
       //? 생성된 엔티티를 queryRunner를 사용하여 저장
-      const meetup = await queryRunner.manager.save(m);
+      const meetup = await queryRunner.manager.save(newMeetup);
 
       //? create a Ledger if needed
       if (cost > 0) {
-        const newBalance = user.profile?.balance - cost;
         const ledger = new Ledger({
           credit: cost,
           ledgerType: LedgerType.CREDIT_SPEND,
@@ -181,7 +185,7 @@ export class MeetupsService {
       //? 트랜잭션 커밋
       await queryRunner.commitTransaction();
 
-      return meetup;
+      return newMeetup;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;

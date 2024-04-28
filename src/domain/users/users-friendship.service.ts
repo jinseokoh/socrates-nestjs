@@ -217,7 +217,7 @@ export class UsersFriendshipService {
         event.token = friendship.sender?.pushToken;
         event.options = friendship.sender?.profile?.options ?? {};
         event.body = friendship.plea
-          ? `답글을 요청한 ${friendship.recipient.username}님과 친구가 되어, ${friendship.plea.reward}코인을 받았습니다.`
+          ? `요청을 보낸 ${friendship.recipient.username}님과 친구가 되어, ${friendship.plea.reward}코인을 받았습니다.`
           : `${friendship.recipient.username}님이 나의 친구신청을 수락했습니다.`;
         this.eventEmitter.emit('user.notified', event);
       }

@@ -143,14 +143,12 @@ export class UsersController {
     @CurrentUserId() id: number,
     @Param('userId') userId: number,
     @Body(ValidateUsernamePipe) dto: ChangeUsernameDto,
-  ): Promise<AnyData> {
+  ): Promise<User> {
     if (id !== userId) {
       throw new BadRequestException(`doh! mind your id`);
     }
-    const balance = await this.usersService.changeUsername(userId, dto);
-    return {
-      data: balance,
-    };
+
+    return await this.usersService.changeUsername(userId, dto);
   }
 
   // A dedicated endpoint to update password.
