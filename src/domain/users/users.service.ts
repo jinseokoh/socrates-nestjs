@@ -418,7 +418,8 @@ export class UsersService {
         : `n/a`;
 
     const email = user.email.replace(/@/g, '*').replace(/\./g, ':');
-    const phone = user.phone && user.phone.length > 4 ? user.phone.substring(3) : 'n/a';
+    const phone =
+      user.phone && user.phone.length > 4 ? user.phone.substring(3) : 'n/a';
     const postfix = random.generate({ length: 5, charset: 'numeric' });
 
     user.username = `${user.username}(탈퇴)`; // unique key
@@ -482,23 +483,19 @@ userId = VALUES(`userId`)',
   // 본인인증 OTP SMS 발송
   // 전화번호/이메일 확인 후 OTP 전송
   async sendOtpForNonExistingUser(val: string, cache = false): Promise<void> {
-    const phone = val.replace(/-/gi, '');
-    const where = val.includes('@') ? { email: val } : { phone: phone };
+    const phone = val.includes('@') ? null : val.replace(/-/gi, '');
+    const email = val.includes('@') ? val : null;
+    const where = val.includes('@') ? { email } : { phone };
     const user = await this.findByUniqueKey({ where });
     if (user) {
       throw new UnprocessableEntityException('already taken');
     }
 
-    let otp = '000000';
-
+    let otp = '';
     if (phone === '01094867415') {
-      if (cache) {
-        const cacheKey = this._getCacheKey(phone);
-        await this.cacheManager.set(cacheKey, otp, 60 * 10);
-      } else {
-        // upsert 2번째 인자 ON CONFLICT 에 들어갈 칼럼
-        await this.secretRepository.upsert([{ key: phone, otp: otp }], ['key']);
-      }
+      otp = cache
+        ? await this._upsertOtpWithCache(phone, '000000')
+        : await this._upsertOtp(phone, '000000');
     } else {
       otp = cache
         ? await this._upsertOtpWithCache(phone)
@@ -514,8 +511,9 @@ userId = VALUES(`userId`)',
 
   // 기존회원 본인인증정보 수정) 전화번호/이메일 확인 후 OTP 전송
   async sendOtpForExistingUser(val: string, cache = false): Promise<void> {
-    const phone = val.replace(/-/gi, '');
-    const where = val.includes('@') ? { email: val } : { phone: phone };
+    const phone = val.includes('@') ? null : val.replace(/-/gi, '');
+    const email = val.includes('@') ? val : null;
+    const where = val.includes('@') ? { email } : { phone };
     const user = await this.findByUniqueKey({ where });
     if (!user) {
       throw new NotFoundException('user not found');
@@ -527,7 +525,6 @@ userId = VALUES(`userId`)',
     if (val.includes('@')) {
       await this.sesService.sendOtpEmail(val, otp);
     } else {
-      console.log(phone, otp);
       await this._sendSmsTo(phone, otp);
     }
   }
@@ -566,17 +563,22 @@ userId = VALUES(`userId`)',
     return `${this.env}:user:${key}:key`;
   }
 
-  async _upsertOtp(phone: string, length = 6): Promise<string> {
-    const otp = random.generate({ length, charset: 'numeric' });
-    await this.secretRepository.upsert([{ key: phone, otp: otp }], ['key']);
-    return otp;
+  async _upsertOtp(key: string, otp = null): Promise<string> {
+    const pass = otp ? otp : random.generate({ length: 6, charset: 'numeric' });
+    await this.repository.manager.query(
+      'INSERT IGNORE INTO secret (`key`, otp) \
+VALUES (?, ?) \
+ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), otp=VALUES(otp)',
+      [key, pass],
+    );
+    return pass;
   }
 
-  async _upsertOtpWithCache(phone: string, length = 6): Promise<string> {
-    const otp = random.generate({ length, charset: 'numeric' });
-    const cacheKey = this._getCacheKey(phone);
-    await this.cacheManager.set(cacheKey, otp, 60 * 10);
-    return otp;
+  async _upsertOtpWithCache(key: string, otp = null): Promise<string> {
+    const pass = otp ? otp : random.generate({ length: 6, charset: 'numeric' });
+    const cacheKey = this._getCacheKey(key);
+    await this.cacheManager.set(cacheKey, pass, 60 * 10);
+    return pass;
   }
 
   async _sendSmsTo(phone: string, otp: string): Promise<any> {
