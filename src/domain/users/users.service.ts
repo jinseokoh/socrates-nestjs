@@ -487,6 +487,9 @@ userId = VALUES(`userId`)',
     const email = val.includes('@') ? val : null;
     const where = val.includes('@') ? { email } : { phone };
     const user = await this.findByUniqueKey({ where });
+
+    console.log(user);
+
     if (user) {
       throw new UnprocessableEntityException('already taken');
     }
@@ -530,10 +533,16 @@ userId = VALUES(`userId`)',
   }
 
   // OTP 검사
-  async checkOtp(val: string, otp: string, cache = false): Promise<void> {
-    const phone = val.replace(/-/gi, '');
+  async checkOtp(
+    id: number, // userId
+    val: string,
+    otp: string,
+    cache: boolean,
+    dto: UpdateUserDto,
+  ): Promise<User> {
+    const key = val.replace(/-/gi, '');
     if (cache) {
-      const cacheKey = this._getCacheKey(phone);
+      const cacheKey = this._getCacheKey(key);
       const cachedOtp = await this.cacheManager.get(cacheKey);
       if (!cachedOtp) {
         throw new UnprocessableEntityException('otp expired');
@@ -542,13 +551,17 @@ userId = VALUES(`userId`)',
       }
     } else {
       const secret = await this.secretRepository.findOne({
-        where: { key: phone },
+        where: { key: key },
       });
+
+      console.log(secret);
       if (!secret) {
         throw new UnprocessableEntityException('otp unavailable');
       }
       const now = moment();
       const expiredAt = moment(secret.updatedAt).add(3, 'minutes');
+
+      console.log(now, expiredAt);
 
       if (now.isAfter(expiredAt)) {
         throw new UnprocessableEntityException(`otp expired`);
@@ -557,6 +570,9 @@ userId = VALUES(`userId`)',
         throw new UnprocessableEntityException('otp mismatched');
       }
     }
+
+    const user = await this.repository.preload({ id, ...dto });
+    return await this.repository.save(user);
   }
 
   _getCacheKey(key: string): string {
@@ -566,9 +582,9 @@ userId = VALUES(`userId`)',
   async _upsertOtp(key: string, otp = null): Promise<string> {
     const pass = otp ? otp : random.generate({ length: 6, charset: 'numeric' });
     await this.repository.manager.query(
-      'INSERT IGNORE INTO secret (`key`, otp) \
+      "INSERT IGNORE INTO secret (`key`, otp) \
 VALUES (?, ?) \
-ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), otp=VALUES(otp)',
+ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), otp=VALUES(otp), updatedAt=(CONVERT_TZ(NOW(), 'UTC', 'Asia/Seoul'))",
       [key, pass],
     );
     return pass;

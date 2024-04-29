@@ -7,12 +7,13 @@ import {
   HttpStatus,
   Inject,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiOperation } from '@nestjs/swagger';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SmsMessageDto } from 'src/domain/users/dto/sms-message.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
@@ -20,6 +21,8 @@ import { UsersService } from 'src/domain/users/users.service';
 import { AnyData } from 'src/common/types';
 import { ThrottlerBehindProxyGuard } from 'src/common/guards/throttler-behind-proxy.guard';
 import { Throttle } from '@nestjs/throttler';
+import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
+import { User } from 'src/domain/users/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
@@ -78,15 +81,14 @@ export class UserSmsController {
 
   @ApiOperation({ description: 'OTP 코드 검사' })
   @HttpCode(HttpStatus.OK)
-  @Get(':key/otp/:otp')
+  @Patch(':key/otp/:otp')
   async checkOtp(
-    @CurrentUserId() id: number,
+    @CurrentUserId() userId: number,
     @Param('key') key: string,
     @Param('otp') otp: string,
     @Query('cache') cache: string | null,
-    // @Body() dto: UpdateUserDto,
-  ): Promise<AnyData> {
-    await this.usersService.checkOtp(key, otp, !!cache);
-    return { data: 'ok' };
+    @Body() dto: UpdateUserDto,
+  ): Promise<User> {
+    return await this.usersService.checkOtp(userId, key, otp, !!cache, dto);
   }
 }
