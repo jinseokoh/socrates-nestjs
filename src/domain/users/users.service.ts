@@ -554,14 +554,11 @@ userId = VALUES(`userId`)',
         where: { key: key },
       });
 
-      console.log(secret);
       if (!secret) {
         throw new UnprocessableEntityException('otp unavailable');
       }
       const now = moment();
       const expiredAt = moment(secret.updatedAt).add(3, 'minutes');
-
-      console.log(now, expiredAt);
 
       if (now.isAfter(expiredAt)) {
         throw new UnprocessableEntityException(`otp expired`);
