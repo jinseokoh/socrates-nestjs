@@ -487,9 +487,6 @@ userId = VALUES(`userId`)',
     const email = val.includes('@') ? val : null;
     const where = val.includes('@') ? { email } : { phone };
     const user = await this.findByUniqueKey({ where });
-
-    console.log(user);
-
     if (user) {
       throw new UnprocessableEntityException('already taken');
     }
@@ -497,12 +494,12 @@ userId = VALUES(`userId`)',
     let otp = '';
     if (phone === '01094867415') {
       otp = cache
-        ? await this._upsertOtpWithCache(phone, '000000')
-        : await this._upsertOtp(phone, '000000');
+        ? await this._upsertOtpUsingCache(phone, '000000')
+        : await this._upsertOtpUsingDb(phone, '000000');
     } else {
       otp = cache
-        ? await this._upsertOtpWithCache(phone)
-        : await this._upsertOtp(phone);
+        ? await this._upsertOtpUsingCache(phone)
+        : await this._upsertOtpUsingDb(phone);
     }
 
     if (val.includes('@')) {
@@ -522,8 +519,8 @@ userId = VALUES(`userId`)',
       throw new NotFoundException('user not found');
     }
     const otp = cache
-      ? await this._upsertOtpWithCache(phone)
-      : await this._upsertOtp(phone);
+      ? await this._upsertOtpUsingCache(phone)
+      : await this._upsertOtpUsingDb(phone);
 
     if (val.includes('@')) {
       await this.sesService.sendOtpEmail(val, otp);
@@ -576,7 +573,7 @@ userId = VALUES(`userId`)',
     return `${this.env}:user:${key}:key`;
   }
 
-  async _upsertOtp(key: string, otp = null): Promise<string> {
+  async _upsertOtpUsingDb(key: string, otp = null): Promise<string> {
     const pass = otp ? otp : random.generate({ length: 6, charset: 'numeric' });
     await this.repository.manager.query(
       "INSERT IGNORE INTO secret (`key`, otp) \
@@ -587,7 +584,7 @@ ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), otp=VALUES(otp), updatedAt=(CONVERT
     return pass;
   }
 
-  async _upsertOtpWithCache(key: string, otp = null): Promise<string> {
+  async _upsertOtpUsingCache(key: string, otp = null): Promise<string> {
     const pass = otp ? otp : random.generate({ length: 6, charset: 'numeric' });
     const cacheKey = this._getCacheKey(key);
     await this.cacheManager.set(cacheKey, pass, 60 * 10);

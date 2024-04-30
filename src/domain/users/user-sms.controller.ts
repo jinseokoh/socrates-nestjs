@@ -54,10 +54,9 @@ export class UserSmsController {
   @Post(':key/otp')
   async validateEmailAndSendOtp(
     @Param('key') key: string,
-    // @Query('force') force: string | undefined,
-    // @Query('cache') cache: string | undefined,
+    @Query('cache') cache: string | undefined,
   ): Promise<any> {
-    await this.usersService.sendOtpForNonExistingUser(key);
+    await this.usersService.sendOtpForNonExistingUser(key, !!cache);
     return { data: 'ok' };
   }
 
@@ -73,7 +72,7 @@ export class UserSmsController {
   @Post(':key/change')
   async sendOtpForExistingUser(
     @Param('key') key: string,
-    @Query('cache') cache: string | null,
+    @Query('cache') cache: string | undefined,
   ): Promise<AnyData> {
     await this.usersService.sendOtpForExistingUser(key, !!cache);
     return { data: 'ok' };
