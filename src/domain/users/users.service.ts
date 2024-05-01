@@ -509,7 +509,7 @@ userId = VALUES(`userId`)',
     }
   }
 
-  // 기존회원 본인인증정보 수정) 전화번호/이메일 확인 후 OTP 전송
+  // @deprecated. 기존회원 본인인증정보 수정) 전화번호/이메일 확인 후 OTP 전송
   async sendOtpForExistingUser(val: string, cache = false): Promise<void> {
     const phone = val.includes('@') ? null : val.replace(/-/gi, '');
     const email = val.includes('@') ? val : null;
