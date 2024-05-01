@@ -29,5 +29,5 @@ export class CreateBannerDto {
 
   @ApiProperty({ description: '공개여부' })
   @IsBoolean()
-  isPublished: boolean;
+  isActive: boolean;
 }

@@ -15,23 +15,18 @@ export class Banner {
   @Column({ length: 64 })
   title: string;
 
+  @Column({ length: 255, nullable: true })
+  asset: string | null;
+
+  @Column({ length: 255, nullable: true })
+  url: string | null;
+
   @Column({ type: 'text', nullable: true })
   body: string | null;
 
-  @Column({ length: 255, nullable: true })
-  image: string | null;
-
-  @Column({ length: 32 })
-  @ApiProperty({ description: 'button label', nullable: true })
-  buttonLabel: string | null;
-
-  @Column({ type: 'enum', enum: ButtonType, default: ButtonType.INFO })
-  @ApiProperty({ description: 'button type' })
-  buttonType: ButtonType;
-
   @Column({ default: false })
   @ApiProperty({ description: "whether or not it's published" })
-  isPublished: boolean;
+  isActive: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
