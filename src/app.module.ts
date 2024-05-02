@@ -31,6 +31,7 @@ import { SocketIoModule } from './websockets/socketio.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { AlarmsModule } from 'src/domain/alarms/alarms.module';
 import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
+import { BannersModule } from 'src/domain/banners/banners.module';
 
 @Module({
   imports: [
@@ -108,20 +109,21 @@ import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'static'),
     }),
-    FcmModule,
-    NaverModule,
     AlarmsModule,
     AuthModule,
+    BannersModule,
     CareersModule,
     CategoriesModule,
-    DotsModule,
     ChatsModule,
-    LedgersModule,
     ContentsModule,
+    DotsModule,
+    FcmModule,
     InquiriesModule,
     LanguagesModule,
+    LedgersModule,
     MeetupsModule,
     UsersModule,
+    NaverModule,
     RedisModule.register({ name: REDIS_PUBSUB_CLIENT }),
     SocketIoModule,
   ],

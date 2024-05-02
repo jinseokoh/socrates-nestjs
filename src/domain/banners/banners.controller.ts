@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -13,10 +12,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation } from '@nestjs/swagger';
-import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-// import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
-import { AnyData, SignedUrl } from 'src/common/types';
+import { SignedUrl } from 'src/common/types';
 import { Banner } from 'src/domain/banners/entities/banner.entity';
 import { BannersService } from 'src/domain/banners/banners.service';
 import { CreateBannerDto } from 'src/domain/banners/dto/create-banner.dto';
@@ -43,7 +39,7 @@ export class BannersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'active Banner 리스트' })
-  @Get('')
+  @Get()
   async getActiveBanners(): Promise<Banner[]> {
     return await this.bannersService.findActive();
   }

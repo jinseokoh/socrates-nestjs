@@ -6,7 +6,7 @@ import { S3Module } from 'src/services/aws/s3.module';
 import { Banner } from './entities/banner.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Banner]), S3Module],
-  exports: [BannersService],
+  // exports: [BannersService],
   providers: [BannersService],
   controllers: [BannersController],
 })
