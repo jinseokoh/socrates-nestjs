@@ -1,31 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
-import { ButtonType } from 'src/common/enums';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
+
 export class CreateBannerDto {
   @ApiProperty({ description: 'banner title' })
   @IsString()
   title: string;
 
-  @ApiProperty({ description: '본문', required: false })
+  @ApiProperty({ description: 'image asset' })
   @IsString()
   @IsOptional()
-  body?: string | null;
+  asset: string | null;
 
-  @ApiProperty({ description: 'banner image Url' })
+  @ApiProperty({ description: 'image network' })
   @IsString()
   @IsOptional()
   image: string | null;
 
-  @ApiProperty({ description: 'button label' })
+  @ApiProperty({ description: '본문', required: false })
   @IsString()
-  buttonLabel: string;
-
-  @ApiProperty({
-    description: 'button type',
-    default: ButtonType.INFO,
-  })
-  @IsEnum(ButtonType)
-  buttonType: ButtonType;
+  @IsOptional()
+  body?: string | null;
 
   @ApiProperty({ description: '공개여부' })
   @IsBoolean()

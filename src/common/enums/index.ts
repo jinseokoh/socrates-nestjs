@@ -1,9 +1,8 @@
-// export * from './availability'; // unused
 export * from './alarm-type';
+// export * from './availability';
 export * from './career';
 export * from './category';
 export * from './content-type';
-export * from './button-type';
 export * from './day';
 export * from './question-type';
 export * from './emotion';
@@ -22,6 +21,7 @@ export * from './party-type';
 // export * from './payment-method'; // unused
 export * from './personality';
 export * from './plea-status';
+export * from './question-type';
 export * from './rate';
 export * from './region';
 export * from './religion';

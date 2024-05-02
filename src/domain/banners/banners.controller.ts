@@ -42,17 +42,8 @@ export class BannersController {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: 'Banner 리스트 w/ Pagination' })
-  @PaginateQueryOptions()
-  @Get()
-  async getBanners(
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Banner>> {
-    return await this.bannersService.findAll(query);
-  }
-
-  @ApiOperation({ description: 'Banner 상세보기' })
-  @Get('active')
+  @ApiOperation({ description: 'active Banner 리스트' })
+  @Get('')
   async getActiveBanners(): Promise<Banner[]> {
     return await this.bannersService.findActive();
   }

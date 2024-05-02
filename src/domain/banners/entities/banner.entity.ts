@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ButtonType } from 'src/common/enums';
 import {
   Column,
   CreateDateColumn,

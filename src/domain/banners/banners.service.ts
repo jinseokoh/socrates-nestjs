@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FilterOperator, paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { AnyData, SignedUrl } from 'src/common/types';
 import { Banner } from 'src/domain/banners/entities/banner.entity';
 import { CreateBannerDto } from 'src/domain/banners/dto/create-banner.dto';
@@ -28,18 +27,6 @@ export class BannersService {
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
-
-  async findAll(query: PaginateQuery): Promise<Paginated<Banner>> {
-    const queryBuilder = await this.repository.createQueryBuilder('banner');
-    return await paginate(query, queryBuilder, {
-      sortableColumns: ['id', 'title'],
-      searchableColumns: ['title'],
-      defaultSortBy: [['id', 'DESC']],
-      filterableColumns: {
-        isActive: [FilterOperator.EQ],
-      },
-    });
-  }
 
   async findActive(): Promise<Banner[]> {
     return await this.repository
