@@ -183,13 +183,15 @@ export class RoomsService {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async remove(
-    dto: Omit<
-      CreateRoomDto,
-      'lastReadMessageId' | 'partyType' | 'isPaid' | 'isBanned' | 'note'
-    >,
-  ): Promise<Room> {
-    const room = await this.findOneByIds(dto.userId, dto.meetupId);
-    return await this.repository.remove(room);
+  async remove(id: number, userId: number): Promise<Room> {
+    const room = await this.repository.findOneOrFail({
+      where: { id },
+    });
+
+    if (room.userId == userId) {
+      return await this.repository.remove(room);
+    } else {
+      throw new BadRequestException('doh! mind your id');
+    }
   }
 }

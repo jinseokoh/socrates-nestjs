@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Put,
@@ -14,7 +15,6 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { AnyData } from 'src/common/types';
 import { ChangeRoomIsPaidDto } from 'src/domain/chats/dto/change-room-is-paid.dto';
 import { CreateRoomDto } from 'src/domain/chats/dto/create-room.dto';
 import { UpdateRoomDto } from 'src/domain/chats/dto/update-room.dto';
@@ -58,6 +58,8 @@ export class RoomsController {
     return await this.roomsService.findAllByUserId(userId, query);
   }
 
+  // load Rooms
+
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//
@@ -80,14 +82,11 @@ export class RoomsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'Room soft 삭제' })
-  @Delete()
+  @Delete(':id')
   async remove(
-    @Body()
-    dto: Omit<
-      CreateRoomDto,
-      'lastReadMessageId' | 'partyType' | 'isPaid' | 'isBanned' | 'note'
-    >,
+    @CurrentUserId() userId: number,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<Room> {
-    return await this.roomsService.remove(dto);
+    return await this.roomsService.remove(id, userId);
   }
 }
