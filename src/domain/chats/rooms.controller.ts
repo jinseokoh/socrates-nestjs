@@ -54,7 +54,7 @@ export class RoomsController {
     @CurrentUserId() userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Room>> {
-    console.log(query);
+    console.log('------------------>>', userId, query);
     return await this.roomsService.findAllByUserId(userId, query);
   }
 
