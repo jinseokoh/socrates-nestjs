@@ -321,13 +321,13 @@ export class MeetupsService {
   //?-------------------------------------------------------------------------//
 
   async softRemove(id: number): Promise<Meetup> {
-    const Meetup = await this.findById(id);
-    return await this.repository.softRemove(Meetup);
+    const meetup = await this.findById(id);
+    return await this.repository.softRemove(meetup);
   }
 
   async remove(id: number): Promise<Meetup> {
-    const Meetup = await this.findById(id);
-    return await this.repository.remove(Meetup);
+    const meetup = await this.findById(id);
+    return await this.repository.remove(meetup);
   }
 
   //?-------------------------------------------------------------------------//

@@ -184,14 +184,21 @@ export class RoomsService {
   //?-------------------------------------------------------------------------//
 
   async remove(id: number, userId: number): Promise<Room> {
-    const room = await this.repository.findOneOrFail({
-      where: { id },
-    });
-
-    if (room.userId == userId) {
-      return await this.repository.remove(room);
-    } else {
-      throw new BadRequestException('doh! mind your id');
+    try {
+      const room = await this.repository.findOneOrFail({
+        where: { id },
+      });
+      console.log(room);
+      if (room.userId == userId) {
+        //! as opposed to softRemove, remove drops id in response.
+        await this.repository.remove(room);
+        room.id = 0; // to prevent hydration error on a flutter client
+        return room;
+      } else {
+        throw new BadRequestException('doh! mind your id');
+      }
+    } catch (e) {
+      throw new NotFoundException('entity not found');
     }
   }
 }
