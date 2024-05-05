@@ -22,7 +22,7 @@ export class AlarmsService {
     const timestampInMilliseconds = moment().valueOf();
     const id = `msg_${timestampInMilliseconds}`;
     //! as for the expiration, needs to be in seconds format (not milliseconds)
-    const expires = moment().add(10, 'minutes').unix();
+    const expires = moment().add(2, 'days').unix();
     try {
       const alarm = await this.model.create({ ...dto, id, expires });
       return alarm;
