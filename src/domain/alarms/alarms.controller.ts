@@ -12,6 +12,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { CreateAlarmDto } from 'src/domain/alarms/dto/create-alarm.dto';
 import { AlarmsService } from 'src/domain/alarms/alarms.service';
 import { IAlarm, IAlarmKey } from 'src/domain/alarms/entities/alarm.interface';
+import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 
 @Controller('alarms')
 export class AlarmsController {
@@ -23,8 +24,15 @@ export class AlarmsController {
 
   @ApiOperation({ description: 'Alarm 생성' })
   @Post()
-  async create(@Body() createAlarmDto: CreateAlarmDto): Promise<IAlarm> {
-    return await this.alarmsService.create(createAlarmDto);
+  async create(
+    @CurrentUserId() userId: number,
+    @Body() createAlarmDto: CreateAlarmDto,
+  ): Promise<IAlarm> {
+    const dto = {
+      ...createAlarmDto,
+      userId,
+    };
+    return await this.alarmsService.create(dto);
   }
 
   //?-------------------------------------------------------------------------//
@@ -32,9 +40,9 @@ export class AlarmsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'Alarm 리스트' })
-  @Get(':userId')
+  @Get()
   async fetch(
-    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUserId() userId: number,
     @Query('lastId') lastId: string | undefined,
   ): Promise<any> {
     const lastKey = lastId
@@ -60,9 +68,9 @@ export class AlarmsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'Alarm 삭제' })
-  @Delete(':userId/:id')
+  @Delete(':id')
   async delete(
-    @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUserId() userId: number,
     @Param('id') id: string,
   ): Promise<any> {
     const key = {
