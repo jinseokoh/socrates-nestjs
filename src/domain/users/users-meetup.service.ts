@@ -120,7 +120,7 @@ export class UsersMeetupService {
     event.name = 'meetupLike';
     event.token = meetup.user.pushToken;
     event.options = meetup.user.profile?.options ?? {};
-    event.body = `누군가 나의 모임글을 찜했습니다.`;
+    event.body = `${meetup.title} 모임에 누군가 찜을 했습니다.`;
     this.eventEmitter.emit('user.notified', event);
 
     if (affectedRows > 0) {
@@ -303,7 +303,7 @@ export class UsersMeetupService {
       event.name = 'meetupRequest';
       event.token = meetup.user.pushToken;
       event.options = meetup.user.profile?.options ?? {};
-      event.body = `누군가 ${meetup.title} 모임에 참가신청 했습니다.`;
+      event.body = `${meetup.title} 모임에 누군가 참가신청을 했습니다.`;
       this.eventEmitter.emit('user.notified', event);
 
       return meetup;
@@ -372,6 +372,11 @@ export class UsersMeetupService {
       }
 
       if (status === JoinStatus.ACCEPTED) {
+        const meetup = await queryRunner.manager.findOneOrFail(Meetup, {
+          where: { id: meetupId },
+          relations: [`rooms`, `rooms.user`, `rooms.user.profile`],
+        });
+
         const recipient = await queryRunner.manager.findOneOrFail(User, {
           where: { id: askingUserId },
           relations: [`profile`],
@@ -382,20 +387,16 @@ export class UsersMeetupService {
           event.name = 'meetupRequestApproval';
           event.token = recipient.pushToken;
           event.options = recipient.profile?.options ?? {};
-          event.body = `모임장이 나의 참가신청을 수락했습니다.`;
+          event.body = `${meetup.title} 모임장이 나의 참가신청을 수락했습니다.`;
         } else {
           event.name = 'meetupInviteApproval';
           event.token = recipient.pushToken;
           event.options = recipient.profile?.options ?? {};
-          event.body = `상대방이 내 모임으로의 초대를 수락했습니다.`;
+          event.body = `${meetup.title} 모임으로의 초대를 상대방이 수락했습니다.`;
         }
         this.eventEmitter.emit('user.notified', event);
         // notification with event listener ----------------------------------//
         if (meetupChatOpen) {
-          const meetup = await queryRunner.manager.findOneOrFail(Meetup, {
-            where: { id: meetupId },
-            relations: [`rooms`, `rooms.user`, `rooms.user.profile`],
-          });
           meetup.rooms.map((v: Room) => {
             const event = new UserNotificationEvent();
             event.name = 'meetupChatOpen';

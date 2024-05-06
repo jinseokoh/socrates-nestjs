@@ -11,14 +11,17 @@ export class UserNotificationListener {
   @OnEvent('user.notified', { async: true })
   async handleOrderCreatedEvent(event: UserNotificationEvent): Promise<void> {
     const fbToken = event.token;
-    const config = event.options.hasOwnProperty(event.name)
+
+    // todo. dynamodb 로 알림 record 생성
+
+    const userSetting = event.options.hasOwnProperty(event.name)
       ? event.options[event.name]
       : false;
     const notification = {
       title: 'MeSo',
       body: event.body,
     };
-    if (fbToken && config) {
+    if (fbToken && userSetting) {
       try {
         await this.fcmService.sendToToken(fbToken, notification);
       } catch (e) {
