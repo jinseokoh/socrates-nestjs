@@ -93,7 +93,7 @@ export class UsersPleaService {
         credit: dto.reward,
         ledgerType: LedgerType.CREDIT_ESCROW,
         balance: newBalance,
-        note: `요청.사례금 (user: #${dto.senderId})`,
+        note: `요청.사례금 (상대 #${dto.recipientId})`,
         userId: dto.senderId,
       });
       await queryRunner.manager.save(ledger);
@@ -254,7 +254,7 @@ export class UsersPleaService {
           debit: plea.reward - 1,
           ledgerType: LedgerType.DEBIT_REFUND,
           balance: newBalance,
-          note: `요청 사례금 환불 (user: #${plea.sender.id}, plea: #${plea.id})`,
+          note: `요청거절 사례금 환불 (요청발송 #${plea.senderId}, 요청수신 #${plea.recipientId})`,
           userId: plea.sender.id,
         });
         await queryRunner.manager.save(ledger);

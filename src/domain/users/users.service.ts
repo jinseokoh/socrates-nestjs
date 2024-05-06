@@ -182,7 +182,7 @@ export class UsersService {
           credit: dto.costToUpdate,
           ledgerType: LedgerType.CREDIT_SPEND,
           balance: newBalance,
-          note: `사용자명 변경요금 (user #${id})`,
+          note: `사용자명 변경`,
           userId: id,
         });
         await queryRunner.manager.save(ledger);

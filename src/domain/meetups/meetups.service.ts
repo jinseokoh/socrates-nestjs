@@ -158,7 +158,7 @@ export class MeetupsService {
           credit: cost,
           ledgerType: LedgerType.CREDIT_SPEND,
           balance: newBalance,
-          note: `모임.생성료 -${cost} 🪙 (user: #${user.id}, meetup: #${meetup.id})`,
+          note: `모임.생성료 -${cost} (모임 #${meetup.id})`,
           userId: user.id,
         });
         await queryRunner.manager.save(ledger);

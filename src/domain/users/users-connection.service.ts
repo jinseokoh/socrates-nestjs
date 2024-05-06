@@ -202,7 +202,7 @@ export class UsersConnectionService {
           event.name = 'connectionReaction';
           event.token = connection.user.pushToken;
           event.options = connection.user.profile?.options ?? {};
-          event.body = `누군가 나의 발견글에 공감표시를 남겼습니다.`;
+          event.body = `내 발견글에 누군가 공감표시를 남겼습니다.`;
           this.eventEmitter.emit('user.notified', event);
         }
       }

@@ -160,7 +160,7 @@ export class RoomsService {
         credit: dto.costToUpdate,
         ledgerType: LedgerType.CREDIT_SPEND,
         balance: newBalance,
-        note: `채팅방 입장료 (meetup #${dto.meetupId}, user #${dto.userId})`,
+        note: `채팅방 입장료 (모임 #${dto.meetupId})`,
         userId: dto.userId,
       });
       await queryRunner.manager.save(ledger);

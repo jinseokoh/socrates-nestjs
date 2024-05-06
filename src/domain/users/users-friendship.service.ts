@@ -108,7 +108,7 @@ export class UsersFriendshipService {
           credit: dto.cost,
           ledgerType: LedgerType.CREDIT_SPEND,
           balance: newBalance,
-          note: `친구.신청료 -${dto.cost} 🪙 (user: #${dto.senderId})`,
+          note: `친구.신청료 -${dto.cost} (대상 #${dto.senderId})`,
           userId: dto.senderId,
         });
         await queryRunner.manager.save(ledger);
@@ -183,14 +183,14 @@ export class UsersFriendshipService {
           'UPDATE `plea` SET status = ? WHERE id = ?',
           [PleaStatus.ACCEPTED, friendship.plea.id],
         );
-        // plea.reward 를 friendship sender (= plea recipient) 에게 지급
+        //? plea.reward 를 friendship sender (== plea recipient; 작성자) 에게 지급
         const newBalance =
           friendship.sender.profile?.balance + friendship.plea.reward;
         const ledger = new Ledger({
           debit: friendship.plea.reward,
           ledgerType: LedgerType.DEBIT_REWARD,
           balance: newBalance,
-          note: `요청.사례금 +${friendship.plea.reward} 🪙 (user: #${friendship.sender.id}, plea: #${friendship.plea.id})`,
+          note: `요청.사례금 +${friendship.plea.reward} (요청발송 #${friendship.recipientId}, 요청수신 #${friendship.senderId})`,
           userId: friendship.sender.id,
         });
         await queryRunner.manager.save(ledger);
@@ -217,7 +217,7 @@ export class UsersFriendshipService {
         event.token = friendship.sender?.pushToken;
         event.options = friendship.sender?.profile?.options ?? {};
         event.body = friendship.plea
-          ? `요청을 보낸 ${friendship.recipient.username}님과 친구가 되어, ${friendship.plea.reward}코인을 받았습니다.`
+          ? `요청 보낸 ${friendship.recipient.username}님과 친구가 되어, ${friendship.plea.reward}코인을 받았습니다.`
           : `${friendship.recipient.username}님이 나의 친구신청을 수락했습니다.`;
         this.eventEmitter.emit('user.notified', event);
       }
@@ -269,6 +269,7 @@ export class UsersFriendshipService {
         ],
       });
 
+      // 요청으로 보낸 친구신청인 경우
       if (friendship.plea && friendship.plea.status === PleaStatus.PENDING) {
         await queryRunner.manager
           .getRepository(Plea)
@@ -280,7 +281,7 @@ export class UsersFriendshipService {
           debit: friendship.plea.reward - 1,
           ledgerType: LedgerType.DEBIT_REFUND,
           balance: newBalance,
-          note: `요청.사례금환불 +${friendship.plea.reward} 🪙  (user: #${friendship.recipient.id}, plea: #${friendship.plea.id})`,
+          note: `요청.사례금환불 +${friendship.plea.reward} (요청발송 #${friendship.recipientId}, 요청수신 #${friendship.senderId})`,
           userId: recipientId,
         });
         await queryRunner.manager.save(ledger);
@@ -356,7 +357,7 @@ export class UsersFriendshipService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 받거나 보낸 친구신청 리스트 (paginated)
+  // 내친구 리스트를 위한, 받거나 보낸 친구신청 리스트 (paginated)
   async getMyFriendships(
     userId: number,
     query: PaginateQuery,

@@ -52,7 +52,7 @@ export class RemarksService {
     event.name = 'connectionRemark';
     event.token = remarkWithUser.connection.user.pushToken;
     event.options = remarkWithUser.connection.user.profile?.options ?? {};
-    event.body = `누군가 내 발견글에 댓글을 남겼습니다.`;
+    event.body = `내 발견글에 누군가 댓글을 남겼습니다.`;
     this.eventEmitter.emit('user.notified', event);
 
     this.connectionRepository.increment(

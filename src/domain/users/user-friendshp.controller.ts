@@ -104,7 +104,10 @@ export class UserFriendshipController {
     return await this.usersFriendshipService.getFriendshipsSent(userId, query);
   }
 
-  @ApiOperation({ description: '받거나 보낸 친구신청 리스트 (paginated)' })
+  @ApiOperation({
+    description:
+      '내친구 리스트를 위한, 받거나 보낸 친구신청 리스트 (paginated)',
+  })
   @Get(':userId/friendships')
   async getMyFriends(
     @Param('userId') userId: number,
