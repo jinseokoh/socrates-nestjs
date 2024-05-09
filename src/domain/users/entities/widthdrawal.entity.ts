@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -14,9 +14,9 @@ export class Withdrawal {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
-  @Column({ length: 64, unique: true })
+  @Column({ length: 128, unique: true })
   @ApiProperty({ description: 'email' })
-  email: string;
+  providerId: string;
 
   @Column({ length: 128, nullable: true })
   @ApiProperty({ description: 'reason to quit' })
@@ -34,9 +34,11 @@ export class Withdrawal {
   @Column({ type: 'int', unsigned: true, nullable: true })
   userId: number | null; // to make it available to Repository.
 
-  @OneToOne(() => User, (user) => user.withdrawal)
+  @ManyToOne(() => User, (user) => user.withdrawals, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
-  user: User;
+  user?: User;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

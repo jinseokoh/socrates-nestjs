@@ -18,7 +18,7 @@ export class Provider {
   @Column({ length: 16, nullable: true })
   providerName: string | null;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 128, nullable: true })
   providerId: string | null;
 
   @CreateDateColumn()

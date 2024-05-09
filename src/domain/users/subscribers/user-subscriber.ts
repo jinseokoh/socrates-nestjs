@@ -1,3 +1,4 @@
+import { INITIAL_BONUS_COIN } from 'src/common/constants';
 import { LedgerType } from 'src/common/enums';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
@@ -52,8 +53,8 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
       .createQueryBuilder()
       .select('COUNT(*)', 'count')
       .from(Withdrawal, 'withdrawal')
-      .where('withdrawal.email = :email', {
-        email: event.entity.email,
+      .where('withdrawal.providerId = :providerId', {
+        providerId: event.entity.pushToken,
       })
       .getRawOne();
     const isRejoinedUserAfterWithdrawal = parseInt(row.count) > 0;
@@ -65,10 +66,10 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
         .into(Ledger)
         .values([
           {
-            debit: 10,
-            balance: 10,
+            debit: INITIAL_BONUS_COIN,
+            balance: INITIAL_BONUS_COIN,
             ledgerType: LedgerType.DEBIT_REWARD,
-            note: 'free 10 coins granted',
+            note: `free ${INITIAL_BONUS_COIN} coins granted`,
             userId: event.entity.id,
           },
         ])

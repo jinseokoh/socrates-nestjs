@@ -46,6 +46,7 @@ import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { User } from 'src/domain/users/entities/user.entity';
+import { Provider } from 'src/domain/users/entities/provider.entity';
 
 @Injectable()
 export class UsersService {
@@ -409,14 +410,11 @@ export class UsersService {
   }
 
   async _voidPersonalInformation(id: number, message: string): Promise<any> {
-    const user = await this.findById(id);
-    const userEmail = user.email;
-
+    const user = await this.findById(id, ['providers']);
     const realname =
       user.realname && user.realname.length > 1
         ? user.realname.slice(0, -1) + '*'
         : `n/a`;
-
     const email = user.email.replace(/@/g, '*').replace(/\./g, ':');
     const phone =
       user.phone && user.phone.length > 4 ? user.phone.substring(3) : 'n/a';
@@ -428,21 +426,24 @@ export class UsersService {
     user.realname = `${realname}`;
     user.dob = moment(user.dob).startOf('year').tz('Asia/Seoul').toDate();
     await this.repository.save(user);
-
     await this.repository.manager.query(
       'UPDATE `user` SET password=NULL,career=NULL,avatar=NULL,pushToken=NULL,refreshTokenHash=NULL,isActive=0 WHERE id = ?',
       [id],
     );
 
     // add a withdrawal entry
-    await this.repository.manager.query(
-      'INSERT IGNORE INTO `withdrawal` \
-(email, reason, userId) VALUES (?, ?, ?) \
+    await Promise.all(
+      user.providers.map(async (v: Provider) => {
+        await this.repository.manager.query(
+          'INSERT IGNORE INTO `withdrawal` \
+(providerId, reason, userId) VALUES (?, ?, ?) \
 ON DUPLICATE KEY UPDATE \
-email = VALUES(`email`), \
+providerId = VALUES(`providerId`), \
 reason = VALUES(`reason`), \
 userId = VALUES(`userId`)',
-      [userEmail, message, id],
+          [v.providerId, message, id],
+        );
+      }),
     );
   }
 

@@ -159,6 +159,7 @@ export class AuthService {
         ? Gender.FEMALE
         : Gender.MALE
       : null;
+    createUserDto.pushToken = providerId; //! to pass providerId to event entity (중복가입)
     createUserDto.isActive = false; //! isActive is a flag for user verification
 
     //? 사용자 생성!

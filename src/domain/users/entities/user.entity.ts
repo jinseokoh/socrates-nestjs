@@ -127,12 +127,12 @@ export class User {
   })
   profile: Profile;
 
-  @OneToOne(() => Withdrawal, (withdrawal) => withdrawal.user)
-  withdrawal: Withdrawal;
-
   /*-------------------------------------------------------------------------*/
 
   //* 1-to-many hasMany
+
+  @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.user)
+  withdrawals: Withdrawal[];
 
   @OneToMany(() => Ledger, (ledger) => ledger.user, {
     // cascade: ['insert', 'update'],
