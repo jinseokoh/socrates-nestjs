@@ -47,6 +47,7 @@ import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
+import { PurchaseCoinDto } from 'src/domain/users/dto/purchase-coin.dto';
 
 @Injectable()
 export class UsersService {
@@ -224,6 +225,53 @@ export class UsersService {
       ...dto,
     });
     return await this.profileRepository.save(profile);
+  }
+
+  //? 코인 구매
+  //! balance will be adjusted w/ ledger model event subscriber.
+  //! using transaction using query runner
+  async purchase(id: number, dto: PurchaseCoinDto): Promise<User> {
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    // let newBalance = 0;
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const user = await queryRunner.manager.findOne(User, {
+        where: { id: id },
+        relations: [`profile`],
+      });
+      if (!user) {
+        throw new NotFoundException(`user not found`);
+      }
+      if (user?.isBanned) {
+        throw new UnprocessableEntityException(`a banned user`);
+      }
+
+      const newBalance = user.profile?.balance + dto.coins;
+      user.profile.balance = newBalance;
+
+      const ledger = new Ledger({
+        debit: dto.coins,
+        ledgerType: LedgerType.DEBIT_PURCHASE,
+        balance: newBalance,
+        note: `구매 (${dto.id})`,
+        userId: id,
+      });
+      await queryRunner.manager.save(ledger);
+
+      await queryRunner.manager.save(user);
+      // commit transaction now:
+      await queryRunner.commitTransaction();
+
+      return user;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   //?-------------------------------------------------------------------------//
@@ -484,29 +532,35 @@ userId = VALUES(`userId`)',
   // 본인인증 OTP SMS 발송
   // 전화번호/이메일 확인 후 OTP 전송
   async sendOtpForNonExistingUser(val: string, cache = false): Promise<void> {
-    const phone = val.includes('@') ? null : val.replace(/-/gi, '');
-    const email = val.includes('@') ? val : null;
-    const where = val.includes('@') ? { email } : { phone };
-    const user = await this.findByUniqueKey({ where });
+    const value = val.replace(/-/gi, '');
+    const user = val.includes('@')
+      ? await this.findByUniqueKey({ where: { email: val } })
+      : await this.findByUniqueKey({ where: { phone: value } });
     if (user) {
       throw new UnprocessableEntityException('already taken');
     }
 
     let otp = '';
-    if (phone === '01094867415') {
+
+    // for app store submission test
+    if (value === '01012341234' || value === '01012345678') {
       otp = cache
-        ? await this._upsertOtpUsingCache(phone, '000000')
-        : await this._upsertOtpUsingDb(phone, '000000');
+        ? await this._upsertOtpUsingCache(value, '000000')
+        : await this._upsertOtpUsingDb(value, '000000');
     } else {
       otp = cache
-        ? await this._upsertOtpUsingCache(phone)
-        : await this._upsertOtpUsingDb(phone);
+        ? await this._upsertOtpUsingCache(value)
+        : await this._upsertOtpUsingDb(value);
     }
 
-    if (val.includes('@')) {
-      await this.sesService.sendOtpEmail(val, otp);
+    if (value === '01012341234' || value === '01012345678') {
+      // do not send any email or SMS
     } else {
-      await this._sendSmsTo(phone, otp);
+      if (val.includes('@')) {
+        await this.sesService.sendOtpEmail(val, otp);
+      } else {
+        await this._sendSmsTo(value, otp);
+      }
     }
   }
 

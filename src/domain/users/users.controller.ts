@@ -43,6 +43,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { SignedUrl, AnyData } from 'src/common/types';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { initialUsername } from 'src/helpers/random-username';
+import { PurchaseCoinDto } from 'src/domain/users/dto/purchase-coin.dto';
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
@@ -210,6 +211,20 @@ export class UsersController {
     @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
     return await this.usersService.getSignedUrl(id, dto);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? OTP
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: 'Coin 구매' })
+  @HttpCode(HttpStatus.OK)
+  @Post('purchase')
+  async sendCoin(
+    @CurrentUserId() id: number,
+    @Body() dto: PurchaseCoinDto,
+  ): Promise<User> {
+    return await this.usersService.purchase(id, dto);
   }
 
   //?-------------------------------------------------------------------------//

@@ -7,7 +7,6 @@ import {
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { AWS_SES_CONNECTION } from 'src/common/constants';
 import { Gender } from 'src/common/enums/gender';
 import { ResetPasswordDto } from 'src/domain/auth/dto/reset-password.dto';
 import { UserCredentialsDto } from 'src/domain/auth/dto/user-credentials.dto';
@@ -18,10 +17,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { ProvidersService } from 'src/domain/users/providers.service';
 import { UsersService } from 'src/domain/users/users.service';
 import { initialUsername } from 'src/helpers/random-username';
-import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { Response as ExpressResponse } from 'express';
-import { CreateLedgerDto } from 'src/domain/ledgers/dto/create-ledger.dto';
-import { Role } from 'src/common/enums';
 
 //import { SesService } from 'src/services/aws/ses.service';
 
