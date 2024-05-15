@@ -9,8 +9,7 @@ import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import helmet from 'helmet';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from 'src/app.module';
-import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';
-import { join } from 'path';
+import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';``
 import { RedisIoAdapter } from 'src/websockets/redis-io.adapter';
 
 async function bootstrap() {
