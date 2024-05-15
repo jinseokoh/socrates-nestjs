@@ -2,114 +2,42 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>websocket client</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
-    <script src="http://localhost:4001/socket.io/socket.io.js"></script>
+    <title>brought you by Science Integration</title>
   <body>
     <div id="v-app">
-      <h1>Vue Chat</h1>
-      <form>
-        <input v-model="text" type="text" />
-        <button type="submit" @click.prevent="sendChatMessage()">Send</button>
-      </form>
-      <div class="flex">
-        <p>Room: {{ activeRoom }}</p>
-        <p>Status: {{ isJoined ? 'joined' : 'not joined' }}</p>
-        <div>
-          <button @click="toggleRoomMembership">{{ isJoined ? 'Leave' : 'Join' }}</button>
-        </div>        
-        <div class="flex">
-          <button class="tab-btn" :class="{ active: activeRoom == '19'}" @click="activeRoom = '19'">Room #1</button>
-          <button class="tab-btn" :class="{ active: activeRoom == '20'}" @click="activeRoom = '20'">Room #2</button>
-        </div>
-      </div>
-      <p>
-        <ul>
-          <li v-for="message of messages[activeRoom]">
-            <string>
-              {{ message.author.firstName }}
-            </string>
-            {{ message.text }}
-          </li>
-        </ul>
-      </p>
-    </div> 
-    <script>
-      var app = new Vue({
-        el: '#v-app',
-        data: {
-          text: '',
-          messages: {
-            19: [],
-            20: [],
-          },
-          rooms: {
-            19: false,
-            20: false,
-          },
-          activeRoom: '19',
-          username: '',
-          sockets: {
-            chat: null,
-            alert: null
-          },
-        },
-        methods: {
-          sendChatMessage() {
-            // check if user is memeber of active room
-            const ts = new Date().getTime();
-            const msg = {
-              author: {
-                image: 'https://cdn.fleaauction.world/images/user.png',
-                firstName: 'tester',
-                lastName: 'last',
-                id: 2,
-              },
-              id: `msg_${ts}_2`,
-              text: this.text,
-              room: this.activeRoom,
-              createdAt: ts,
-            }
-            this.messages[this.activeRoom].push(msg)
-            this.sockets.chat.emit('chatToServer', msg)
-            this.text = '';
-          },
-          receiveChatMesssage(payload) {
-            this.messages[this.activeRoom].push(payload)
-          },
-          toggleRoomMembership() {
-            if (this.isJoined) {
-              this.sockets.chat.emit('leaveRoom', { room: this.activeRoom, username: 'tester' })
-            } else {
-              this.sockets.chat.emit('joinRoom', { room: this.activeRoom, username: 'tester' })
-            }
-          }
-        },
-        computed: {
-          isJoined() {
-            return this.rooms[this.activeRoom];
-          }
-        },
-        created() {
-          this.username = prompt('Enter your username:');
-          this.sockets.chat = io('http://localhost:4001/chat', {
-            query: {
-              room: '19',
-            }
-          });
-          this.sockets.chat.on('chatToClient', (payload) => {
-            console.log(payload);
-            this.receiveChatMesssage(payload);
-          });
-          this.sockets.chat.on('joinedRoom', (room) => {
-            // this.rooms[room] = true;
-          });
-          this.sockets.chat.on('leftRoom', (room) => {
-            // this.rooms[room] = false;
-          });
-        }
 
-      });
-    </script>
+      <pre style="font-family: 'Courier New', Courier, monospace;" style="margin-bottom: 24px;">
+      Uh-oh, you are not supposed to be here.
+      </pre>
+
+      <pre style="font-family: 'Courier New', Courier, monospace;" style="margin-bottom: 24px;">
+__   __          _                                 _              _                   
+\ \ / /         ( )                               | |            | |                  
+ \ V /___  _   _|/__   _____   _ __ ___  __ _  ___| |__   ___  __| |                  
+  \ // _ \| | | | \ \ / / _ \ | '__/ _ \/ _` |/ __| '_ \ / _ \/ _` |                  
+  | | (_) | |_| |  \ V /  __/ | | |  __/ (_| | (__| | | |  __/ (_| |                  
+  \_/\___/ \__,_|   \_/ \___| |_|  \___|\__,_|\___|_| |_|\___|\__,_|                  
+                                                                                      
+                                                                                      
+ _   _            _       _                        _    ___  ______ _____          __ 
+| | | |          (_)     | |                      | |  / _ \ | ___ \_   _|        / _|
+| |_| |__   ___   _ _ __ | |_ ___ _ __ _ __   __ _| | / /_\ \| |_/ / | |     ___ | |_ 
+| __| '_ \ / _ \ | | '_ \| __/ _ \ '__| '_ \ / _` | | |  _  ||  __/  | |    / _ \|  _|
+| |_| | | |  __/ | | | | | ||  __/ |  | | | | (_| | | | | | || |    _| |_  | (_) | |  
+ \__|_| |_|\___| |_|_| |_|\__\___|_|  |_| |_|\__,_|_| \_| |_/\_|    \___/   \___/|_|  
+                                                                                      
+                                                                                      
+___  ___          _     _____                      _                                  
+|  \/  |         | |   /  ___|                    | |                                 
+| .  . | ___  ___| |_  \ `--.  ___   ___ _ __ __ _| |_ ___  ___                       
+| |\/| |/ _ \/ _ \ __|  `--. \/ _ \ / __| '__/ _` | __/ _ \/ __|                      
+| |  | |  __/  __/ |_  /\__/ / (_) | (__| | | (_| | ||  __/\__ \_                     
+\_|  |_/\___|\___|\__| \____/ \___/ \___|_|  \__,_|\__\___||___(_)     
+      </pre>
+
+      <pre style="font-family: 'Courier New', Courier, monospace;" style="margin-bottom: 24px;">
+      Visit <a href="https://mesoapp.kr">https://mesoapp.kr</a> for more information.
+      </pre>
+    </div>
   </body>
 </html>
