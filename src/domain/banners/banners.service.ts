@@ -101,7 +101,7 @@ export class BannersService {
 
     return {
       upload: url,
-      image: `https://cdn.fleaauction.world/${path}`,
+      image: `https://cdn.mesoapp.kr/${path}`,
     };
   }
 }

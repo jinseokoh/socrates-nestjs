@@ -78,7 +78,7 @@ export class User {
   @Column({
     length: 255,
     nullable: true,
-    default: 'https://cdn.fleaauction.world/images/user.png',
+    default: 'https://cdn.mesoapp.kr/icons/user.png',
   })
   @ApiProperty({ description: 'avatar' })
   avatar: string | null;

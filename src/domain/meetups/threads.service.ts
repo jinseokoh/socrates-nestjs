@@ -186,12 +186,12 @@ export class ThreadsService {
   // S3 직접 업로드를 위한 signedUrl 리턴
   async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
     const fileUri = randomName(dto.name ?? 'thread', dto.mimeType);
-    const path = `${process.env.NODE_ENV}/filez/${userId}/${fileUri}`;
+    const path = `${process.env.NODE_ENV}/threads/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
     return {
       upload: url,
-      image: `https://cdn.fleaauction.world/${path}`,
+      image: `https://cdn.mesoapp.kr/${path}`,
     };
   }
 }

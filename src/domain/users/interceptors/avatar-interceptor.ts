@@ -18,7 +18,7 @@ export class AvatarInterceptor implements NestInterceptor {
       map((data) => {
         const users = data.data.map((user: User) => {
           if (!user.avatar) {
-            user.avatar = 'https://cdn.fleaauction.world/images/user.png';
+            user.avatar = 'https://cdn.mesoapp.kr/icons/user.png';
           }
           return user;
         });
