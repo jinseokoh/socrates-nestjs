@@ -7,6 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
 import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import helmet from 'helmet';
+import * as Sentry from '@sentry/node';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from 'src/app.module';
 import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';``
@@ -30,7 +31,10 @@ async function bootstrap() {
   await redisIoAdapter.connectToRedis();
   app.useWebSocketAdapter(redisIoAdapter);
 
-  // app.setGlobalPrefix('v1', { exclude: ['/'] });
+  Sentry.init({
+    dsn: configService.get('sentry.dsn'),
+  });
+
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
   // app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalPipes(
@@ -58,6 +62,10 @@ async function bootstrap() {
   app.use(helmet());
   app.use(helmet.hidePoweredBy());
   app.use(cookieParser());
+
+  app.use(async function () {
+    throw new Error('My first Sentry error!');
+  });
 
   //! this is for static index.html to run inline and cdn script code. remove this if you don't want.
   // app.use(function (req, res, next) {

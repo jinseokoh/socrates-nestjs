@@ -123,17 +123,6 @@ import * as redisStore from 'cache-manager-ioredis';
         ],
       }),
     }),
-    // SentryModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   inject: [ConfigService],
-    //   useFactory: async (configService: ConfigService) => ({
-    //     dsn: configService.get<string>('sentry.dsn'),
-    //     debug: true,
-    //     environment: configService.get<string>('nodeEnv'),
-    //     release: null, // must create a release in sentry.io dashboard
-    //     logLevels: ['debug'], //based on sentry.io loglevel //
-    //   }),
-    // }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'static'), // for index.html
     }),

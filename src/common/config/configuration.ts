@@ -50,6 +50,9 @@ export const configuration = () => ({
     activitiesChannel: process.env.SLACK_WEBHOOK_ACTIVITY_URL,
     errorsChannel: process.env.SLACK_WEBHOOK_ERROR_URL,
   },
+  sentry: {
+    dsn: process.env.SENTRY_DSN,
+  },
   iamport: {
     merchantId: process.env.IAMPORT_MERCHANT_ID,
     apiKey: process.env.IAMPORT_API_KEY,

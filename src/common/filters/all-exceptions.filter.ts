@@ -2,6 +2,7 @@ import { Catch, ArgumentsHost, HttpException } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
+import * as Sentry from '@sentry/node';
 @Catch()
 export class AllExceptionsFilter extends BaseExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
@@ -23,14 +24,11 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
         timestamp: new Date().toISOString(),
         path: request.url,
       });
-    } else {
-      // response.status(status).json({
-      //   statusCode: status,
-      //   message: exception.message,
-      //   timestamp: new Date().toISOString(),
-      //   path: request.url,
-      // });
-      super.catch(exception, host);
     }
+
+    Sentry.captureException(exception);
+    super.catch(exception, host);
+    // if (status > 500) {
+    // }
   }
 }
