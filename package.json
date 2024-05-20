@@ -78,6 +78,7 @@
     "nestjs-dynamoose": "^0.5.8",
     "nestjs-paginate": "^8.6.2",
     "nestjs-pino": "^3.5.0",
+    "nestjs-slack": "^2.0.0",
     "passport": "^0.7.0",
     "passport-firebase-jwt": "^1.2.1",
     "passport-google-oauth20": "^2.0.0",

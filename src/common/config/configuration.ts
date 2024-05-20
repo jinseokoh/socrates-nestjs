@@ -47,7 +47,8 @@ export const configuration = () => ({
     plusFriendId: process.env.NAVER_PLUS_FRIEND_ID,
   },
   slack: {
-    webhookUrl: process.env.SLACK_WEBHOOK_URL,
+    activitiesChannel: process.env.SLACK_WEBHOOK_ACTIVITY_URL,
+    errorsChannel: process.env.SLACK_WEBHOOK_ERROR_URL,
   },
   iamport: {
     merchantId: process.env.IAMPORT_MERCHANT_ID,

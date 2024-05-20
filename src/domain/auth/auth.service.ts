@@ -18,6 +18,7 @@ import { ProvidersService } from 'src/domain/users/providers.service';
 import { UsersService } from 'src/domain/users/users.service';
 import { initialUsername } from 'src/helpers/random-username';
 import { Response as ExpressResponse } from 'express';
+import { SlackService } from 'nestjs-slack';
 
 //import { SesService } from 'src/services/aws/ses.service';
 
@@ -32,6 +33,7 @@ export class AuthService {
     private readonly providersService: ProvidersService,
     private readonly jwtService: JwtService,
 
+    @Inject(SlackService) private readonly slack: SlackService,
     // @Inject(AWS_SES_CONNECTION) private readonly ses: SesService,
     @Inject(ConfigService) private configService: ConfigService,
   ) {
@@ -167,6 +169,11 @@ export class AuthService {
       ? await bcrypt.hash(tokens.refreshToken, 10)
       : null;
     const username = initialUsername(user.id);
+
+    await this.slack.postMessage({
+      channel: 'activities',
+      text: `[${process.env.NODE_ENV}-api] 😱 회원가입 : <${process.env.ADMIN_URL}/users/${user.id}|${user.username}>`,
+    });
 
     await this.usersService.update(user.id, {
       username,

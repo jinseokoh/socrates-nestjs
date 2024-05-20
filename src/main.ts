@@ -30,17 +30,6 @@ async function bootstrap() {
   await redisIoAdapter.connectToRedis();
   app.useWebSocketAdapter(redisIoAdapter);
 
-  // Create new DynamoDB instance
-  // dynamoose.aws.ddb.local();
-  // const ddb = new dynamoose.aws.ddb.DynamoDB({
-  //   credentials: {
-  //     accessKeyId: configService.get('aws.accessKey'),
-  //     secretAccessKey: configService.get('aws.secretAccessKey'),
-  //   },
-  //   region: configService.get('aws.defaultRegion'),
-  // });
-  // dynamoose.aws.ddb.set(ddb);
-
   // app.setGlobalPrefix('v1', { exclude: ['/'] });
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
   // app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
@@ -71,16 +60,16 @@ async function bootstrap() {
   app.use(cookieParser());
 
   //! this is for static index.html to run inline and cdn script code. remove this if you don't want.
-  app.use(function (req, res, next) {
-    res.setHeader(
-      'Content-Security-Policy',
-      "default-src 'self'; font-src 'self'; img-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*; style-src 'self'; frame-src 'self'",
-    );
-    next();
-  });
+  // app.use(function (req, res, next) {
+  //   res.setHeader(
+  //     'Content-Security-Policy',
+  //     "default-src 'self'; font-src 'self'; img-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*; style-src 'self'; frame-src 'self'",
+  //   );
+  //   next();
+  // });
 
-  // see https://expressjs.com/en/guide/behind-proxies.html
-  app.set('trust proxy', true);
+  //! see https://expressjs.com/en/guide/behind-proxies.html
+  // app.set('trust proxy', true);
 
   const config = new DocumentBuilder()
     .setTitle('Socrates v1')
