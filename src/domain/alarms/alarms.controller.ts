@@ -63,6 +63,12 @@ export class AlarmsController {
     };
   }
 
+  @ApiOperation({ description: 'Banner 상세보기' })
+  @Get(':id')
+  async getAlarmById(@Param('id') id: number): Promise<IAlarm> {
+    throw new Error('My first Sentry error!');
+  }
+
   //?-------------------------------------------------------------------------//
   //? DELETE
   //?-------------------------------------------------------------------------//

@@ -28,8 +28,9 @@ import { MeetupsService } from 'src/domain/meetups/meetups.service';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { multerOptions } from 'src/helpers/multer-options';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
+import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 
-@UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
 @Controller('meetups')
 export class MeetupsController {
   constructor(private readonly meetupsService: MeetupsService) {}

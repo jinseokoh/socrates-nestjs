@@ -1,6 +1,6 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -10,12 +10,10 @@ import helmet from 'helmet';
 import * as Sentry from '@sentry/node';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from 'src/app.module';
-import { AllExceptionsFilter } from 'src/common/filters/all-exceptions.filter';``
 import { RedisIoAdapter } from 'src/websockets/redis-io.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const { httpAdapter } = app.get(HttpAdapterHost);
 
   const configService = app.get<ConfigService>(ConfigService);
   app.connectMicroservice({
@@ -35,8 +33,10 @@ async function bootstrap() {
     dsn: configService.get('sentry.dsn'),
   });
 
-  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
+  // 전역으로 ClassSerializerInterceptor 등록 (controller 에서 manually 설정중)
   // app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
+  // 전역으로 ValidationPipe 등록
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -62,10 +62,6 @@ async function bootstrap() {
   app.use(helmet());
   app.use(helmet.hidePoweredBy());
   app.use(cookieParser());
-
-  app.use(async function () {
-    throw new Error('My first Sentry error!');
-  });
 
   //! this is for static index.html to run inline and cdn script code. remove this if you don't want.
   // app.use(function (req, res, next) {

@@ -1,5 +1,5 @@
 import { AlarmsModule } from 'src/domain/alarms/alarms.module';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from 'src/app.controller';
 import { AuthModule } from 'src/domain/auth/auth.module';
 import { BannersModule } from 'src/domain/banners/banners.module';
@@ -33,6 +33,8 @@ import { SocketIoModule } from './websockets/socketio.module';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UsersModule } from 'src/domain/users/users.module';
 import * as redisStore from 'cache-manager-ioredis';
+import { DuplicateEntryErrorInterceptor } from 'src/common/interceptors/duplicate-entry-error.interceptor';
+import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.filter';
 
 @Module({
   imports: [
@@ -150,6 +152,14 @@ import * as redisStore from 'cache-manager-ioredis';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: DuplicateEntryErrorInterceptor, // 중복입력은 400으로 전환
+    },
+    {
+      provide: APP_FILTER,
+      useClass: SentryErrorReportFilter, // 500 이상이면 Senty로 보고
     },
   ],
 })
