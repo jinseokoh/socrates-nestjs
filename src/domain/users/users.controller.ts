@@ -34,6 +34,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { ValidateUsernamePipe } from 'src/domain/users/pipes/validate-username.pipe';
 import { HashPasswordPipe } from 'src/domain/users/pipes/hash-password.pipe';
 import { UniqueKeysPipe } from 'src/domain/users/pipes/unique-keys.pipe';
+import { Public } from 'src/common/decorators/public.decorator';
 import { UsersService } from 'src/domain/users/users.service';
 import { multerOptions } from 'src/helpers/multer-options';
 import { AvatarInterceptor } from './interceptors/avatar-interceptor';
@@ -226,5 +227,13 @@ export class UsersController {
     @Body() dto: PurchaseCoinDto,
   ): Promise<User> {
     return await this.usersService.purchase(userId, dto);
+  }
+
+  @ApiOperation({ description: 'Cache Bust' })
+  @Public()
+  @Post('bust')
+  async cacheBust(): Promise<any> {
+    await this.usersService.cacheBust();
+    return `busted cache store`;
   }
 }

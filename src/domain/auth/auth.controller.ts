@@ -143,7 +143,7 @@ export class AuthController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Private) 로그아웃
+  //? 로그아웃
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '사용자 로그아웃' })
@@ -153,20 +153,4 @@ export class AuthController {
   logout(@CurrentUserId() id: number): Promise<void> {
     return this.authService.logout(id);
   }
-
-  // @ApiOperation({ description: '비밀번호 변경' })
-  // @HttpCode(HttpStatus.OK)
-  // @Public()
-  // @Post('forgot-password')
-  // async changePassword(@Body() dto: ForgotPasswordDto): Promise<any> {
-  //   await this.authService.forgotPassword(dto.email);
-  //   return { data: 'ok' };
-  // }
-
-  // @ApiOperation({ description: '사용자 등록 (via 소셜인증)' })
-  // @Public()
-  // @Post('social')
-  // async social(@Body() dto: UserSocialIdDto): Promise<Tokens> {
-  //   return await this.authService.socialize(dto);
-  // }
 }

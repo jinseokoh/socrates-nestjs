@@ -35,6 +35,8 @@ import { UsersModule } from 'src/domain/users/users.module';
 import * as redisStore from 'cache-manager-ioredis';
 import { DuplicateEntryErrorInterceptor } from 'src/common/interceptors/duplicate-entry-error.interceptor';
 import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.filter';
+import { SecretsModule } from 'src/domain/secrets/secrets.module';
+// import { CustomLogger } from 'src/helpers/custom-logger';
 
 @Module({
   imports: [
@@ -70,7 +72,8 @@ import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.
           timezone: 'local', // which is Asia/Seoul
           bigNumberStrings: true,
           supportBigNumbers: true,
-          logging: nodeEnv === 'local',
+          logging: ['query', 'error'], // nodeEnv === 'local',
+          // logger: new CustomLogger(),
           migrations: ['dist/migrations/**/*{.ts,.js}'],
           cli: {
             migrationsDir: 'dist/migrations',
@@ -145,6 +148,7 @@ import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.
     LanguagesModule,
     LedgersModule,
     MeetupsModule,
+    SecretsModule,
     UsersModule,
   ],
   controllers: [AppController],
@@ -153,10 +157,10 @@ import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: DuplicateEntryErrorInterceptor, // 중복입력은 400으로 전환
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: DuplicateEntryErrorInterceptor, // 중복입력은 400으로 전환
+    // },
     {
       provide: APP_FILTER,
       useClass: SentryErrorReportFilter, // 500 이상이면 Senty로 보고

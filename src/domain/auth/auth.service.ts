@@ -64,21 +64,6 @@ export class AuthService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Public) 전화번호
-  //?-------------------------------------------------------------------------//
-
-  // async verifyPhoneNumberWithOtp(phone: string): Promise<string> {
-  //   const user = await this.usersService.findByUniqueKey({
-  //     where: { phone },
-  //   });
-  //   if (user) {
-  //     throw new BadRequestException('phone already taken');
-  //   }
-
-  //   return await this._generateOtp(phone);
-  // }
-
-  //?-------------------------------------------------------------------------//
   //? Public) 이메일 (가입/비번)
   //?-------------------------------------------------------------------------//
 
