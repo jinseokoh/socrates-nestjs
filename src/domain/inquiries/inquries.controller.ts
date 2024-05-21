@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -20,8 +19,9 @@ import { UpdateInquiryDto } from 'src/domain/inquiries/dto/update-inquiry.dto';
 import { InquiriesService } from 'src/domain/inquiries/inquiries.service';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
+import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 
-@UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
 @Controller('inquiries')
 export class InquiriesController {
   constructor(private readonly inquiriesService: InquiriesService) {}
