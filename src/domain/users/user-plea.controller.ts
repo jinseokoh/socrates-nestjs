@@ -1,52 +1,22 @@
 import {
   BadRequestException,
-  Body,
   ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
   Param,
   ParseIntPipe,
-  Patch,
-  Post,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { SkipThrottle } from '@nestjs/throttler';
-import { Plea } from 'src/domain/users/entities/plea.entity';
-import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { CreatePleaDto } from 'src/domain/users/dto/create-plea.dto';
+import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
-import { User } from 'src/domain/users/entities/user.entity';
-import { PleaStatus } from 'src/common/enums';
-import { UpdatePleaDto } from 'src/domain/users/dto/update-plea.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 // @SkipThrottle()
 @Controller('users')
 export class UserPleaController {
   constructor(private readonly usersPleaService: UsersPleaService) {}
-
-  //?-------------------------------------------------------------------------//
-  //? Plea Pivot
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '요청 생성' })
-  @PaginateQueryOptions()
-  @Post(':senderId/pleas/:recipientId/dots/:dotId')
-  async attachToPleaPivot(
-    @Param('senderId', ParseIntPipe) senderId: number,
-    @Param('recipientId', ParseIntPipe) recipientId: number,
-    @Param('dotId', ParseIntPipe) dotId: number,
-    @Body() dto: CreatePleaDto,
-  ): Promise<Plea> {
-    return await this.usersPleaService.createPlea({
-      ...dto,
-      senderId,
-      recipientId,
-      dotId,
-    });
-  }
 
   //--------------------------------------------------------------------------//
   // Read
@@ -55,74 +25,50 @@ export class UserPleaController {
   @ApiOperation({
     description: '내가 모든 사용자에게 받은 요청 리스트 grouped by sender',
   })
-  @Get(':myId/pleas-from')
+  @Get(':userId/pleas-from')
   async getMyReceivedPleas(
-    @Param('myId', ParseIntPipe) myId: number,
+    @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Plea[]> {
-    return await this.usersPleaService.getMyReceivedPleas(myId);
+    return await this.usersPleaService.getMyReceivedPleas(userId);
   }
 
   @ApiOperation({
     description: '내가 모든 사용자에게 보낸 요청 리스트 grouped by recipient',
   })
-  @Get(':myId/pleas-to')
+  @Get(':userId/pleas-to')
   async getMySentPleas(
-    @Param('myId', ParseIntPipe) myId: number,
+    @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Plea[]> {
-    return await this.usersPleaService.getMySentPleas(myId);
+    return await this.usersPleaService.getMySentPleas(userId);
   }
 
   @ApiOperation({ description: '내가 이 사용자에게 받은 요청 리스트' })
-  @Get(':myId/pleas-from/:userId')
+  @Get(':userId/pleas-from/:otherId')
   async getMyReceivedPleasFromThisUser(
-    @Param('myId', ParseIntPipe) myId: number,
     @Param('userId', ParseIntPipe) userId: number,
+    @Param('otherId', ParseIntPipe) otherId: number,
   ): Promise<Plea[]> {
     return await this.usersPleaService.getMyReceivedPleasFromThisUser(
-      myId,
       userId,
+      otherId,
     );
   }
 
   @ApiOperation({ description: '내가 이 사용자에게 보낸 요청 리스트' })
-  @Get(':myId/pleas-to/:userId')
+  @Get(':userId/pleas-to/:otherId')
   async getMySentPleasToThisUser(
-    @Param('myId', ParseIntPipe) myId: number,
     @Param('userId', ParseIntPipe) userId: number,
+    @Param('userId', ParseIntPipe) otherId: number,
   ): Promise<Plea[]> {
-    return await this.usersPleaService.getMySentPleasToThisUser(myId, userId);
-  }
-
-  //--------------------------------------------------------------------------//
-  // Update
-  //--------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '요청 상태 변경' })
-  @Patch('pleas/:id')
-  async updatePlea(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdatePleaDto,
-  ): Promise<Plea> {
-    try {
-      return await this.usersPleaService.update(id, dto);
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    return await this.usersPleaService.getMySentPleasToThisUser(
+      userId,
+      otherId,
+    );
   }
 
   //--------------------------------------------------------------------------//
   // Delete
   //--------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '요청 삭제' })
-  @Delete('pleas/:id')
-  async deletePlea(@Param('id', ParseIntPipe) id: number): Promise<Plea> {
-    try {
-      return await this.usersPleaService.delete(id);
-    } catch (e) {
-      throw new BadRequestException();
-    }
-  }
 
   @ApiOperation({ description: '요청들 삭제' })
   @Delete(':senderId/pleas/:recipientId')

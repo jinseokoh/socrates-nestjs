@@ -14,6 +14,9 @@ import { CreateSecretDto } from 'src/domain/secrets/dto/create-secret.dto';
 import { UpdateSecretDto } from 'src/domain/secrets/dto/update-secret.dto';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { SecretsService } from 'src/domain/secrets/secrets.service';
+
+//! @deprecated
+//! 직접 호출하는 사용하는 곳 없고 대신 users/{id}/otp 이런식으로 사용
 @Controller('secrets')
 export class SecretsController {
   constructor(private readonly secretsService: SecretsService) {}

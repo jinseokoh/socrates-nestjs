@@ -1,19 +1,22 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { CreateAlarmDto } from 'src/domain/alarms/dto/create-alarm.dto';
 import { AlarmsService } from 'src/domain/alarms/alarms.service';
 import { IAlarm, IAlarmKey } from 'src/domain/alarms/entities/alarm.interface';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
+import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 
+@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
 @Controller('alarms')
 export class AlarmsController {
   constructor(private readonly alarmsService: AlarmsService) {}

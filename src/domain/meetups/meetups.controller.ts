@@ -62,9 +62,7 @@ export class MeetupsController {
   @ApiOperation({ description: 'Meetup 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get()
-  async getMeetups(
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Meetup>> {
+  async findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Meetup>> {
     return await this.meetupsService.findAll(query);
   }
 
@@ -78,7 +76,7 @@ export class MeetupsController {
 
   @ApiOperation({ description: 'Meetup 상세보기' })
   @Get(':id')
-  async getMeetupById(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
+  async findById(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
     return await this.meetupsService.findById(id, [
       'venue',
       'user',

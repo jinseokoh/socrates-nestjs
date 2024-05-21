@@ -15,13 +15,14 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
+import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { ChangeRoomIsPaidDto } from 'src/domain/chats/dto/change-room-is-paid.dto';
 import { CreateRoomDto } from 'src/domain/chats/dto/create-room.dto';
 import { UpdateRoomDto } from 'src/domain/chats/dto/update-room.dto';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { RoomsService } from 'src/domain/chats/rooms.service';
 
-@UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
 @Controller('chats')
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}

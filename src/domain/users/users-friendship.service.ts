@@ -23,7 +23,7 @@ import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Plea } from 'src/domain/users/entities/plea.entity';
+import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 

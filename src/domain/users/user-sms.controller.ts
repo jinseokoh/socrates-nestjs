@@ -33,11 +33,13 @@ export class UserSmsController {
   ) {}
 
   //?-------------------------------------------------------------------------//
-  //? topic 으로 FCM 발송
+  //? SMS 발송
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: 'topic 으로 FCM 발송' })
-  @Post('sms')
+  //! @deprecated
+  //! 테스트용 메서드
+  @ApiOperation({ description: 'user 에게 SMS 문자 발송' })
+  @Post('test-sms')
   async sendSms(@Body() dto: SmsMessageDto): Promise<any> {
     await this.smsClient.send({
       to: dto.phone,
@@ -60,7 +62,7 @@ export class UserSmsController {
     return { data: 'ok' };
   }
 
-  // 전화번호(이메일) 업데이트
+  //? 전화번호(이메일) 업데이트
   // prerequisite)
   // - 기존정보 확인 (전화번호나 이메일)
   // - any user associated w/ old phone or email must exist.

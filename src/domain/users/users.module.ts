@@ -33,7 +33,7 @@ import { UserLanguagesController } from 'src/domain/users/user-languages.control
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
 import { Flag } from 'src/domain/users/entities/flag.entity';
-import { Plea } from 'src/domain/users/entities/plea.entity';
+import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { UserFriendshipController } from 'src/domain/users/user-friendshp.controller';
 import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';

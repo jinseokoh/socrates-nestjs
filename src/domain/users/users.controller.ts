@@ -37,7 +37,6 @@ import { UniqueKeysPipe } from 'src/domain/users/pipes/unique-keys.pipe';
 import { UsersService } from 'src/domain/users/users.service';
 import { multerOptions } from 'src/helpers/multer-options';
 import { AvatarInterceptor } from './interceptors/avatar-interceptor';
-import { SmsMessageDto } from 'src/domain/users/dto/sms-message.dto';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { SkipThrottle } from '@nestjs/throttler';
 import { SignedUrl, AnyData } from 'src/common/types';
@@ -205,39 +204,25 @@ export class UsersController {
   }
 
   @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
-  @Post('image/url')
+  @Post(':userId/upload-url')
   async getSignedUrl(
-    @CurrentUserId() id: number,
+    @Param('userId') userId: number,
     @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
-    return await this.usersService.getSignedUrl(id, dto);
+    return await this.usersService.getSignedUrl(userId, dto);
   }
 
   //?-------------------------------------------------------------------------//
-  //? OTP
+  //? 코인 구매
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'Coin 구매' })
   @HttpCode(HttpStatus.OK)
-  @Post('purchase')
+  @Post(':userId/purchase')
   async sendCoin(
-    @CurrentUserId() id: number,
+    @Param('userId') userId: number,
     @Body() dto: PurchaseCoinDto,
   ): Promise<User> {
-    return await this.usersService.purchase(id, dto);
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? OTP
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: 'OTP 발송' })
-  @HttpCode(HttpStatus.OK)
-  @Post('otp')
-  async sendOtp(@Body() dto: SmsMessageDto): Promise<void> {
-    await this.smsClient.send({
-      to: dto.phone,
-      content: dto.body,
-    });
+    return await this.usersService.purchase(userId, dto);
   }
 }

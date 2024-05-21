@@ -1,6 +1,6 @@
 import {
-  BadRequestException,
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -8,16 +8,13 @@ import {
   ParseIntPipe,
   Post,
   Query,
-  Sse,
+  UseInterceptors,
 } from '@nestjs/common';
-import { EventPattern } from '@nestjs/microservices';
 import { ApiOperation } from '@nestjs/swagger';
 import * as moment from 'moment';
-import { Observable } from 'rxjs';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { Public } from 'src/common/decorators/public.decorator';
 import { MessageType } from 'src/common/enums';
-import { IMessageEvent } from 'src/common/interfaces';
+import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { SignedUrl } from 'src/common/types';
 import { CreateMessageDto } from 'src/domain/chats/dto/create-message.dto';
 import {
@@ -27,30 +24,14 @@ import {
 import { MessagesService } from 'src/domain/chats/messages.service';
 import { RoomsService } from 'src/domain/chats/rooms.service';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
-import { SseService } from 'src/services/sse/sse.service';
 
+@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
 @Controller('chats')
 export class MessagesController {
   constructor(
     private readonly messagesService: MessagesService,
     private readonly roomsService: RoomsService,
-    private readonly sseService: SseService,
   ) {}
-
-  //?-------------------------------------------------------------------------//
-  //? SSE
-  //?-------------------------------------------------------------------------//
-
-  @EventPattern('sse.add_chat')
-  handleSseComments(data: any): void {
-    this.sseService.fire(data.key, data.value);
-  }
-
-  @Public()
-  @Sse('/stream')
-  sse(): Observable<IMessageEvent> {
-    return this.sseService.sseStream$;
-  }
 
   //?-------------------------------------------------------------------------//
   //? CREATE

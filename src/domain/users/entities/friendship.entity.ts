@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { FriendshipStatus, RequestFrom } from 'src/common/enums';
-import { Plea } from 'src/domain/users/entities/plea.entity';
+import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,

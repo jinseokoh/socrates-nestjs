@@ -35,7 +35,7 @@ import { ReportConnection } from 'src/domain/dots/entities/report_connection.ent
 import { Reaction } from 'src/domain/dots/entities/reaction.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
-import { Plea } from 'src/domain/users/entities/plea.entity';
+import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
 @Entity()
 export class User {
