@@ -6,9 +6,11 @@ import { tap } from 'rxjs/operators';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 
-// ref) https://hwasurr.io/nestjs/caching/
+// ref) https://dev.to/secmohammed/nestjs-caching-globally-neatly-1e17
 @Injectable()
 export class HttpCacheInterceptor extends CacheInterceptor {
+  protected cachedRoutes = new Map();
+
   //! 캐쉬 여부 결정 override
   trackBy(context: ExecutionContext): string | undefined {
     const request = context.switchToHttp().getRequest();
@@ -17,12 +19,36 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     const isGetRequest = httpAdapter.getRequestMethod(request) === 'GET';
     const excludePaths = ['/v1/users/mine'];
     if (
-      !isGetRequest ||
-      (isGetRequest &&
-        excludePaths.includes(httpAdapter.getRequestUrl(request)))
+      isGetRequest &&
+      excludePaths.includes(httpAdapter.getRequestUrl(request))
     ) {
       return undefined;
     }
+
+    if (!isGetRequest) {
+      setTimeout(async () => {
+        for (const values of this.cachedRoutes.values()) {
+          for (const value of values) {
+            await this.cacheManager.del(value);
+          }
+        }
+      }, 0);
+      return undefined;
+    }
+
+    // to always get the base url of the incoming get request url.
+    const key = httpAdapter.getRequestUrl(request).split('?')[0];
+    if (
+      this.cachedRoutes.has(key) &&
+      !this.cachedRoutes.get(key).includes(httpAdapter.getRequestUrl(request))
+    ) {
+      this.cachedRoutes.set(key, [
+        ...this.cachedRoutes.get(key),
+        httpAdapter.getRequestUrl(request),
+      ]);
+      return httpAdapter.getRequestUrl(request);
+    }
+    this.cachedRoutes.set(key, [httpAdapter.getRequestUrl(request)]);
     return httpAdapter.getRequestUrl(request);
   }
 
@@ -37,7 +63,6 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     console.log('~~ intercept ~~');
 
     const isGetRequest = httpAdapter.getRequestMethod(request) === 'GET';
-    const excludePaths = ['/v1/users'];
     const isStartsWithAuth = request.originalUrl.startsWith('/v1/users');
 
     if (!isGetRequest) {
@@ -50,37 +75,9 @@ export class HttpCacheInterceptor extends CacheInterceptor {
 
       console.log('allKeys => ', allKeys);
 
-      const cacheKeys = allKeys.length > 0 ? allKeys : [request.originalUrl];
-
-      console.log('cacheKeys => ', cacheKeys);
-
-      // 캐시 무효화 처리
-      return next.handle().pipe(
-        tap(() => {
-          this._clearCaches(cacheKeys);
-        }),
-      );
-
       //? await this.cacheManager.reset(); 무조건 cacheStore 비우기
     }
     // 기존 캐싱 처리
     return super.intercept(context, next);
-  }
-
-  /**
-   * @param cacheKeys 삭제할 캐시 키 목록
-   */
-  private async _clearCaches(cacheKeys: string[]): Promise<void> {
-    const client = await this.cacheManager.store.getClient();
-    const _keys = await Promise.all(
-      cacheKeys.map(async (cacheKey) => {
-        return await client.keys(`*${cacheKey}*`);
-      }),
-    );
-    await Promise.all(
-      _keys.flat().map(async (key) => {
-        await client.del(key);
-      }),
-    );
   }
 }
