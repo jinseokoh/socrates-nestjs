@@ -72,7 +72,7 @@ import { SecretsModule } from 'src/domain/secrets/secrets.module';
           timezone: 'local', // which is Asia/Seoul
           bigNumberStrings: true,
           supportBigNumbers: true,
-          logging: ['query', 'error'], // nodeEnv === 'local',
+          logging: nodeEnv === 'local',
           // logger: new CustomLogger(),
           migrations: ['dist/migrations/**/*{.ts,.js}'],
           cli: {
@@ -157,10 +157,10 @@ import { SecretsModule } from 'src/domain/secrets/secrets.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: DuplicateEntryErrorInterceptor, // 중복입력은 400으로 전환
-    // },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: DuplicateEntryErrorInterceptor, // 중복입력은 400으로 전환
+    },
     {
       provide: APP_FILTER,
       useClass: SentryErrorReportFilter, // 500 이상이면 Senty로 보고
