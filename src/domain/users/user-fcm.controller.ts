@@ -13,6 +13,8 @@ import { FcmService } from 'src/services/fcm/fcm.service';
 import { FcmTopicDto } from 'src/domain/users/dto/fcm-topic.dto';
 import { SkipThrottle } from '@nestjs/throttler';
 
+//! @deprecated
+//! 미사용
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
@@ -40,7 +42,7 @@ export class UserFcmController {
   //? token 으로 FCM 발송
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: 'token 으로 FCM 발송' })
+  @ApiOperation({ description: 'userId 사용하여 token 으로 FCM 발송' })
   @Post(':userId/fcm')
   async sendToTokens(
     @Param('userId') userId: number,

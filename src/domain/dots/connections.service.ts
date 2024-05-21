@@ -1,4 +1,3 @@
-import { ApiOperation } from '@nestjs/swagger';
 import {
   BadRequestException,
   Injectable,
@@ -82,41 +81,6 @@ export class ConnectionsService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Upsert
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: 'create connection! not dot.' })
-  async upsert(dto: CreateConnectionDto): Promise<void> {
-    try {
-      //! somehow the following repository.upsert() method gives off a weird error
-      //! TypeORMError: Cannot update entity because entity id is not set in the entity
-      //! need to investigate further in a later time.
-      // await this.repository.upsert(
-      //   [
-      //     {
-      //       userId: dto.userId,
-      //       dotId: dto.dotId,
-      //       answer: dto.answer,
-      //     },
-      //   ],
-      //   ['userId', 'dotId'],
-      // );
-      await this.repository.manager.query(
-        'INSERT IGNORE INTO `connection` \
-(userId, dotId, answer) VALUES (?, ?, ?) \
-ON DUPLICATE KEY UPDATE \
-userId = VALUES(`userId`), \
-dotId = VALUES(`dotId`), \
-answer = VALUES(`answer`)',
-        [dto.userId, dto.dotId, dto.answer],
-      );
-    } catch (e) {
-      console.error(dto, e);
-      throw new BadRequestException();
-    }
-  }
-
-  //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
   async findAll(query: PaginateQuery): Promise<Paginated<Connection>> {
@@ -164,25 +128,6 @@ answer = VALUES(`answer`)',
           });
     } catch (e) {
       this.logger.error(e);
-      throw new NotFoundException('entity not found');
-    }
-  }
-
-  // 이 회원의 Connection 리스트 전부 보기
-  // Meetup 상세보기
-  async findByUserId(id: number): Promise<Connection[]> {
-    try {
-      return this.repository
-        .createQueryBuilder('connection')
-        .leftJoinAndSelect('connection.dot', 'dot')
-        .leftJoinAndSelect('connection.user', 'author')
-        .leftJoinAndSelect('connection.remarks', 'remark')
-        .leftJoinAndSelect('remark.user', 'user')
-        .where({
-          userId: id,
-        })
-        .getMany();
-    } catch (e) {
       throw new NotFoundException('entity not found');
     }
   }

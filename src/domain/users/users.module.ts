@@ -19,10 +19,8 @@ import { UsersService } from 'src/domain/users/users.service';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
 import { SesModule } from 'src/services/aws/ses.module';
-import { CrawlerModule } from 'src/services/crawler/crawler.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { UserUsersController } from 'src/domain/users/user-users.controller';
-import { UserFcmController } from 'src/domain/users/user-fcm.controller';
 import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
 import { UserMeetupsController } from 'src/domain/users/user-meetups.controller';
 import { UserSmsController } from 'src/domain/users/user-sms.controller';
@@ -83,29 +81,29 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
   exports: [UsersService],
   providers: [
     UsersService,
-    UsersLedgerService,
-    UsersMeetupService,
     UsersConnectionService,
     UsersFriendshipService,
+    UsersLedgerService,
+    UsersMeetupService,
     UsersPleaService,
-    UsersUserService,
     UserSubscriber,
+    UsersUserService,
     LanguageSkillSubscriber,
     UserNotificationListener,
   ],
   controllers: [
     UsersController,
     UserCategoriesController,
+    UserConnectionsController,
+    UserFriendshipController,
     UserImpressionsController,
     UserLanguagesController,
     UserLedgersController,
     UserMeetupsController,
-    UserConnectionsController,
-    UserFriendshipController,
     UserPleaController,
-    UserUsersController,
-    UserFcmController,
     UserSmsController,
+    UserUsersController,
+    // UserFcmController, 미사용 comment out
   ],
 })
 export class UsersModule {}

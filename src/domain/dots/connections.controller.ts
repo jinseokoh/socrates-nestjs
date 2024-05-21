@@ -15,6 +15,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
+import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { SignedUrl } from 'src/common/types';
 import { ConnectionsService } from 'src/domain/dots/connections.service';
 import { CreateConnectionDto } from 'src/domain/dots/dto/create-connection.dto';
@@ -23,7 +24,7 @@ import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { Reaction } from 'src/domain/dots/entities/reaction.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
-@UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
 @Controller('connections')
 export class ConnectionsController {
   constructor(private readonly connectionsService: ConnectionsService) {}
@@ -32,7 +33,7 @@ export class ConnectionsController {
   //? Create
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '커넥션 답변 추가' })
+  @ApiOperation({ description: '커넥션 답변 생성/수정' })
   @Post()
   async createConnection(
     @CurrentUserId() userId: number,
@@ -40,23 +41,6 @@ export class ConnectionsController {
   ): Promise<Connection> {
     try {
       return await this.connectionsService.create({ ...dto, userId });
-    } catch (e) {
-      throw new BadRequestException();
-    }
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? Upsert
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '커넥션 답변 추가' })
-  @Post('upsert')
-  async upsertConnection(
-    @CurrentUserId() userId: number,
-    @Body() dto: CreateConnectionDto,
-  ): Promise<void> {
-    try {
-      await this.connectionsService.upsert({ ...dto, userId });
     } catch (e) {
       throw new BadRequestException();
     }
@@ -109,12 +93,6 @@ export class ConnectionsController {
     ]);
 
     return connection.userReactions ?? [];
-  }
-
-  @ApiOperation({ description: '이 회원의 Connection 리스트 전부 보기' })
-  @Get('users/:id')
-  async getConnectionByUserId(@Param('id') id: number): Promise<Connection[]> {
-    return await this.connectionsService.findByUserId(id);
   }
 
   //?-------------------------------------------------------------------------//

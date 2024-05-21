@@ -16,7 +16,7 @@ import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { SecretsService } from 'src/domain/secrets/secrets.service';
 
 //! @deprecated
-//! 직접 호출하는 사용하는 곳 없고 대신 users/{id}/otp 이런식으로 사용
+//! 미사용
 @Controller('secrets')
 export class SecretsController {
   constructor(private readonly secretsService: SecretsService) {}
@@ -38,16 +38,14 @@ export class SecretsController {
   @ApiOperation({ description: 'OTP 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get()
-  async getSecrets(
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Secret>> {
+  async findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Secret>> {
     return await this.secretsService.findAll(query);
   }
 
   @ApiOperation({ description: 'OTP 상세보기' })
-  @Get(':id')
-  async getSecretsById(@Param('id') id: string): Promise<Secret> {
-    return await this.secretsService.findByKey(id);
+  @Get(':key')
+  async findByKey(@Param('key') key: string): Promise<Secret> {
+    return await this.secretsService.findByKey(key);
   }
 
   //?-------------------------------------------------------------------------//

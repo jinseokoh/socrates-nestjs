@@ -13,12 +13,13 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
+import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { ContentsService } from 'src/domain/contents/contents.service';
 import { CreateContentDto } from 'src/domain/contents/dto/create-content.dto';
 import { UpdateContentDto } from 'src/domain/contents/dto/update-content.dto';
 import { Content } from 'src/domain/contents/entities/content.entity';
 
-@UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
 @Controller('contents')
 export class ContentsController {
   constructor(private readonly contentsService: ContentsService) {}
@@ -41,9 +42,7 @@ export class ContentsController {
   @ApiOperation({ description: '공지사항 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get()
-  async getContents(
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Content>> {
+  async findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Content>> {
     return await this.contentsService.findAll(query);
   }
 
@@ -55,15 +54,9 @@ export class ContentsController {
 
   @ApiOperation({ description: '공지사항 상세보기' })
   @Get(':id')
-  async getContentById(@Param('id') id: number): Promise<Content> {
+  async findById(@Param('id') id: number): Promise<Content> {
     return await this.contentsService.findById(id);
   }
-
-  // @ApiOperation({ description: '공지사항 상세보기' })
-  // @Get(':slug/slug')
-  // async getContentBySlug(@Param('slug') slug: string): Promise<Content> {
-  //   return await this.contentsService.findBySlug(slug);
-  // }
 
   //?-------------------------------------------------------------------------//
   //? UPDATE

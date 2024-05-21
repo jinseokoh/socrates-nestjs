@@ -12,8 +12,7 @@ export class UserNotificationListener {
   async handleOrderCreatedEvent(event: UserNotificationEvent): Promise<void> {
     const fbToken = event.token;
 
-    // todo. dynamodb 로 알림 record 생성
-
+    // todo. dynamodb 알림 record 생성
     const userSetting = event.options.hasOwnProperty(event.name)
       ? event.options[event.name]
       : false;
@@ -25,6 +24,7 @@ export class UserNotificationListener {
       try {
         await this.fcmService.sendToToken(fbToken, notification);
       } catch (e) {
+        // todo. slack or sentry report
         this.logger.error(e);
       }
     }

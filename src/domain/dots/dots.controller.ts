@@ -18,8 +18,9 @@ import { CreateDotDto } from 'src/domain/dots/dto/create-dot.dto';
 import { UpdateDotDto } from 'src/domain/dots/dto/update-dot.dto';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
+import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 
-@UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
 @Controller('dots')
 export class DotsController {
   constructor(private readonly dotsService: DotsService) {}
@@ -61,7 +62,7 @@ export class DotsController {
   }
 
   @Public()
-  @ApiOperation({ description: 'all the active dots' })
+  @ApiOperation({ description: 'all the inactive dots' })
   @Get('/inactive')
   async getInactives(): Promise<Array<Dot>> {
     return await this.dotsService.getInactives();

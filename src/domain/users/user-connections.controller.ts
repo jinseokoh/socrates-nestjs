@@ -40,11 +40,19 @@ export class UserConnectionsController {
   @ApiOperation({ description: '내가 만든 발견 리스트 (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/connections')
-  async getMyConnections(
+  async listMyConnections(
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Connection>> {
-    return await this.usersConnectionService.getMyConnections(userId, query);
+    return await this.usersConnectionService.listMyConnections(userId, query);
+  }
+
+  @ApiOperation({ description: '내가 만든 발견 리스트 (all)' })
+  @Get(':userId/connections/all')
+  async loadMyConnections(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<Connection[]> {
+    return await this.usersConnectionService.loadMyConnections(userId);
   }
 
   //?-------------------------------------------------------------------------//
@@ -124,9 +132,8 @@ export class UserConnectionsController {
   async getConnectionIdsReportedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
-    const data = await this.usersConnectionService.getConnectionIdsReportedByMe(
-      userId,
-    );
+    const data =
+      await this.usersConnectionService.getConnectionIdsReportedByMe(userId);
     return {
       data,
     };

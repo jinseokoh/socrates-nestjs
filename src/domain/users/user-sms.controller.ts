@@ -2,7 +2,6 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Inject,
@@ -15,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
-import { SmsMessageDto } from 'src/domain/users/dto/sms-message.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { UsersService } from 'src/domain/users/users.service';
 import { AnyData } from 'src/common/types';
@@ -36,16 +34,15 @@ export class UserSmsController {
   //? SMS 발송
   //?-------------------------------------------------------------------------//
 
-  //! @deprecated
-  //! 테스트용 메서드
-  @ApiOperation({ description: 'user 에게 SMS 문자 발송' })
-  @Post('test-sms')
-  async sendSms(@Body() dto: SmsMessageDto): Promise<any> {
-    await this.smsClient.send({
-      to: dto.phone,
-      content: dto.body,
-    });
-  }
+  //! @deprecated 미사용
+  // @ApiOperation({ description: 'user 에게 SMS 문자 발송' })
+  // @Post('test-sms')
+  // async sendSms(@Body() dto: SmsMessageDto): Promise<any> {
+  //   await this.smsClient.send({
+  //     to: dto.phone,
+  //     content: dto.body,
+  //   });
+  // }
 
   // 본인인증 OTP SMS 발송
   // rate limiting 적용

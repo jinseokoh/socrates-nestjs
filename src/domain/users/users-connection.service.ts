@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -49,7 +49,7 @@ export class UsersConnectionService {
   //?-------------------------------------------------------------------------//
 
   // 내가 만든 발견 리스트 (paginated)
-  async getMyConnections(
+  async listMyConnections(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Connection>> {
@@ -77,6 +77,24 @@ export class UsersConnectionService {
     };
 
     return await paginate(query, queryBuilder, config);
+  }
+
+  // 이 회원의 Connection 리스트 전부 보기
+  async loadMyConnections(userId: number): Promise<Connection[]> {
+    try {
+      return this.connectionRepository
+        .createQueryBuilder('connection')
+        .leftJoinAndSelect('connection.dot', 'dot')
+        .leftJoinAndSelect('connection.user', 'author')
+        .leftJoinAndSelect('connection.remarks', 'remark')
+        .leftJoinAndSelect('remark.user', 'user')
+        .where({
+          userId,
+        })
+        .getMany();
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
   }
 
   //?-------------------------------------------------------------------------//
