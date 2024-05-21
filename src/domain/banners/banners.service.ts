@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AnyData, SignedUrl } from 'src/common/types';
+import { SignedUrl } from 'src/common/types';
 import { Banner } from 'src/domain/banners/entities/banner.entity';
 import { CreateBannerDto } from 'src/domain/banners/dto/create-banner.dto';
 import { UpdateBannerDto } from 'src/domain/banners/dto/update-banner.dto';
-import { randomName } from 'src/helpers/random-filename';
+import { randomImageName, randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { Repository } from 'typeorm';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
@@ -95,7 +95,7 @@ export class BannersService {
 
   // s3 직접 업로드를 위한 signedUrl 리턴
   async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
-    const fileUri = randomName(dto.name ?? 'banner', dto.mimeType);
+    const fileUri = randomImageName(dto.name ?? 'banner', dto.mimeType);
     const path = `${process.env.NODE_ENV}/banners/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 

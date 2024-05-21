@@ -146,11 +146,11 @@ export class MeetupsController {
   }
 
   @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
-  @Post('image/url')
+  @Post('upload-url')
   async getSignedUrl(
-    @CurrentUserId() id: number,
+    @CurrentUserId() userId: number,
     @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
-    return await this.meetupsService.getSignedUrl(id, dto);
+    return await this.meetupsService.getSignedUrl(userId, dto);
   }
 }

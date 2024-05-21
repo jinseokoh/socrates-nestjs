@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
   paginate,
-  PaginateConfig,
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
@@ -13,7 +12,7 @@ import { UpdateInquiryDto } from 'src/domain/inquiries/dto/update-inquiry.dto';
 import { Comment } from 'src/domain/inquiries/entities/comment.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
-import { randomName } from 'src/helpers/random-filename';
+import { randomImageName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { Repository } from 'typeorm';
 @Injectable()
@@ -134,7 +133,7 @@ export class InquiriesService {
 
   // S3 직접 업로드를 위한 signedUrl 리턴
   async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
-    const fileUri = randomName(dto.name ?? 'inquiry', dto.mimeType);
+    const fileUri = randomImageName(dto.name ?? 'inquiry', dto.mimeType);
     const path = `${process.env.NODE_ENV}/inquiries/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 

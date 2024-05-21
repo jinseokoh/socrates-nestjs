@@ -24,7 +24,7 @@ import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
-import { randomName } from 'src/helpers/random-filename';
+import { randomImageName, randomName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { DataSource, In } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
@@ -40,14 +40,10 @@ export class MeetupsService {
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     @InjectRepository(Meetup)
     private readonly repository: Repository<Meetup>,
-    @InjectRepository(Venue)
-    private readonly venueRepository: Repository<Venue>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Career)
     private readonly careerRepository: Repository<Career>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly s3Service: S3Service,
     private dataSource: DataSource, // for transaction
   ) {}
@@ -371,7 +367,7 @@ export class MeetupsService {
 
   // S3 직접 업로드를 위한 signedUrl 리턴
   async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
-    const fileUri = randomName(dto.name ?? 'meetup', dto.mimeType);
+    const fileUri = randomImageName(dto.name ?? 'meetup', dto.mimeType);
     const path = `${process.env.NODE_ENV}/meetups/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 

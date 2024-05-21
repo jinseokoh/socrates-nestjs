@@ -18,7 +18,7 @@ import { LoremIpsum } from 'lorem-ipsum';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { S3Service } from 'src/services/aws/s3.service';
 import { UpdateConnectionDto } from 'src/domain/dots/dto/update-connection.dto';
-import { randomName } from 'src/helpers/random-filename';
+import { randomImageName } from 'src/helpers/random-filename';
 import { SignedUrl } from 'src/common/types';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
@@ -150,7 +150,7 @@ export class ConnectionsService {
 
   // S3 직접 업로드를 위한 signedUrl 리턴
   async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
-    const fileUri = randomName(dto.name ?? 'connection', dto.mimeType);
+    const fileUri = randomImageName(dto.name ?? 'connection', dto.mimeType);
     const path = `${process.env.NODE_ENV}/connections/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 

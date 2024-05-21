@@ -20,6 +20,7 @@ import { UpdateBannerDto } from 'src/domain/banners/dto/update-banner.dto';
 import { multerOptions } from 'src/helpers/multer-options';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
+import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 @UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
 @Controller('banners')
 export class BannersController {
@@ -89,14 +90,12 @@ export class BannersController {
   // Some extra endpoints
   //--------------------------------------------------------------------------//
 
-  @ApiOperation({
-    description: 's3 직접 업로드를 위한 signedUrl 리턴',
-  })
-  @Post(':id/upload-url')
-  async uploadUrl(
-    @Param('id') id: number,
+  @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
+  @Post('upload-url')
+  async getSignedUrl(
+    @CurrentUserId() userId: number,
     @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
-    return await this.bannersService.getSignedUrl(id, dto);
+    return await this.bannersService.getSignedUrl(userId, dto);
   }
 }

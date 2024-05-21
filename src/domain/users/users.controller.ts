@@ -193,6 +193,8 @@ export class UsersController {
   //? UPLOAD
   //?-------------------------------------------------------------------------//
 
+  //!@ depreacated
+  //! 미사용
   @ApiOperation({ description: 'User 프로필사진 갱신' })
   @UseInterceptors(FileInterceptor('file', multerOptions))
   @Post(':userId/avatar')

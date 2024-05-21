@@ -14,7 +14,7 @@ import { CreateThreadDto } from 'src/domain/meetups/dto/create-thread.dto';
 import { UpdateThreadDto } from 'src/domain/meetups/dto/update-thread.dto';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
-import { randomName } from 'src/helpers/random-filename';
+import { randomImageName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
 import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -185,7 +185,7 @@ export class ThreadsService {
 
   // S3 직접 업로드를 위한 signedUrl 리턴
   async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
-    const fileUri = randomName(dto.name ?? 'thread', dto.mimeType);
+    const fileUri = randomImageName(dto.name ?? 'thread', dto.mimeType);
     const path = `${process.env.NODE_ENV}/threads/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 

@@ -36,7 +36,7 @@ import { Interest } from 'src/domain/users/entities/interest.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
-import { randomName } from 'src/helpers/random-filename';
+import { randomImageName, randomName } from 'src/helpers/random-filename';
 import { Repository } from 'typeorm/repository/Repository';
 import { S3Service } from 'src/services/aws/s3.service';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
@@ -499,7 +499,8 @@ userId = VALUES(`userId`)',
   //? UPLOAD
   //?-------------------------------------------------------------------------//
 
-  // User 프로필사진 갱신
+  //! @deprecated
+  //! compression 은 client side 에서 실행
   async upload(id: number, file: Express.Multer.File): Promise<User> {
     await this.findById(id);
     const path = `local/users/${id}/${randomName('avatar')}`;
@@ -515,7 +516,7 @@ userId = VALUES(`userId`)',
 
   // S3 직접 업로드를 위한 signedUrl 리턴
   async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
-    const fileUri = randomName(dto.name ?? 'avatar', dto.mimeType);
+    const fileUri = randomImageName(dto.name ?? 'avatar', dto.mimeType);
     const path = `${process.env.NODE_ENV}/avatars/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
