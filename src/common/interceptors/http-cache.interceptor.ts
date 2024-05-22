@@ -53,6 +53,7 @@ export class HttpCacheInterceptor extends CacheInterceptor {
   }
 
   //! 캐쉬 override
+  // todo. remove this.
   async intercept(
     context: ExecutionContext,
     next: CallHandler<any>,
@@ -60,15 +61,11 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     const request = context.switchToHttp().getRequest();
     const { httpAdapter } = this.httpAdapterHost;
 
-    console.log('~~ intercept ~~');
+    console.log('~~ caching interceptor ~~');
 
     const isGetRequest = httpAdapter.getRequestMethod(request) === 'GET';
-    const isStartsWithAuth = request.originalUrl.startsWith('/v1/users');
 
     if (!isGetRequest) {
-      if (!isStartsWithAuth) {
-        console.log('it starts with auth');
-      }
       const allKeys = this.reflector.getAllAndMerge(CACHE_KEY_METADATA, [
         context.getHandler(),
       ]);
