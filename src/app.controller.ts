@@ -1,17 +1,26 @@
 import { Controller, Get } from '@nestjs/common';
+import { AppService } from 'src/app.service';
 import { Public } from 'src/common/decorators/public.decorator';
 @Controller()
 export class AppController {
-  // @Public()
-  // @Get()
-  // index(): string {
-  //   return `Welcome to MeetSocrates v1 API ${process.env.APP_TYPE}, a work of GoK (v${process.env.APP_VERSION})`;
-  // }
+  constructor(private readonly appService: AppService) {}
+
+  @Public()
+  @Get('/counts')
+  async counts(): Promise<{
+    users: number;
+    meetups: number;
+    dots: number;
+    connections: number;
+  }> {
+    return await this.appService.getCounts();
+  }
 
   @Public()
   @Get('/version')
-  version(): string {
-    return process.env.APP_VERSION;
+  version(): { version: string } {
+    const version = this.appService.getVersion();
+    return { version };
   }
 
   // @EventPattern('RealTime')

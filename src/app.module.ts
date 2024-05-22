@@ -1,6 +1,7 @@
 import { AlarmsModule } from 'src/domain/alarms/alarms.module';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from 'src/app.controller';
+import { AppService } from 'src/app.service';
 import { AuthModule } from 'src/domain/auth/auth.module';
 import { BannersModule } from 'src/domain/banners/banners.module';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -37,7 +38,6 @@ import { DuplicateEntryErrorInterceptor } from 'src/common/interceptors/duplicat
 import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.filter';
 import { SecretsModule } from 'src/domain/secrets/secrets.module';
 // import { CustomLogger } from 'src/helpers/custom-logger';
-
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
@@ -137,6 +137,7 @@ import { SecretsModule } from 'src/domain/secrets/secrets.module';
     RedisModule.register({ name: REDIS_PUBSUB_CLIENT }),
     // TypeORM Entities
     AlarmsModule,
+    AppModule,
     AuthModule,
     BannersModule,
     CareersModule,
@@ -165,6 +166,7 @@ import { SecretsModule } from 'src/domain/secrets/secrets.module';
       provide: APP_FILTER,
       useClass: SentryErrorReportFilter, // 500 이상이면 Senty로 보고
     },
+    AppService,
   ],
 })
 export class AppModule {}
