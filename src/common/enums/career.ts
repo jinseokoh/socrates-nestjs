@@ -1,5 +1,4 @@
-export enum Career {
-  ALL = 'all',
+export enum BaseCareer {
   STUDENT = 'student',
   ACCOUNTING = 'accounting',
   HR = 'hr',
@@ -27,3 +26,11 @@ export enum Career {
   WELFARE = 'welfare',
   OTHER = 'other',
 }
+
+export enum OptionalCareer {
+  ALL = 'all',
+}
+
+export const TargetCareer = { ...BaseCareer, ...OptionalCareer };
+
+export type TargetCareerType = BaseCareer | OptionalCareer;

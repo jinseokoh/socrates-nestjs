@@ -5,10 +5,11 @@ import {
   Expense,
   Region,
   Time,
-  Career as CareerEnum,
+  TargetCareer,
   Category as CategoryEnum,
   SubCategory,
   TargetGender,
+  TargetCareerType,
 } from 'src/common/enums';
 import {
   Column,
@@ -70,11 +71,11 @@ export class Meetup {
 
   @Column({
     type: 'set',
-    enum: CareerEnum,
-    default: [CareerEnum.ALL],
+    enum: TargetCareer,
+    default: [TargetCareer.ALL],
   })
   @ApiProperty({ description: 'comma separated target career list' })
-  targetCareers: CareerEnum[];
+  targetCareers: TargetCareerType[];
 
   @Column({ length: 8, nullable: true })
   @ApiProperty({ description: 'age range' })

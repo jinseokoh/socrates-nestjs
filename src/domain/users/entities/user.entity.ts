@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { Gender, Role, Career } from 'src/common/enums';
+import { Gender, Role, BaseCareer } from 'src/common/enums';
 import {
   Column,
   CreateDateColumn,
@@ -67,9 +67,9 @@ export class User {
   @ApiProperty({ description: '성별' })
   gender: Gender | null;
 
-  @Column({ type: 'enum', enum: Career, nullable: true })
+  @Column({ type: 'enum', enum: BaseCareer, nullable: true })
   @ApiProperty({ description: '직군' })
-  career: Career | null;
+  career: BaseCareer | null;
 
   @Column({ nullable: true })
   @ApiProperty({ description: 'dob' })

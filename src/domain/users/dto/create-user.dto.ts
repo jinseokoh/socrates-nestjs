@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Role } from 'src/common/enums';
-import { Career } from 'src/common/enums/career';
+import { BaseCareer } from 'src/common/enums/career';
 import { Gender } from 'src/common/enums/gender';
 export class CreateUserDto {
   @ApiProperty({ description: '닉네임', required: false })
@@ -41,9 +41,9 @@ export class CreateUserDto {
   gender: Gender | null;
 
   @ApiProperty({ description: '직군', required: false })
-  @IsEnum(Career)
+  @IsEnum(BaseCareer)
   @IsOptional()
-  career: Career | null;
+  career: BaseCareer | null;
 
   @ApiProperty({
     description: 'date of birth',

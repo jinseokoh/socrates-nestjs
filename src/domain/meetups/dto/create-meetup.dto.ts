@@ -14,7 +14,7 @@ import {
   Category,
   Region,
   SubCategory,
-  Career as CareerEnum,
+  TargetCareerType,
 } from 'src/common/enums';
 import { Day } from 'src/common/enums/day';
 import { Expense } from 'src/common/enums/expense';
@@ -58,7 +58,7 @@ export class CreateMeetupDto {
   @ApiProperty({ description: '상대방 careers', default: ['all'] })
   @IsArray()
   @IsOptional()
-  targetCareers: CareerEnum[];
+  targetCareers: TargetCareerType[];
 
   @ApiProperty({ description: '상대방 나이', default: null })
   @IsString()
