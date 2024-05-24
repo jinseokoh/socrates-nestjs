@@ -26,7 +26,7 @@ export class HttpCacheInterceptor extends CacheInterceptor {
       '/v1/version',
       '/v1/counts',
       '/v1/users/mine',
-      '/v1/users/bust',
+      // '/v1/users/bust',
     ];
     if (isGetRequest && excludePaths.includes(requestUrl)) {
       return undefined;
@@ -100,27 +100,17 @@ export class HttpCacheInterceptor extends CacheInterceptor {
 /v1/users/{userId}/categories
 /v1/users/{userId}/categories/{slug}
 /v1/users/{userId}/connections-reported/{connectionId}
-/v1/users/{userId}/connections-reported/{connectionId}
-/v1/users/{userId}/connections/{connectionId}
-/v1/users/{userId}/connections/{connectionId}
 /v1/users/{userId}/connections/{connectionId}
 /v1/users/{senderId}/friendships/{recipientId}
-/v1/users/{senderId}/friendships/{recipientId}
-/v1/users/{senderId}/friendships/{recipientId}
-/v1/users/{userId}/impressions
-/v1/users/{userId}/languages
-/v1/users/{userId}/languages
-/v1/users/{userId}/meetups-liked/{meetupId}
-/v1/users/{userId}/meetups-liked/{meetupId}
-/v1/users/{userId}/meetups-reported/{meetupId}
-/v1/users/{userId}/meetups-reported/{meetupId}
-/v1/users/{askingUserId}/joins/{askedUserId}/meetups/{meetupId}
+/v1/users/{userId}/impressions - users:userId
+/v1/users/{userId}/languages - users:userId
+/v1/users/{userId}/meetups-liked/{meetupId} - users:userId, meetups
+/v1/users/{userId}/meetups-reported/{meetupId} - users:userId, meetups
 /v1/users/{askingUserId}/joins/{askedUserId}/meetups/{meetupId}
 /v1/users/{senderId}/pleas/{recipientId}
 /v1/users/{key}/otp
 /v1/users/{key}/change
 /v1/users/{key}/otp/{otp}
-/v1/users/{userId}/users-hated/{otherId} - users:userId
 /v1/users/{userId}/users-hated/{otherId} - users:userId
 /v1/users/{userId}/reports/{otherId} - users:userId
 /v1/users/{userId}/reports/{otherId} - users:userId
