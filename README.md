@@ -26,11 +26,12 @@
 
 ### Firebase 콘솔
 
-Firebase Admin SDK account key 는 Firebase 프로젝트 설정 페이지에서 생성후 다운로드 할 수 있다. 이 프로젝트와 연결된 Firebase 프로젝트의 이름은 MeetSocrates 이며, 해당 키파일은 fb-admin-dev.account-key.json 이란 이름으로 이 프로젝트 root 에 위치한다. 이로서, 모든 Firebase Admin 의 기능을 수행할 수 있다. 물론 과금도 해당 프로젝트에 부과된다.
+Firebase Admin SDK account key 는 Firebase 프로젝트 설정 페이지에서 생성후 다운로드 할 수 있다. 이 프로젝트와 연결된 Firebase 프로젝트의 이름은 MeetSocrates 이며, 해당 키파일은 fb-admin.account-key.json 이란 이름으로 이 프로젝트 root 에 위치한다. 이로서, 모든 Firebase Admin 의 기능을 수행할 수 있다.
 
+- fb-admin.account-key.json 파일은 이 NestJS 프로젝트 뿐만아니라, 아래의 프로젝트에서도 사용한다. (FB admin 기능을 사용하므로)
+  - Functions 카카오 사용자 인증을 위해 활성화 [관련프로젝트](https://github.com/jinseokoh/socrates-firebase-functions)
 - [Firebase Console](https://console.firebase.google.com/project/meetsocrates-fd76c)
 - Authentication 에서 Google, Apple 을 활성화
-- Functions 카카오 사용자 인증을 위해 활성화 [관련프로젝트](https://github.com/jinseokoh/socrates-firebase-functions)
 
 ### Google Cloud 콘솔
 

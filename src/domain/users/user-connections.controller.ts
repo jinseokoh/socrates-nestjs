@@ -148,6 +148,8 @@ export class UserConnectionsController {
   //? - update reaction entity itself (do we need to delete it if all 5 emotions are falsy?)
   //? - update connection's reaction counts
 
+
+  //! cache invalidation
   @ApiOperation({ description: '발견 reaction 리스트에 추가' })
   @Post(':userId/connections/:connectionId')
   async upsertReaction(
