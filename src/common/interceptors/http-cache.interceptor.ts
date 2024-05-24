@@ -87,16 +87,85 @@ export class HttpCacheInterceptor extends CacheInterceptor {
   }
 }
 
+
+/v1/users
+/v1/users/{userId}
+/v1/users/{userId}/username
+/v1/users/{userId}/password
+/v1/users/{userId}/profile
+/v1/users/{userId}/avatar
+/v1/users/{userId}/upload-url
+/v1/users/{userId}/purchase
+/v1/users/bust
+/v1/users/{userId}/categories
+/v1/users/{userId}/categories/{slug}
+/v1/users/{userId}/connections-reported/{connectionId}
+/v1/users/{userId}/connections-reported/{connectionId}
+/v1/users/{userId}/connections/{connectionId}
+/v1/users/{userId}/connections/{connectionId}
+/v1/users/{userId}/connections/{connectionId}
+/v1/users/{senderId}/friendships/{recipientId}
+/v1/users/{senderId}/friendships/{recipientId}
+/v1/users/{senderId}/friendships/{recipientId}
+/v1/users/{userId}/impressions
+/v1/users/{userId}/languages
+/v1/users/{userId}/languages
+/v1/users/{userId}/meetups-liked/{meetupId}
+/v1/users/{userId}/meetups-liked/{meetupId}
+/v1/users/{userId}/meetups-reported/{meetupId}
+/v1/users/{userId}/meetups-reported/{meetupId}
+/v1/users/{askingUserId}/joins/{askedUserId}/meetups/{meetupId}
+/v1/users/{askingUserId}/joins/{askedUserId}/meetups/{meetupId}
+/v1/users/{senderId}/pleas/{recipientId}
+/v1/users/{key}/otp
+/v1/users/{key}/change
+/v1/users/{key}/otp/{otp}
+/v1/users/{userId}/users-hated/{otherId} - users:userId
+/v1/users/{userId}/users-hated/{otherId} - users:userId
+/v1/users/{userId}/reports/{otherId} - users:userId
+/v1/users/{userId}/reports/{otherId} - users:userId
+/v1/users/{userId}/flags - users:userId
+
+
+
+
+
+
+
+function checkPattern(url) {
+  const patterns = [
+    /^\/v1\/users\/(\d+)$/,
+    /^\/v1\/users\/(\d+)\/[a-z\-]+$/,
+    /^\/v1\/users\/(\d+)\/categories\/([a-zA-Z]+)$/,
+    /^\/v1\/users\/(\d+)\/connections-reported\/(\d+)$/
+  ];
+    for (let i = 0; i < patterns.length; i++) {
+      const match = url.match(patterns[i]);
+      if (match) {
+        const userId = match[1];
+        return 
+      }
+    }
+    console.log('The URL does not match any of the predefined patterns.');
+}
+
 function extractCacheTags(requestUrl: string): string[] {
+
   const baseUrl = requestUrl.split('?')[0];
   const keys = baseUrl.split('/');
 
   if (keys[2] === 'users') {
+    const match = baseUrl.match(/^\/v1\/users\/(\d+)$/);
+    if (match) {
+
+    }
+      return []
+    }
     if (baseUrl.includes('connections') || baseUrl.includes('reactions')) {
-      return 'connections';
+      return ['connections'];
     }
     if (baseUrl.includes('connections')) {
-      return 'connections';
+      return ['connections'];
     }
     if (baseUrl.includes('joins')) {
       return ['users', 'meetups'];
@@ -104,12 +173,12 @@ function extractCacheTags(requestUrl: string): string[] {
 
     return [`users:${keys[3]}`];
   } else {
-    //? 간단한 처리
+    //? 다른 경우는 간단히 2번째 key (ex. entity 명)
+    return [keys[2]];
   }
 
   return [];
 }
-
 
 // function setCacheWithTags(key, value, tags) {
 //   client.set(key, value, (err) => {
