@@ -7,10 +7,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { CategoriesService } from 'src/domain/categories/categories.service';
 
-@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}

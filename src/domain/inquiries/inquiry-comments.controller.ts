@@ -22,9 +22,8 @@ import { CreateCommentDto } from 'src/domain/inquiries/dto/create-comment.dto';
 import { UpdateCommentDto } from 'src/domain/inquiries/dto/update-comment.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 
-@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('inquiries')
 export class InquiryCommentsController {
   constructor(private readonly commentsService: CommentsService) {}

@@ -19,9 +19,8 @@ import { CreateBannerDto } from 'src/domain/banners/dto/create-banner.dto';
 import { UpdateBannerDto } from 'src/domain/banners/dto/update-banner.dto';
 import { multerOptions } from 'src/helpers/multer-options';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
-import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('banners')
 export class BannersController {
   constructor(private readonly bannersService: BannersService) {}

@@ -18,9 +18,8 @@ import { CreateDotDto } from 'src/domain/dots/dto/create-dot.dto';
 import { UpdateDotDto } from 'src/domain/dots/dto/update-dot.dto';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
-import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 
-@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('dots')
 export class DotsController {
   constructor(private readonly dotsService: DotsService) {}

@@ -13,13 +13,12 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
-import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { ContentsService } from 'src/domain/contents/contents.service';
 import { CreateContentDto } from 'src/domain/contents/dto/create-content.dto';
 import { UpdateContentDto } from 'src/domain/contents/dto/update-content.dto';
 import { Content } from 'src/domain/contents/entities/content.entity';
 
-@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('contents')
 export class ContentsController {
   constructor(private readonly contentsService: ContentsService) {}

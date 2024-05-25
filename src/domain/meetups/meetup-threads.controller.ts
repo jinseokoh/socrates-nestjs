@@ -16,13 +16,12 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { CreateThreadDto } from 'src/domain/meetups/dto/create-thread.dto';
 import { UpdateThreadDto } from 'src/domain/meetups/dto/update-thread.dto';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { ThreadsService } from 'src/domain/meetups/threads.service';
 
-@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
 export class MeetupThreadsController {
   constructor(private readonly threadsService: ThreadsService) {}

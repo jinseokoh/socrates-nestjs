@@ -15,7 +15,6 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
-import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { SignedUrl } from 'src/common/types';
 import { ConnectionsService } from 'src/domain/dots/connections.service';
 import { CreateConnectionDto } from 'src/domain/dots/dto/create-connection.dto';
@@ -24,7 +23,7 @@ import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { Reaction } from 'src/domain/dots/entities/reaction.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
-@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('connections')
 export class ConnectionsController {
   constructor(private readonly connectionsService: ConnectionsService) {}

@@ -15,13 +15,12 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
-import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { CreateLedgerDto } from 'src/domain/ledgers/dto/create-ledger.dto';
 import { UpdateLedgerDto } from 'src/domain/ledgers/dto/update-ledger.dto';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { LedgersService } from 'src/domain/ledgers/ledgers.service';
 
-@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('ledgers')
 export class LedgersController {
   constructor(private readonly ledgersService: LedgersService) {}

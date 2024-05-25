@@ -14,7 +14,6 @@ import { ApiOperation } from '@nestjs/swagger';
 import * as moment from 'moment';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { MessageType } from 'src/common/enums';
-import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { SignedUrl } from 'src/common/types';
 import { CreateMessageDto } from 'src/domain/chats/dto/create-message.dto';
 import {
@@ -25,7 +24,7 @@ import { MessagesService } from 'src/domain/chats/messages.service';
 import { RoomsService } from 'src/domain/chats/rooms.service';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
-@UseInterceptors(ClassSerializerInterceptor, HttpCacheInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('chats')
 export class MessagesController {
   constructor(

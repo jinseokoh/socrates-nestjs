@@ -1,3 +1,4 @@
+import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { AlarmsModule } from 'src/domain/alarms/alarms.module';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from 'src/app.controller';
@@ -161,6 +162,10 @@ import { SecretsModule } from 'src/domain/secrets/secrets.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: DuplicateEntryErrorInterceptor, // 중복입력은 400으로 전환
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpCacheInterceptor,
     },
     {
       provide: APP_FILTER,

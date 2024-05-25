@@ -2,18 +2,19 @@
 import { CACHE_KEY_METADATA, CacheInterceptor } from '@nestjs/cache-manager';
 import { CallHandler, ExecutionContext, Injectable } from '@nestjs/common';
 import { Observable } from 'rxjs';
-const TAG_KEY_PREFIX = 'tag:';
+const TAG_KEY_PREFIX = 'meso:';
 
 // ref) https://dev.to/secmohammed/nestjs-caching-globally-neatly-1e17
 @Injectable()
 export class HttpCacheInterceptor extends CacheInterceptor {
-  _extractCacheTags(requestUrl: string): string[] {
-    const entity = requestUrl.split('/')[2];
+  _extractCacheTagsToRemove(uri: string): string[] {
+    const baseUri = uri.split('?')[0];
+    const entity = baseUri.split('/')[2];
     if (entity === 'users') {
-      if (requestUrl.includes('connections')) {
+      if (uri.includes('connections')) {
         return [TAG_KEY_PREFIX + 'connections'];
       }
-      if (requestUrl.includes('joins')) {
+      if (uri.includes('joins')) {
         return [TAG_KEY_PREFIX + 'meetups'];
       }
       return [];
@@ -21,17 +22,19 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     return [TAG_KEY_PREFIX + entity];
   }
 
-  async _save(requestUrl: string) {
-    const tag = TAG_KEY_PREFIX + requestUrl.split('/')[2];
+  async _save(uri: string) {
+    const baseUri = uri.split('?')[0];
+    const entity = baseUri.split('/')[2];
+    const tag = TAG_KEY_PREFIX + entity;
     const redisClient = this.cacheManager.store.getClient();
-    await redisClient.sadd(tag, requestUrl);
+    await redisClient.sadd(tag, uri);
   }
 
   async _invalidate(tag: string) {
     const redisClient = this.cacheManager.store.getClient();
     const keys = await redisClient.smembers(tag);
     const pipeline = redisClient.pipeline();
-    keys.forEach((key) => {
+    keys.forEach((key: string) => {
       pipeline.del(key);
     });
 
@@ -59,12 +62,14 @@ export class HttpCacheInterceptor extends CacheInterceptor {
 
     //! POST, PUT, PATCH, DELETE 처리
     if (!isGetRequest) {
-      const cacheTags = this._extractCacheTags(requestUrl);
-      setTimeout(async () => {
-        for (const tag of cacheTags) {
-          await this._invalidate(tag);
-        }
-      }, 0);
+      const cacheTags = this._extractCacheTagsToRemove(requestUrl);
+      if (cacheTags.length > 0) {
+        setTimeout(async () => {
+          for (const tag of cacheTags) {
+            await this._invalidate(tag);
+          }
+        }, 0);
+      }
       return undefined;
     }
 
