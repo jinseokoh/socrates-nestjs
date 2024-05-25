@@ -556,7 +556,7 @@ userId = VALUES(`userId`)',
     let otp = '';
 
     // for app store submission test
-    if (value === '01012341234' || value === '01012345678') {
+    if (value === '01012345678' || value === '01087654321') {
       otp = cache
         ? await this._upsertOtpUsingCache(value, '000000')
         : await this._upsertOtpUsingDb(value, '000000');
@@ -566,7 +566,7 @@ userId = VALUES(`userId`)',
         : await this._upsertOtpUsingDb(value);
     }
 
-    if (value === '01012341234' || value === '01012345678') {
+    if (value === '01012345678' || value === '01087654321') {
       // do not send any email or SMS
     } else {
       if (val.includes('@')) {
