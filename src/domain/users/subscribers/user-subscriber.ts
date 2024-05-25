@@ -69,7 +69,7 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
             debit: INITIAL_BONUS_COIN,
             balance: INITIAL_BONUS_COIN,
             ledgerType: LedgerType.DEBIT_REWARD,
-            note: `free ${INITIAL_BONUS_COIN} coins granted`,
+            note: `가입축하 ${INITIAL_BONUS_COIN}코인 지급`,
             userId: event.entity.id,
           },
         ])

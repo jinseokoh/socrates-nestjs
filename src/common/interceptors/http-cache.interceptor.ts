@@ -22,7 +22,7 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     return [TAG_KEY_PREFIX + entity];
   }
 
-  async _save(uri: string) {
+  async _saveCacheTags(uri: string) {
     const baseUri = uri.split('?')[0];
     const entity = baseUri.split('/')[2];
     const tag = TAG_KEY_PREFIX + entity;
@@ -30,7 +30,7 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     await redisClient.sadd(tag, uri);
   }
 
-  async _invalidate(tag: string) {
+  async _invalidateCacheTags(tag: string) {
     const redisClient = this.cacheManager.store.getClient();
     const keys = await redisClient.smembers(tag);
     const pipeline = redisClient.pipeline();
@@ -66,7 +66,7 @@ export class HttpCacheInterceptor extends CacheInterceptor {
       if (cacheTags.length > 0) {
         setTimeout(async () => {
           for (const tag of cacheTags) {
-            await this._invalidate(tag);
+            await this._invalidateCacheTags(tag);
           }
         }, 0);
       }
@@ -75,7 +75,7 @@ export class HttpCacheInterceptor extends CacheInterceptor {
 
     //! GET 처리
     setTimeout(async () => {
-      await this._save(requestUrl);
+      await this._saveCacheTags(requestUrl);
     }, 0);
     return requestUrl;
   }
