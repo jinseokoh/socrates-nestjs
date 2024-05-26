@@ -11,10 +11,10 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     const baseUri = uri.split('?')[0];
     const entity = baseUri.split('/')[2];
     if (entity === 'users') {
-      if (uri.includes('connections')) {
+      if (uri.includes('connection')) {
         return [TAG_KEY_PREFIX + 'connections'];
       }
-      if (uri.includes('joins')) {
+      if (uri.includes('meetup')) {
         return [TAG_KEY_PREFIX + 'meetups'];
       }
       return [];
