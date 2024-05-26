@@ -15,6 +15,9 @@ export class HttpCacheInterceptor extends CacheInterceptor {
         return [TAG_KEY_PREFIX + 'connections'];
       }
       if (uri.includes('meetup')) {
+        if (uri.includes('join')) {
+          return [TAG_KEY_PREFIX + 'meetups', TAG_KEY_PREFIX + 'chats'];
+        }
         return [TAG_KEY_PREFIX + 'meetups'];
       }
       return [];
