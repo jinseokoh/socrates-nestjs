@@ -52,6 +52,7 @@ export class DotsService {
       filterableColumns: {
         isActive: [FilterOperator.EQ],
         userId: [FilterOperator.EQ, FilterOperator.IN],
+        createdAt: [FilterOperator.LT, FilterOperator.GT],
       },
     });
   }
