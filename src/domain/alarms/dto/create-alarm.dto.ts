@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsEnum,
   IsNumber,
   IsObject,
@@ -50,6 +51,10 @@ export class CreateAlarmDto {
   @IsObject()
   @IsOptional()
   user: ISender | null;
+
+  @ApiProperty({ description: '읽음 여부' })
+  @IsBoolean()
+  isRead: boolean;
 
   // 빈칸으로 남겨두면 자동생성
   @ApiProperty({

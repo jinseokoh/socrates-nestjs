@@ -24,6 +24,7 @@ export interface IAlarm extends IAlarmKey {
   data: IData;
   link: string | null;
   user: ISender | null;
+  isRead: boolean;
   expires?: number;
   createdAt?: number;
   updatedAt?: number;

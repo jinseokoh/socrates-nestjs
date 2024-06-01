@@ -52,6 +52,10 @@ export const AlarmSchema = new Schema(
       },
       required: false,
     },
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
     expires: {
       type: {
         value: Number,
