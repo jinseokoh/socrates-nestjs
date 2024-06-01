@@ -26,8 +26,19 @@ export const AlarmSchema = new Schema(
     message: {
       type: String,
     },
+    data: {
+      type: Object,
+      schema: {
+        page: String,
+        tab: {
+          type: Number,
+          default: null,
+        },
+      },
+    },
     link: {
       type: String,
+      default: null,
       required: false,
     },
     user: {

@@ -30,10 +30,10 @@ export class AlarmsController {
     @CurrentUserId() userId: number,
     @Body() createAlarmDto: CreateAlarmDto,
   ): Promise<IAlarm> {
-    const dto = {
-      ...createAlarmDto,
-      userId,
-    };
+    const dto = { ...createAlarmDto };
+    if (!dto.hasOwnProperty('userId')) {
+      dto['userId'] = userId;
+    }
     return await this.alarmsService.create(dto);
   }
 

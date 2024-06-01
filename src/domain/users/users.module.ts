@@ -44,6 +44,7 @@ import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { UserPleaController } from 'src/domain/users/user-plea.controller';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
+import { AlarmsModule } from 'src/domain/alarms/alarms.module';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
         limit: 2,
       },
     ]),
+    AlarmsModule,
     SesModule,
     S3Module,
     FcmModule,

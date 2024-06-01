@@ -5,6 +5,11 @@ export interface IAlarmKey {
   id: string | null; // sort key
 }
 
+export interface IData {
+  page: string;
+  tab: number | null;
+}
+
 export interface ISender {
   username: string;
   avatar: string;
@@ -15,7 +20,8 @@ export interface ISender {
 
 export interface IAlarm extends IAlarmKey {
   alarmType: AlarmType;
-  message: string | null;
+  message: string;
+  data: IData;
   link: string | null;
   user: ISender | null;
   expires?: number;

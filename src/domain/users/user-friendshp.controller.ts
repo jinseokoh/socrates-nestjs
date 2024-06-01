@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -16,10 +15,12 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
-import { FriendshipStatus } from 'src/common/enums';
+import { AlarmType, FriendshipStatus } from 'src/common/enums';
+import { AlarmsService } from 'src/domain/alarms/alarms.service';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto';
 import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
+import { CreateAlarmDto } from 'src/domain/alarms/dto/create-alarm.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -27,6 +28,7 @@ import { UsersFriendshipService } from 'src/domain/users/users-friendship.servic
 export class UserFriendshipController {
   constructor(
     private readonly usersFriendshipService: UsersFriendshipService,
+    private readonly alarmsService: AlarmsService,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -41,11 +43,20 @@ export class UserFriendshipController {
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body() dto: CreateFriendshipDto,
   ): Promise<void> {
-    return await this.usersFriendshipService.createFriendship({
+    await this.usersFriendshipService.createFriendship({
       ...dto,
       senderId,
       recipientId,
     });
+    const alarmDto = new CreateAlarmDto();
+    alarmDto.alarmType = AlarmType.FRIENDSHIP;
+    alarmDto.userId = recipientId;
+    alarmDto.message = `새로운 친구초대를 받았습니다.`;
+    alarmDto.data = {
+      page: 'activity',
+      tab: 7,
+    };
+    await this.alarmsService.create(alarmDto);
   }
 
   @ApiOperation({ description: '친구신청 수락' })

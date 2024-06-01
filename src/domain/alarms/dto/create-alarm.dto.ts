@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { AlarmType } from 'src/common/enums';
-import { ISender } from 'src/domain/alarms/entities/alarm.interface';
+import { IData, ISender } from 'src/domain/alarms/entities/alarm.interface';
 
 export class CreateAlarmDto {
   @ApiProperty({ description: '사용자 id', required: true })
@@ -31,17 +31,22 @@ export class CreateAlarmDto {
   @IsEnum(AlarmType)
   alarmType: AlarmType;
 
-  @ApiProperty({ description: 'TextAlarm 용 payload', required: true })
+  @ApiProperty({ description: 'message', required: true })
   @IsString()
   @IsOptional()
   message: string;
 
-  @ApiProperty({ description: 'TextAlarm 용 payload', required: false })
+  @ApiProperty({ description: 'data (navigation 용)', required: true })
+  @IsObject()
+  @IsOptional()
+  data: IData | null;
+
+  @ApiProperty({ description: 'link (navigation 용)', required: false })
   @IsString()
   @IsOptional()
   link: string | null;
 
-  @ApiProperty({ description: 'ImageAlarm 용 payload', required: false })
+  @ApiProperty({ description: '사용자', required: false })
   @IsObject()
   @IsOptional()
   user: ISender | null;
