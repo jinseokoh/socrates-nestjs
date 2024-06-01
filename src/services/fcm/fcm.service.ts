@@ -10,6 +10,7 @@ export class FcmService {
   async sendToToken(
     token: string,
     notification: firebaseAdmin.messaging.Notification,
+    data: { [key: string]: string },
   ): Promise<string> {
     const payload: firebaseAdmin.messaging.TokenMessage = {
       token,
@@ -18,6 +19,7 @@ export class FcmService {
         body: notification.body,
         imageUrl: notification.imageUrl,
       },
+      data: data,
       apns: {
         fcmOptions: {
           imageUrl: notification?.imageUrl,
@@ -40,6 +42,7 @@ export class FcmService {
   async sendToTopic(
     topic: string,
     notification: firebaseAdmin.messaging.Notification,
+    data: { [key: string]: string },
   ): Promise<string> {
     const payload: firebaseAdmin.messaging.TopicMessage = {
       topic,
@@ -48,6 +51,7 @@ export class FcmService {
         body: notification.body,
         imageUrl: notification.imageUrl,
       },
+      data: data,
       apns: {
         fcmOptions: {
           imageUrl: notification?.imageUrl,
@@ -69,6 +73,7 @@ export class FcmService {
   async sendToCondition(
     condition: string,
     notification: firebaseAdmin.messaging.Notification,
+    data: { [key: string]: string },
   ): Promise<string> {
     const payload: firebaseAdmin.messaging.ConditionMessage = {
       condition,
@@ -77,6 +82,7 @@ export class FcmService {
         body: notification.body,
         imageUrl: notification.imageUrl,
       },
+      data: data,
       apns: {
         fcmOptions: {
           imageUrl: notification?.imageUrl,
@@ -99,6 +105,7 @@ export class FcmService {
   async sendMulticast(
     tokens: string[],
     notification: firebaseAdmin.messaging.Notification,
+    data: { [key: string]: string },
   ) {
     if (tokens.length < 1) {
       throw new BadRequestException('No token is provided.');
@@ -111,6 +118,7 @@ export class FcmService {
         body: notification?.body,
         imageUrl: notification?.imageUrl,
       },
+      data: data,
       apns: {
         fcmOptions: {
           imageUrl: notification?.imageUrl,

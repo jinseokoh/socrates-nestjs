@@ -20,9 +20,13 @@ export class UserNotificationListener {
       title: 'MeSo',
       body: event.body,
     };
+    const data = {
+      page: event.data.page,
+      tab: event.data.tab.toString(),
+    };
     if (fbToken && userSetting) {
       try {
-        await this.fcmService.sendToToken(fbToken, notification);
+        await this.fcmService.sendToToken(fbToken, notification, data);
       } catch (e) {
         // todo. slack or sentry report
         this.logger.error(e);

@@ -1,5 +1,3 @@
-import { IData } from 'src/domain/alarms/entities/alarm.interface';
-
 export class UserNotificationEvent {
   name:
     | 'meetupLike'
@@ -17,5 +15,5 @@ export class UserNotificationEvent {
   token: string | null; // 누구에게 보낼지
   options: object; // 보낼지 말지 결정하기 위한 사용자 profile options 상태 전달용
   body: string;
-  data: IData;
+  data: { [key: string]: string };
 }

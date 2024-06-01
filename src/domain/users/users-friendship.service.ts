@@ -108,7 +108,7 @@ export class UsersFriendshipService {
           credit: dto.cost,
           ledgerType: LedgerType.CREDIT_SPEND,
           balance: newBalance,
-          note: `친구.신청료 -${dto.cost} (대상 #${dto.senderId})`,
+          note: `친구 신청료 (대상 #${dto.senderId})`,
           userId: dto.senderId,
         });
         await queryRunner.manager.save(ledger);
@@ -131,10 +131,10 @@ export class UsersFriendshipService {
       event.name = 'friendRequest';
       event.token = recipient.pushToken;
       event.options = recipient.profile?.options ?? {};
-      event.body = `${sender.username}님이 나에게 친구신청을 보냈습니다. ${dto.message}`;
+      event.body = `${sender.username}님으로부터 친구신청을 받았습니다. ${dto.message}`;
       event.data = {
         page: 'activities',
-        tab: 7,
+        tab: '7',
       };
       this.eventEmitter.emit('user.notified', event);
     } catch (error) {

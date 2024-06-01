@@ -54,7 +54,7 @@ export class UserFriendshipController {
     alarmDto.message = `새로운 친구초대를 받았습니다.`;
     alarmDto.data = {
       page: 'activities',
-      tab: 7,
+      tab: '7',
     };
     await this.alarmsService.create(alarmDto);
   }
