@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UseInterceptors,
@@ -65,10 +66,23 @@ export class AlarmsController {
     };
   }
 
+  // not being used
   @ApiOperation({ description: 'Banner 상세보기' })
   @Get(':id')
   async getAlarmById(@Param('id') id: number): Promise<IAlarm> {
     throw new Error('My first Sentry error!');
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? UPDATE
+  //?-------------------------------------------------------------------------//
+
+  @Patch(':id/read')
+  async markAsRead(
+    @CurrentUserId() userId: number,
+    @Param('id') id: string,
+  ): Promise<void> {
+    await this.alarmsService.markAsRead(userId, id);
   }
 
   //?-------------------------------------------------------------------------//

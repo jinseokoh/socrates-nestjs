@@ -20,9 +20,9 @@ export class AlarmsService {
   //?
   async create(dto: CreateAlarmDto): Promise<IAlarm> {
     const timestampInMilliseconds = moment().valueOf();
-    const id = `msg_${timestampInMilliseconds}`;
+    const id = `m${timestampInMilliseconds}`; // m as in message
     //! as for the expiration, needs to be in seconds format (not milliseconds)
-    const expires = moment().add(2, 'days').unix();
+    const expires = moment().add(7, 'days').unix();
     try {
       const alarm = await this.model.create({ ...dto, id, expires });
       return alarm;
@@ -72,6 +72,15 @@ export class AlarmsService {
     } catch (error) {
       console.error(`[dynamodb] error`, error);
       throw new BadRequestException(error);
+    }
+  }
+
+  async markAsRead(userId: number, id: string): Promise<void> {
+    try {
+      await this.model.update({ userId, id }, { isRead: true });
+    } catch (error) {
+      console.error('Error updating isRead:', error);
+      throw error;
     }
   }
 
