@@ -132,6 +132,10 @@ export class UsersFriendshipService {
       event.token = recipient.pushToken;
       event.options = recipient.profile?.options ?? {};
       event.body = `${sender.username}님이 나에게 친구신청을 보냈습니다. ${dto.message}`;
+      event.data = {
+        page: 'activities',
+        tab: 7,
+      };
       this.eventEmitter.emit('user.notified', event);
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -219,6 +223,10 @@ export class UsersFriendshipService {
         event.body = friendship.plea
           ? `요청 보낸 ${friendship.recipient.username}님과 친구가 되어, ${friendship.plea.reward}코인을 받았습니다.`
           : `${friendship.recipient.username}님이 나의 친구신청을 수락했습니다.`;
+        event.data = {
+          page: `settings/friends`,
+          tab: null,
+        };
         this.eventEmitter.emit('user.notified', event);
       }
     } catch (error) {

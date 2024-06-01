@@ -221,6 +221,10 @@ export class UsersConnectionService {
           event.token = connection.user.pushToken;
           event.options = connection.user.profile?.options ?? {};
           event.body = `내 발견글에 누군가 공감표시를 남겼습니다.`;
+          event.data = {
+            page: `connections/${dto.connectionId}`,
+            tab: null,
+          };
           this.eventEmitter.emit('user.notified', event);
         }
       }

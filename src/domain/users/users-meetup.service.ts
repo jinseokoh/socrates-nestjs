@@ -121,6 +121,10 @@ export class UsersMeetupService {
     event.token = meetup.user.pushToken;
     event.options = meetup.user.profile?.options ?? {};
     event.body = `${meetup.title} 모임에 누군가 찜을 했습니다.`;
+    event.data = {
+      page: `meetups/${meetupId}`,
+      tab: null,
+    };
     this.eventEmitter.emit('user.notified', event);
 
     if (affectedRows > 0) {
@@ -304,6 +308,10 @@ export class UsersMeetupService {
       event.token = meetup.user.pushToken;
       event.options = meetup.user.profile?.options ?? {};
       event.body = `${meetup.title} 모임에 누군가 참가신청을 했습니다.`;
+      event.data = {
+        page: `meetups/${meetupId}`,
+        tab: null,
+      };
       this.eventEmitter.emit('user.notified', event);
 
       return meetup;
@@ -388,11 +396,19 @@ export class UsersMeetupService {
           event.token = recipient.pushToken;
           event.options = recipient.profile?.options ?? {};
           event.body = `${meetup.title} 모임장이 나의 참가신청을 수락했습니다.`;
+          event.data = {
+            page: `meetups/${meetupId}`,
+            tab: null,
+          };
         } else {
           event.name = 'meetupInviteApproval';
           event.token = recipient.pushToken;
           event.options = recipient.profile?.options ?? {};
           event.body = `${meetup.title} 모임으로의 초대를 상대방이 수락했습니다.`;
+          event.data = {
+            page: `meetups/${meetupId}`,
+            tab: null,
+          };
         }
         this.eventEmitter.emit('user.notified', event);
         // notification with event listener ----------------------------------//
@@ -402,7 +418,11 @@ export class UsersMeetupService {
             event.name = 'meetupChatOpen';
             event.token = v.user.pushToken;
             event.options = v.user.profile?.options ?? {};
-            event.body = `${meetup.title} 모임 참가자가 모두 확정되어 채팅방이 열립니다.`;
+            event.body = `${meetup.title} 모임 참가자가 모두 확정되어 채팅방이 열렸습니다.`;
+            event.data = {
+              page: `meetups/${meetupId}`,
+              tab: null,
+            };
             this.eventEmitter.emit('user.notified', event);
           });
         }

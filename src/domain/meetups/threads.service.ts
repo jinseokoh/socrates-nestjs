@@ -56,6 +56,10 @@ export class ThreadsService {
     event.token = threadWithUser.meetup.user.pushToken;
     event.options = threadWithUser.meetup.user.profile?.options ?? {};
     event.body = `${threadWithUser.meetup.title} 모임에 누군가 댓글을 달았습니다.`;
+    event.data = {
+      page: `meetups/${dto.meetupId}`,
+      tab: null,
+    };
     this.eventEmitter.emit('user.notified', event);
 
     // this.meetupRepository.increment({ id: dto.meetupId }, `threadCount`, 1);

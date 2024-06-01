@@ -53,7 +53,7 @@ export class UserFriendshipController {
     alarmDto.userId = recipientId;
     alarmDto.message = `새로운 친구초대를 받았습니다.`;
     alarmDto.data = {
-      page: 'activity',
+      page: 'activities',
       tab: 7,
     };
     await this.alarmsService.create(alarmDto);
