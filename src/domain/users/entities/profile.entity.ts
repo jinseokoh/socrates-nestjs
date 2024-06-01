@@ -24,6 +24,10 @@ export class Profile {
   @Column({ length: 255, nullable: true })
   bio: string | null;
 
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'height' })
+  height: number;
+
   @Column({ length: 64, nullable: true })
   @ApiProperty({ description: '지역' })
   region: string | null;
