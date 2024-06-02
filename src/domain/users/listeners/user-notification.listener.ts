@@ -45,10 +45,7 @@ export class UserNotificationListener {
       alarmDto.alarmType = AlarmType.ACTIVITY;
       alarmDto.userId = event.userId;
       alarmDto.message = event.body;
-      alarmDto.data = {
-        page: 'activities',
-        tab: '7',
-      };
+      alarmDto.data = event.data;
       await this.alarmsService.create(alarmDto);
     }
   }
