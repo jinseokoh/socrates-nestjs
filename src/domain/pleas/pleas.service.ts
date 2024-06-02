@@ -111,7 +111,7 @@ export class PleasService {
       event.body = `${sender.username}님이 나에게 발견글 작성 요청을 보냈습니다. ${dto.message}`;
       event.data = {
         page: `connections`,
-        tab: null,
+        tab: '',
       };
       this.eventEmitter.emit('user.notified', event);
 

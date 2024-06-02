@@ -227,7 +227,7 @@ export class UsersFriendshipService {
           : `${friendship.recipient.username}님이 나의 친구신청을 수락했습니다.`;
         event.data = {
           page: `settings/friends`,
-          tab: null,
+          tab: '',
         };
         this.eventEmitter.emit('user.notified', event);
       }

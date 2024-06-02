@@ -124,7 +124,7 @@ export class UsersMeetupService {
     event.body = `${meetup.title} 모임에 누군가 찜을 했습니다.`;
     event.data = {
       page: `meetups/${meetupId}`,
-      tab: null,
+      tab: '',
     };
     this.eventEmitter.emit('user.notified', event);
 
@@ -312,7 +312,7 @@ export class UsersMeetupService {
       event.body = `${meetup.title} 모임에 누군가 참가신청을 했습니다.`;
       event.data = {
         page: `meetups/${meetupId}`,
-        tab: null,
+        tab: '',
       };
       this.eventEmitter.emit('user.notified', event);
 
@@ -400,7 +400,7 @@ export class UsersMeetupService {
           event.body = `${meetup.title} 모임장이 나의 참가신청을 수락했습니다.`;
           event.data = {
             page: `meetups/${meetupId}`,
-            tab: null,
+            tab: '',
           };
         } else {
           event.name = 'meetupInviteApproval';
@@ -410,7 +410,7 @@ export class UsersMeetupService {
           event.body = `${meetup.title} 모임으로의 초대를 상대방이 수락했습니다.`;
           event.data = {
             page: `meetups/${meetupId}`,
-            tab: null,
+            tab: '',
           };
         }
         this.eventEmitter.emit('user.notified', event);
@@ -425,7 +425,7 @@ export class UsersMeetupService {
             event.body = `${meetup.title} 모임 참가자가 모두 확정되어 채팅방이 열렸습니다.`;
             event.data = {
               page: `meetups/${meetupId}`,
-              tab: null,
+              tab: '',
             };
             this.eventEmitter.emit('user.notified', event);
           });

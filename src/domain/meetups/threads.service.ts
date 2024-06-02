@@ -59,7 +59,7 @@ export class ThreadsService {
     event.body = `${threadWithUser.meetup.title} 모임에 누군가 댓글을 달았습니다.`;
     event.data = {
       page: `meetups/${dto.meetupId}`,
-      tab: null,
+      tab: '',
     };
     this.eventEmitter.emit('user.notified', event);
 
