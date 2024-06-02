@@ -1,7 +1,7 @@
 export enum AlarmType {
   GENERAL = 'general',
-  MEETUP = 'meetup',
-  CONNECTION = 'connection',
-  FRIENDSHIP = 'friendship',
-  INQUIRY = 'inquiry',
+  MEETUP = 'meetups',
+  CONNECTION = 'connections',
+  ACTIVITY = 'activities',
+  SETTING = 'settings',
 }

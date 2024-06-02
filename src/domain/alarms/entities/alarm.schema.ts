@@ -19,8 +19,8 @@ export const AlarmSchema = new Schema(
         AlarmType.GENERAL,
         AlarmType.MEETUP,
         AlarmType.CONNECTION,
-        AlarmType.FRIENDSHIP,
-        AlarmType.INQUIRY,
+        AlarmType.ACTIVITY,
+        AlarmType.SETTING,
       ],
     },
     message: {

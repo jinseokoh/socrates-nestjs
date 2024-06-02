@@ -49,7 +49,7 @@ export class UserFriendshipController {
       recipientId,
     });
     const alarmDto = new CreateAlarmDto();
-    alarmDto.alarmType = AlarmType.FRIENDSHIP;
+    alarmDto.alarmType = AlarmType.ACTIVITY;
     alarmDto.userId = recipientId;
     alarmDto.message = `새로운 친구초대를 받았습니다.`;
     alarmDto.data = {
