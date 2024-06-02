@@ -56,7 +56,7 @@ export class UsersFriendshipService {
   //! 친구신청 생성 (using transaction)
   //! profile's balance will be adjusted w/ ledger model event subscriber.
   //! - for hated(blocked) users, app needs to take care of 'em instead of server.
-  async createFriendship(dto: CreateFriendshipDto): Promise<void> {
+  async createFriendship(dto: CreateFriendshipDto): Promise<User> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -103,12 +103,14 @@ export class UsersFriendshipService {
 
       // initialize
       const newBalance = sender.profile?.balance - dto.cost;
+      sender.profile.balance = newBalance;
+
       if (dto.cost > 0) {
         const ledger = new Ledger({
           credit: dto.cost,
           ledgerType: LedgerType.CREDIT_SPEND,
           balance: newBalance,
-          note: `친구 신청료 (대상 #${dto.senderId})`,
+          note: `친구 신청료 (상대 #${dto.recipientId})`,
           userId: dto.senderId,
         });
         await queryRunner.manager.save(ledger);
@@ -138,6 +140,8 @@ export class UsersFriendshipService {
         tab: '7',
       };
       this.eventEmitter.emit('user.notified', event);
+
+      return sender;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -291,7 +295,7 @@ export class UsersFriendshipService {
           debit: friendship.plea.reward - 1,
           ledgerType: LedgerType.DEBIT_REFUND,
           balance: newBalance,
-          note: `요청.사례금환불 +${friendship.plea.reward} (요청발송 #${friendship.recipientId}, 요청수신 #${friendship.senderId})`,
+          note: `요청 사례금 환불 +${friendship.plea.reward} (요청발송 #${friendship.recipientId}, 요청수신 #${friendship.senderId})`,
           userId: recipientId,
         });
         await queryRunner.manager.save(ledger);

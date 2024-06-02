@@ -256,7 +256,7 @@ export class UsersService {
         debit: dto.coins,
         ledgerType: LedgerType.DEBIT_PURCHASE,
         balance: newBalance,
-        note: `구매 (${dto.id})`,
+        note: `코인 구매 (앱)`,
         userId: id,
       });
       await queryRunner.manager.save(ledger);
