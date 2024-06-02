@@ -93,7 +93,7 @@ export class PleasService {
         credit: dto.reward,
         ledgerType: LedgerType.CREDIT_ESCROW,
         balance: newBalance,
-        note: `요청.사례금 (상대 #${dto.recipientId})`,
+        note: `요청 사례금 (상대 #${dto.recipientId})`,
         userId: dto.senderId,
       });
       await queryRunner.manager.save(ledger);
@@ -105,6 +105,7 @@ export class PleasService {
       //? notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
       event.name = 'friendRequestPlea';
+      event.userId = recipient.id;
       event.token = recipient.pushToken;
       event.options = recipient.profile?.options ?? {};
       event.body = `${sender.username}님이 나에게 발견글 작성 요청을 보냈습니다. ${dto.message}`;

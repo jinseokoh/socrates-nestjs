@@ -218,6 +218,7 @@ export class UsersConnectionService {
         if (dto.isNewReaction) {
           const event = new UserNotificationEvent();
           event.name = 'connectionReaction';
+          event.userId = connection.user.id;
           event.token = connection.user.pushToken;
           event.options = connection.user.profile?.options ?? {};
           event.body = `내 발견글에 누군가 공감표시를 남겼습니다.`;

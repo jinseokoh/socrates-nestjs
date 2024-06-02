@@ -118,6 +118,7 @@ export class UsersMeetupService {
     // todo. fine tune notifying logic to dedup the same id
     const event = new UserNotificationEvent();
     event.name = 'meetupLike';
+    event.userId = meetup.user.id;
     event.token = meetup.user.pushToken;
     event.options = meetup.user.profile?.options ?? {};
     event.body = `${meetup.title} 모임에 누군가 찜을 했습니다.`;
@@ -305,6 +306,7 @@ export class UsersMeetupService {
       // notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
       event.name = 'meetupRequest';
+      event.userId = meetup.user.id;
       event.token = meetup.user.pushToken;
       event.options = meetup.user.profile?.options ?? {};
       event.body = `${meetup.title} 모임에 누군가 참가신청을 했습니다.`;
@@ -402,6 +404,7 @@ export class UsersMeetupService {
           };
         } else {
           event.name = 'meetupInviteApproval';
+          event.userId = recipient.id;
           event.token = recipient.pushToken;
           event.options = recipient.profile?.options ?? {};
           event.body = `${meetup.title} 모임으로의 초대를 상대방이 수락했습니다.`;
@@ -416,6 +419,7 @@ export class UsersMeetupService {
           meetup.rooms.map((v: Room) => {
             const event = new UserNotificationEvent();
             event.name = 'meetupChatOpen';
+            event.userId = v.user.id;
             event.token = v.user.pushToken;
             event.options = v.user.profile?.options ?? {};
             event.body = `${meetup.title} 모임 참가자가 모두 확정되어 채팅방이 열렸습니다.`;

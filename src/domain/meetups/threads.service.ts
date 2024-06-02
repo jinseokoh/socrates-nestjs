@@ -53,6 +53,7 @@ export class ThreadsService {
     // notification with event listener ------------------------------------//
     const event = new UserNotificationEvent();
     event.name = 'meetupThread';
+    event.userId = threadWithUser.meetup.user.id;
     event.token = threadWithUser.meetup.user.pushToken;
     event.options = threadWithUser.meetup.user.profile?.options ?? {};
     event.body = `${threadWithUser.meetup.title} 모임에 누군가 댓글을 달았습니다.`;

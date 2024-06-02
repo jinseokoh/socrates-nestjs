@@ -1,12 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { AlarmType } from 'src/common/enums';
+import { AlarmsService } from 'src/domain/alarms/alarms.service';
+import { CreateAlarmDto } from 'src/domain/alarms/dto/create-alarm.dto';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { FcmService } from 'src/services/fcm/fcm.service';
 
 @Injectable()
 export class UserNotificationListener {
   private readonly logger = new Logger(UserNotificationListener.name);
-  constructor(private readonly fcmService: FcmService) {}
+  constructor(
+    private readonly fcmService: FcmService,
+    private readonly alarmsService: AlarmsService,
+  ) {}
 
   @OnEvent('user.notified', { async: true })
   async handleOrderCreatedEvent(event: UserNotificationEvent): Promise<void> {
@@ -31,6 +37,19 @@ export class UserNotificationListener {
         // todo. slack or sentry report
         this.logger.error(e);
       }
+    }
+    // alarms 생성
+
+    if (event.name == 'friendRequest') {
+      const alarmDto = new CreateAlarmDto();
+      alarmDto.alarmType = AlarmType.ACTIVITY;
+      alarmDto.userId = event.userId;
+      alarmDto.message = event.body;
+      alarmDto.data = {
+        page: 'activities',
+        tab: '7',
+      };
+      await this.alarmsService.create(alarmDto);
     }
   }
 }

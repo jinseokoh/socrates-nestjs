@@ -129,11 +129,12 @@ export class UsersFriendshipService {
       // notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
       event.name = 'friendRequest';
+      event.userId = recipient.id;
       event.token = recipient.pushToken;
       event.options = recipient.profile?.options ?? {};
       event.body = `${sender.username}님으로부터 친구신청을 받았습니다. ${dto.message}`;
       event.data = {
-        page: 'activities',
+        page: 'activities/requests',
         tab: '7',
       };
       this.eventEmitter.emit('user.notified', event);
@@ -218,6 +219,7 @@ export class UsersFriendshipService {
       ) {
         const event = new UserNotificationEvent();
         event.name = 'friendRequestApproval';
+        event.userId = friendship.sender?.id;
         event.token = friendship.sender?.pushToken;
         event.options = friendship.sender?.profile?.options ?? {};
         event.body = friendship.plea
