@@ -195,7 +195,7 @@ export class UsersFriendshipService {
           debit: friendship.plea.reward,
           ledgerType: LedgerType.DEBIT_REWARD,
           balance: newBalance,
-          note: `요청.사례금 +${friendship.plea.reward} (요청발송 #${friendship.recipientId}, 요청수신 #${friendship.senderId})`,
+          note: `요청 사례금 ${friendship.plea.reward} (요청발송 #${friendship.recipientId}, 요청수신 #${friendship.senderId})`,
           userId: friendship.sender.id,
         });
         await queryRunner.manager.save(ledger);

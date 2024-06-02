@@ -18,7 +18,6 @@ export class UserNotificationListener {
   async handleOrderCreatedEvent(event: UserNotificationEvent): Promise<void> {
     const fbToken = event.token;
 
-    // todo. dynamodb 알림 record 생성
     const userSetting = event.options.hasOwnProperty(event.name)
       ? event.options[event.name]
       : false;
@@ -26,10 +25,7 @@ export class UserNotificationListener {
       title: 'MeSo',
       body: event.body,
     };
-    const data = {
-      page: event.data.page,
-      tab: event.data.tab.toString(),
-    };
+    const data = event.data;
     if (fbToken && userSetting) {
       try {
         await this.fcmService.sendToToken(fbToken, notification, data);
@@ -38,8 +34,8 @@ export class UserNotificationListener {
         this.logger.error(e);
       }
     }
-    // alarms 생성
 
+    // todo. 나머지 dynamodb 알림 record 생성
     if (event.name == 'friendRequest') {
       const alarmDto = new CreateAlarmDto();
       alarmDto.alarmType = AlarmType.ACTIVITY;
