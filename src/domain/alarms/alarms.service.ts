@@ -33,7 +33,7 @@ export class AlarmsService {
   }
 
   //? notice that records will be sorted by range key, which is id
-  //? (in msg_xx_## format string; xx is milliseconds).
+  //? (in m## format string; xx is milliseconds).
   //?
   async fetch(userId: number, lastKey: IAlarmKey | null): Promise<any> {
     try {
@@ -41,14 +41,14 @@ export class AlarmsService {
         ? await this.model
             .query('userId')
             .eq(userId)
-            .sort(SortOrder.descending)
+            .sort(SortOrder.ascending)
             .startAt(lastKey)
             .limit(LIMIT)
             .exec()
         : await this.model
             .query('userId')
             .eq(userId)
-            .sort(SortOrder.descending)
+            .sort(SortOrder.ascending)
             .limit(LIMIT)
             .exec();
     } catch (error) {
