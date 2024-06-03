@@ -144,12 +144,11 @@ export class UsersFriendshipService {
       return sender;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw error;
-      // if (error.name === 'EntityNotFoundError') {
-      //   throw new NotFoundException(`user not found`);
-      // } else {
-      //   throw error;
-      // }
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`user not found`);
+      } else {
+        throw error;
+      }
     } finally {
       await queryRunner.release();
     }
