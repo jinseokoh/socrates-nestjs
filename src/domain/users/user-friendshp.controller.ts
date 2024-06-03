@@ -19,6 +19,7 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto';
 import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
 import { FriendshipStatus } from 'src/common/enums';
+import { User } from 'src/domain/users/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -39,8 +40,8 @@ export class UserFriendshipController {
     @Param('senderId', ParseIntPipe) senderId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body() dto: CreateFriendshipDto,
-  ): Promise<void> {
-    await this.usersFriendshipService.createFriendship({
+  ): Promise<User> {
+    return await this.usersFriendshipService.createFriendship({
       ...dto,
       senderId,
       recipientId,
