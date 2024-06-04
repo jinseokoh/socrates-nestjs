@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
-  IsBoolean,
   IsNumber,
   IsObject,
   IsOptional,
@@ -18,6 +17,11 @@ export class CreateProfileDto {
   @IsString()
   @IsOptional()
   bio?: string | null;
+
+  @ApiProperty({ description: 'height', required: false, default: 0 })
+  @IsNumber()
+  @IsOptional()
+  height: number;
 
   @ApiProperty({ description: '접속지역', required: false })
   @IsString()
