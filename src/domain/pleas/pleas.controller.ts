@@ -41,6 +41,12 @@ export class PleasController {
     return await this.pleasService.findAll(query);
   }
 
+  // @ApiOperation({ description: 'Pleas' })
+  // @Get()
+  // async getByUserId(userId: number): Promise<<Plea[]>> {
+  //   return await this.pleasService.getByUserId(userId);
+  // }
+
   @ApiOperation({ description: 'Plea 상세보기' })
   @Get(':id')
   async findById(@Param('id', ParseIntPipe) id: number): Promise<Plea> {

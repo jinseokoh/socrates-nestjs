@@ -26,20 +26,20 @@ export class UserPleaController {
     description: '내가 모든 사용자에게 받은 요청 리스트 grouped by sender',
   })
   @Get(':userId/pleas-from')
-  async getMyReceivedPleas(
+  async getReceivedPleasByUserId(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Plea[]> {
-    return await this.usersPleaService.getMyReceivedPleas(userId);
+    return await this.usersPleaService.getReceivedPleasByUserId(userId);
   }
 
   @ApiOperation({
     description: '내가 모든 사용자에게 보낸 요청 리스트 grouped by recipient',
   })
   @Get(':userId/pleas-to')
-  async getMySentPleas(
+  async getSentPleasByUserId(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Plea[]> {
-    return await this.usersPleaService.getMySentPleas(userId);
+    return await this.usersPleaService.getSentPleasByUserId(userId);
   }
 
   @ApiOperation({ description: '내가 이 사용자에게 받은 요청 리스트' })
