@@ -25,13 +25,13 @@ export class Plea {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   public id: number;
 
-  @Column({
-    type: 'enum',
-    enum: PleaStatus,
-    default: PleaStatus.INIT,
-  })
-  @ApiProperty({ description: 'ACCEPTED|PENDING|NILL' })
-  status: PleaStatus;
+  // @Column({
+  //   type: 'enum',
+  //   enum: PleaStatus,
+  //   default: PleaStatus.INIT,
+  // })
+  // @ApiProperty({ description: 'ACCEPTED|PENDING|NILL' })
+  // status: PleaStatus;
 
   @Column({ type: 'tinyint', unsigned: true, nullable: true })
   reward: number | null;

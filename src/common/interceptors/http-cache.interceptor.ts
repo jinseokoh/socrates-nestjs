@@ -12,10 +12,13 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     const entity = baseUri.split('/')[2];
     if (entity === 'users') {
       if (uri.includes('connection')) {
+        //? reaction 추가했으면 connection 갱신해야지
         return [TAG_KEY_PREFIX + 'connections'];
       }
       if (uri.includes('meetup')) {
         if (uri.includes('join')) {
+          //? meetup 신청자 리스트 갱신되면 meetup 바뀌어야지
+          //? meetup 신청 수락하면 chat 갱신까지
           return [TAG_KEY_PREFIX + 'meetups', TAG_KEY_PREFIX + 'chats'];
         }
         return [TAG_KEY_PREFIX + 'meetups'];

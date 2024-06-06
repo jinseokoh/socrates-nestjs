@@ -207,7 +207,7 @@ export class PleasService {
         relations: ['sender', 'sender.profile'],
       });
 
-      if (plea.status === PleaStatus.INIT) {
+      if (plea.connectionId === null) {
         // plea.reward - 1 환불
         const newBalance = plea.sender.profile?.balance + plea.reward - 1;
         const ledger = new Ledger({

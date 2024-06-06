@@ -183,14 +183,9 @@ export class UsersFriendshipService {
 
       if (
         friendship.plea &&
-        friendship.plea.status === PleaStatus.PENDING &&
+        friendship.plea.connectionId !== null &&
         status === FriendshipStatus.ACCEPTED
       ) {
-        // update plea.status to ACCEPTED
-        await this.repository.manager.query(
-          'UPDATE `plea` SET status = ? WHERE id = ?',
-          [PleaStatus.ACCEPTED, friendship.plea.id],
-        );
         //? plea.reward 를 friendship sender (== plea recipient; 작성자) 에게 지급
         const newBalance =
           friendship.sender.profile?.balance + friendship.plea.reward;
@@ -202,7 +197,11 @@ export class UsersFriendshipService {
           userId: friendship.sender.id,
         });
         await queryRunner.manager.save(ledger);
-        // soft-delete plea
+        // soft delete the plea
+        // await this.repository.manager.query(
+        //   'UPDATE `plea` SET deletedAt = NOW() WHERE id = ?',
+        //   [friendship.plea.id],
+        // );
         await queryRunner.manager
           .getRepository(Plea)
           .softDelete(friendship.plea.id);
@@ -283,10 +282,7 @@ export class UsersFriendshipService {
       });
 
       // 요청으로 보낸 친구신청인 경우
-      if (friendship.plea && friendship.plea.status === PleaStatus.PENDING) {
-        await queryRunner.manager
-          .getRepository(Plea)
-          .softDelete(friendship.plea.id);
+      if (friendship.plea && friendship.plea.connectionId !== null) {
         const newBalance =
           friendship.recipient.profile?.balance + friendship.plea.reward - 1;
 
@@ -298,6 +294,10 @@ export class UsersFriendshipService {
           userId: recipientId,
         });
         await queryRunner.manager.save(ledger);
+        // soft delete the plea
+        await queryRunner.manager
+          .getRepository(Plea)
+          .softDelete(friendship.plea.id);
       }
 
       await this.repository.manager.query(
