@@ -40,7 +40,7 @@ export class UserFcmController {
       },
       {
         page: '',
-        tab: '',
+        args: '',
       },
     );
   }
@@ -65,7 +65,7 @@ export class UserFcmController {
       },
       {
         page: '',
-        tab: '',
+        args: '',
       },
     );
   }

@@ -14,7 +14,7 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { LedgerType, FriendshipStatus, PleaStatus } from 'src/common/enums';
+import { LedgerType, FriendshipStatus } from 'src/common/enums';
 import { AnyData } from 'src/common/types';
 import { DataSource, Not } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -137,7 +137,7 @@ export class UsersFriendshipService {
       event.body = `${sender.username}님으로부터 친구신청을 받았습니다. ${dto.message}`;
       event.data = {
         page: 'activities/requests',
-        tab: '7',
+        args: 'tab:7',
       };
       this.eventEmitter.emit('user.notified', event);
 
@@ -193,7 +193,7 @@ export class UsersFriendshipService {
           debit: friendship.plea.reward,
           ledgerType: LedgerType.DEBIT_REWARD,
           balance: newBalance,
-          note: `요청 사례금 ${friendship.plea.reward} (요청발송 #${friendship.recipientId}, 요청수신 #${friendship.senderId})`,
+          note: `요청 사례금 (발송#${friendship.recipientId},수신#${friendship.senderId})`,
           userId: friendship.sender.id,
         });
         await queryRunner.manager.save(ledger);
@@ -229,7 +229,7 @@ export class UsersFriendshipService {
           : `${friendship.recipient.username}님이 나의 친구신청을 수락했습니다.`;
         event.data = {
           page: `settings/friends`,
-          tab: '',
+          args: 'load:plea',
         };
         this.eventEmitter.emit('user.notified', event);
       }
@@ -290,7 +290,7 @@ export class UsersFriendshipService {
           debit: friendship.plea.reward - 1,
           ledgerType: LedgerType.DEBIT_REFUND,
           balance: newBalance,
-          note: `요청 사례금 환불 +${friendship.plea.reward} (요청발송 #${friendship.recipientId}, 요청수신 #${friendship.senderId})`,
+          note: `요청중지 사례금 환불 (발송#${friendship.recipientId},수신#${friendship.senderId})`,
           userId: recipientId,
         });
         await queryRunner.manager.save(ledger);

@@ -56,7 +56,7 @@ export class RemarksService {
     event.body = `내 발견글에 누군가 댓글을 남겼습니다.`;
     event.data = {
       page: `connections/${dto.connectionId}`,
-      tab: '',
+      args: '',
     };
     this.eventEmitter.emit('user.notified', event);
 

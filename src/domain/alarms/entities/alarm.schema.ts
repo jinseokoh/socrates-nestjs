@@ -30,9 +30,9 @@ export const AlarmSchema = new Schema(
       type: Object,
       schema: {
         page: String,
-        tab: {
+        args: {
           type: String,
-          default: null,
+          default: '',
         },
       },
     },

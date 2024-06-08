@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { PleaStatus } from 'src/common/enums';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreatePleaDto {
   @ApiProperty({ description: 'id' })
   @IsNumber()
@@ -26,15 +25,6 @@ export class CreatePleaDto {
   @IsNumber()
   @IsOptional()
   connectionId?: number | null;
-
-  @ApiProperty({
-    description: 'status',
-    default: PleaStatus.INIT,
-    required: true,
-  })
-  @IsEnum(PleaStatus)
-  @IsOptional()
-  status: PleaStatus;
 
   @ApiProperty({ description: '요청시 사례 비용' })
   @IsNumber()

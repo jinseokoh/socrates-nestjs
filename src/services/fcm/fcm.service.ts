@@ -22,7 +22,7 @@ export class FcmService {
       },
       data: {
         page: data.page,
-        tab: data.tab,
+        args: data.args,
       },
       apns: {
         fcmOptions: {
@@ -57,7 +57,7 @@ export class FcmService {
       },
       data: {
         page: data.page,
-        tab: data.tab,
+        args: data.args,
       },
       apns: {
         fcmOptions: {
@@ -91,7 +91,7 @@ export class FcmService {
       },
       data: {
         page: data.page,
-        tab: data.tab,
+        args: data.args,
       },
       apns: {
         fcmOptions: {
@@ -130,7 +130,7 @@ export class FcmService {
       },
       data: {
         page: data.page,
-        tab: data.tab,
+        args: data.args,
       },
       apns: {
         fcmOptions: {

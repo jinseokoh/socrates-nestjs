@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PleaStatus } from 'src/common/enums';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,

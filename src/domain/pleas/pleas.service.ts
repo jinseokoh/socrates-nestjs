@@ -19,7 +19,7 @@ import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
-import { FriendshipStatus, LedgerType, PleaStatus } from 'src/common/enums';
+import { FriendshipStatus, LedgerType } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -111,7 +111,7 @@ export class PleasService {
       event.body = `${sender.username}님이 나에게 발견글 작성 요청을 보냈습니다. ${dto.message}`;
       event.data = {
         page: `connections`,
-        tab: '',
+        args: 'load:plea',
       };
       this.eventEmitter.emit('user.notified', event);
 
@@ -214,7 +214,7 @@ export class PleasService {
           debit: plea.reward - 1,
           ledgerType: LedgerType.DEBIT_REFUND,
           balance: newBalance,
-          note: `요청거절 사례금 환불 (요청발송 #${plea.senderId}, 요청수신 #${plea.recipientId})`,
+          note: `요청거절 사례금 환불 (발송#${plea.senderId},수신#${plea.recipientId})`,
           userId: plea.sender.id,
         });
         await queryRunner.manager.save(ledger);
