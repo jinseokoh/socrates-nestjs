@@ -41,14 +41,14 @@ export class AlarmsService {
         ? await this.model
             .query('userId')
             .eq(userId)
-            .sort(SortOrder.ascending)
+            .sort(SortOrder.descending)
             .startAt(lastKey)
             .limit(LIMIT)
             .exec()
         : await this.model
             .query('userId')
             .eq(userId)
-            .sort(SortOrder.ascending)
+            .sort(SortOrder.descending)
             .limit(LIMIT)
             .exec();
     } catch (error) {
