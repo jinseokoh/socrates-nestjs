@@ -110,7 +110,7 @@ export class UsersFriendshipService {
           credit: dto.cost,
           ledgerType: LedgerType.CREDIT_SPEND,
           balance: newBalance,
-          note: `친구 신청료 (상대 #${dto.recipientId})`,
+          note: `친구 신청료 (대상#${dto.recipientId})`,
           userId: dto.senderId,
         });
         await queryRunner.manager.save(ledger);
