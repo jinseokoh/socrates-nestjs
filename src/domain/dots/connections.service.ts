@@ -53,20 +53,29 @@ export class ConnectionsService {
         },
       });
       if (connection) {
+        //! 수정
         await this.repository.manager.query(
-          'INSERT IGNORE INTO `connection` (userId, dotId, choices, answer) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE \
+          'INSERT IGNORE INTO `connection` (userId, dotId, choices, answer, images) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE \
   userId = VALUES(`userId`), \
   dotId = VALUES(`dotId`), \
   choices = VALUES(`choices`), \
-  answer = VALUES(`answer`)',
-          [dto.userId, dto.dotId, JSON.stringify(dto.choices), dto.answer],
+  answer = VALUES(`answer`), \
+  images = VALUES(`images`)',
+          [
+            dto.userId,
+            dto.dotId,
+            dto.choices ? JSON.stringify(dto.choices) : null,
+            dto.answer,
+            dto.images ? JSON.stringify(dto.images) : null,
+          ],
         );
-        connection['choices'] = dto.choices;
-        connection['answer'] = dto.answer;
+        // connection['choices'] = dto.choices;
+        // connection['answer'] = dto.answer;
         connection['dot'] = dot;
 
         return connection;
       } else {
+        //! 생성
         const connection = await this.repository.save(
           this.repository.create(dto),
         );
