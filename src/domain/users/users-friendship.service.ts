@@ -73,7 +73,7 @@ export class UsersFriendshipService {
       });
       if (friendship) {
         if (friendship.status === FriendshipStatus.ACCEPTED) {
-          throw new UnprocessableEntityException(`in a relationship`);
+          throw new UnprocessableEntityException(`relationship exists`);
         } else {
           // friendship 이미 존재
           throw new UnprocessableEntityException(`entity exists`);
@@ -101,11 +101,9 @@ export class UsersFriendshipService {
         relations: [`profile`],
       });
 
-      // initialize
-      const newBalance = sender.profile?.balance - dto.cost;
-      sender.profile.balance = newBalance;
-
       if (dto.cost > 0) {
+        const newBalance = sender.profile?.balance - dto.cost;
+        sender.profile.balance = newBalance;
         const ledger = new Ledger({
           credit: dto.cost,
           ledgerType: LedgerType.CREDIT_SPEND,
@@ -225,8 +223,8 @@ export class UsersFriendshipService {
         event.token = friendship.sender?.pushToken;
         event.options = friendship.sender?.profile?.options ?? {};
         event.body = friendship.plea
-          ? `요청 보낸 ${friendship.recipient.username}님과 친구가 되어, ${friendship.plea.reward}코인을 받았습니다.`
-          : `${friendship.recipient.username}님이 나의 친구신청을 수락했습니다.`;
+          ? `요청한 ${friendship.recipient.username}님이 친구관계를 맺었습니다. (${friendship.plea.reward}코인수령 완료)`
+          : `${friendship.recipient.username}님이 신청을 수락하여 친구관계를 맺었습니다.`;
         event.data = {
           page: `settings/friends`,
           args: 'load:plea',
@@ -250,11 +248,11 @@ export class UsersFriendshipService {
   // 시나리오
   // case 1) 친구신청 보낸 사용자가 [보낸친구신청] 리스트에서 취소
   //         Ledger = 변화 없음
-  // case 2) 요청받은 사용자가 답글작성 후 (자동으로 친구신청이 보내진 후) [보낸친구신청] 리스트에서 취소
+  // case 2) 요청받은 사용자가 답글작성 후 (자동으로 친구신청이 보내진 후) [보낸친구신청] 리스트에서 취소 -> client 에서 금지!
   //         Ledger = 요청보낸 사용자에게 reward-1 환불
   // case 3) 요청보낸 사용자가 [받은친구신청] 리스트에서 거절
   //         Ledger = 요청보낸 사용자에게 reward-1 환불
-  // case 4) 요청받은 사용자가 reward 지급받은 이후, 24 시간 안에 친구해제
+  // case 4) 요청받은 사용자가 reward 지급받은 이후, 24 시간 안에 친구해제 (to be implemented)
   //         Ledger = 요청받은 사용자에게 reward 차감 (무효처리)
   //         Ledger = 요청보낸 사용자에게 reward-1 환불
   //

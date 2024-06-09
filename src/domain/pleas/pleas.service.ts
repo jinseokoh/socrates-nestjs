@@ -23,6 +23,7 @@ import { FriendshipStatus, LedgerType } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Connection } from 'src/domain/dots/entities/connection.entity';
 
 @Injectable()
 export class PleasService {
@@ -59,7 +60,7 @@ export class PleasService {
       });
       if (friendship) {
         if (friendship.status === FriendshipStatus.ACCEPTED) {
-          throw new UnprocessableEntityException(`in a relationship`);
+          throw new UnprocessableEntityException(`relationship exists`);
         } else {
           // friendship already exists
           throw new UnprocessableEntityException(`entity exists`);
@@ -86,6 +87,17 @@ export class PleasService {
         where: { id: dto.recipientId },
         relations: [`profile`],
       });
+
+      // validation ----------------------------------------------------------//
+      const connection = await queryRunner.manager.findOne(Connection, {
+        where: {
+          userId: dto.recipientId,
+          dotId: dto.dotId,
+        },
+      });
+      if (connection) { // connection already exists
+        throw new BadRequestException(`precondition exists`);
+      }
 
       // initialize
       const newBalance = sender.profile?.balance - dto.reward;
@@ -204,7 +216,7 @@ export class PleasService {
         where: {
           id: id,
         },
-        relations: ['sender', 'sender.profile'],
+        relations: ['sender', 'sender.profile', 'recipient'],
       });
 
       if (plea.connectionId === null) {
@@ -225,17 +237,17 @@ export class PleasService {
       await queryRunner.commitTransaction();
 
       //? notification with event listener ------------------------------------//
-      // const event = new UserNotificationEvent();
-      // event.name = 'connectionPlea';
-      // event.userId = recipient.id;
-      // event.token = recipient.pushToken;
-      // event.options = recipient.profile?.options ?? {};
-      // event.body = `${sender.username}님이 나에게 발견글 작성 요청을 보냈습니다. ${dto.message}`;
-      // event.data = {
-      //   page: `connections`,
-      //   args: 'load:plea',
-      // };
-      // this.eventEmitter.emit('user.notified', event);
+      const event = new UserNotificationEvent();
+      event.name = 'connectionPleaDenial';
+      event.userId = plea.senderId;
+      event.token = plea.sender.pushToken;
+      event.options = plea.sender.profile?.options ?? {};
+      event.body = `${plea.recipient.username}님이 내가 보낸 발견글 작성요청을 거절했습니다. (${plea.reward - 1}코인 환불처리완료)`;
+      event.data = {
+        page: `settings/coin`,
+        args: '',
+      };
+      this.eventEmitter.emit('user.notified', event);
 
       return plea;
     } catch (error) {

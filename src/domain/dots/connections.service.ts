@@ -21,6 +21,10 @@ import { UpdateConnectionDto } from 'src/domain/dots/dto/update-connection.dto';
 import { randomImageName } from 'src/helpers/random-filename';
 import { SignedUrl } from 'src/common/types';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
+import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { RequestFrom } from 'src/common/enums';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 
 @Injectable()
 export class ConnectionsService {
@@ -31,7 +35,9 @@ export class ConnectionsService {
     private readonly repository: Repository<Connection>,
     @InjectRepository(Dot)
     private readonly dotRepository: Repository<Dot>,
-    private dataSource: DataSource, // for transaction
+    @InjectRepository(Plea)
+    private readonly pleaRepository: Repository<Plea>,
+    private eventEmitter: EventEmitter2,
     private readonly s3Service: S3Service,
   ) {}
 
@@ -75,10 +81,67 @@ export class ConnectionsService {
 
         return connection;
       } else {
-        //! 생성
+        //! 생성 (user-friendship.service 와 중복 로직 있지만, transaction 때문에 비슷한 로직으로 다시 구성)
         const connection = await this.repository.save(
           this.repository.create(dto),
         );
+
+        //? 모든 plea 중 지금 나에게 보내온 요청이 있는지 검사
+        const pleas = await this.pleaRepository.find({
+          relations: ['sender', 'sender.profile', 'recipient'],
+          where: {
+            recipientId: dto.userId,
+            dotId: dto.dotId,
+          },
+        });
+
+        if (pleas.length > 0) {
+          //? plea 가 있다면, plea 상태 갱신
+          await Promise.all(
+            pleas.map(async (v) => {
+              try {
+                await this.repository.manager.query(
+                  'UPDATE plea SET connectionId = ? WHERE id = ?',
+                  [connection.id, v.id],
+                );
+              } catch (e) {
+                console.error(e);
+              }
+            }),
+          );
+          //? plea 가 있다면, 자동 친구요청 보내기
+          await Promise.all(
+            pleas.map(async (v: Plea) => {
+              try {
+                const pleaId = v.id;
+                const requestFrom = RequestFrom.PLEA;
+                const message =
+                  '요청한 질문에 답변하여 자동발송된 친구신청입니다.';
+
+                await this.repository.manager.query(
+                  'INSERT IGNORE INTO `friendship` \
+                  (senderId, recipientId, requestFrom, message, pleaId) VALUES (?, ?, ?, ?, ?)',
+                  [v.recipientId, v.senderId, requestFrom, message, pleaId],
+                );
+
+                // notification with event listener ------------------------------------//
+                const event = new UserNotificationEvent();
+                event.name = 'friendRequest';
+                event.userId = v.sender.id; // 친구신청 받는사람의 id
+                event.token = v.sender.pushToken; // 친구신청 받는 사람의 token
+                event.options = v.sender.profile?.options ?? {};
+                event.body = `${v.recipient.username}님이 요청한 질문에 답변하여 자동으로 친구신청을 받았습니다.`;
+                event.data = {
+                  page: 'activities/requests',
+                  args: 'tab:7',
+                };
+                this.eventEmitter.emit('user.notified', event);
+              } catch (e) {
+                console.error(e);
+              }
+            }),
+          );
+        }
         connection['dot'] = dot;
 
         return connection;

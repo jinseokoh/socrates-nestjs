@@ -7,6 +7,7 @@ import { DotsController } from 'src/domain/dots/dots.controller';
 import { DotsService } from 'src/domain/dots/dots.service';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { Remark } from 'src/domain/dots/entities/remark.entity';
+import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { RemarksService } from 'src/domain/dots/remarks.service';
 import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { S3Module } from 'src/services/aws/s3.module';
@@ -14,7 +15,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
 import { ConnectionSubscriber } from 'src/domain/dots/subscribers/connection-subscriber';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Dot, Connection, Remark]),
+    TypeOrmModule.forFeature([Dot, Connection, Remark, Plea]),
     S3Module,
     FcmModule,
   ],
