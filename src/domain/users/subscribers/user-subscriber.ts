@@ -41,9 +41,11 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
             meetupChatOpen: false, // 모임 채팅방 오픈
             connectionReaction: false, // 발견 공감
             connectionRemark: false, // 발견 댓글
+            connectionPlea: false, // 친구신청 발견글 요청
+            connectionPleaDenial: false, // 친구신청 발견글 요청 거절
             friendRequest: false, // 친구 신청
             friendRequestApproval: false, // 친구신청 승인
-            friendRequestPlea: false, // 친구신청 발견글 요청
+            friendRequestDenial: false, // 친구신청 거절
           },
         },
       ])

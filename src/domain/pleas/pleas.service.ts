@@ -93,7 +93,7 @@ export class PleasService {
         credit: dto.reward,
         ledgerType: LedgerType.CREDIT_ESCROW,
         balance: newBalance,
-        note: `요청 사례금 (상대 #${dto.recipientId})`,
+        note: `요청 사례금 (대상#${dto.recipientId})`,
         userId: dto.senderId,
       });
       await queryRunner.manager.save(ledger);
@@ -104,7 +104,7 @@ export class PleasService {
 
       //? notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
-      event.name = 'friendRequestPlea';
+      event.name = 'connectionPlea';
       event.userId = recipient.id;
       event.token = recipient.pushToken;
       event.options = recipient.profile?.options ?? {};
@@ -187,7 +187,7 @@ export class PleasService {
 
   //! 요청 삭제 (using transaction)
   // API 호출 시나리오
-  // case 1) 요청받은 사용자가 요청 init 상태에서, 답글작성 거절
+  // case 1) 요청받은 사용자가 connectionId === null 상태에서, 답글작성 거절
   //         Ledger = 요청보낸 사용자에게 reward-1 환불
   // case 2) 다른 경우 환불 처리 필요없음.
   //
@@ -223,6 +223,19 @@ export class PleasService {
       // soft-delete plea
       await queryRunner.manager.getRepository(Plea).softDelete(id);
       await queryRunner.commitTransaction();
+
+      //? notification with event listener ------------------------------------//
+      // const event = new UserNotificationEvent();
+      // event.name = 'connectionPlea';
+      // event.userId = recipient.id;
+      // event.token = recipient.pushToken;
+      // event.options = recipient.profile?.options ?? {};
+      // event.body = `${sender.username}님이 나에게 발견글 작성 요청을 보냈습니다. ${dto.message}`;
+      // event.data = {
+      //   page: `connections`,
+      //   args: 'load:plea',
+      // };
+      // this.eventEmitter.emit('user.notified', event);
 
       return plea;
     } catch (error) {
