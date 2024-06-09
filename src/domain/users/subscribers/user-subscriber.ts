@@ -46,6 +46,7 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
             friendRequest: false, // 친구 신청
             friendRequestApproval: false, // 친구신청 승인
             friendRequestDenial: false, // 친구신청 거절
+            eventNotification: false,
           },
         },
       ])

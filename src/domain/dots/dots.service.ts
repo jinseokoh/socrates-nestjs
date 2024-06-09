@@ -4,6 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -11,11 +12,13 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { QuestionType } from 'src/common/enums';
+import { LedgerType, QuestionType } from 'src/common/enums';
 import { CreateDotDto } from 'src/domain/dots/dto/create-dot.dto';
 import { UpdateDotDto } from 'src/domain/dots/dto/update-dot.dto';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
-import { DataSource, IsNull, Not, Repository } from 'typeorm';
+import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
+import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class DotsService {
@@ -25,6 +28,7 @@ export class DotsService {
     @InjectRepository(Dot)
     private readonly repository: Repository<Dot>,
     private dataSource: DataSource, // for transaction
+    private eventEmitter: EventEmitter2,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -117,18 +121,48 @@ export class DotsService {
 
   // Dot increment
   async thumbsUp(id: number): Promise<void> {
-    await this.repository.increment({ id }, 'up', 1);
-    const dot = await this.findById(id);
-    const total = dot.up + dot.down;
-    if (total >= 50) {
-      if (dot.up < dot.down) {
-        await this.repository.softDelete(id);
-      } else {
-        await this.repository.manager.query(
-          'UPDATE `dot` SET isActive = 1 WHERE id = ?',
-          [id],
-        );
+    try {
+      const dot = await this.findById(id, ['user', 'user.profile']);
+      await this.repository.increment({ id }, 'up', 1);
+      const total = dot.up + dot.down;
+      if (total >= 50) {
+        if (dot.up < dot.down) {
+          await this.repository.softDelete(id);
+        }
+        if (dot.up > dot.down) {
+          await this.repository.manager.query(
+            'UPDATE `dot` SET isActive = 1 WHERE id = ?',
+            [id],
+          );
+          if (dot.isActive == false) {
+            //? 작성자에게 2코인 제공 보너스 지급
+            const newBalance = dot.user.profile?.balance + 2;
+            const ledger = new Ledger({
+              debit: 2,
+              ledgerType: LedgerType.DEBIT_EVENT,
+              balance: newBalance,
+              note: `발견 정식질문 등록선물 (대상#${id})`,
+              userId: dot.userId,
+            });
+            await this.repository.save(ledger);
+
+            // notification with event listener ------------------------------------//
+            const event = new UserNotificationEvent();
+            event.name = 'eventNotification';
+            event.userId = dot.userId;
+            event.token = dot.user.pushToken;
+            event.options = dot.user.profile?.options ?? {};
+            event.body = `제공한 질문이 정식 등록되어 2코인 선물을 보내 드립니다.`;
+            event.data = {
+              page: `settings/coin`,
+              args: '',
+            };
+            this.eventEmitter.emit('user.notified', event);
+          }
+        }
       }
+    } catch (e) {
+      console.error(e);
     }
   }
 

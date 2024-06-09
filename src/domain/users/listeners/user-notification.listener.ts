@@ -53,5 +53,14 @@ export class UserNotificationListener {
       alarmDto.data = event.data;
       await this.alarmsService.create(alarmDto);
     }
+
+    if (event.name == 'eventNotification') {
+      const alarmDto = new CreateAlarmDto();
+      alarmDto.alarmType = AlarmType.SETTING;
+      alarmDto.userId = event.userId;
+      alarmDto.message = event.body;
+      alarmDto.data = event.data;
+      await this.alarmsService.create(alarmDto);
+    }
   }
 }

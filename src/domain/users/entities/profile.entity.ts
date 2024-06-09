@@ -108,6 +108,7 @@ export class Profile {
       friendRequest: false, // 친구 신청
       friendRequestApproval: false, // 친구신청 승인
       friendRequestDenial: false, // 친구신청 발견글 요청
+      eventNotification: false,
     };
   }
 }

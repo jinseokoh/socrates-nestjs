@@ -298,12 +298,27 @@ export class UsersFriendshipService {
           .softDelete(friendship.plea.id);
       }
 
-      await this.repository.manager.query(
+      await queryRunner.manager.query(
         'DELETE FROM `friendship` WHERE senderId = ? AND recipientId = ?',
         [senderId, recipientId],
       );
 
       await queryRunner.commitTransaction();
+
+      //? notification with event listener ------------------------------------//
+      const event = new UserNotificationEvent();
+      event.name = 'friendRequestDenial';
+      event.userId = senderId;
+      event.token = friendship.sender.pushToken;
+      event.options = friendship.sender.profile?.options ?? {};
+      event.body = friendship.plea
+        ? `발견글 작성요청한 ${friendship.recipient.username}님이 나와의 친구관계를 유보했습니다.`
+        : `${friendship.recipient.username}님이 나와의 친구관계를 유보했습니다.`;
+      event.data = {
+        page: `settings/friends`,
+        args: 'load/plea',
+      };
+      this.eventEmitter.emit('user.notified', event);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;

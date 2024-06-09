@@ -242,7 +242,7 @@ export class PleasService {
       event.userId = plea.senderId;
       event.token = plea.sender.pushToken;
       event.options = plea.sender.profile?.options ?? {};
-      event.body = `${plea.recipient.username}님이 내가 보낸 발견글 작성요청을 거절했습니다. (${plea.reward - 1}코인 환불처리완료)`;
+      event.body = `${plea.recipient.username}님이 발견글 작성요청을 거절했습니다. (${plea.reward - 1}코인 환불처리완료)`;
       event.data = {
         page: `settings/coin`,
         args: '',
