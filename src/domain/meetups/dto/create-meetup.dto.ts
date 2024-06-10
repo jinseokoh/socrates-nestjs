@@ -55,15 +55,20 @@ export class CreateMeetupDto {
   @IsOptional()
   targetGender: TargetGender;
 
+  @ApiProperty({ description: '상대방 나이 min', default: 18 })
+  @IsString()
+  @IsOptional()
+  targetMinAge: number;
+
+  @ApiProperty({ description: '상대방 나이 max', default: 66 })
+  @IsString()
+  @IsOptional()
+  targetMaxAge: number;
+
   @ApiProperty({ description: '상대방 careers', default: ['all'] })
   @IsArray()
   @IsOptional()
   targetCareers: TargetCareerType[];
-
-  @ApiProperty({ description: '상대방 나이', default: null })
-  @IsString()
-  @IsOptional()
-  targetAge: string | null;
 
   @ApiProperty({ description: 'CreateVenueDto' })
   @ValidateNested()

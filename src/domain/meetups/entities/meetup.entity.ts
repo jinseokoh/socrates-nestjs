@@ -83,10 +83,6 @@ export class Meetup {
   @ApiProperty({ description: 'comma separated target career list' })
   targetCareers: TargetCareerType[];
 
-  @Column({ length: 8, nullable: true })
-  @ApiProperty({ description: 'age range' })
-  targetAge: string | null;
-
   @Column({
     type: 'enum',
     enum: Region,
