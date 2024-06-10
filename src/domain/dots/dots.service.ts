@@ -88,6 +88,9 @@ export class DotsService {
   }
 
   async getInactives(age = null): Promise<Array<Dot>> {
+    console.log(age);
+    console.log(age === undefined ? 'undefined' : age === null ? 'null' : age);
+
     if (!age) {
       return await this.repository.find({
         relations: ['user'],

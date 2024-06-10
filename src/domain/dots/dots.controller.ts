@@ -6,8 +6,10 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -56,22 +58,27 @@ export class DotsController {
   @Public()
   @ApiOperation({ description: 'all the active dots' })
   @Get('/active')
-  async getActives(): Promise<Array<Dot>> {
-    return await this.dotsService.getActives();
+  async getActives(@Query('age') age: number | undefined): Promise<Array<Dot>> {
+    return await this.dotsService.getActives(age);
   }
 
   @Public()
   @ApiOperation({ description: 'all the inactive dots' })
   @Get('/inactive')
-  async getInactives(): Promise<Array<Dot>> {
-    return await this.dotsService.getInactives();
+  async getInactives(
+    @Query('age') age: number | undefined,
+  ): Promise<Array<Dot>> {
+    return await this.dotsService.getInactives(age);
   }
 
   @Public()
   @ApiOperation({ description: 'Dot List' })
   @Get(':slug')
-  async getBySlugs(@Param('slug') slug: string): Promise<Array<Dot>> {
-    return await this.dotsService.getBySlug(slug);
+  async getBySlugs(
+    @Param('slug') slug: string,
+    @Query('age') age: number | undefined,
+  ): Promise<Array<Dot>> {
+    return await this.dotsService.getBySlug(slug, age);
   }
 
   //?-------------------------------------------------------------------------//
