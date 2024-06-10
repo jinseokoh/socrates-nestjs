@@ -18,7 +18,12 @@ import { UpdateDotDto } from 'src/domain/dots/dto/update-dot.dto';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
-import { DataSource, LessThanOrEqual, Repository } from 'typeorm';
+import {
+  DataSource,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Repository,
+} from 'typeorm';
 
 @Injectable()
 export class DotsService {
@@ -62,8 +67,8 @@ export class DotsService {
   }
 
   // Dot 리스트
-  async getActives(age?: number | null): Promise<Array<Dot>> {
-    if (age === null) {
+  async getActives(age = null): Promise<Array<Dot>> {
+    if (!age) {
       return await this.repository.find({
         relations: ['user'],
         where: {
@@ -77,13 +82,13 @@ export class DotsService {
       where: {
         isActive: true,
         targetMinAge: LessThanOrEqual(age),
-        targetMaxAge: GreaterThanOrEqual(age),
+        targetMaxAge: MoreThanOrEqual(age),
       },
     });
   }
 
-  async getInactives(age?: number | null): Promise<Array<Dot>> {
-    if (age === null) {
+  async getInactives(age = null): Promise<Array<Dot>> {
+    if (!age) {
       return await this.repository.find({
         relations: ['user'],
         where: {
@@ -97,14 +102,14 @@ export class DotsService {
       where: {
         isActive: false,
         targetMinAge: LessThanOrEqual(age),
-        targetMaxAge: GreaterThanOrEqual(age),
+        targetMaxAge: MoreThanOrEqual(age),
       },
     });
   }
 
   // Dot 리스트
-  async getBySlug(slug: string, age?: number | null): Promise<Array<Dot>> {
-    if (age === null) {
+  async getBySlug(slug: string, age = null): Promise<Array<Dot>> {
+    if (!age) {
       return await this.repository.find({
         where: {
           slug: slug,
@@ -118,7 +123,7 @@ export class DotsService {
         slug: slug,
         isActive: true,
         targetMinAge: LessThanOrEqual(age),
-        targetMaxAge: GreaterThanOrEqual(age),
+        targetMaxAge: MoreThanOrEqual(age),
       },
     });
   }
@@ -849,7 +854,3 @@ export class DotsService {
     }
   }
 }
-function GreaterThanOrEqual(age: number): number | import("typeorm").FindOperator<number> {
-  throw new Error('Function not implemented.');
-}
-
