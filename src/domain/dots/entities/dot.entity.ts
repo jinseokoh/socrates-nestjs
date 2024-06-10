@@ -42,7 +42,7 @@ export class Dot {
   options: string[] | null;
 
   @Column({ default: false })
-  @ApiProperty({ description: 'allowMultiple' })
+  @ApiProperty({ description: 'whether or not allow multiple answers' })
   allowMultiple: boolean;
 
   @Column('json', { nullable: true })

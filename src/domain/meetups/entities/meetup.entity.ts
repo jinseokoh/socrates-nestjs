@@ -69,6 +69,12 @@ export class Meetup {
   @ApiProperty({ description: 'gender looking for' })
   targetGender: TargetGender;
 
+  @Column({ type: 'tinyint', unsigned: true, default: 18 })
+  targetMinAge: number;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 66 })
+  targetMaxAge: number;
+
   @Column({
     type: 'set',
     enum: TargetCareer,
