@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
-import { QuestionType } from 'src/common/enums';
+import { QuestionType, TargetGender } from 'src/common/enums';
 import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -57,6 +56,16 @@ export class Dot {
   @ApiProperty({ description: 'isActive' })
   isActive: boolean;
 
+  @Column({ type: 'enum', enum: TargetGender, default: TargetGender.ALL })
+  @ApiProperty({ description: 'gender looking for' })
+  targetGender: TargetGender;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 18 })
+  targetMinAge: number;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 66 })
+  targetMaxAge: number;
+
   @Column({ type: 'int', unsigned: true, default: 0 })
   up: number;
 
@@ -97,3 +106,34 @@ export class Dot {
     Object.assign(this, partial);
   }
 }
+
+/*
+  JFYI, on the client side,
+
+  static RangeAge getRangeAgeOf(int? age) {
+    if (age == null) {
+      return const RangeAge(min: 18, max: 66);
+    }
+
+    if (age <= 24) {
+      return const RangeAge(min: 18, max: 30);
+    }
+    if (age <= 30) {
+      return const RangeAge(min: 24, max: 36);
+    }
+    if (age <= 36) {
+      return const RangeAge(min: 30, max: 42);
+    }
+    if (age <= 42) {
+      return const RangeAge(min: 36, max: 48);
+    }
+    if (age <= 48) {
+      return const RangeAge(min: 42, max: 54);
+    }
+    if (age <= 54) {
+      return const RangeAge(min: 48, max: 60);
+    }
+
+    return const RangeAge(min: 54, max: 66);
+  }
+*/
