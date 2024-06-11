@@ -61,6 +61,8 @@ export class DotsService {
       filterableColumns: {
         isActive: [FilterOperator.EQ],
         userId: [FilterOperator.EQ, FilterOperator.IN],
+        targetMinAge: [FilterOperator.LTE],
+        targetMaxAge: [FilterOperator.GTE],
         createdAt: [FilterOperator.LT, FilterOperator.GT],
       },
     });
