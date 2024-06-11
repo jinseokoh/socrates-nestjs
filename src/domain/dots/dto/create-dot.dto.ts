@@ -22,7 +22,7 @@ export class CreateDotDto {
   @IsEnum(QuestionType)
   questionType: QuestionType;
 
-  @ApiProperty({ description: 'options', default: [] })
+  @ApiProperty({ description: 'options', default: null })
   @IsArray()
   @IsOptional()
   options: string[];
