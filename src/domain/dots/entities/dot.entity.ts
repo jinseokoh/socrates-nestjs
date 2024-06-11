@@ -8,12 +8,15 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { IsArray } from 'class-validator';
+import { Faction } from 'src/domain/dots/entities/faction.entity';
 
 @Entity()
 export class Dot {
@@ -80,6 +83,15 @@ export class Dot {
 
   @DeleteDateColumn()
   deletedAt: Date | null;
+
+  //**------------------------------------------------------------------------*/
+  //** many-to-many belongsToMany
+
+  @ManyToMany(() => Faction, (faction) => faction.dots, {
+    cascade: true,
+  })
+  @JoinTable({ name: 'dot_faction' })
+  factions: Faction[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany using one-to-many
