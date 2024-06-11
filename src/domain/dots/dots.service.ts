@@ -840,16 +840,14 @@ export class DotsService {
       // '내가 해본 가장 도발적이고 발칙한 상상은 무엇인가요?',
     ];
 
+    //? 순차저장!
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      await Promise.all(
-        items.map(async (v) => {
-          return await queryRunner.manager.save(v);
-        }),
-      );
-
+      for (const item in items) {
+        await queryRunner.manager.save(item);
+      }
       // commit transaction now:
       await queryRunner.commitTransaction();
     } catch (error) {

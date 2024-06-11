@@ -26,6 +26,9 @@ export class Dot {
   @Column({ length: 16, nullable: false })
   slug: string;
 
+  @Column({ length: 16, nullable: true })
+  help: string | null;
+
   @Column({ length: 255, nullable: false })
   @ApiProperty({ description: 'question' })
   question: string;
@@ -120,32 +123,11 @@ export class Dot {
 }
 
 /*
-  JFYI, on the client side,
-
-  static RangeAge getRangeAgeOf(int? age) {
-    if (age == null) {
-      return const RangeAge(min: 18, max: 66);
-    }
-
-    if (age <= 24) {
-      return const RangeAge(min: 18, max: 30);
-    }
-    if (age <= 30) {
-      return const RangeAge(min: 24, max: 36);
-    }
-    if (age <= 36) {
-      return const RangeAge(min: 30, max: 42);
-    }
-    if (age <= 42) {
-      return const RangeAge(min: 36, max: 48);
-    }
-    if (age <= 48) {
-      return const RangeAge(min: 42, max: 54);
-    }
-    if (age <= 54) {
-      return const RangeAge(min: 48, max: 60);
-    }
-
-    return const RangeAge(min: 54, max: 66);
-  }
+update `dot` set help='선호' where slug='love';
+update `dot` set help='가치관' where slug='wow';
+update `dot` set help='경험' where slug='cool';
+update `dot` set help='최근' where slug='saint';
+update `dot` set help='일상' where slug='yes';
+update `dot` set help='가설' where slug='pirate';
+update `dot` set help='논란' where slug='devil';
 */
