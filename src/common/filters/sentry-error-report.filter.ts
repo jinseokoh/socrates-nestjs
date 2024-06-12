@@ -20,7 +20,7 @@ export class SentryErrorReportFilter extends BaseExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    if (httpStatus >= 500) {
+    if (httpStatus >= 500 && process.env.NODE_ENV != 'local') {
       Sentry.captureException(exception);
       this.notifySlack(exception as any);
     }

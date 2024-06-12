@@ -18,6 +18,7 @@ import { UpdateDotDto } from 'src/domain/dots/dto/update-dot.dto';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
+import { ageToFaction, ageToFactionId } from 'src/helpers/age-to-faction';
 import {
   DataSource,
   LessThanOrEqual,
@@ -55,7 +56,7 @@ export class DotsService {
   async findAll(query: PaginateQuery): Promise<Paginated<Dot>> {
     console.log(`query => `, query);
     return await paginate(query, this.repository, {
-      relations: ['user'],
+      relations: ['user', 'factions'],
       sortableColumns: ['id', 'answerCount'],
       searchableColumns: ['slug'],
       defaultSortBy: [['id', 'DESC']],
@@ -65,6 +66,7 @@ export class DotsService {
         targetMinAge: [FilterOperator.LTE],
         targetMaxAge: [FilterOperator.GTE],
         createdAt: [FilterOperator.LT, FilterOperator.GT],
+        'factions.factionId': [FilterOperator.EQ],
       },
     });
   }
@@ -80,14 +82,15 @@ export class DotsService {
       });
     }
 
-    return await this.repository.find({
-      relations: ['user'],
-      where: {
-        isActive: true,
-        targetMinAge: LessThanOrEqual(age),
-        targetMaxAge: MoreThanOrEqual(age),
-      },
-    });
+    const items = await this.repository
+      .createQueryBuilder('dot')
+      .leftJoinAndSelect('dot.user', 'user')
+      .innerJoinAndSelect('dot.factions', 'faction')
+      .where('faction.id = :factionId', { factionId: ageToFactionId(age) })
+      .andWhere('dot.isActive = :isActive', { isActive: true })
+      .getMany();
+
+    return items;
   }
 
   async getInactives(age = null): Promise<Array<Dot>> {
@@ -103,14 +106,15 @@ export class DotsService {
       });
     }
 
-    return await this.repository.find({
-      relations: ['user'],
-      where: {
-        isActive: false,
-        targetMinAge: LessThanOrEqual(age),
-        targetMaxAge: MoreThanOrEqual(age),
-      },
-    });
+    const items = await this.repository
+      .createQueryBuilder('dot')
+      .leftJoinAndSelect('dot.user', 'user')
+      .innerJoinAndSelect('dot.factions', 'faction')
+      .where('faction.id = :factionId', { factionId: ageToFactionId(age) })
+      .andWhere('dot.isActive = :isActive', { isActive: false })
+      .getMany();
+
+    return items;
   }
 
   // Dot 리스트
@@ -124,14 +128,14 @@ export class DotsService {
       });
     }
 
-    return await this.repository.find({
-      where: {
-        slug: slug,
-        isActive: true,
-        targetMinAge: LessThanOrEqual(age),
-        targetMaxAge: MoreThanOrEqual(age),
-      },
-    });
+    const items = await this.repository
+      .createQueryBuilder('dot')
+      .innerJoinAndSelect('dot.user', 'user')
+      .innerJoinAndSelect('dot.factions', 'faction')
+      .where('faction.id = :factionId', { factionId: 1 })
+      .getMany();
+
+    return items;
   }
 
   async findById(id: number, relations: string[] = []): Promise<Dot> {
@@ -220,7 +224,7 @@ export class DotsService {
   //?-------------------------------------------------------------------------//
 
   async seedDots(): Promise<void> {
-    const items = [
+    const items = <Dot[]>[
       //! 최애 ✅
       new Dot({
         slug: 'love',
@@ -261,6 +265,13 @@ export class DotsService {
         slug: 'love',
         help: '최애',
         question: '가장 좋아하는 게임은 뭐야?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'love',
+        help: '최애',
+        question: '가장 좋아하는 가수나 밴드는 누구야?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -579,8 +590,21 @@ export class DotsService {
       new Dot({
         slug: 'saint',
         help: '최근',
-        question:
-          '최근에 쇼핑한 물건 중에 내 생활에 가장 큰 변화를 가져오거나 가장 만족하는 제품은 무엇인가요? 그 이유는?',
+        question: '최근에 쇼핑한 물건 중에 가장 만족하는 것은 뭐야?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'saint',
+        help: '최근',
+        question: '최근에 쇼핑한 물건 중에 가장 후회하는 것은 뭐야?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'saint',
+        help: '최근',
+        question: '최근에 친해진 사람이 있으면 어떻게 만난 사람인지 알려줄래?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -588,7 +612,21 @@ export class DotsService {
         slug: 'saint',
         help: '최근',
         question:
-          '최근에 쇼핑한 물건 중에 가장 후회하는 것은 무엇인가요? 그 이유는?',
+          '최근에 건강을 위해 새롭게 시작했거나 관심을 갖기 시작한 운동이 있다면 뭐야?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'saint',
+        help: '최근',
+        question: '최근에 관심을 갖게 된 취미활동이 있어?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'saint',
+        help: '최근',
+        question: '최근에 시작한 재태크 혹은 경제활동이 있어?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -596,7 +634,14 @@ export class DotsService {
         slug: 'saint',
         help: '최근',
         question:
-          '최근에 친분을 쌓은 사람이 있다면 누구이며, 그 사람을 알게 된 계기는 무엇인가요?',
+          '최근에 소비했던 내용 중에 먹는것 빼고 가장 높은 비율을 차지한 내용은 뭐야?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'saint',
+        help: '최근',
+        question: '최근에 자기 계발을 위해서 배우기 시작한 것이 있다면 알려줘.',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -604,62 +649,21 @@ export class DotsService {
         slug: 'saint',
         help: '최근',
         question:
-          '최근에 나의 건강을 위해 새롭게 시작했거나 관심을 갖게 된 분야가 있다면 무엇인가요? 그 계기는?',
+          '최근에 봤던 영화나 드라마 중에서 가장 재밌게 봤던 영화는 뭐야?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
       new Dot({
         slug: 'saint',
         help: '최근',
-        question: '최근에 관심을 갖게 된 취미활동은 무엇인가요? 그 계기는?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'saint',
-        help: '최근',
-        question:
-          '최근에 관심갖기 시작한 재태크 혹은 경제활동이 있다면 무엇인가요? 그 계기는?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'saint',
-        help: '최근',
-        question:
-          '최근에 가장 많이 마신 음료는 무엇인가요? 그 것을 선택한 이유와 계기는 무엇인가요?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'saint',
-        help: '최근',
-        question:
-          '최근에 배우기 시작한 자기 계발이나 교육 프로그램이 있다면 무엇인가요? 그 계기는?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'saint',
-        help: '최근',
-        question:
-          '최근에 봤던 영화나 드라마 중에서 가장 기억에 남는 것은 무엇인가요? 그 이유는?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'saint',
-        help: '최근',
-        question:
-          '최근에 새로운 인사이트를 얻거나 감동을 받은 유튜브 영상을 공유해주세요. 내용 중 어떤 점이 좋았는지도.',
+        question: '최근에 저지른 가장 후회하는 일은 뭐야?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: false,
       }),
       new Dot({
         slug: 'saint',
         help: '최근',
-        question:
-          '최근에 발견했거나 읽었던 책 중에서 가장 유익한 책이 있다면 무엇인가요? 그 이유는?',
+        question: '최근에 읽었던 책 중에서 가장 유익한 책은 어떤 책이야?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -667,7 +671,7 @@ export class DotsService {
         slug: 'saint',
         help: '최근',
         question:
-          '최근에 경험한 일 들 중에, 예전의 나라면 상상도 못할 일을 경험한 것이 있다면 무엇인가요? 그 계기는?',
+          '최근 새롭게 한 일 중에, 예전의 나였더라면 상상도 못할 일을 한 것이 있다면 알려줘.',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -677,7 +681,7 @@ export class DotsService {
         slug: 'yes',
         help: '일상',
         question:
-          '이 세상에서 가장 중요하다고 여기는 3가지 아이템은 무엇인가요?',
+          '내가 이 세상에서 가장 중요하다고 여기는 것에는 어떤 것이 있어?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -685,14 +689,7 @@ export class DotsService {
         slug: 'yes',
         help: '일상',
         question:
-          '내 방에서 없어서는 안 될 가장 소중한 3가지 아이템은 무엇인가요?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'yes',
-        help: '일상',
-        question: '내 폰에서 없어서는 안 될 가장 중요한 3가지 앱은 무엇인가요?',
+          '내가 갖고 있는 것 중에 가장 아끼는 3가지 아이템에 대해서 말해줘',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -700,7 +697,7 @@ export class DotsService {
         slug: 'yes',
         help: '일상',
         question:
-          '지금은 갖고있지 않지만, 수년 뒤 나는 이 3가지 아이템을 반드시 갖고 있을 것이다. 이건 무엇인가요?',
+          '내가 갖고 있지 않지만, 가장 갖고 싶은 3가지 아이템에 대해서 말해줘.',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -708,7 +705,7 @@ export class DotsService {
         slug: 'yes',
         help: '일상',
         question:
-          '내가 하면 충분히 잘할 수 있을 법한 비즈니스의 종류를 3가지 물어본다면, 무엇인가요?',
+          '전화, 문자, 카톡 같이 누구와 연락할 때 사용하는 앱 말고, 그 밖에 앱들 중에 제일 많이 사용하는 앱은 뭐야?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -716,7 +713,21 @@ export class DotsService {
         slug: 'yes',
         help: '일상',
         question:
-          '나의 이상형과 가장 비슷하거나 닮은꼴인 3명의 연애인 이름을 말해주세요. 어떤 점이 이상형과 닮은 꼴인가요?',
+          '내가 하면 충분히 경쟁력있게 잘할 수 있을 것 같은 3가지 비즈니스 영역이 뭐야?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'yes',
+        help: '일상',
+        question: '내 이상형과 가장 비슷하거나 닮은꼴인 3명의 연애인을 말해줘.',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'yes',
+        help: '일상',
+        question: '언제 떠올리더라도 행복한 장소 3군데를 물어본다면?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -724,7 +735,7 @@ export class DotsService {
         slug: 'yes',
         help: '일상',
         question:
-          '언제 떠올리더라도 행복한 장소 3군데를 물어본다면 어디인가요? 그 이유는?',
+          '누구와 함께 하더라도 자신있게 즐길 수 있는 운동종목 3가지를 말해줘.',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -732,7 +743,7 @@ export class DotsService {
         slug: 'yes',
         help: '일상',
         question:
-          '누구와 함께 하더라도 자신있게 즐길 수 있는 운동종목 3가지와 좋아하는 이유를 알려주세요.',
+          '누구와 함께 하더라도 재미있게 즐길 수 있는 취미활동 3가지를 말해줘.',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -740,15 +751,7 @@ export class DotsService {
         slug: 'yes',
         help: '일상',
         question:
-          '누구와 함께 하더라도 재미있게 즐길 수 있는 취미활동 3가지와 좋아하는 이유를 알려주세요.',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'yes',
-        help: '일상',
-        question:
-          '연애 상대를 선택함에 있어서, 그 사람이 반드시 갖춰야 하는 3가지 조건이 있다면?',
+          '연애 상대를 선택함에 있어서, 그 사람이 반드시 갖춰야 하는 3가지 조건이나 소양이 있다면?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -758,7 +761,7 @@ export class DotsService {
         slug: 'pirate',
         help: '가설',
         question:
-          '시간을 돌릴 수 있다면, 내가 결정했던 것들 중 가장 바꾸고 싶은 건 무엇인가요? 그 이유는?',
+          '시간을 돌릴 수 있다면, 내가 결정했던 것들 중 가장 바꾸고 싶은 건 뭐야?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -766,7 +769,7 @@ export class DotsService {
         slug: 'pirate',
         help: '가설',
         question:
-          '내가 앞으로 일주일 동안만 살 수 있는 운명이라면 죽기 전에 꼭 경험해 보고 싶은 일은 무엇인가요? 그 이유는?',
+          '내가 앞으로 일주일 동안만 살 수 있는 운명이라면 죽기 전에 꼭 경험해 보고 싶은 일은 뭐야?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -774,7 +777,7 @@ export class DotsService {
         slug: 'pirate',
         help: '가설',
         question:
-          '만일 전생에 내가 동물이었다면, 어떤 동물이었을 것이라 생각하나요? 그 이유는?',
+          '만일 전생에 내가 동물이었다면, 어떤 동물이었을 것이라 생각해?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -782,7 +785,14 @@ export class DotsService {
         slug: 'pirate',
         help: '가설',
         question:
-          '만일 타임머신이 만들어진다면 제일 먼저 가보고 싶은 시대는 언제인가요? 그 이유는?',
+          '만일 타임머신이 만들어진다면 제일 먼저 가보고 싶은 시대와 장소는 어디야?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'pirate',
+        help: '가설',
+        question: '만일 슈퍼히어로가 될 수 있다면, 어떤 슈퍼파워를 갖고 싶어?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -790,15 +800,7 @@ export class DotsService {
         slug: 'pirate',
         help: '가설',
         question:
-          '만일 당신이 슈퍼히어로가 될 수 있다면, 어떤 슈퍼파워를 갖고 싶은가요? 그 이유는?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'pirate',
-        help: '가설',
-        question:
-          '만일 당신의 삶이 영화로 만들어 진다면, 그 영화의 장르는 어떤 장르일까요? 그 이유는?',
+          '만일 당신의 삶이 영화로 만들어 진다면, 그 영화의 장르는 어떤 장르일까?',
         questionType: QuestionType.MULTIPLE_CHOICE,
         isActive: true,
         options: [
@@ -815,8 +817,7 @@ export class DotsService {
       new Dot({
         slug: 'pirate',
         help: '가설',
-        question:
-          '유명해지고 싶다면 어떤 분야에서 유명해 지고 싶나요? 그 이유는?',
+        question: '유명해지고 싶다면 어떤 분야에서 유명해 지고 싶어?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -824,7 +825,7 @@ export class DotsService {
         slug: 'pirate',
         help: '가설',
         question:
-          '만약 하루 동안만 성별이 바뀌는 기회가 주어진다면, 어떤 일을 경험해보고 싶나요? 그 이유는?',
+          '만약 하루 동안만 성별이 바뀌는 기회가 주어진다면, 어떤 일을 경험해보고 싶어?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -832,15 +833,14 @@ export class DotsService {
         slug: 'pirate',
         help: '가설',
         question:
-          '당신의 미래에 대해 단 한가지를 물어볼 수 있는 마법의 구슬이 있다면, 어떤 질문을 하고 싶나요? 그 이유는?',
+          '미래의 나에 대해 딱 한가지를 물어볼 수 있는 마법의 구슬이 있다면, 어떤 질문을 하고 싶어?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
       new Dot({
         slug: 'pirate',
         help: '가설',
-        question:
-          '평생을 다른 나라에서 살아야 한다면 어느 곳을 선택할 것인가요? 그 이유는?',
+        question: '평생을 다른 나라에서 살아야 한다면 어느 나라에서 살고 싶어?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -849,8 +849,14 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         help: '논란',
-        question:
-          '결혼제도는 진보한 현대사회에 더 이상 유효하지 않는 제도로 보는 시각이 있습니다. 나의 찬반의견과 그 이유는?',
+        question: '아이를 낳고 키우는 것은 선택사항이야 아니면 의무사항이야?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        help: '논란',
+        question: '결혼을 하는 건 반드시 필요하고 합리적인 제도라고 생각해?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -858,14 +864,30 @@ export class DotsService {
         slug: 'devil',
         help: '논란',
         question:
-          '대마초를 합법화 하는 나라가 늘어나고 있습니다. 이에 대하여 나의 찬반 의견과 그 이유는?',
+          '결혼 후 더 이상 사랑하지 않게 된다면, 이혼을 하는게 당연하다고 생각해?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
       new Dot({
         slug: 'devil',
         help: '논란',
-        question: '동성애에 대한 나의 찬반 의견과 그 이유를 말해주세요.',
+        question: '동성애에 대한 나의 찬반 의견을 말해줘.',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        help: '논란',
+        question:
+          '결혼하지 않고 여러명의 이성과 자유롭게 사랑을 하는 것과 결혼을 하고 한명의 이성과 사랑하는 것 중 어떤 것에 더 동경이 가는지 말해줘.',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        help: '논란',
+        question:
+          '강력범들의 가벼운 처벌수위로 논란이 많은데, 범죄인의 인권을 보호하고 변호하는게 말이 된다고 생각해?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -880,8 +902,14 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         help: '논란',
-        question:
-          '가장 과대평가된 유명인이 있다면 누굴 꼽을 수 있을까요? 그 이유는?',
+        question: '가장 과대평가된 유명인이 있다면 누굴 꼽을 수 있어?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        help: '논란',
+        question: '술을 자주 즐기는 것도 병이라고 생각해?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -889,15 +917,7 @@ export class DotsService {
         slug: 'devil',
         help: '논란',
         question:
-          '두 명의 상대를 동시에 사랑하는 것이 가능할까요? 나의 의견과 그 이유는?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
-        help: '논란',
-        question:
-          '당신이 꾼 꿈 중에 아직도 잊혀지지않는 가장 이상한 꿈 내용은 무엇인지 말해주세요.',
+          '합리적인 소비는 아니겠지만, 무리해서라도 남들에게 보여지는 값비싼 물건을 소비하는 것이 필요한 것이라 생각해?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -919,9 +939,12 @@ export class DotsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      for (const item in items) {
-        await queryRunner.manager.save(item);
-      }
+      await Promise.all(
+        items.map(async (v) => {
+          return await queryRunner.manager.save(v);
+        }),
+      );
+
       // commit transaction now:
       await queryRunner.commitTransaction();
     } catch (error) {

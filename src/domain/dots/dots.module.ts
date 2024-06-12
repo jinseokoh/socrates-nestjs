@@ -13,10 +13,9 @@ import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
 import { ConnectionSubscriber } from 'src/domain/dots/subscribers/connection-subscriber';
-import { Faction } from 'src/domain/dots/entities/faction.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Dot, Connection, Remark, Plea, Faction]),
+    TypeOrmModule.forFeature([Dot, Connection, Remark, Plea]),
     S3Module,
     FcmModule,
   ],

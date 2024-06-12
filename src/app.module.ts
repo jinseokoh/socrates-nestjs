@@ -39,6 +39,7 @@ import { DuplicateEntryErrorInterceptor } from 'src/common/interceptors/duplicat
 import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.filter';
 import { SecretsModule } from 'src/domain/secrets/secrets.module';
 import { PleasModule } from 'src/domain/pleas/pleas.module';
+import { FactionsModule } from 'src/domain/factions/factions.module';
 // import { CustomLogger } from 'src/helpers/custom-logger';
 @Module({
   imports: [
@@ -147,6 +148,7 @@ import { PleasModule } from 'src/domain/pleas/pleas.module';
     ChatsModule,
     ContentsModule,
     DotsModule,
+    FactionsModule,
     InquiriesModule,
     LanguagesModule,
     LedgersModule,

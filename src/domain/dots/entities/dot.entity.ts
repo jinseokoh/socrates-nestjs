@@ -16,7 +16,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { IsArray } from 'class-validator';
-import { Faction } from 'src/domain/dots/entities/faction.entity';
+import { Faction } from 'src/domain/factions/entities/faction.entity';
 
 @Entity()
 export class Dot {
@@ -62,15 +62,15 @@ export class Dot {
   @ApiProperty({ description: 'isActive' })
   isActive: boolean;
 
-  @Column({ type: 'enum', enum: TargetGender, default: TargetGender.ALL })
-  @ApiProperty({ description: 'gender looking for' })
-  targetGender: TargetGender;
+  // @Column({ type: 'enum', enum: TargetGender, default: TargetGender.ALL })
+  // @ApiProperty({ description: 'gender looking for' })
+  // targetGender: TargetGender;
 
-  @Column({ type: 'tinyint', unsigned: true, default: 18 })
-  targetMinAge: number;
+  // @Column({ type: 'tinyint', unsigned: true, default: 18 })
+  // targetMinAge: number;
 
-  @Column({ type: 'tinyint', unsigned: true, default: 66 })
-  targetMaxAge: number;
+  // @Column({ type: 'tinyint', unsigned: true, default: 66 })
+  // targetMaxAge: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   up: number;
