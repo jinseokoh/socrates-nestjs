@@ -22,24 +22,15 @@ export const ageToFaction = (age: number): string => {
 };
 
 export const ageToFactionId = (age: number): number => {
-  if (age <= 24) {
+  if (age <= 28) {
     return 1;
   }
-  if (age <= 30) {
+  if (age <= 39) {
     return 2;
   }
-  if (age <= 36) {
+  if (age <= 50) {
     return 3;
   }
-  if (age <= 42) {
-    return 4;
-  }
-  if (age <= 48) {
-    return 5;
-  }
-  if (age <= 54) {
-    return 6;
-  }
 
-  return 7;
+  return 4;
 };
