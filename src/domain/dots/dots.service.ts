@@ -8,6 +8,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
+  PaginateConfig,
   PaginateQuery,
   Paginated,
   paginate,
@@ -19,12 +20,7 @@ import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { ageToFaction, ageToFactionId } from 'src/helpers/age-to-faction';
-import {
-  DataSource,
-  LessThanOrEqual,
-  MoreThanOrEqual,
-  Repository,
-} from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class DotsService {
@@ -54,8 +50,7 @@ export class DotsService {
   //?-------------------------------------------------------------------------//
 
   async findAll(query: PaginateQuery): Promise<Paginated<Dot>> {
-    console.log(`query => `, query);
-    return await paginate(query, this.repository, {
+    const config: PaginateConfig<Dot> = {
       relations: ['user', 'factions'],
       sortableColumns: ['id', 'answerCount'],
       searchableColumns: ['slug'],
@@ -63,12 +58,12 @@ export class DotsService {
       filterableColumns: {
         isActive: [FilterOperator.EQ],
         userId: [FilterOperator.EQ, FilterOperator.IN],
-        targetMinAge: [FilterOperator.LTE],
-        targetMaxAge: [FilterOperator.GTE],
         createdAt: [FilterOperator.LT, FilterOperator.GT],
-        'factions.factionId': [FilterOperator.EQ],
+        'factions.id': [FilterOperator.EQ, FilterOperator.IN],
       },
-    });
+    };
+
+    return await paginate(query, this.repository, config);
   }
 
   // Dot 리스트
@@ -82,21 +77,25 @@ export class DotsService {
       });
     }
 
-    const items = await this.repository
-      .createQueryBuilder('dot')
-      .leftJoinAndSelect('dot.user', 'user')
-      .innerJoinAndSelect('dot.factions', 'faction')
-      .where('faction.id = :factionId', { factionId: ageToFactionId(age) })
-      .andWhere('dot.isActive = :isActive', { isActive: true })
-      .getMany();
-
-    return items;
+    // return await this.repository
+    //   .createQueryBuilder('dot')
+    //   .leftJoinAndSelect('dot.user', 'user')
+    //   .innerJoinAndSelect('dot.factions', 'faction')
+    //   .where('faction.id = :factionId', { factionId: ageToFactionId(age) })
+    //   .andWhere('dot.isActive = :isActive', { isActive: true })
+    //   .getMany();
+    return await this.repository.find({
+      relations: ['user', 'factions'],
+      where: {
+        isActive: true,
+        factions: {
+          id: ageToFactionId(age),
+        },
+      },
+    });
   }
 
   async getInactives(age = null): Promise<Array<Dot>> {
-    console.log(age);
-    console.log(age === undefined ? 'undefined' : age === null ? 'null' : age);
-
     if (!age) {
       return await this.repository.find({
         relations: ['user'],
@@ -106,19 +105,19 @@ export class DotsService {
       });
     }
 
-    const items = await this.repository
-      .createQueryBuilder('dot')
-      .leftJoinAndSelect('dot.user', 'user')
-      .innerJoinAndSelect('dot.factions', 'faction')
-      .where('faction.id = :factionId', { factionId: ageToFactionId(age) })
-      .andWhere('dot.isActive = :isActive', { isActive: false })
-      .getMany();
-
-    return items;
+    return await this.repository.find({
+      relations: ['user', 'factions'],
+      where: {
+        isActive: false,
+        factions: {
+          id: ageToFactionId(age),
+        },
+      },
+    });
   }
 
   // Dot 리스트
-  async getBySlug(slug: string, age = null): Promise<Array<Dot>> {
+  async getActivesBySlug(slug: string, age = null): Promise<Array<Dot>> {
     if (!age) {
       return await this.repository.find({
         where: {
@@ -128,14 +127,16 @@ export class DotsService {
       });
     }
 
-    const items = await this.repository
-      .createQueryBuilder('dot')
-      .innerJoinAndSelect('dot.user', 'user')
-      .innerJoinAndSelect('dot.factions', 'faction')
-      .where('faction.id = :factionId', { factionId: 1 })
-      .getMany();
-
-    return items;
+    return await this.repository.find({
+      relations: ['user', 'factions'],
+      where: {
+        slug: slug,
+        isActive: true,
+        factions: {
+          id: ageToFactionId(age),
+        },
+      },
+    });
   }
 
   async findById(id: number, relations: string[] = []): Promise<Dot> {

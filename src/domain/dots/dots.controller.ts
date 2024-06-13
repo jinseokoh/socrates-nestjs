@@ -56,15 +56,15 @@ export class DotsController {
   }
 
   @Public()
-  @ApiOperation({ description: 'all the active dots' })
-  @Get('/active')
+  @ApiOperation({ description: 'load active dots' })
+  @Get('active')
   async getActives(@Query('age') age: number | undefined): Promise<Array<Dot>> {
     return await this.dotsService.getActives(age);
   }
 
   @Public()
-  @ApiOperation({ description: 'all the inactive dots' })
-  @Get('/inactive')
+  @ApiOperation({ description: 'load inactive dots' })
+  @Get('inactive')
   async getInactives(
     @Query('age') age: number | undefined,
   ): Promise<Array<Dot>> {
@@ -72,13 +72,13 @@ export class DotsController {
   }
 
   @Public()
-  @ApiOperation({ description: 'Dot List' })
-  @Get(':slug')
-  async getBySlugs(
+  @ApiOperation({ description: 'load active dots by slug' })
+  @Get('active/:slug')
+  async getActivesBySlug(
     @Param('slug') slug: string,
     @Query('age') age: number | undefined,
   ): Promise<Array<Dot>> {
-    return await this.dotsService.getBySlug(slug, age);
+    return await this.dotsService.getActivesBySlug(slug, age);
   }
 
   //?-------------------------------------------------------------------------//
