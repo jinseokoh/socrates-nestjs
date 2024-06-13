@@ -7,7 +7,7 @@ export class Faction {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
-  @Column({ length: 5, nullable: false })
+  @Column({ length: 6, nullable: false })
   @ApiProperty({
     description: 'age group name',
   })

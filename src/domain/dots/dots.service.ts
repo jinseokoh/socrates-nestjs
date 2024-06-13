@@ -237,7 +237,23 @@ export class DotsService {
       new Dot({
         slug: 'love',
         help: '최애',
-        question: '가장 좋아하는 유튜브 채널을 콕 찝어서 말해줘',
+        question:
+          '가장 좋아하는 유튜브 채널이 뭐야? 생각나는 채널들 전부 말해줘',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'love',
+        help: '최애',
+        question:
+          '가장 좋아하는 예능 프로그램이나 TV 시리즈는 뭐야? 기억나는 것 전부 말해줘.',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'love',
+        help: '최애',
+        question: '가장 재미있게 본 영화나 드라마는 기억나는 것 전부 말해줘.',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -258,7 +274,7 @@ export class DotsService {
       new Dot({
         slug: 'love',
         help: '최애',
-        question: '집·학교·직장을 제외하고 가장 즐겨찾는 장소가 있다면 어딘데?',
+        question: '집·학교·직장을 제외하고 가장 즐겨찾는 장소가 있다면 어디야?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -283,22 +299,6 @@ export class DotsService {
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
-      new Dot({
-        slug: 'love',
-        help: '최애',
-        question:
-          '가장 재미있게 본 TV 프로그램이나 시리즈는 뭐야? 여러개 있다면 전부 말해줘.',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'love',
-        help: '최애',
-        question:
-          '가장 좋아하는 영화 장르은 뭐야? 해당 장르의 영화 몇개만 추천한다면?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
 
       //! 가치관 ✅
       new Dot({
@@ -319,7 +319,7 @@ export class DotsService {
       new Dot({
         slug: 'wow',
         help: '가치관',
-        question: '다른 사람의 행동 중에서 당신을 가장 화나게 하는 게 뭐야?',
+        question: '이성 친구를 선택할 때 외모와 능력 둘 중 어떤게 더 중요해?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -327,7 +327,7 @@ export class DotsService {
         slug: 'wow',
         help: '가치관',
         question:
-          '힘든 상황에 처했을떄 누군가의 도움을 청하는 편이야? 아님 혼자 극복하려는 편이야? 만일 후자라면, 일례를 말해줘.',
+          '합리적인 소비는 아니지만, 무리해서라도 남들에게 보여지는 값비싼 물건을 소비하는 것이 필요한 것이라 생각해?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -335,7 +335,7 @@ export class DotsService {
         slug: 'wow',
         help: '가치관',
         question:
-          '룸메이트와 함께 사는 경우, 상대방의 어떤 생활습관이나 행동이 나를 가장 거슬리게 할까?',
+          '일이 잘 안풀리면, 될 때까지 지속적인 노력을 하는 편이야? 아니면 일단 포기하고 다른 방법을 강구하는 편이야?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -411,14 +411,16 @@ export class DotsService {
       new Dot({
         slug: 'wow',
         help: '가치관',
-        question: '이성 친구를 선택할 때 외모와 능력 둘 중 어떤게 더 중요해?',
+        question:
+          '가장 호감이 가는 스타일의 사람을 영화의 캐릭터로 빗대어 말한다면 누구야?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
       new Dot({
         slug: 'wow',
         help: '가치관',
-        question: '빌런 캐릭터 중 나와 비슷한 캐릭터를 하나 꼽는다면 누굴까?',
+        question:
+          '가장 싫어하는 스타일의 사람을 영화의 빌런 캐릭터로 빗대어 말한다면 누구야?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -721,7 +723,7 @@ export class DotsService {
       new Dot({
         slug: 'yes',
         help: '일상',
-        question: '내 이상형과 가장 비슷하거나 닮은꼴인 3명의 연애인을 말해줘.',
+        question: '멀리하는 음식이나 음료 3가지를 말한다면?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -857,7 +859,7 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         help: '논란',
-        question: '결혼을 하는 건 반드시 필요하고 합리적인 제도라고 생각해?',
+        question: '결혼은 반드시 필요하고 합리적인 제도라고 생각해?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -865,7 +867,7 @@ export class DotsService {
         slug: 'devil',
         help: '논란',
         question:
-          '결혼 후 더 이상 사랑하지 않게 된다면, 이혼을 하는게 당연하다고 생각해?',
+          '강력범들의 가벼운 처벌수위로 논란이 많은데, 사형제도의 부활이 필요하다고 생각해?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -879,30 +881,6 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         help: '논란',
-        question:
-          '결혼하지 않고 여러명의 이성과 자유롭게 사랑을 하는 것과 결혼을 하고 한명의 이성과 사랑하는 것 중 어떤 것에 더 동경이 가는지 말해줘.',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
-        help: '논란',
-        question:
-          '강력범들의 가벼운 처벌수위로 논란이 많은데, 범죄인의 인권을 보호하고 변호하는게 말이 된다고 생각해?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
-        help: '논란',
-        question:
-          '정치색이 완전히 정반대인 사람과 친구관계가 될 수 있다고 생각해?',
-        questionType: QuestionType.SHORT_ANSWER,
-        isActive: true,
-      }),
-      new Dot({
-        slug: 'devil',
-        help: '논란',
         question: '가장 과대평가된 유명인이 있다면 누굴 꼽을 수 있어?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
@@ -910,7 +888,8 @@ export class DotsService {
       new Dot({
         slug: 'devil',
         help: '논란',
-        question: '술을 자주 즐기는 것도 병이라고 생각해?',
+        question:
+          '세대별, 성별, 정치성향별, 소득별 갈등이 점점 더 심화되는 사회현상의 원인은 뭐라고 생각해?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -918,7 +897,30 @@ export class DotsService {
         slug: 'devil',
         help: '논란',
         question:
-          '합리적인 소비는 아니겠지만, 무리해서라도 남들에게 보여지는 값비싼 물건을 소비하는 것이 필요한 것이라 생각해?',
+          '흙수저로 태어난다면 아무리 열심히 노력해도 스스로 중산층의 삶을 개척하는 것이 거의 불가능한 사회라고 생각해?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        help: '논란',
+        question:
+          '다수의 이성과 자유로운 교제하는 비혼주의의 삶과, 결혼과 가정을 선택하는 필혼주의의 삶. 둘 중 어떤 걸 선호해?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'devil',
+        help: '논란',
+        question: '지금까지 해본 가장 도발적이고 발칙한 상상은 뭐야?',
+        questionType: QuestionType.SHORT_ANSWER,
+        isActive: true,
+      }),
+      new Dot({
+        slug: 'wow',
+        help: '가치관',
+        question:
+          '사주가 너무 안 좋다고 하면서 가족이 말린다면, 관계를 끝낼 것 같아? 아니면 무시할 것 같아?',
         questionType: QuestionType.SHORT_ANSWER,
         isActive: true,
       }),
@@ -932,7 +934,6 @@ export class DotsService {
       // '이성에게 매력적으로 보이기 위해 사용하는 나만의 비법은 무엇인가요?',
       // '낯선 상대방으로부터 성적 매력을 느낄 때가 있었다면, 어떤 상황이었나요?',
       // '당신을 섹시한 무드로 만드는 특별한 상황이나 분위기가 있다면, 무엇인가요?',
-      // '내가 해본 가장 도발적이고 발칙한 상상은 무엇인가요?',
     ];
 
     //? 순차저장!
