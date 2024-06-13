@@ -19,7 +19,7 @@ import { UpdateDotDto } from 'src/domain/dots/dto/update-dot.dto';
 import { Dot } from 'src/domain/dots/entities/dot.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
-import { ageToFaction, ageToFactionId } from 'src/helpers/age-to-faction';
+import { ageToFactionId } from 'src/helpers/age-to-faction';
 import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
@@ -39,7 +39,21 @@ export class DotsService {
 
   async create(dto: CreateDotDto): Promise<Dot> {
     try {
-      return await this.repository.save(this.repository.create(dto));
+      const factionId = ageToFactionId(dto.age);
+
+      const createDotDto = { ...dto };
+      delete createDotDto.age; // age 는 dot 생성때 필요없음.
+
+      const dot = await this.repository.save(
+        this.repository.create(createDotDto),
+      );
+
+      await this.repository.manager.query(
+        'INSERT IGNORE INTO `dot_faction` (dotId, factionId) VALUES (?, ?)',
+        [dot.id, factionId],
+      );
+
+      return dot;
     } catch (e) {
       throw new BadRequestException();
     }

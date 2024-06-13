@@ -7,9 +7,14 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { QuestionType, TargetGender } from 'src/common/enums';
+import { QuestionType } from 'src/common/enums';
 
 export class CreateDotDto {
+  @ApiProperty({ description: 'age' })
+  @IsNumber()
+  @IsOptional()
+  age: number;
+
   @ApiProperty({ description: 'slug' })
   @IsString()
   slug: string; // category slug
@@ -36,21 +41,6 @@ export class CreateDotDto {
   @IsBoolean()
   @IsOptional()
   isActive: boolean;
-
-  @ApiProperty({ description: 'TargetGender' })
-  @IsEnum(TargetGender)
-  @IsOptional()
-  targetGender: TargetGender;
-
-  @ApiProperty({ description: 'min age' })
-  @IsNumber()
-  @IsOptional()
-  targetMinAge: number;
-
-  @ApiProperty({ description: 'max age' })
-  @IsNumber()
-  @IsOptional()
-  targetMaxAge: number;
 
   @ApiProperty({ description: '사용자 아이디' })
   @IsNumber()
