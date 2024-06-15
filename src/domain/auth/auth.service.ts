@@ -155,7 +155,7 @@ export class AuthService {
 
     await this.slack.postMessage({
       channel: 'activities',
-      text: `[${process.env.NODE_ENV}-api] 😱 회원가입 : <${process.env.ADMIN_URL}/users/${user.id}|${user.username}>`,
+      text: `[${process.env.NODE_ENV}-api] 🥳 회원가입 : <${process.env.ADMIN_URL}/users/${user.id}|${username}>`,
     });
 
     await this.usersService.update(user.id, {
