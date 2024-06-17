@@ -102,3 +102,13 @@ pm2 monit
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+## Apple
+
+Q) The Support URL provided in App Store Connect, https://mesoapp.kr, does not direct to a website with information users can use to ask questions and request support.
+
+A) https://mesoapp.kr now has a popup action button on the bottom right corner for users to ask questions and request support.
+
+Q) Why does your app require user's date of birth and gender information upon registration?
+
+A) Since the main purpose of this service is to provide opportunities to meet users, we are using mobile phone authentication services in Korea for the following two main reasons. Name and gender information are included in the basic information required by the mobile phone authentication service in Korea. In addition, self-identification is not required to see the existing information, and it is necessary to post or write to participate in earnest.
