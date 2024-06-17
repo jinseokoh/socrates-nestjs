@@ -103,12 +103,22 @@ pm2 monit
 
 Nest is [MIT licensed](LICENSE).
 
-## Apple
+## Guideline 1.5 - Safety
 
-Q) The Support URL provided in App Store Connect, https://mesoapp.kr, does not direct to a website with information users can use to ask questions and request support.
+Q. The Support URL provided in App Store Connect, https://mesoapp.kr, does not direct to a website with information users can use to ask questions and request support.
 
-A) https://mesoapp.kr now has a popup action button on the bottom right corner for users to ask questions and request support.
+A. https://mesoapp.kr now has a popup action button on the bottom right corner for live help desk.
 
-Q) Why does your app require user's date of birth and gender information upon registration?
+## Guideline 2.1 - Information Needed
 
-A) Since the main purpose of this service is to provide opportunities to meet users, we are using mobile phone authentication services in Korea for the following two main reasons. Name and gender information are included in the basic information required by the mobile phone authentication service in Korea. In addition, self-identification is not required to see the existing information, and it is necessary to post or write to participate in earnest.
+Q. Why does your app require user's date of birth and gender information upon registration?
+
+A. My app may appear to require user information upon registration without any existing content. However, that is not the case. Submitting personal information is not necessary to browse the current content. To clarify this, I have included a couple of sample posts for you this time. Once a user decides to actively participate—such as posting a new card, asking questions, or answering them—they will need to submit their personal information for verification through the Korean mobile phone authentication service. This process involves providing name, gender, date of birth, phone number, and mobile carrier details.
+
+The purpose of this app is to facilitate gatherings of groups ranging from 2 to 8 people who share common interests. Therefore, it was considered essential to prevent individuals from concealing their identities or sharing incorrect information prior to posting. Additionally, measures were implemented to prevent minors under the age of 17 from misrepresenting their identities.
+
+## Guideline 2.1 - Information Needed
+
+Q. we were unable to sign in with the following demo account credentials you provided in App Store Connect.
+
+A. Sorry. I gave you a wrong number. Once you enter the number, "01012345678", you'll be asked to enter OTP number, which is "000000".
