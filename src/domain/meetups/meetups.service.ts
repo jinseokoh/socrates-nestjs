@@ -56,6 +56,7 @@ export class MeetupsService {
   //! profile's balance will be adjusted w/ ledger model event subscriber.
   async create(dto: CreateMeetupDto): Promise<Meetup> {
     // create a new query runner
+    console.log(dto);
     const queryRunner = this.dataSource.createQueryRunner();
     const cost = dto.hasQa ? 1 : 0;
 
@@ -184,6 +185,7 @@ export class MeetupsService {
 
       return newMeetup;
     } catch (error) {
+      console.error(error);
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {

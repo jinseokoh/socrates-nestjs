@@ -56,12 +56,12 @@ export class CreateMeetupDto {
   targetGender: TargetGender;
 
   @ApiProperty({ description: '상대방 나이 min', default: 18 })
-  @IsString()
+  @IsNumber()
   @IsOptional()
   targetMinAge: number;
 
   @ApiProperty({ description: '상대방 나이 max', default: 66 })
-  @IsString()
+  @IsNumber()
   @IsOptional()
   targetMaxAge: number;
 
