@@ -127,6 +127,21 @@ export class UsersService {
     }
   }
 
+  // User 상세보기 (w/ id)
+  async findByUid(uid: string): Promise<User> {
+    try {
+      return await this.repository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.profile', 'profile')
+        .leftJoinAndSelect('user.providers', 'providers')
+        .where('providers.providerName = "firebase"')
+        .andWhere('providers.providerId = :uid', { uid })
+        .getOneOrFail();
+    } catch (e) {
+      throw new NotFoundException('user not found');
+    }
+  }
+
   // User 상세보기 (w/ unique key)
   async findByUniqueKey(params: FindOneOptions): Promise<User> {
     return await this.repository.findOne(params);

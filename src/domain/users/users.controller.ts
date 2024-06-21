@@ -116,6 +116,12 @@ export class UsersController {
       : await this.usersService.findById(id, defaultRelations);
   }
 
+  @ApiOperation({ description: 'find user by providerId' })
+  @Get(':uid/uid')
+  async findUserByProviderId(@Param('uid') uid: string): Promise<User> {
+    return await this.usersService.findByUid(uid);
+  }
+
   @ApiOperation({ description: 'initial username' })
   @Get(':id/username')
   getInitialUsername(@Param('id', ParseIntPipe) id: number): AnyData {
