@@ -117,6 +117,7 @@ export class UsersController {
   }
 
   @ApiOperation({ description: 'find user by providerId' })
+  @Public()
   @Get(':uid/uid')
   async findUserByProviderId(@Param('uid') uid: string): Promise<User> {
     return await this.usersService.findByUid(uid);
