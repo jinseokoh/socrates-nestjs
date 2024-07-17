@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { QuestionType, TargetGender } from 'src/common/enums';
-import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -8,6 +8,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -19,64 +20,33 @@ import { IsArray } from 'class-validator';
 import { Faction } from 'src/domain/factions/entities/faction.entity';
 
 @Entity()
-export class Dot {
+export class Poll {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
-
-  @Column({ length: 16, nullable: false })
-  slug: string;
-
-  @Column({ length: 16, nullable: true })
-  help: string | null;
 
   @Column({ length: 255, nullable: false })
   @ApiProperty({ description: 'question' })
   question: string;
-
-  @Column({
-    type: 'enum',
-    enum: QuestionType,
-    default: QuestionType.SHORT_ANSWER,
-    nullable: true,
-  })
-  @ApiProperty({ description: 'questionType' })
-  questionType: QuestionType;
 
   @Column('json', { nullable: true })
   @ApiProperty({ description: 'options' })
   @IsArray()
   options: string[] | null;
 
-  @Column({ default: false })
-  @ApiProperty({ description: 'whether or not allow multiple answers' })
-  allowMultiple: boolean;
-
   @Column('json', { nullable: true })
-  @ApiProperty({ description: 'options' })
-  aggregatedChoices: { [key: string]: number };
+  @ApiProperty({ description: '진행 결과' })
+  aggregatedAnswers: { [key: string]: number };
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   answerCount: number;
 
   @Column({ default: false })
+  @ApiProperty({ description: 'whether or not allow multiple answers' })
+  isMultiple: boolean;
+
+  @Column({ default: true })
   @ApiProperty({ description: 'isActive' })
   isActive: boolean;
-
-  // @Column({ type: 'enum', enum: TargetGender, default: TargetGender.ALL })
-  // @ApiProperty({ description: 'gender looking for' })
-  // targetGender: TargetGender;
-
-  // @Column({ type: 'tinyint', unsigned: true, default: 18 })
-  // targetMinAge: number;
-
-  // @Column({ type: 'tinyint', unsigned: true, default: 66 })
-  // targetMaxAge: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  up: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  down: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -87,20 +57,11 @@ export class Dot {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  //**------------------------------------------------------------------------*/
-  //** many-to-many belongsToMany
-
-  @ManyToMany(() => Faction, (faction) => faction.dots, {
-    cascade: true,
-  })
-  @JoinTable({ name: 'dot_faction' })
-  factions: Faction[];
-
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany using one-to-many
 
-  @OneToMany(() => Connection, (connection) => connection.dot)
-  public connections: Connection[];
+  @OneToMany(() => Feed, (feed) => feed.dot)
+  public feeds: Feed[];
 
   @OneToMany(() => Plea, (plea) => plea.dot)
   public pleas: Plea[];
@@ -114,10 +75,17 @@ export class Dot {
   @ManyToOne(() => User, (user) => user.dots, {})
   user: User | null;
 
+  @Column({ type: 'int', unsigned: true, default: null })
+  feedId: number | null; // to make it available to Repository.
+
+  @ManyToOne(() => Feed, (feed) => feed.poll, {})
+  @JoinColumn()
+  feed: Feed | null;
+
   //?-------------------------------------------------------------------------?/
   //? constructor
 
-  constructor(partial: Partial<Dot>) {
+  constructor(partial: Partial<Poll>) {
     Object.assign(this, partial);
   }
 }

@@ -32,6 +32,7 @@ import { Room } from 'src/domain/chats/entities/room.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { LedgerType } from 'src/common/enums';
+import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
 @Injectable()
 export class MeetupsService {
   private readonly logger = new Logger(MeetupsService.name);
@@ -468,7 +469,7 @@ export class MeetupsService {
     }
   }
 
-  async getMeetupReporterIds(id: number): Promise<Array<Like>> {
+  async getMeetupReporterIds(id: number): Promise<Array<ReportMeetup>> {
     try {
       const rows = await this.repository.manager.query(
         'SELECT userId FROM `report_meetup` WHERE meetupId = ?',
@@ -485,7 +486,7 @@ export class MeetupsService {
   //? test
   //?-------------------------------------------------------------------------//
 
-  async getComments(id: number): Promise<void> {
+  async getOpinions(id: number): Promise<void> {
     this.redisClient.emit('sse.user_joined_meetup', {
       meetupId: id,
       username: 'elantra',

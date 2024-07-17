@@ -11,13 +11,13 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { DataSource, Repository } from 'typeorm';
-import { CreateConnectionDto } from 'src/domain/dots/dto/create-connection.dto';
+import { CreateFeedDto } from 'src/domain/feeds/dto/create-feed.dto';
 import { LoremIpsum } from 'lorem-ipsum';
-import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { Dot } from 'src/domain/feeds/entities/dot.entity';
 import { S3Service } from 'src/services/aws/s3.service';
-import { UpdateConnectionDto } from 'src/domain/dots/dto/update-connection.dto';
+import { UpdateFeedDto } from 'src/domain/feeds/dto/update-feed.dto';
 import { randomImageName } from 'src/helpers/random-filename';
 import { SignedUrl } from 'src/common/types';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
@@ -27,12 +27,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 
 @Injectable()
-export class ConnectionsService {
-  private readonly logger = new Logger(ConnectionsService.name);
+export class FeedsService {
+  private readonly logger = new Logger(FeedsService.name);
 
   constructor(
-    @InjectRepository(Connection)
-    private readonly repository: Repository<Connection>,
+    @InjectRepository(Feed)
+    private readonly repository: Repository<Feed>,
     @InjectRepository(Dot)
     private readonly dotRepository: Repository<Dot>,
     @InjectRepository(Plea)
@@ -45,23 +45,23 @@ export class ConnectionsService {
   //? Create
   //?-------------------------------------------------------------------------//
 
-  async create(dto: CreateConnectionDto): Promise<Connection> {
+  async create(dto: CreateFeedDto): Promise<Feed> {
     try {
       const dot = await this.dotRepository.findOne({
         where: {
           id: dto.dotId,
         },
       });
-      const connection = await this.repository.findOne({
+      const feed = await this.repository.findOne({
         where: {
           userId: dto.userId,
           dotId: dto.dotId,
         },
       });
-      if (connection) {
+      if (feed) {
         //! 수정
         await this.repository.manager.query(
-          'INSERT IGNORE INTO `connection` (userId, dotId, choices, answer, images) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE \
+          'INSERT IGNORE INTO `feed` (userId, dotId, choices, answer, images) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE \
   userId = VALUES(`userId`), \
   dotId = VALUES(`dotId`), \
   choices = VALUES(`choices`), \
@@ -75,14 +75,14 @@ export class ConnectionsService {
             dto.images ? JSON.stringify(dto.images) : null,
           ],
         );
-        // connection['choices'] = dto.choices;
-        // connection['answer'] = dto.answer;
-        connection['dot'] = dot;
+        // feed['choices'] = dto.choices;
+        // feed['answer'] = dto.answer;
+        feed['dot'] = dot;
 
-        return connection;
+        return feed;
       } else {
         //! 생성 (user-friendship.service 와 중복 로직 있지만, transaction 때문에 비슷한 로직으로 다시 구성)
-        const connection = await this.repository.save(
+        const feed = await this.repository.save(
           this.repository.create(dto),
         );
 
@@ -101,8 +101,8 @@ export class ConnectionsService {
             pleas.map(async (v) => {
               try {
                 await this.repository.manager.query(
-                  'UPDATE plea SET connectionId = ? WHERE id = ?',
-                  [connection.id, v.id],
+                  'UPDATE plea SET feedId = ? WHERE id = ?',
+                  [feed.id, v.id],
                 );
               } catch (e) {
                 console.error(e);
@@ -142,9 +142,9 @@ export class ConnectionsService {
             }),
           );
         }
-        connection['dot'] = dot;
+        feed['dot'] = dot;
 
-        return connection;
+        return feed;
       }
     } catch (e) {
       console.log(e);
@@ -155,7 +155,7 @@ export class ConnectionsService {
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
-  async findAll(query: PaginateQuery): Promise<Paginated<Connection>> {
+  async findAll(query: PaginateQuery): Promise<Paginated<Feed>> {
     return await paginate(query, this.repository, {
       relations: ['user', 'user.profile', 'dot', 'remarks', 'remarks.user'],
       sortableColumns: [
@@ -180,7 +180,7 @@ export class ConnectionsService {
   }
 
   // Meetup 상세보기
-  async findById(id: number, relations: string[] = []): Promise<Connection> {
+  async findById(id: number, relations: string[] = []): Promise<Feed> {
     const includedRemarks = relations.includes('remarks');
     try {
       return relations.length > 0
@@ -208,12 +208,12 @@ export class ConnectionsService {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  async update(id: number, dto: UpdateConnectionDto): Promise<Connection> {
-    const connection = await this.repository.preload({ id, ...dto });
-    if (!connection) {
+  async update(id: number, dto: UpdateFeedDto): Promise<Feed> {
+    const feed = await this.repository.preload({ id, ...dto });
+    if (!feed) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.repository.save(connection);
+    return await this.repository.save(feed);
   }
 
   //?-------------------------------------------------------------------------//
@@ -222,8 +222,8 @@ export class ConnectionsService {
 
   // S3 직접 업로드를 위한 signedUrl 리턴
   async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
-    const fileUri = randomImageName(dto.name ?? 'connection', dto.mimeType);
-    const path = `${process.env.NODE_ENV}/connections/${userId}/${fileUri}`;
+    const fileUri = randomImageName(dto.name ?? 'feed', dto.mimeType);
+    const path = `${process.env.NODE_ENV}/feeds/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
     return {
@@ -236,7 +236,7 @@ export class ConnectionsService {
   //? SEED
   //?-------------------------------------------------------------------------//
 
-  async seedConnections(): Promise<void> {
+  async seedFeeds(): Promise<void> {
     const lorem = new LoremIpsum({
       sentencesPerParagraph: {
         max: 8,
@@ -256,7 +256,7 @@ export class ConnectionsService {
         const userId = randomInt(1, 20);
         const answer = lorem.generateSentences(5);
 
-        const dto = new CreateConnectionDto();
+        const dto = new CreateFeedDto();
         dto.dotId = dotId;
         dto.userId = userId;
         dto.answer = answer;

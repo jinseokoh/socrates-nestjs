@@ -8,7 +8,6 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Sse,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -16,17 +15,17 @@ import {
 
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { Comment } from 'src/domain/inquiries/entities/comment.entity';
-import { CommentsService } from 'src/domain/inquiries/comments.service';
-import { CreateCommentDto } from 'src/domain/inquiries/dto/create-comment.dto';
-import { UpdateCommentDto } from 'src/domain/inquiries/dto/update-comment.dto';
+import { Opinion } from 'src/domain/inquiries/entities/opinion.entity';
+import { OpinionsService } from 'src/domain/inquiries/opinions.service';
+import { CreateOpinionDto } from 'src/domain/inquiries/dto/create-opinion.dto';
+import { UpdateOpinionDto } from 'src/domain/inquiries/dto/update-opinion.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('inquiries')
-export class InquiryCommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+export class InquiryOpinionsController {
+  constructor(private readonly opinionsService: OpinionsService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
@@ -34,13 +33,13 @@ export class InquiryCommentsController {
 
   @ApiOperation({ description: '댓글 등록' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':inquiryId/comments')
+  @Post(':inquiryId/opinions')
   async create(
     @CurrentUserId() userId: number,
     @Param('inquiryId') inquiryId: number,
-    @Body() dto: CreateCommentDto,
+    @Body() dto: CreateOpinionDto,
   ): Promise<any> {
-    return await this.commentsService.create({
+    return await this.opinionsService.create({
       ...dto,
       userId,
       inquiryId,
@@ -52,11 +51,11 @@ export class InquiryCommentsController {
   //?-------------------------------------------------------------------------//
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':inquiryId/comments')
-  async getComments(
+  @Get(':inquiryId/opinions')
+  async getOpinions(
     @Param('inquiryId', ParseIntPipe) inquiryId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Comment>> {
+  ): Promise<Paginated<Opinion>> {
     const queryParams = {
       ...query,
       ...{
@@ -65,18 +64,18 @@ export class InquiryCommentsController {
         },
       },
     };
-    return await this.commentsService.findAll(queryParams);
+    return await this.opinionsService.findAll(queryParams);
   }
 
   @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':inquiryId/comments/:commentId')
-  async getCommentsById(
+  @Get(':inquiryId/opinions/:opinionId')
+  async getOpinionsById(
     @Param('inquiryId', ParseIntPipe) inquiryId: number,
-    @Param('commentId', ParseIntPipe) commentId: number,
+    @Param('opinionId', ParseIntPipe) opinionId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Comment>> {
-    return await this.commentsService.findAllById(inquiryId, commentId, query);
+  ): Promise<Paginated<Opinion>> {
+    return await this.opinionsService.findAllById(inquiryId, opinionId, query);
   }
 
   //?-------------------------------------------------------------------------//
@@ -84,12 +83,12 @@ export class InquiryCommentsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '댓글 수정' })
-  @Patch(':inquiryId/comments/:commentId')
+  @Patch(':inquiryId/opinions/:opinionId')
   async update(
-    @Param('commentId') id: number,
-    @Body() dto: UpdateCommentDto,
-  ): Promise<Comment> {
-    return await this.commentsService.update(id, dto);
+    @Param('opinionId') id: number,
+    @Body() dto: UpdateOpinionDto,
+  ): Promise<Opinion> {
+    return await this.opinionsService.update(id, dto);
   }
 
   //?-------------------------------------------------------------------------//
@@ -97,11 +96,11 @@ export class InquiryCommentsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '관리자) 댓글 soft 삭제' })
-  @Delete(':inquiryId/comments/:commentId')
+  @Delete(':inquiryId/opinions/:opinionId')
   async remove(
     @Param('inquiryId', ParseIntPipe) inquiryId: number,
-    @Param('commentId') id: number,
-  ): Promise<Comment> {
-    return await this.commentsService.softRemove(id);
+    @Param('opinionId') id: number,
+  ): Promise<Opinion> {
+    return await this.opinionsService.softRemove(id);
   }
 }

@@ -12,10 +12,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
 
 @Entity()
-export class Remark {
+export class Comment {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
@@ -56,12 +56,12 @@ export class Remark {
   user: User;
 
   @Column({ type: 'int', unsigned: true })
-  connectionId: number; // to make it available to Repository.
+  feedId: number; // to make it available to Repository.
 
-  @ManyToOne(() => Connection, (connection) => connection.remarks, {
+  @ManyToOne(() => Feed, (feed) => feed.remarks, {
     onDelete: 'CASCADE',
   })
-  connection: Connection;
+  feed: Feed;
 
   //**--------------------------------------------------------------------------*/
   //** one to many (self recursive relations)

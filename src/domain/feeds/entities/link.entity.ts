@@ -1,17 +1,26 @@
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
-// a user can like meetup
+// a user can bookmark feed
 //? Like 모델 사용을 위해서, many to many 대신 이 방식으로 사용하는 것 추천
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-export class Like {
+export class Link {
   @PrimaryColumn({ type: 'int', unsigned: true })
-  public userId: number;
+  public feedId: number;
 
   @PrimaryColumn({ type: 'int', unsigned: true })
-  public meetupId: number;
+  public linkContentId: number;
+
+  @Column({ length: 16, nullable: false })
+  entity: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -23,10 +32,10 @@ export class Like {
   })
   public user: User;
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.usersLiked, {
+  @ManyToOne(() => Feed, (feed) => feed.usersBookmarked, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  public meetup: Meetup;
+  public feed: Feed;
 }

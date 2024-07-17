@@ -32,8 +32,8 @@ export class CreateReactionDto {
   @IsOptional()
   userId: number;
 
-  @ApiProperty({ description: '관련 Connection 아이디' })
+  @ApiProperty({ description: '관련 Feed 아이디' })
   @IsNumber()
   @IsOptional()
-  connectionId: number;
+  feedId: number;
 }

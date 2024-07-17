@@ -7,22 +7,22 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CreateCommentDto } from 'src/domain/inquiries/dto/create-comment.dto';
+import { CreateOpinionDto } from 'src/domain/inquiries/dto/create-opinion.dto';
 
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
-import { Comment } from 'src/domain/inquiries/entities/comment.entity';
+import { Opinion } from 'src/domain/inquiries/entities/opinion.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ClientProxy } from '@nestjs/microservices';
-import { UpdateCommentDto } from 'src/domain/inquiries/dto/update-comment.dto';
+import { UpdateOpinionDto } from 'src/domain/inquiries/dto/update-opinion.dto';
 
 @Injectable()
-export class CommentsService {
-  private readonly logger = new Logger(CommentsService.name);
+export class OpinionsService {
+  private readonly logger = new Logger(OpinionsService.name);
 
   constructor(
-    @InjectRepository(Comment)
-    private readonly repository: Repository<Comment>,
+    @InjectRepository(Opinion)
+    private readonly repository: Repository<Opinion>,
     @InjectRepository(Inquiry)
     private readonly inquiryRepository: Repository<Inquiry>,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
@@ -32,36 +32,36 @@ export class CommentsService {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  async create(dto: CreateCommentDto): Promise<Comment> {
+  async create(dto: CreateOpinionDto): Promise<Opinion> {
     // creation
-    const comment = await this.repository.save(this.repository.create(dto));
-    const commentWithUser = await this.findById(comment.id, [
+    const opinion = await this.repository.save(this.repository.create(dto));
+    const opinionWithUser = await this.findById(opinion.id, [
       'user',
       'inquiry',
       'inquiry.user',
     ]);
-    console.log('commentWithUser', commentWithUser);
+    console.log('opinionWithUser', opinionWithUser);
 
     this.inquiryRepository.increment({ id: dto.inquiryId }, `remarkCount`, 1);
 
-    return commentWithUser;
+    return opinionWithUser;
   }
 
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
 
-  async findAll(query: PaginateQuery): Promise<Paginated<Comment>> {
+  async findAll(query: PaginateQuery): Promise<Paginated<Opinion>> {
     const queryBuilder = this.repository
-      .createQueryBuilder('comment')
-      .innerJoinAndSelect('comment.user', 'user')
+      .createQueryBuilder('opinion')
+      .innerJoinAndSelect('opinion.user', 'user')
       .innerJoinAndSelect('user.profile', 'profile')
-      .leftJoinAndSelect('comment.children', 'children')
+      .leftJoinAndSelect('opinion.children', 'children')
       .leftJoinAndSelect('children.user', 'replier')
-      .where('comment.parentId IS NULL')
-      .andWhere('comment.deletedAt IS NULL');
+      .where('opinion.parentId IS NULL')
+      .andWhere('opinion.deletedAt IS NULL');
 
-    const config: PaginateConfig<Comment> = {
+    const config: PaginateConfig<Opinion> = {
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultLimit: 20,
@@ -72,31 +72,31 @@ export class CommentsService {
       },
     };
 
-    return await paginate<Comment>(query, queryBuilder, config);
+    return await paginate<Opinion>(query, queryBuilder, config);
   }
 
   async findAllById(
     inquiryId: number,
-    commentId: number,
+    opinionId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Comment>> {
+  ): Promise<Paginated<Opinion>> {
     const queryBuilder = this.repository
-      .createQueryBuilder('comment')
-      .innerJoinAndSelect('comment.user', 'user')
+      .createQueryBuilder('opinion')
+      .innerJoinAndSelect('opinion.user', 'user')
       .innerJoinAndSelect('user.profile', 'profile')
-      .where('comment.inquiryId = :inquiryId', { inquiryId })
-      .andWhere('comment.parentId = :commentId', { commentId })
+      .where('opinion.inquiryId = :inquiryId', { inquiryId })
+      .andWhere('opinion.parentId = :opinionId', { opinionId })
       // .andWhere(
       //   new Brackets((qb) => {
-      //     qb.where('comment.id = :commentId', { commentId }).orWhere(
-      //       'comment.parentId = :commentId',
-      //       { commentId },
+      //     qb.where('opinion.id = :opinionId', { opinionId }).orWhere(
+      //       'opinion.parentId = :opinionId',
+      //       { opinionId },
       //     );
       //   }),
       // )
-      .andWhere('comment.deletedAt IS NULL');
+      .andWhere('opinion.deletedAt IS NULL');
 
-    const config: PaginateConfig<Comment> = {
+    const config: PaginateConfig<Opinion> = {
       sortableColumns: ['id'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
@@ -106,10 +106,10 @@ export class CommentsService {
       },
     };
 
-    return await paginate<Comment>(query, queryBuilder, config);
+    return await paginate<Opinion>(query, queryBuilder, config);
   }
 
-  async findById(id: number, relations: string[] = []): Promise<Comment> {
+  async findById(id: number, relations: string[] = []): Promise<Opinion> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -124,7 +124,7 @@ export class CommentsService {
     }
   }
 
-  async findByUniqueKey(params: FindOneOptions): Promise<Comment | null> {
+  async findByUniqueKey(params: FindOneOptions): Promise<Opinion | null> {
     return await this.repository.findOne(params);
   }
 
@@ -132,31 +132,31 @@ export class CommentsService {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  async update(id: number, dto: UpdateCommentDto): Promise<Comment> {
-    const comment = await this.repository.preload({ id, ...dto });
-    if (!comment) {
+  async update(id: number, dto: UpdateOpinionDto): Promise<Opinion> {
+    const opinion = await this.repository.preload({ id, ...dto });
+    if (!opinion) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.repository.save(comment);
+    return await this.repository.save(opinion);
   }
 
   //?-------------------------------------------------------------------------//
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async softRemove(id: number): Promise<Comment> {
-    const comment = await this.findById(id);
-    await this.repository.softRemove(comment);
-    // no column named commentCount. just remove it. that's all.
+  async softRemove(id: number): Promise<Opinion> {
+    const opinion = await this.findById(id);
+    await this.repository.softRemove(opinion);
+    // no column named opinionCount. just remove it. that's all.
     // await this.inquiryRepository.manager.query(
-    //   `UPDATE inquiry SET commentCount = commentCount - 1 WHERE id = ? AND commentCount > 0`,
-    //   [comment.inquiryId],
+    //   `UPDATE inquiry SET opinionCount = opinionCount - 1 WHERE id = ? AND opinionCount > 0`,
+    //   [opinion.inquiryId],
     // );
-    return comment;
+    return opinion;
   }
 
-  async remove(id: number): Promise<Comment> {
-    const comment = await this.findById(id);
-    return await this.repository.remove(comment);
+  async remove(id: number): Promise<Opinion> {
+    const opinion = await this.findById(id);
+    return await this.repository.remove(opinion);
   }
 }

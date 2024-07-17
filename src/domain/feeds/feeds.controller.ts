@@ -16,17 +16,17 @@ import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 import { SignedUrl } from 'src/common/types';
-import { ConnectionsService } from 'src/domain/dots/connections.service';
-import { CreateConnectionDto } from 'src/domain/dots/dto/create-connection.dto';
-import { UpdateConnectionDto } from 'src/domain/dots/dto/update-connection.dto';
-import { Connection } from 'src/domain/dots/entities/connection.entity';
-import { Reaction } from 'src/domain/dots/entities/reaction.entity';
+import { FeedsService } from 'src/domain/feeds/feeds.service';
+import { CreateFeedDto } from 'src/domain/feeds/dto/create-feed.dto';
+import { UpdateFeedDto } from 'src/domain/feeds/dto/update-feed.dto';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { Reaction } from 'src/domain/feeds/entities/reaction.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('connections')
-export class ConnectionsController {
-  constructor(private readonly connectionsService: ConnectionsService) {}
+@Controller('feeds')
+export class FeedsController {
+  constructor(private readonly feedsService: FeedsService) {}
 
   //?-------------------------------------------------------------------------//
   //? Create
@@ -34,12 +34,12 @@ export class ConnectionsController {
 
   @ApiOperation({ description: '커넥션 답변 생성/수정' })
   @Post()
-  async createConnection(
+  async createFeed(
     @CurrentUserId() userId: number,
-    @Body() dto: CreateConnectionDto,
-  ): Promise<Connection> {
+    @Body() dto: CreateFeedDto,
+  ): Promise<Feed> {
     try {
-      return await this.connectionsService.create({ ...dto, userId });
+      return await this.feedsService.create({ ...dto, userId });
     } catch (e) {
       throw new BadRequestException();
     }
@@ -50,20 +50,20 @@ export class ConnectionsController {
   //?-------------------------------------------------------------------------//
 
   @Public()
-  @ApiOperation({ description: 'Connection 리스트 w/ Pagination' })
+  @ApiOperation({ description: 'Feed 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get()
   async findAll(
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Connection>> {
-    return await this.connectionsService.findAll(query);
+  ): Promise<Paginated<Feed>> {
+    return await this.feedsService.findAll(query);
   }
 
   //? the commenting out relations can be ignored to reduce the amount of response
-  @ApiOperation({ description: 'Connection 상세보기' })
+  @ApiOperation({ description: 'Feed 상세보기' })
   @Get(':id')
-  async getConnectionById(@Param('id') id: number): Promise<Connection> {
-    return await this.connectionsService.findById(id, [
+  async getFeedById(@Param('id') id: number): Promise<Feed> {
+    return await this.feedsService.findById(id, [
       'dot',
       'remarks',
       'remarks.user',
@@ -72,26 +72,26 @@ export class ConnectionsController {
       'userReactions',
       'user',
       'user.profile',
-      'user.connections',
-      'user.connections.dot',
-      'user.connections.remarks',
-      'user.connections.remarks.user',
+      'user.feeds',
+      'user.feeds.dot',
+      'user.feeds.remarks',
+      'user.feeds.remarks.user',
       // 'user.sentFriendships',
     ]);
   }
 
-  @ApiOperation({ description: 'Connection 의 reaction 리스트' })
+  @ApiOperation({ description: 'Feed 의 reaction 리스트' })
   @Get(':id/reactions')
-  async getConnectionReactionsById(
+  async getFeedReactionsById(
     @Param('id') id: number,
   ): Promise<Reaction[]> {
-    const connection = await this.connectionsService.findById(id, [
+    const feed = await this.feedsService.findById(id, [
       'userReactions',
       'userReactions.user',
       'userReactions.user.profile',
     ]);
 
-    return connection.userReactions ?? [];
+    return feed.userReactions ?? [];
   }
 
   //?-------------------------------------------------------------------------//
@@ -102,9 +102,9 @@ export class ConnectionsController {
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateConnectionDto,
-  ): Promise<Connection> {
-    return await this.connectionsService.update(id, dto);
+    @Body() dto: UpdateFeedDto,
+  ): Promise<Feed> {
+    return await this.feedsService.update(id, dto);
   }
 
   //?-------------------------------------------------------------------------//
@@ -117,7 +117,7 @@ export class ConnectionsController {
     @CurrentUserId() userId: number,
     @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
-    return await this.connectionsService.getSignedUrl(userId, dto);
+    return await this.feedsService.getSignedUrl(userId, dto);
   }
 
   //?-------------------------------------------------------------------------//
@@ -127,7 +127,7 @@ export class ConnectionsController {
   // just for testing
   @ApiOperation({ description: 'seed dots' })
   @Post('seed')
-  async seedConnections(): Promise<void> {
-    return await this.connectionsService.seedConnections();
+  async seedFeeds(): Promise<void> {
+    return await this.feedsService.seedFeeds();
   }
 }

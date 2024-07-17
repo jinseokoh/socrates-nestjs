@@ -307,7 +307,7 @@ export class UsersService {
   async quit(id: number, dto: DeleteUserDto): Promise<any> {
     const user = await this.findById(id);
     try {
-      await this._deleteComment(id);
+      await this._deleteOpinion(id);
       await this._deleteConnection(id);
       await this._deleteFlag(id);
       await this._deleteHate(id);
@@ -341,9 +341,9 @@ export class UsersService {
     };
   }
 
-  async _deleteComment(id: number) {
+  async _deleteOpinion(id: number) {
     await this.repository.manager.query(
-      'UPDATE `comment` SET deletedAt=NOW() WHERE userId = ?',
+      'UPDATE `opinion` SET deletedAt=NOW() WHERE userId = ?',
       [id],
     );
   }

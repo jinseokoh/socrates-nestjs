@@ -7,14 +7,14 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CreateRemarkDto } from 'src/domain/dots/dto/create-remark.dto';
+import { CreateRemarkDto } from 'src/domain/feeds/dto/create-remark.dto';
 
-import { Connection } from 'src/domain/dots/entities/connection.entity';
-import { Remark } from 'src/domain/dots/entities/remark.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { Remark } from 'src/domain/feeds/entities/remark.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ClientProxy } from '@nestjs/microservices';
-import { UpdateRemarkDto } from 'src/domain/dots/dto/update-remark.dto';
+import { UpdateRemarkDto } from 'src/domain/feeds/dto/update-remark.dto';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -25,8 +25,8 @@ export class RemarksService {
   constructor(
     @InjectRepository(Remark)
     private readonly repository: Repository<Remark>,
-    @InjectRepository(Connection)
-    private readonly connectionRepository: Repository<Connection>,
+    @InjectRepository(Feed)
+    private readonly feedRepository: Repository<Feed>,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     // @Inject(SlackService) private readonly slack: SlackService,
     private eventEmitter: EventEmitter2,
@@ -43,25 +43,25 @@ export class RemarksService {
     // fetch data for notification recipient
     const remarkWithUser = await this.findById(remark.id, [
       'user',
-      'connection',
-      'connection.user',
-      'connection.user.profile',
+      'feed',
+      'feed.user',
+      'feed.user.profile',
     ]);
     // notification with event listener ------------------------------------//
     const event = new UserNotificationEvent();
-    event.name = 'connectionRemark';
-    event.userId = remarkWithUser.connection.user.id;
-    event.token = remarkWithUser.connection.user.pushToken;
-    event.options = remarkWithUser.connection.user.profile?.options ?? {};
+    event.name = 'feedRemark';
+    event.userId = remarkWithUser.feed.user.id;
+    event.token = remarkWithUser.feed.user.pushToken;
+    event.options = remarkWithUser.feed.user.profile?.options ?? {};
     event.body = `내 발견글에 누군가 댓글을 남겼습니다.`;
     event.data = {
-      page: `connections/${dto.connectionId}`,
+      page: `feeds/${dto.feedId}`,
       args: '',
     };
     this.eventEmitter.emit('user.notified', event);
 
-    this.connectionRepository.increment(
-      { id: dto.connectionId },
+    this.feedRepository.increment(
+      { id: dto.feedId },
       `remarkCount`,
       1,
     );
@@ -89,7 +89,7 @@ export class RemarksService {
       defaultLimit: 20,
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
-        connectionId: [FilterOperator.EQ],
+        feedId: [FilterOperator.EQ],
         isFlagged: [FilterOperator.EQ],
       },
     };
@@ -98,7 +98,7 @@ export class RemarksService {
   }
 
   async findAllById(
-    connectionId: number,
+    feedId: number,
     remarkId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Remark>> {
@@ -106,7 +106,7 @@ export class RemarksService {
       .createQueryBuilder('remark')
       .innerJoinAndSelect('remark.user', 'user')
       .innerJoinAndSelect('user.profile', 'profile')
-      .where('remark.connectionId = :connectionId', { connectionId })
+      .where('remark.feedId = :feedId', { feedId })
       .andWhere('remark.parentId = :remarkId', { remarkId })
       // .andWhere(
       //   new Brackets((qb) => {
@@ -170,9 +170,9 @@ export class RemarksService {
     try {
       const remark = await this.findById(id);
       await this.repository.softRemove(remark);
-      await this.connectionRepository.manager.query(
-        `UPDATE connection SET remarkCount = remarkCount - 1 WHERE id = ? AND remarkCount > 0`,
-        [remark.connectionId],
+      await this.feedRepository.manager.query(
+        `UPDATE feed SET remarkCount = remarkCount - 1 WHERE id = ? AND remarkCount > 0`,
+        [remark.feedId],
       );
       return remark;
     } catch (e) {

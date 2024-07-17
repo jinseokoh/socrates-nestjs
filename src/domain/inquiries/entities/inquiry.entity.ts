@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { InquiryType } from 'src/common/enums/inquiry-type';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Comment } from 'src/domain/inquiries/entities/comment.entity';
+import { Opinion } from 'src/domain/inquiries/entities/opinion.entity';
 import {
   Column,
   CreateDateColumn,
@@ -17,6 +17,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
 
 @Entity()
 export class Inquiry {
@@ -69,10 +70,10 @@ export class Inquiry {
   //*-------------------------------------------------------------------------*/
   //* 1-to-many hasMany
 
-  @OneToMany(() => Comment, (comment) => comment.inquiry, {
+  @OneToMany(() => Opinion, (opinion) => opinion.inquiry, {
     // cascade: ['insert', 'update'],
   })
-  comments: Comment[];
+  opinions: Opinion[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany
@@ -84,6 +85,10 @@ export class Inquiry {
   @ManyToMany(() => Meetup, (meetup) => meetup.flaggedInquiries)
   @JoinTable({ name: 'inquiry_meetup' }) // owning side
   flaggedMeetups: Meetup[];
+
+  @ManyToMany(() => Feed, (feed) => feed.flaggedInquiries)
+  @JoinTable({ name: 'inquiry_feed' }) // owning side
+  flaggedFeeds: Feed[];
 
   @ManyToMany(() => Connection, (connection) => connection.flaggedInquiries)
   @JoinTable({ name: 'inquiry_connection' }) // owning side

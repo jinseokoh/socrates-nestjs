@@ -17,7 +17,7 @@ import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Comment } from 'src/domain/inquiries/entities/comment.entity';
+import { Opinion } from 'src/domain/inquiries/entities/opinion.entity';
 import { ReportUser } from 'src/domain/users/entities/report_user.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
@@ -37,6 +37,7 @@ import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -139,16 +140,6 @@ export class User {
   })
   ledgers: Ledger[];
 
-  @OneToMany(() => Inquiry, (inquiry) => inquiry.user, {
-    // cascade: ['insert', 'update'],
-  })
-  inquiries: Inquiry[];
-
-  @OneToMany(() => Thread, (thread) => thread.user, {
-    // cascade: ['insert', 'update'],
-  })
-  threads: Thread[];
-
   @OneToMany(() => Provider, (provider) => provider.user, {
     // cascade: ['insert', 'update'],
   })
@@ -159,6 +150,16 @@ export class User {
   })
   meetups: Meetup[];
 
+  @OneToMany(() => Thread, (thread) => thread.user, {
+    // cascade: ['insert', 'update'],
+  })
+  threads: Thread[];
+
+  @OneToMany(() => Feed, (feed) => feed.user, {
+    // cascade: ['insert', 'update'],
+  })
+  feeds: Feed[];
+
   @OneToMany(() => Dot, (dot) => dot.user, {
     // cascade: ['insert', 'update'],
   })
@@ -167,11 +168,16 @@ export class User {
   @OneToMany(() => Connection, (connection) => connection.user)
   public connections: Connection[];
 
-  @OneToMany(() => Comment, (comment) => comment.user)
-  public comments: Comment[];
+  @OneToMany(() => Inquiry, (inquiry) => inquiry.user, {
+    // cascade: ['insert', 'update'],
+  })
+  inquiries: Inquiry[];
 
   @OneToMany(() => Remark, (remark) => remark.user)
   public remarks: Remark[];
+
+  @OneToMany(() => Opinion, (opinion) => opinion.user)
+  public opinions: Opinion[];
 
   @OneToMany(() => Impression, (impression) => impression.user)
   public impressions: Impression[];

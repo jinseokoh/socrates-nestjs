@@ -163,7 +163,7 @@ export class UserUsersController {
 
   @ApiOperation({ description: '사용자 댓글 신고' })
   @Post(':userId/flags')
-  async createFlagComment(
+  async createFlagOpinion(
     @Param('userId', ParseIntPipe) userId: number,
     @Body() dto: CreateFlagDto,
   ): Promise<Flag> {

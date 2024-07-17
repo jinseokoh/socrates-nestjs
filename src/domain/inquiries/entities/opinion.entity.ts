@@ -15,7 +15,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 
 @Entity()
-export class Comment {
+export class Opinion {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
@@ -46,7 +46,7 @@ export class Comment {
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.comments, {
+  @ManyToOne(() => User, (user) => user.opinions, {
     onDelete: 'CASCADE',
   })
   user: User;
@@ -54,7 +54,7 @@ export class Comment {
   @Column({ type: 'int', unsigned: true })
   inquiryId: number; // to make it available to Repository.
 
-  @ManyToOne(() => Inquiry, (inquiry) => inquiry.comments, {
+  @ManyToOne(() => Inquiry, (inquiry) => inquiry.opinions, {
     onDelete: 'CASCADE',
   })
   inquiry: Inquiry;
@@ -67,19 +67,19 @@ export class Comment {
   @Column({ type: 'int', unsigned: true, nullable: true })
   parentId: number | null;
 
-  @OneToMany(() => Comment, (comment) => comment.parent)
-  children: Comment[];
+  @OneToMany(() => Opinion, (opinion) => opinion.parent)
+  children: Opinion[];
 
-  @ManyToOne(() => Comment, (Comment) => Comment.children, {
+  @ManyToOne(() => Opinion, (Opinion) => Opinion.children, {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'parentId' })
-  parent: Comment;
+  parent: Opinion;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  constructor(partial: Partial<Comment>) {
+  constructor(partial: Partial<Opinion>) {
     Object.assign(this, partial);
   }
 }

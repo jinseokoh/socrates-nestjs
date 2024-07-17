@@ -1,5 +1,5 @@
-import { Connection } from 'src/domain/dots/entities/connection.entity';
-import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { Dot } from 'src/domain/feeds/entities/dot.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import {
   DataSource,
@@ -9,18 +9,18 @@ import {
 } from 'typeorm';
 
 @EventSubscriber()
-export class ConnectionSubscriber
-  implements EntitySubscriberInterface<Connection>
+export class FeedSubscriber
+  implements EntitySubscriberInterface<Feed>
 {
   constructor(dataSource: DataSource) {
     dataSource.subscribers.push(this);
   }
 
   listenTo(): any {
-    return Connection;
+    return Feed;
   }
 
-  async afterInsert(event: InsertEvent<Connection>) {
+  async afterInsert(event: InsertEvent<Feed>) {
     if (event.entity.choices === null) {
       //? shortAnswer
       await event.manager

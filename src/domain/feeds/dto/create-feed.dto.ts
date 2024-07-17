@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class CreateConnectionDto {
+export class CreateFeedDto {
   @ApiProperty({ description: 'dot 답변' })
   @IsArray()
   @IsOptional()

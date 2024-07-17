@@ -16,16 +16,16 @@ import {
 
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { Remark } from 'src/domain/dots/entities/remark.entity';
-import { RemarksService } from 'src/domain/dots/remarks.service';
-import { CreateRemarkDto } from 'src/domain/dots/dto/create-remark.dto';
-import { UpdateRemarkDto } from 'src/domain/dots/dto/update-remark.dto';
+import { Remark } from 'src/domain/feeds/entities/remark.entity';
+import { RemarksService } from 'src/domain/feeds/remarks.service';
+import { CreateRemarkDto } from 'src/domain/feeds/dto/create-remark.dto';
+import { UpdateRemarkDto } from 'src/domain/feeds/dto/update-remark.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('connections')
-export class ConnectionRemarksController {
+@Controller('feeds')
+export class FeedRemarksController {
   constructor(private readonly remarksService: RemarksService) {}
 
   //?-------------------------------------------------------------------------//
@@ -34,25 +34,25 @@ export class ConnectionRemarksController {
 
   @ApiOperation({ description: '댓글 생성' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':connectionId/remarks')
+  @Post(':feedId/remarks')
   async createRemark(
     @CurrentUserId() userId: number,
-    @Param('connectionId', ParseIntPipe) connectionId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
     @Body() dto: CreateRemarkDto,
   ): Promise<any> {
     return await this.remarksService.create({
       ...dto,
       userId,
-      connectionId,
+      feedId,
     });
   }
 
   @ApiOperation({ description: '답글 등록' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':connectionId/remarks/:remarkId')
+  @Post(':feedId/remarks/:remarkId')
   async createReply(
     @CurrentUserId() userId: number,
-    @Param('connectionId') connectionId: number,
+    @Param('feedId') feedId: number,
     @Param('remarkId', ParseIntPipe) remarkId: number,
     @Body() dto: CreateRemarkDto,
   ): Promise<any> {
@@ -64,7 +64,7 @@ export class ConnectionRemarksController {
     return await this.remarksService.create({
       ...dto,
       userId,
-      connectionId,
+      feedId,
       parentId,
     });
   }
@@ -74,16 +74,16 @@ export class ConnectionRemarksController {
   //?-------------------------------------------------------------------------//
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':connectionId/remarks')
+  @Get(':feedId/remarks')
   async getRemarks(
-    @Param('connectionId', ParseIntPipe) connectionId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Remark>> {
     const queryParams = {
       ...query,
       ...{
         filter: {
-          connectionId: `$eq:${connectionId}`,
+          feedId: `$eq:${feedId}`,
         },
       },
     };
@@ -93,13 +93,13 @@ export class ConnectionRemarksController {
 
   @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':connectionId/remarks/:remarkId')
+  @Get(':feedId/remarks/:remarkId')
   async getRemarksById(
-    @Param('connectionId', ParseIntPipe) connectionId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
     @Param('remarkId', ParseIntPipe) remarkId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Remark>> {
-    return await this.remarksService.findAllById(connectionId, remarkId, query);
+    return await this.remarksService.findAllById(feedId, remarkId, query);
   }
 
   //?-------------------------------------------------------------------------//
@@ -107,9 +107,9 @@ export class ConnectionRemarksController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '댓글 수정' })
-  @Patch(':connectionId/remarks/:remarkId')
+  @Patch(':feedId/remarks/:remarkId')
   async update(
-    @Param('connectionId', ParseIntPipe) connectionId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
     @Param('remarkId') remarkId: number,
     @Body() dto: UpdateRemarkDto,
   ): Promise<Remark> {
@@ -121,9 +121,9 @@ export class ConnectionRemarksController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '댓글 soft 삭제' })
-  @Delete(':connectionId/remarks/:remarkId')
+  @Delete(':feedId/remarks/:remarkId')
   async remove(
-    @Param('connectionId', ParseIntPipe) connectionId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
     @Param('remarkId') remarkId: number,
   ): Promise<Remark> {
     return await this.remarksService.softRemove(remarkId);

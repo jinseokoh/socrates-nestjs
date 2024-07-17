@@ -1,23 +1,23 @@
-import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 
-// a user can abhor connection
+// a user can abhor feed
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-export class ReportConnection {
+export class ReportFeed {
   @PrimaryColumn({ type: 'int', unsigned: true })
   public userId: number;
 
   @PrimaryColumn({ type: 'int', unsigned: true })
-  public connectionId: number;
+  public feedId: number;
 
   @Column({ length: 32, nullable: true })
   message: string | null;
 
-  @ManyToOne(() => User, (user) => user.connectionsReported)
+  @ManyToOne(() => User, (user) => user.feedsReported)
   public user: User;
 
-  @ManyToOne(() => Connection, (connection) => connection.userReports)
-  public connection: Connection;
+  @ManyToOne(() => Feed, (feed) => feed.userReports)
+  public feed: Feed;
 }

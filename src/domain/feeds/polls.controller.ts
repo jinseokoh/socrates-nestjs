@@ -15,10 +15,10 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
-import { DotsService } from 'src/domain/dots/dots.service';
-import { CreateDotDto } from 'src/domain/dots/dto/create-dot.dto';
-import { UpdateDotDto } from 'src/domain/dots/dto/update-dot.dto';
-import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { DotsService } from 'src/domain/feeds/dots.service';
+import { CreateDotDto } from 'src/domain/feeds/dto/create-dot.dto';
+import { UpdateDotDto } from 'src/domain/feeds/dto/update-dot.dto';
+import { Dot } from 'src/domain/feeds/entities/dot.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -32,7 +32,7 @@ export class DotsController {
 
   @ApiOperation({ description: '커넥션 질문 추가' })
   @Post()
-  async createConnection(
+  async createFeed(
     @CurrentUserId() userId: number,
     @Body() dto: CreateDotDto,
   ): Promise<Dot> {
