@@ -15,16 +15,16 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
-import { DotsService } from 'src/domain/feeds/dots.service';
-import { CreateDotDto } from 'src/domain/feeds/dto/create-dot.dto';
-import { UpdateDotDto } from 'src/domain/feeds/dto/update-dot.dto';
-import { Dot } from 'src/domain/feeds/entities/dot.entity';
+import { PollsService } from 'src/domain/feeds/polls.service';
+import { CreatePollDto } from 'src/domain/feeds/dto/create-poll.dto';
+import { UpdatePollDto } from 'src/domain/feeds/dto/update-poll.dto';
+import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('dots')
-export class DotsController {
-  constructor(private readonly dotsService: DotsService) {}
+@Controller('polls')
+export class PollsController {
+  constructor(private readonly pollsService: PollsService) {}
 
   //?-------------------------------------------------------------------------//
   //? Create
@@ -34,10 +34,10 @@ export class DotsController {
   @Post()
   async createFeed(
     @CurrentUserId() userId: number,
-    @Body() dto: CreateDotDto,
-  ): Promise<Dot> {
+    @Body() dto: CreatePollDto,
+  ): Promise<Poll> {
     try {
-      return await this.dotsService.create({ ...dto, userId });
+      return await this.pollsService.create({ ...dto, userId });
     } catch (e) {
       throw new BadRequestException();
     }
@@ -48,72 +48,23 @@ export class DotsController {
   //?-------------------------------------------------------------------------//
 
   @Public()
-  @ApiOperation({ description: 'Dot 리스트 w/ Pagination' })
+  @ApiOperation({ description: 'Poll 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get()
-  async findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Dot>> {
-    return await this.dotsService.findAll(query);
-  }
-
-  @Public()
-  @ApiOperation({ description: 'load active dots' })
-  @Get('active')
-  async getActives(@Query('age') age: number | undefined): Promise<Array<Dot>> {
-    return await this.dotsService.getActives(age);
-  }
-
-  @Public()
-  @ApiOperation({ description: 'load inactive dots' })
-  @Get('inactive')
-  async getInactives(
-    @Query('age') age: number | undefined,
-  ): Promise<Array<Dot>> {
-    return await this.dotsService.getInactives(age);
-  }
-
-  @Public()
-  @ApiOperation({ description: 'load active dots by slug' })
-  @Get('active/:slug')
-  async getActivesBySlug(
-    @Param('slug') slug: string,
-    @Query('age') age: number | undefined,
-  ): Promise<Array<Dot>> {
-    return await this.dotsService.getActivesBySlug(slug, age);
+  async findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Poll>> {
+    return await this.pollsService.findAll(query);
   }
 
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: 'Dot 갱신' })
+  @ApiOperation({ description: 'Poll 갱신' })
   @Patch(':id')
   async update(
     @Param('id') id: number,
-    @Body() dto: UpdateDotDto,
+    @Body() dto: UpdatePollDto,
   ): Promise<any> {
-    return await this.dotsService.update(id, dto);
-  }
-
-  @ApiOperation({ description: 'Dot 갱신' })
-  @Patch(':id/up')
-  async thumbsUp(@Param('id') id: number): Promise<any> {
-    return await this.dotsService.thumbsUp(id);
-  }
-
-  @ApiOperation({ description: 'Dot 갱신' })
-  @Patch(':id/down')
-  async thumbsDown(@Param('id') id: number): Promise<any> {
-    return await this.dotsService.thumbsDown(id);
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? SEED
-  //?-------------------------------------------------------------------------//
-
-  @Public()
-  @ApiOperation({ description: 'seed dots' })
-  @Post('seed')
-  async seedDots(): Promise<void> {
-    return await this.dotsService.seedDots();
+    return await this.pollsService.update(id, dto);
   }
 }

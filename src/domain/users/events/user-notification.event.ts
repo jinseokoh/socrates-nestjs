@@ -9,7 +9,7 @@ export class UserNotificationEvent {
     | 'meetupInviteApproval'
     | 'meetupChatOpen'
     | 'connectionReaction'
-    | 'connectionRemark'
+    | 'feedComment'
     | 'connectionPlea'
     | 'connectionPleaDenial'
     | 'friendRequest'

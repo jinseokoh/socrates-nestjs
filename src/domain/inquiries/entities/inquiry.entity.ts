@@ -16,7 +16,6 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Connection } from 'src/domain/dots/entities/connection.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 
 @Entity()
@@ -89,10 +88,6 @@ export class Inquiry {
   @ManyToMany(() => Feed, (feed) => feed.flaggedInquiries)
   @JoinTable({ name: 'inquiry_feed' }) // owning side
   flaggedFeeds: Feed[];
-
-  @ManyToMany(() => Connection, (connection) => connection.flaggedInquiries)
-  @JoinTable({ name: 'inquiry_connection' }) // owning side
-  flaggedConnections: Connection[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

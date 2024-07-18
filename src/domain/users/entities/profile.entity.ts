@@ -102,7 +102,7 @@ export class Profile {
       meetupRequestApproval: false, // 모임신청 승인
       meetupInviteApproval: false, // 모임초대 승인
       connectionReaction: false, // 발견 공감
-      connectionRemark: false, // 발견 댓글
+      connectionComment: false, // 발견 댓글
       connectionPlea: false, // 친구신청 발견글 요청
       connectionPleaDenial: false, // 친구신청 발견글 요청
       friendRequest: false, // 친구 신청

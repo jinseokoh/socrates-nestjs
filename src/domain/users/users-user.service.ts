@@ -13,11 +13,11 @@ import { DataSource } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Hate } from 'src/domain/users/entities/hate.entity';
-import { ReportUser } from 'src/domain/users/entities/report_user.entity';
+import { UserUserReport } from 'src/domain/users/entities/user_user_report.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
-import { Remark } from 'src/domain/dots/entities/remark.entity';
+import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 
 @Injectable()
@@ -30,8 +30,8 @@ export class UsersUserService {
     private readonly repository: Repository<User>,
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
-    @InjectRepository(ReportUser)
-    private readonly reportUserRepository: Repository<ReportUser>,
+    @InjectRepository(UserUserReport)
+    private readonly reportUserRepository: Repository<UserUserReport>,
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     private dataSource: DataSource, // for transaction
@@ -107,28 +107,28 @@ export class UsersUserService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? ReportUser Pivot (신고)
+  //? UserUserReport Pivot (신고)
   //?-------------------------------------------------------------------------//
 
   // 신고한 사용자 리스트에 추가
-  async attachUserIdToReportUserPivot(
+  async attachUserIdToUserUserReportPivot(
     userId: number,
     accusedUserId: number,
     message: string | null,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `report_user` (userId, accusedUserId, message) VALUES (?, ?, ?)',
+      'INSERT IGNORE INTO `user_user_report` (userId, accusedUserId, message) VALUES (?, ?, ?)',
       [userId, accusedUserId, message],
     );
   }
 
   // 신고한 사용자 리스트에서 삭제
-  async detachUserIdFromReportUserPivot(
+  async detachUserIdFromUserUserReportPivot(
     userId: number,
     accusedUserId: number,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `report_user` WHERE userId = ? AND accusedUserId = ?',
+      'DELETE FROM `user_user_report` WHERE userId = ? AND accusedUserId = ?',
       [userId, accusedUserId],
     );
   }
@@ -137,7 +137,7 @@ export class UsersUserService {
   async getUsersBeingReportedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<ReportUser>> {
+  ): Promise<Paginated<UserUserReport>> {
     const queryBuilder = this.reportUserRepository
       .createQueryBuilder('reportUser')
       .innerJoinAndSelect('reportUser.accusedUser', 'user')
@@ -146,7 +146,7 @@ export class UsersUserService {
         userId: userId,
       });
 
-    const config: PaginateConfig<ReportUser> = {
+    const config: PaginateConfig<UserUserReport> = {
       sortableColumns: ['userId'],
       searchableColumns: ['message'],
       defaultLimit: 20,
@@ -192,9 +192,9 @@ export class UsersUserService {
         .createQueryRunner()
         .manager.save(flag);
 
-      if (dto.entity === 'remark') {
+      if (dto.entity === 'comment') {
         await this.dataSource
-          .getRepository(Remark)
+          .getRepository(Comment)
           .increment({ id: dto.entityId }, 'flagCount', 1);
       }
       if (dto.entity === 'thread') {

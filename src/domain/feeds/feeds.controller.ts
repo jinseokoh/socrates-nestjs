@@ -20,7 +20,6 @@ import { FeedsService } from 'src/domain/feeds/feeds.service';
 import { CreateFeedDto } from 'src/domain/feeds/dto/create-feed.dto';
 import { UpdateFeedDto } from 'src/domain/feeds/dto/update-feed.dto';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { Reaction } from 'src/domain/feeds/entities/reaction.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -53,9 +52,7 @@ export class FeedsController {
   @ApiOperation({ description: 'Feed 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get()
-  async findAll(
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Feed>> {
+  async findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Feed>> {
     return await this.feedsService.findAll(query);
   }
 
@@ -64,34 +61,20 @@ export class FeedsController {
   @Get(':id')
   async getFeedById(@Param('id') id: number): Promise<Feed> {
     return await this.feedsService.findById(id, [
-      'dot',
-      'remarks',
-      'remarks.user',
-      'remarks.user.profile',
+      'poll',
+      'comments',
+      'comments.user',
+      'comments.user.profile',
       'userReports',
       'userReactions',
       'user',
       'user.profile',
       'user.feeds',
-      'user.feeds.dot',
-      'user.feeds.remarks',
-      'user.feeds.remarks.user',
+      'user.feeds.poll',
+      'user.feeds.comments',
+      'user.feeds.comments.user',
       // 'user.sentFriendships',
     ]);
-  }
-
-  @ApiOperation({ description: 'Feed 의 reaction 리스트' })
-  @Get(':id/reactions')
-  async getFeedReactionsById(
-    @Param('id') id: number,
-  ): Promise<Reaction[]> {
-    const feed = await this.feedsService.findById(id, [
-      'userReactions',
-      'userReactions.user',
-      'userReactions.user.profile',
-    ]);
-
-    return feed.userReactions ?? [];
   }
 
   //?-------------------------------------------------------------------------//
@@ -118,16 +101,5 @@ export class FeedsController {
     @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
     return await this.feedsService.getSignedUrl(userId, dto);
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? SEED
-  //?-------------------------------------------------------------------------//
-
-  // just for testing
-  @ApiOperation({ description: 'seed dots' })
-  @Post('seed')
-  async seedFeeds(): Promise<void> {
-    return await this.feedsService.seedFeeds();
   }
 }

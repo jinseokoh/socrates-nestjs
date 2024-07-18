@@ -29,11 +29,12 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
-import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
+import { UserMeetupReport } from 'src/domain/users/entities/user_meetup_report.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
+import { UserMeetupBookmark } from 'src/domain/users/entities/user_meetup_bookmark.entity';
 
 @Entity()
 export class Meetup {
@@ -174,7 +175,7 @@ export class Meetup {
   deletedAt: Date | null;
 
   //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //** many-to-1 (belongsTo)
 
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
@@ -197,7 +198,7 @@ export class Meetup {
   venue?: Venue;
 
   //**--------------------------------------------------------------------------*/
-  //** many-to-many belongsToMany using one-to-many
+  //** many-to-many belongsToMany using one-to-many (hasMany)
 
   @OneToMany(() => Thread, (thread) => thread.meetup)
   public threads: Thread[];
@@ -211,11 +212,14 @@ export class Meetup {
   @OneToMany(() => Like, (like) => like.meetup)
   public usersLiked: Like[];
 
-  @OneToMany(() => ReportMeetup, (reportMeetup) => reportMeetup.meetup)
-  public userReports: ReportMeetup[];
+  @OneToMany(() => UserMeetupBookmark, (bookmark) => bookmark.meetup)
+  public bookmarkedByUsers: UserMeetupBookmark[];
+
+  @OneToMany(() => UserMeetupReport, (reportMeetup) => reportMeetup.meetup)
+  public userReports: UserMeetupReport[];
 
   //**------------------------------------------------------------------------*/
-  //** many-to-many belongsToMany
+  //** many-to-many (belongsToMany)
 
   //! 이 정보는 meetup 이 삭제되더라도 지우지 않고 유지 하기로
   @ManyToMany(() => Career, (career) => career.meetups)

@@ -16,10 +16,10 @@ export class CreatePleaDto {
   @IsOptional()
   recipientId: number;
 
-  @ApiProperty({ description: 'dotId' })
+  @ApiProperty({ description: 'feedId' })
   @IsNumber()
   @IsOptional()
-  dotId: number;
+  feedId: number;
 
   @ApiProperty({ description: 'connectionId' })
   @IsNumber()

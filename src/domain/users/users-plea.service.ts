@@ -42,7 +42,7 @@ export class UsersPleaService {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.sender', 'sender')
-      .innerJoinAndSelect('plea.dot', 'dot')
+      .innerJoinAndSelect('plea.poll', 'poll')
       .where({
         senderId: userId,
         recipientId: myId,
@@ -59,7 +59,7 @@ export class UsersPleaService {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.recipient', 'recipient')
-      .innerJoinAndSelect('plea.dot', 'dot')
+      .innerJoinAndSelect('plea.poll', 'poll')
       .where({
         senderId: myId,
         recipientId: userId,
@@ -74,7 +74,7 @@ export class UsersPleaService {
   async getReceivedPleasByUserId(userId: number): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
-      .innerJoinAndSelect('plea.dot', 'dot')
+      .innerJoinAndSelect('plea.poll', 'poll')
       .innerJoinAndSelect('plea.sender', 'sender')
       .where({
         recipientId: userId,
@@ -88,7 +88,7 @@ export class UsersPleaService {
   async getSentPleasByUserId(userId: number): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
-      .innerJoinAndSelect('plea.dot', 'dot')
+      .innerJoinAndSelect('plea.poll', 'poll')
       .innerJoinAndSelect('plea.recipient', 'recipient')
       .where({
         senderId: userId,

@@ -22,7 +22,7 @@ import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
+import { UserMeetupReport } from 'src/domain/users/entities/user_meetup_report.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
@@ -44,8 +44,8 @@ export class UsersMeetupService {
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Join)
     private readonly joinRepository: Repository<Join>,
-    @InjectRepository(ReportMeetup)
-    private readonly reportMeetupRepository: Repository<ReportMeetup>,
+    @InjectRepository(UserMeetupReport)
+    private readonly reportMeetupRepository: Repository<UserMeetupReport>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
@@ -193,17 +193,17 @@ export class UsersMeetupService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? ReportMeetup Pivot
+  //? UserMeetupReport Pivot
   //?-------------------------------------------------------------------------//
 
   // 차단한 모임 리스트에 추가
-  async attachToReportMeetupPivot(
+  async attachToUserMeetupReportPivot(
     userId: number,
     meetupId: number,
     message: string,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `report_meetup` (userId, meetupId, message) VALUES (?, ?, ?)',
+      'INSERT IGNORE INTO `user_meetup_report` (userId, meetupId, message) VALUES (?, ?, ?)',
       [userId, meetupId, message],
     );
     if (affectedRows > 0) {
@@ -212,12 +212,12 @@ export class UsersMeetupService {
   }
 
   // 차단한 모임 리스트에서 삭제
-  async detachFromReportMeetupPivot(
+  async detachFromUserMeetupReportPivot(
     userId: number,
     meetupId: number,
   ): Promise<void> {
     const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `report_meetup` WHERE userId = ? AND meetupId = ?',
+      'DELETE FROM `user_meetup_report` WHERE userId = ? AND meetupId = ?',
       [userId, meetupId],
     );
     if (affectedRows > 0) {
@@ -233,7 +233,7 @@ export class UsersMeetupService {
   async getMeetupsReportedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<ReportMeetup>> {
+  ): Promise<Paginated<UserMeetupReport>> {
     const queryBuilder = this.reportMeetupRepository
       .createQueryBuilder('reportMeetup')
       .leftJoinAndSelect('reportMeetup.meetup', 'meetup')
@@ -242,7 +242,7 @@ export class UsersMeetupService {
         userId,
       });
 
-    const config: PaginateConfig<ReportMeetup> = {
+    const config: PaginateConfig<UserMeetupReport> = {
       sortableColumns: ['meetupId'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,
@@ -257,7 +257,7 @@ export class UsersMeetupService {
   async getMeetupIdsReportedByMe(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId \
-      FROM `user` INNER JOIN `report_meetup` ON `user`.id = `report_meetup`.userId \
+      FROM `user` INNER JOIN `user_meetup_report` ON `user`.id = `user_meetup_report`.userId \
       WHERE `user`.id = ?',
       [userId],
     );

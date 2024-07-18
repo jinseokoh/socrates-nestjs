@@ -13,7 +13,7 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Hate } from 'src/domain/users/entities/hate.entity';
-import { ReportUser } from 'src/domain/users/entities/report_user.entity';
+import { UserUserReport } from 'src/domain/users/entities/user_user_report.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
 import { UsersUserService } from 'src/domain/users/users-user.service';
@@ -91,7 +91,7 @@ export class UserUsersController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? ReportUser Pivot (신고)
+  //? UserUserReport Pivot (신고)
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '신고한 사용자 리스트에 추가' })
@@ -105,7 +105,7 @@ export class UserUsersController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersUserService.attachUserIdToReportUserPivot(
+      await this.usersUserService.attachUserIdToUserUserReportPivot(
         userId,
         otherId,
         message,
@@ -128,7 +128,7 @@ export class UserUsersController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersUserService.detachUserIdFromReportUserPivot(
+      await this.usersUserService.detachUserIdFromUserUserReportPivot(
         userId,
         otherId,
       );
@@ -145,7 +145,7 @@ export class UserUsersController {
   async getUsersBeingReportedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<ReportUser>> {
+  ): Promise<Paginated<UserUserReport>> {
     return this.usersUserService.getUsersBeingReportedByMe(userId, query);
   }
 

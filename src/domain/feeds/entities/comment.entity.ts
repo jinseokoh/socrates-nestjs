@@ -50,7 +50,7 @@ export class Comment {
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.remarks, {
+  @ManyToOne(() => User, (user) => user.comments, {
     onDelete: 'CASCADE',
   })
   user: User;
@@ -58,7 +58,7 @@ export class Comment {
   @Column({ type: 'int', unsigned: true })
   feedId: number; // to make it available to Repository.
 
-  @ManyToOne(() => Feed, (feed) => feed.remarks, {
+  @ManyToOne(() => Feed, (feed) => feed.comments, {
     onDelete: 'CASCADE',
   })
   feed: Feed;
@@ -71,19 +71,19 @@ export class Comment {
   @Column({ type: 'int', unsigned: true, nullable: true })
   parentId: number | null;
 
-  @OneToMany(() => Remark, (remark) => remark.parent)
-  children: Remark[];
+  @OneToMany(() => Comment, (comment) => comment.parent)
+  children: Comment[];
 
-  @ManyToOne(() => Remark, (Remark) => Remark.children, {
+  @ManyToOne(() => Comment, (Comment) => Comment.children, {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'parentId' })
-  parent: Remark;
+  parent: Comment;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  constructor(partial: Partial<Remark>) {
+  constructor(partial: Partial<Comment>) {
     Object.assign(this, partial);
   }
 }

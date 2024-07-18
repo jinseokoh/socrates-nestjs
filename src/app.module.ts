@@ -13,7 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configuration } from 'src/common/config/configuration';
 import { ContentsModule } from 'src/domain/contents/contents.module';
 import { DataSource } from 'typeorm';
-import { DotsModule } from 'src/domain/dots/dots.module';
+
 import { DynamooseModule } from 'nestjs-dynamoose';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { FcmModule } from 'src/services/fcm/fcm.module';
@@ -39,7 +39,7 @@ import { DuplicateEntryErrorInterceptor } from 'src/common/interceptors/duplicat
 import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.filter';
 import { SecretsModule } from 'src/domain/secrets/secrets.module';
 import { PleasModule } from 'src/domain/pleas/pleas.module';
-import { FactionsModule } from 'src/domain/factions/factions.module';
+import { FeedsModule } from 'src/domain/feeds/feeds.module';
 // import { CustomLogger } from 'src/helpers/custom-logger';
 @Module({
   imports: [
@@ -147,8 +147,7 @@ import { FactionsModule } from 'src/domain/factions/factions.module';
     CategoriesModule,
     ChatsModule,
     ContentsModule,
-    DotsModule,
-    FactionsModule,
+    FeedsModule,
     InquiriesModule,
     LanguagesModule,
     LedgersModule,

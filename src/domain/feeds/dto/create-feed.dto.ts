@@ -2,12 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateFeedDto {
-  @ApiProperty({ description: 'dot 답변' })
+  @ApiProperty({ description: 'poll 답변' })
   @IsArray()
   @IsOptional()
   choices: number[] | null;
 
-  @ApiProperty({ description: 'dot 답변' })
+  @ApiProperty({ description: 'poll 답변' })
   @IsString()
   answer: string;
 
@@ -19,7 +19,7 @@ export class CreateFeedDto {
   @ApiProperty({ description: 'count' })
   @IsNumber()
   @IsOptional()
-  remarkCount: number | null;
+  commentCount: number | null;
 
   @ApiProperty({ description: 'count' })
   @IsNumber()
@@ -51,9 +51,9 @@ export class CreateFeedDto {
   @IsOptional()
   uneasyCount: number | null;
 
-  @ApiProperty({ description: 'dot 아이디', required: true })
+  @ApiProperty({ description: 'feed 아이디', required: true })
   @IsNumber()
-  dotId: number;
+  feedId: number;
 
   @ApiProperty({ description: 'user 아이디' })
   @IsNumber()

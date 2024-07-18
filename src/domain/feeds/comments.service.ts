@@ -7,24 +7,24 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CreateRemarkDto } from 'src/domain/feeds/dto/create-remark.dto';
+import { CreateCommentDto } from 'src/domain/feeds/dto/create-comment.dto';
 
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { Remark } from 'src/domain/feeds/entities/remark.entity';
+import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ClientProxy } from '@nestjs/microservices';
-import { UpdateRemarkDto } from 'src/domain/feeds/dto/update-remark.dto';
+import { UpdateCommentDto } from 'src/domain/feeds/dto/update-comment.dto';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
-export class RemarksService {
-  private readonly logger = new Logger(RemarksService.name);
+export class CommentsService {
+  private readonly logger = new Logger(CommentsService.name);
 
   constructor(
-    @InjectRepository(Remark)
-    private readonly repository: Repository<Remark>,
+    @InjectRepository(Comment)
+    private readonly repository: Repository<Comment>,
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
@@ -36,12 +36,12 @@ export class RemarksService {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  async create(dto: CreateRemarkDto): Promise<Remark> {
+  async create(dto: CreateCommentDto): Promise<Comment> {
     // creation
-    const remark = await this.repository.save(this.repository.create(dto));
+    const comment = await this.repository.save(this.repository.create(dto));
 
     // fetch data for notification recipient
-    const remarkWithUser = await this.findById(remark.id, [
+    const commentWithUser = await this.findById(comment.id, [
       'user',
       'feed',
       'feed.user',
@@ -49,10 +49,10 @@ export class RemarksService {
     ]);
     // notification with event listener ------------------------------------//
     const event = new UserNotificationEvent();
-    event.name = 'feedRemark';
-    event.userId = remarkWithUser.feed.user.id;
-    event.token = remarkWithUser.feed.user.pushToken;
-    event.options = remarkWithUser.feed.user.profile?.options ?? {};
+    event.name = 'feedComment';
+    event.userId = commentWithUser.feed.user.id;
+    event.token = commentWithUser.feed.user.pushToken;
+    event.options = commentWithUser.feed.user.profile?.options ?? {};
     event.body = `내 발견글에 누군가 댓글을 남겼습니다.`;
     event.data = {
       page: `feeds/${dto.feedId}`,
@@ -60,30 +60,26 @@ export class RemarksService {
     };
     this.eventEmitter.emit('user.notified', event);
 
-    this.feedRepository.increment(
-      { id: dto.feedId },
-      `remarkCount`,
-      1,
-    );
+    this.feedRepository.increment({ id: dto.feedId }, `commentCount`, 1);
 
-    return remarkWithUser;
+    return commentWithUser;
   }
 
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
 
-  async findAll(query: PaginateQuery): Promise<Paginated<Remark>> {
+  async findAll(query: PaginateQuery): Promise<Paginated<Comment>> {
     const queryBuilder = this.repository
-      .createQueryBuilder('remark')
-      .innerJoinAndSelect('remark.user', 'user')
+      .createQueryBuilder('comment')
+      .innerJoinAndSelect('comment.user', 'user')
       .innerJoinAndSelect('user.profile', 'profile')
-      .leftJoinAndSelect('remark.children', 'children')
+      .leftJoinAndSelect('comment.children', 'children')
       .leftJoinAndSelect('children.user', 'replier')
-      .where('remark.parentId IS NULL')
-      .andWhere('remark.deletedAt IS NULL');
+      .where('comment.parentId IS NULL')
+      .andWhere('comment.deletedAt IS NULL');
 
-    const config: PaginateConfig<Remark> = {
+    const config: PaginateConfig<Comment> = {
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultLimit: 20,
@@ -94,31 +90,31 @@ export class RemarksService {
       },
     };
 
-    return await paginate<Remark>(query, queryBuilder, config);
+    return await paginate<Comment>(query, queryBuilder, config);
   }
 
   async findAllById(
     feedId: number,
-    remarkId: number,
+    commentId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Remark>> {
+  ): Promise<Paginated<Comment>> {
     const queryBuilder = this.repository
-      .createQueryBuilder('remark')
-      .innerJoinAndSelect('remark.user', 'user')
+      .createQueryBuilder('comment')
+      .innerJoinAndSelect('comment.user', 'user')
       .innerJoinAndSelect('user.profile', 'profile')
-      .where('remark.feedId = :feedId', { feedId })
-      .andWhere('remark.parentId = :remarkId', { remarkId })
+      .where('comment.feedId = :feedId', { feedId })
+      .andWhere('comment.parentId = :commentId', { commentId })
       // .andWhere(
       //   new Brackets((qb) => {
-      //     qb.where('remark.id = :remarkId', { remarkId }).orWhere(
-      //       'remark.parentId = :remarkId',
-      //       { remarkId },
+      //     qb.where('comment.id = :commentId', { commentId }).orWhere(
+      //       'comment.parentId = :commentId',
+      //       { commentId },
       //     );
       //   }),
       // )
-      .andWhere('remark.deletedAt IS NULL');
+      .andWhere('comment.deletedAt IS NULL');
 
-    const config: PaginateConfig<Remark> = {
+    const config: PaginateConfig<Comment> = {
       sortableColumns: ['id'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
@@ -128,10 +124,10 @@ export class RemarksService {
       },
     };
 
-    return await paginate<Remark>(query, queryBuilder, config);
+    return await paginate<Comment>(query, queryBuilder, config);
   }
 
-  async findById(id: number, relations: string[] = []): Promise<Remark> {
+  async findById(id: number, relations: string[] = []): Promise<Comment> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -146,7 +142,7 @@ export class RemarksService {
     }
   }
 
-  async findByUniqueKey(params: FindOneOptions): Promise<Remark | null> {
+  async findByUniqueKey(params: FindOneOptions): Promise<Comment | null> {
     return await this.repository.findOne(params);
   }
 
@@ -154,34 +150,34 @@ export class RemarksService {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  async update(id: number, dto: UpdateRemarkDto): Promise<Remark> {
-    const remark = await this.repository.preload({ id, ...dto });
-    if (!remark) {
+  async update(id: number, dto: UpdateCommentDto): Promise<Comment> {
+    const comment = await this.repository.preload({ id, ...dto });
+    if (!comment) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.repository.save(remark);
+    return await this.repository.save(comment);
   }
 
   //?-------------------------------------------------------------------------//
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async softRemove(id: number): Promise<Remark> {
+  async softRemove(id: number): Promise<Comment> {
     try {
-      const remark = await this.findById(id);
-      await this.repository.softRemove(remark);
+      const comment = await this.findById(id);
+      await this.repository.softRemove(comment);
       await this.feedRepository.manager.query(
-        `UPDATE feed SET remarkCount = remarkCount - 1 WHERE id = ? AND remarkCount > 0`,
-        [remark.feedId],
+        `UPDATE feed SET commentCount = commentCount - 1 WHERE id = ? AND commentCount > 0`,
+        [comment.feedId],
       );
-      return remark;
+      return comment;
     } catch (e) {
       this.logger.log(e);
     }
   }
 
-  async remove(id: number): Promise<Remark> {
-    const remark = await this.findById(id);
-    return await this.repository.remove(remark);
+  async remove(id: number): Promise<Comment> {
+    const comment = await this.findById(id);
+    return await this.repository.remove(comment);
   }
 }

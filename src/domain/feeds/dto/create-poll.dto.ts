@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { QuestionType } from 'src/common/enums';
 
-export class CreateDotDto {
+export class CreatePollDto {
   @ApiProperty({ description: 'age' })
   @IsNumber()
   @IsOptional()

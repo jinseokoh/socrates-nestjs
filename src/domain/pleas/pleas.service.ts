@@ -23,7 +23,7 @@ import { FriendshipStatus, LedgerType } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Connection } from 'src/domain/dots/entities/connection.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
 
 @Injectable()
 export class PleasService {
@@ -89,13 +89,13 @@ export class PleasService {
       });
 
       // validation ----------------------------------------------------------//
-      const connection = await queryRunner.manager.findOne(Connection, {
+      const oldPlea = await queryRunner.manager.findOne(Plea, {
         where: {
-          userId: dto.recipientId,
-          dotId: dto.dotId,
+          senderId: dto.senderId,
+          feedId: dto.feedId,
         },
       });
-      if (connection) { // connection already exists
+      if (oldPlea) { // connection already exists
         throw new BadRequestException(`precondition exists`);
       }
 
@@ -192,7 +192,6 @@ export class PleasService {
     return await this.repository.save(plea);
   }
 
-
   //?-------------------------------------------------------------------------//
   //? DELETE
   //?-------------------------------------------------------------------------//
@@ -219,7 +218,7 @@ export class PleasService {
         relations: ['sender', 'sender.profile', 'recipient'],
       });
 
-      if (plea.connectionId === null) {
+      if (plea.feedId === null) {
         // plea.reward - 1 환불
         const newBalance = plea.sender.profile?.balance + plea.reward - 1;
         const ledger = new Ledger({

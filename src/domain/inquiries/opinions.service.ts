@@ -42,7 +42,7 @@ export class OpinionsService {
     ]);
     console.log('opinionWithUser', opinionWithUser);
 
-    this.inquiryRepository.increment({ id: dto.inquiryId }, `remarkCount`, 1);
+    this.inquiryRepository.increment({ id: dto.inquiryId }, `commentCount`, 1);
 
     return opinionWithUser;
   }

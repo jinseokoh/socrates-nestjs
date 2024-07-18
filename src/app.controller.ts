@@ -10,7 +10,7 @@ export class AppController {
   async counts(): Promise<{
     users: number;
     meetups: number;
-    dots: number;
+    polls: number;
     connections: number;
   }> {
     return await this.appService.getCounts();

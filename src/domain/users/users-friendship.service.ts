@@ -181,7 +181,7 @@ export class UsersFriendshipService {
 
       if (
         friendship.plea &&
-        friendship.plea.connectionId !== null &&
+        friendship.plea.feedId !== null &&
         status === FriendshipStatus.ACCEPTED
       ) {
         //? plea.reward 를 friendship sender (== plea recipient; 작성자) 에게 지급
@@ -280,7 +280,7 @@ export class UsersFriendshipService {
       });
 
       // 요청으로 보낸 친구신청인 경우
-      if (friendship.plea && friendship.plea.connectionId !== null) {
+      if (friendship.plea && friendship.plea.feedId !== null) {
         const newBalance =
           friendship.recipient.profile?.balance + friendship.plea.reward - 1;
 

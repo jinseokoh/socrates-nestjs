@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class CreateRemarkDto {
+export class CreateCommentDto {
   @ApiProperty({ description: '댓글 🔍' })
   @IsString()
   body: string;

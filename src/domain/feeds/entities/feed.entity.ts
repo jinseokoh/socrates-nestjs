@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ReportFeed } from 'src/domain/feeds/entities/report_feed.entity';
+import { UserFeedReport } from 'src/domain/users/entities/user_feed_report.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
-import { Bookmark } from 'src/domain/feeds/entities/bookmark.entity';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -19,7 +18,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { IsArray } from 'class-validator';
-import { Link } from 'src/domain/feeds/entities/link.entity';
+import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { UserFeedBookmark } from 'src/domain/users/entities/user_feed_bookmark.entity';
 
 // a user can like meetup
 // https://github.com/typeorm/typeorm/issues/4653
@@ -31,14 +31,22 @@ export class Feed {
   @Column({ length: 16, nullable: false })
   slug: string;
 
+  @Column({ type: 'text', nullable: true })
+  @ApiProperty({ description: 'feed 내용' })
+  body: string;
+
   @Column('json', { nullable: true })
   @ApiProperty({ description: '작품이미지' })
   @IsArray()
   images: string[] | null;
 
-  @Column({ type: 'text', nullable: true })
-  @ApiProperty({ description: 'feed 내용' })
-  body: string;
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'views' })
+  viewCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'likes' })
+  likeCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'bookmark count' })
@@ -72,37 +80,37 @@ export class Feed {
   poll: Poll;
 
   //*-------------------------------------------------------------------------*/
-  //* 1-to-many hasMany
+  //* 1-to-many (hasMany)
 
-  @OneToMany(() => Link, (link) => link.feed)
-  public links: Link[];
+  @OneToMany(() => Feed, (feed) => feed.parentFeed)
+  subFeeds: Feed[];
 
   @OneToMany(() => Comment, (comment) => comment.feed)
-  public comments: Comment[];
+  comments: Comment[];
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.feed)
-  public usersBookmarked: Bookmark[];
+  @OneToMany(() => Plea, (plea) => plea.feed)
+  public pleas: Plea[];
 
-  @OneToMany(() => ReportFeed, (ReportFeed) => ReportFeed.feed)
-  public userReports: ReportFeed[];
+  @OneToMany(() => UserFeedBookmark, (bookmark) => bookmark.feed)
+  public bookmarkedByUsers: UserFeedBookmark[];
+
+  @OneToMany(() => UserFeedReport, (report) => report.feed)
+  public reportedByUsers: UserFeedReport[];
 
   //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //** many-to-1 (belongsTo)
 
-  @Column({ type: 'int', unsigned: true })
-  public userId: number;
+  @ManyToOne(() => Feed, (feed) => feed.subFeeds)
+  parentFeed: Feed;
+
+  // @Column({ type: 'int', unsigned: true })
+  // public userId: number;
 
   @ManyToOne(() => User, (user) => user.feeds)
   public user: User;
 
-  @Column({ type: 'int', unsigned: true })
-  public dotId: number;
-
-  @ManyToOne(() => Dot, (dot) => dot.feeds)
-  public dot: Dot;
-
   //**--------------------------------------------------------------------------*/
-  //** many-to-many belongsToMany
+  //** many-to-many (belongsToMany)
 
   // //! 이 정보는 meetup 이 삭제되더라도 지우지 않고 유지 하기로
   // @ManyToMany(() => Career, (career) => career.meetups)

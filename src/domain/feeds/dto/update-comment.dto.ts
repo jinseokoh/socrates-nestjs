@@ -1,3 +1,3 @@
 import { PartialType } from '@nestjs/swagger';
-import { CreateRemarkDto } from 'src/domain/feeds/dto/create-remark.dto';
-export class UpdateRemarkDto extends PartialType(CreateRemarkDto) {}
+import { CreateCommentDto } from 'src/domain/feeds/dto/create-comment.dto';
+export class UpdateCommentDto extends PartialType(CreateCommentDto) {}

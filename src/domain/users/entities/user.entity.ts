@@ -12,13 +12,13 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ReportMeetup } from 'src/domain/meetups/entities/report_meetup.entity';
+import { UserMeetupReport } from 'src/domain/users/entities/user_meetup_report.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Opinion } from 'src/domain/inquiries/entities/opinion.entity';
-import { ReportUser } from 'src/domain/users/entities/report_user.entity';
+import { UserUserReport } from 'src/domain/users/entities/user_user_report.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
 import { Interest } from 'src/domain/users/entities/interest.entity';
@@ -28,16 +28,17 @@ import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
-import { Connection } from 'src/domain/dots/entities/connection.entity';
-import { Remark } from 'src/domain/dots/entities/remark.entity';
-import { Dot } from 'src/domain/dots/entities/dot.entity';
-import { ReportConnection } from 'src/domain/dots/entities/report_connection.entity';
-import { Reaction } from 'src/domain/dots/entities/reaction.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { Comment } from 'src/domain/feeds/entities/comment.entity';
+import { Poll } from 'src/domain/feeds/entities/poll.entity';
+import { UserFeedReport } from 'src/domain/users/entities/user_feed_report.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
-import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { UserFeedBookmark } from 'src/domain/users/entities/user_feed_bookmark.entity';
+import { UserUserBookmark } from 'src/domain/users/entities/user_user_bookmark.entity';
+import { UserMeetupBookmark } from 'src/domain/users/entities/user_meetup_bookmark.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -160,21 +161,18 @@ export class User {
   })
   feeds: Feed[];
 
-  @OneToMany(() => Dot, (dot) => dot.user, {
+  @OneToMany(() => Poll, (poll) => poll.user, {
     // cascade: ['insert', 'update'],
   })
-  dots: Dot[];
-
-  @OneToMany(() => Connection, (connection) => connection.user)
-  public connections: Connection[];
+  polls: Poll[];
 
   @OneToMany(() => Inquiry, (inquiry) => inquiry.user, {
     // cascade: ['insert', 'update'],
   })
   inquiries: Inquiry[];
 
-  @OneToMany(() => Remark, (remark) => remark.user)
-  public remarks: Remark[];
+  @OneToMany(() => Comment, (comment) => comment.user)
+  public comments: Comment[];
 
   @OneToMany(() => Opinion, (opinion) => opinion.user)
   public opinions: Opinion[];
@@ -193,12 +191,6 @@ export class User {
 
   @OneToMany(() => Join, (join) => join.askedUser)
   public askedJoins: Join[];
-
-  @OneToMany(() => ReportUser, (reportUser) => reportUser.user)
-  public accusingReports: ReportUser[];
-
-  @OneToMany(() => ReportUser, (reportUser) => reportUser.accusedUser)
-  public accusedReports: ReportUser[];
 
   @OneToMany(() => Hate, (hate) => hate.sender)
   public usersHating: Hate[];
@@ -224,23 +216,39 @@ export class User {
   @OneToMany(() => Like, (like) => like.user)
   public meetupsLiked: Like[];
 
-  @OneToMany(() => ReportMeetup, (reportMeetup) => reportMeetup.user)
-  public meetupReports: ReportMeetup[];
-
   @OneToMany(() => Interest, (interest) => interest.user)
   public categoriesInterested: Interest[];
 
-  @OneToMany(() => Connection, (connection) => connection.user)
-  public connectionsReacted: Reaction[];
-
-  @OneToMany(
-    () => ReportConnection,
-    (reportConnection) => reportConnection.user,
-  )
-  public connectionsReported: ReportConnection[];
-
   @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.user)
   public languageSkills: LanguageSkill[];
+
+  // reports ---------------------------------------------------------------- //
+
+  @OneToMany(() => UserFeedReport, (report) => report.user)
+  public feedReports: UserFeedReport[];
+
+  @OneToMany(() => UserMeetupReport, (report) => report.user)
+  public meetupReports: UserMeetupReport[];
+
+  @OneToMany(() => UserUserReport, (report) => report.user)
+  public userReports: UserUserReport[];
+
+  @OneToMany(() => UserUserReport, (report) => report.accusedUser)
+  public reportedByUsers: UserUserReport[];
+
+  // bookmarks -------------------------------------------------------------- //
+
+  @OneToMany(() => UserFeedBookmark, (bookmark) => bookmark.user)
+  public feedBookmarks: UserFeedBookmark[];
+
+  @OneToMany(() => UserMeetupBookmark, (bookmark) => bookmark.user)
+  public meetupBookmarks: UserFeedBookmark[];
+
+  @OneToMany(() => UserUserBookmark, (bookmark) => bookmark.user)
+  public userBookmarks: UserUserBookmark[];
+
+  @OneToMany(() => UserUserBookmark, (bookmark) => bookmark.bookmarkedUser)
+  public bookmarkedByUsers: UserUserBookmark[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany

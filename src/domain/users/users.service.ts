@@ -320,10 +320,10 @@ export class UsersService {
       await this._deletePlea(id);
       await this._deleteProfile(id);
       await this._deleteProvider(id);
-      await this._deleteRemark(id);
-      await this._deleteReportConnection(id);
-      await this._deleteReportMeetup(id);
-      await this._deleteReportUser(id);
+      await this._deleteComment(id);
+      await this._deleteUserFeedReport(id);
+      await this._deleteUserMeetupReport(id);
+      await this._deleteUserUserReport(id);
       await this._deleteThread(id);
       await this._voidPersonalInformation(id, dto.message ?? '');
       // await this.softRemove(id);
@@ -441,27 +441,27 @@ export class UsersService {
       [id],
     );
   }
-  async _deleteRemark(id: number) {
+  async _deleteComment(id: number) {
     await this.repository.manager.query(
-      'UPDATE `remark` SET deletedAt=NOW() WHERE userId = ?',
+      'UPDATE `comment` SET deletedAt=NOW() WHERE userId = ?',
       [id],
     );
   }
-  async _deleteReportConnection(id: number) {
+  async _deleteUserFeedReport(id: number) {
     await this.repository.manager.query(
       'DELETE FROM `report_connection` WHERE userId = ?',
       [id],
     );
   }
-  async _deleteReportMeetup(id: number) {
+  async _deleteUserMeetupReport(id: number) {
     await this.repository.manager.query(
-      'DELETE FROM `report_meetup` WHERE userId = ?',
+      'DELETE FROM `user_meetup_report` WHERE userId = ?',
       [id],
     );
   }
-  async _deleteReportUser(id: number) {
+  async _deleteUserUserReport(id: number) {
     await this.repository.manager.query(
-      'DELETE FROM `report_user` WHERE userId = ? OR accusedUserId = ?',
+      'DELETE FROM `user_user_report` WHERE userId = ? OR accusedUserId = ?',
       [id, id],
     );
   }

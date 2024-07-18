@@ -121,7 +121,7 @@ export class UserMeetupsController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? ReportMeetup Pivot
+  //? UserMeetupReport Pivot
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '차단한 모임 리스트에 추가' })
@@ -135,7 +135,7 @@ export class UserMeetupsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersMeetupService.attachToReportMeetupPivot(
+      await this.usersMeetupService.attachToUserMeetupReportPivot(
         userId,
         meetupId,
         message,
@@ -151,7 +151,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '차단한 모임 리스트에서 삭제' })
   @Delete(':userId/meetups-reported/:meetupId')
-  async detachFromReportMeetupPivot(
+  async detachFromUserMeetupReportPivot(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<any> {
@@ -159,7 +159,7 @@ export class UserMeetupsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersMeetupService.detachFromReportMeetupPivot(
+      await this.usersMeetupService.detachFromUserMeetupReportPivot(
         userId,
         meetupId,
       );

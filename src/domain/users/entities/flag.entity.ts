@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-//? 댓글 remark, thread, opinion, comment 신고
+//? 댓글 comment, thread, opinion, comment 신고
 @Entity()
 export class Flag {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })

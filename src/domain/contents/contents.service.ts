@@ -48,7 +48,7 @@ export class ContentsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // Dot 리스트
+  // Poll 리스트
   async getActiveContents(): Promise<Content[]> {
     return await this.repository.find({
       where: {

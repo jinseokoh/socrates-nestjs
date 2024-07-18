@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { QuestionType, TargetGender } from 'src/common/enums';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -9,15 +8,12 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { IsArray } from 'class-validator';
-import { Faction } from 'src/domain/factions/entities/faction.entity';
 
 @Entity()
 export class Poll {
@@ -60,11 +56,8 @@ export class Poll {
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany using one-to-many
 
-  @OneToMany(() => Feed, (feed) => feed.dot)
+  @OneToMany(() => Feed, (feed) => feed.poll)
   public feeds: Feed[];
-
-  @OneToMany(() => Plea, (plea) => plea.dot)
-  public pleas: Plea[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
@@ -72,7 +65,7 @@ export class Poll {
   @Column({ type: 'int', unsigned: true, default: null })
   userId: number | null; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.dots, {})
+  @ManyToOne(() => User, (user) => user.polls, {})
   user: User | null;
 
   @Column({ type: 'int', unsigned: true, default: null })
@@ -91,11 +84,11 @@ export class Poll {
 }
 
 /*
-update `dot` set help='선호' where slug='love';
-update `dot` set help='가치관' where slug='wow';
-update `dot` set help='경험' where slug='cool';
-update `dot` set help='최근' where slug='saint';
-update `dot` set help='일상' where slug='yes';
-update `dot` set help='가설' where slug='pirate';
-update `dot` set help='논란' where slug='devil';
+update `poll` set help='선호' where slug='love';
+update `poll` set help='가치관' where slug='wow';
+update `poll` set help='경험' where slug='cool';
+update `poll` set help='최근' where slug='saint';
+update `poll` set help='일상' where slug='yes';
+update `poll` set help='가설' where slug='pirate';
+update `poll` set help='논란' where slug='devil';
 */

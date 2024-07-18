@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Dot } from 'src/domain/dots/entities/dot.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -14,10 +14,10 @@ import {
 } from 'typeorm';
 
 @Entity()
-@Unique('sender_id_recipient_id_dot_id_key', [
+@Unique('sender_id_recipient_id_feed_id_key', [
   'senderId',
   'recipientId',
-  'dotId',
+  'feedId',
 ])
 export class Plea {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -57,11 +57,7 @@ export class Plea {
   recipientId: number;
 
   @Column({ type: 'int', unsigned: true })
-  dotId: number;
-
-  // only if user answered the dot question.
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  connectionId: number | null;
+  feedId: number;
 
   //? -------------------------------------------------------------------------/
   //? many-to-many belongsToMany using many-to-one
@@ -82,13 +78,13 @@ export class Plea {
   @JoinColumn({ name: 'recipientId' })
   public recipient!: User;
 
-  @ManyToOne(() => Dot, (dot) => dot.id, {
+  @ManyToOne(() => Feed, (feed) => feed.id, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'dotId' })
-  public dot: Dot;
+  @JoinColumn({ name: 'feedId' })
+  public feed: Feed;
 
   //? -------------------------------------------------------------------------/
   //? constructor
