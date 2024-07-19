@@ -48,7 +48,7 @@ export class UserFeedsController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? UserFeedReport Pivot
+  //? ReportUserFeed Pivot
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '차단한 발견 리스트에 추가' })
@@ -62,7 +62,7 @@ export class UserFeedsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersFeedService.attachToUserFeedReportPivot(
+      await this.usersFeedService.attachToReportUserFeedPivot(
         userId,
         feedId,
         message,
@@ -86,7 +86,7 @@ export class UserFeedsController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersFeedService.detachFromUserFeedReportPivot(userId, feedId);
+      await this.usersFeedService.detachFromReportUserFeedPivot(userId, feedId);
       return {
         data: 'ok',
       };

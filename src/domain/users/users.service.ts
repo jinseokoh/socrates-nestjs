@@ -321,9 +321,9 @@ export class UsersService {
       await this._deleteProfile(id);
       await this._deleteProvider(id);
       await this._deleteComment(id);
-      await this._deleteUserFeedReport(id);
-      await this._deleteUserMeetupReport(id);
-      await this._deleteUserUserReport(id);
+      await this._deleteReportUserFeed(id);
+      await this._deleteReportUserMeetup(id);
+      await this._deleteReportUserUser(id);
       await this._deleteThread(id);
       await this._voidPersonalInformation(id, dto.message ?? '');
       // await this.softRemove(id);
@@ -447,19 +447,19 @@ export class UsersService {
       [id],
     );
   }
-  async _deleteUserFeedReport(id: number) {
+  async _deleteReportUserFeed(id: number) {
     await this.repository.manager.query(
       'DELETE FROM `report_connection` WHERE userId = ?',
       [id],
     );
   }
-  async _deleteUserMeetupReport(id: number) {
+  async _deleteReportUserMeetup(id: number) {
     await this.repository.manager.query(
       'DELETE FROM `user_meetup_report` WHERE userId = ?',
       [id],
     );
   }
-  async _deleteUserUserReport(id: number) {
+  async _deleteReportUserUser(id: number) {
     await this.repository.manager.query(
       'DELETE FROM `user_user_report` WHERE userId = ? OR accusedUserId = ?',
       [id, id],

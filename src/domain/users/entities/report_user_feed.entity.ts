@@ -6,7 +6,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 // 모델사용을 위해, many-to-many 대신 one-to-many 선호
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-export class UserFeedReport {
+export class ReportUserFeed {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
@@ -38,7 +38,7 @@ export class UserFeedReport {
   //? ----------------------------------------------------------------------- //
   //? constructor
 
-  constructor(partial: Partial<UserFeedReport>) {
+  constructor(partial: Partial<ReportUserFeed>) {
     Object.assign(this, partial);
   }
 }

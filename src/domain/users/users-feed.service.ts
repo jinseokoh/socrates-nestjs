@@ -11,7 +11,7 @@ import { Emotion } from 'src/common/enums';
 import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { UserFeedReport } from 'src/domain/users/entities/user_feed_report.entity';
+import { ReportUserFeed } from 'src/domain/users/entities/report_user_feed.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
@@ -19,7 +19,7 @@ import { CreatePleaDto } from 'src/domain/pleas/dto/create-plea.dto';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UpsertBookmarkDto } from 'src/domain/users/dto/upsert-bookmark.dto';
-import { UserFeedBookmark } from 'src/domain/users/entities/user_feed_bookmark.entity';
+import { BookmarkUserFeed } from 'src/domain/users/entities/user_feed_bookmark.entity';
 
 @Injectable()
 export class UsersFeedService {
@@ -31,12 +31,12 @@ export class UsersFeedService {
     private readonly repository: Repository<User>,
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
-    @InjectRepository(UserFeedBookmark)
-    private readonly bookmarkRepository: Repository<UserFeedBookmark>,
+    @InjectRepository(BookmarkUserFeed)
+    private readonly bookmarkRepository: Repository<BookmarkUserFeed>,
     @InjectRepository(Plea)
     private readonly pleaRepository: Repository<Plea>,
-    @InjectRepository(UserFeedReport)
-    private readonly reportFeedRepository: Repository<UserFeedReport>,
+    @InjectRepository(ReportUserFeed)
+    private readonly reportFeedRepository: Repository<ReportUserFeed>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
@@ -98,11 +98,11 @@ export class UsersFeedService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? UserFeedReport Pivot
+  //? ReportUserFeed Pivot
   //?-------------------------------------------------------------------------//
 
   // 차단한 발견 리스트에 추가
-  async attachToUserFeedReportPivot(
+  async attachToReportUserFeedPivot(
     userId: number,
     feedId: number,
     message: string,
@@ -117,7 +117,7 @@ export class UsersFeedService {
   }
 
   // 차단한 발견 리스트에서 삭제
-  async detachFromUserFeedReportPivot(
+  async detachFromReportUserFeedPivot(
     userId: number,
     feedId: number,
   ): Promise<void> {
@@ -126,7 +126,7 @@ export class UsersFeedService {
       [userId, feedId],
     );
     if (affectedRows > 0) {
-      // await this.feedRrepository.decrement({ feedId }, 'UserFeedReportCount', 1);
+      // await this.feedRrepository.decrement({ feedId }, 'ReportUserFeedCount', 1);
       await this.repository.manager.query(
         'UPDATE `feed` SET reportCount = reportCount - 1 WHERE id = ? AND reportCount > 0',
         [feedId],
@@ -138,7 +138,7 @@ export class UsersFeedService {
   async getFeedsReportedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<UserFeedReport>> {
+  ): Promise<Paginated<ReportUserFeed>> {
     const queryBuilder = this.reportFeedRepository
       .createQueryBuilder('user_feed_report')
       .leftJoinAndSelect('user_feed_report.feed', 'feed')
@@ -147,7 +147,7 @@ export class UsersFeedService {
         userId,
       });
 
-    const config: PaginateConfig<UserFeedReport> = {
+    const config: PaginateConfig<ReportUserFeed> = {
       sortableColumns: ['feedId'],
       searchableColumns: ['feed.body'],
       defaultLimit: 20,
@@ -191,7 +191,7 @@ export class UsersFeedService {
   async getFeedsBookmarkedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<UserFeedBookmark>> {
+  ): Promise<Paginated<BookmarkUserFeed>> {
     const queryBuilder = this.bookmarkRepository
       .createQueryBuilder('bookmark')
       .innerJoinAndSelect('bookmark.feed', 'feed')
@@ -202,7 +202,7 @@ export class UsersFeedService {
         userId,
       });
 
-    const config: PaginateConfig<UserFeedBookmark> = {
+    const config: PaginateConfig<BookmarkUserFeed> = {
       sortableColumns: ['id'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'DESC']],

@@ -1,11 +1,12 @@
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-//? a User can bookmark another User
-//? 모델사용을 위해, many-to-many 대신 one-to-many 선호
-//? https://github.com/typeorm/typeorm/issues/4653
+// a User can bookmark Meetup
+// 모델사용을 위해, many-to-many 대신 one-to-many 선호
+// https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-export class UserUserBookmark {
+export class BookmarkUserMeetup {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
@@ -15,29 +16,29 @@ export class UserUserBookmark {
 
   //? unsigned int 로 사용하기 위해 명시적인 정의가 필요.
   @Column({ type: 'int', unsigned: true })
-  bookmarkedUserId: number;
+  meetupId: number;
 
   @Column({ length: 80, nullable: true })
   message: string | null;
 
-  @ManyToOne(() => User, (user) => user.userBookmarks, {
+  @ManyToOne(() => User, (user) => user.meetupBookmarks, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   public user: User;
 
-  @ManyToOne(() => User, (user) => user.bookmarkedByUsers, {
+  @ManyToOne(() => Meetup, (meetup) => meetup.bookmarkedByUsers, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  public bookmarkedUser: User;
+  public meetup: Meetup;
 
   //? ----------------------------------------------------------------------- //
   //? constructor
 
-  constructor(partial: Partial<UserUserBookmark>) {
+  constructor(partial: Partial<BookmarkUserMeetup>) {
     Object.assign(this, partial);
   }
 }

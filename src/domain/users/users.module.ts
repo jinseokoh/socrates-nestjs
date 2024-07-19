@@ -9,9 +9,9 @@ import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
-import { UserFeedReport } from 'src/domain/users/entities/user_feed_report.entity';
-import { UserMeetupReport } from 'src/domain/users/entities/user_meetup_report.entity';
-import { UserUserReport } from 'src/domain/users/entities/user_user_report.entity';
+import { ReportUserFeed } from 'src/domain/users/entities/report_user_feed.entity';
+import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
+import { ReportUserUser } from 'src/domain/users/entities/report_user_user.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { UsersService } from 'src/domain/users/users.service';
@@ -44,9 +44,9 @@ import { UserPleaController } from 'src/domain/users/user-plea.controller';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
 import { AlarmsModule } from 'src/domain/alarms/alarms.module';
-import { UserUserBookmark } from 'src/domain/users/entities/user_user_bookmark.entity';
-import { UserMeetupBookmark } from 'src/domain/users/entities/user_meetup_bookmark.entity';
-import { UserFeedBookmark } from 'src/domain/users/entities/user_feed_bookmark.entity';
+import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
+import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
+import { BookmarkUserFeed } from 'src/domain/users/entities/user_feed_bookmark.entity';
 
 @Module({
   imports: [
@@ -66,12 +66,12 @@ import { UserFeedBookmark } from 'src/domain/users/entities/user_feed_bookmark.e
       Profile,
       Secret,
       User,
-      UserFeedBookmark,
-      UserMeetupBookmark,
-      UserUserBookmark,
-      UserFeedReport,
-      UserMeetupReport,
-      UserUserReport,
+      BookmarkUserFeed,
+      BookmarkUserMeetup,
+      BookmarkUserUser,
+      ReportUserFeed,
+      ReportUserMeetup,
+      ReportUserUser,
     ]),
     ThrottlerModule.forRoot([
       {

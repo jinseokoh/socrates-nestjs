@@ -13,7 +13,7 @@ import { DataSource } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Hate } from 'src/domain/users/entities/hate.entity';
-import { UserUserReport } from 'src/domain/users/entities/user_user_report.entity';
+import { ReportUserUser } from 'src/domain/users/entities/report_user_user.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
@@ -30,8 +30,8 @@ export class UsersUserService {
     private readonly repository: Repository<User>,
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
-    @InjectRepository(UserUserReport)
-    private readonly reportUserRepository: Repository<UserUserReport>,
+    @InjectRepository(ReportUserUser)
+    private readonly reportUserRepository: Repository<ReportUserUser>,
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     private dataSource: DataSource, // for transaction
@@ -107,11 +107,11 @@ export class UsersUserService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? UserUserReport Pivot (신고)
+  //? ReportUserUser Pivot (신고)
   //?-------------------------------------------------------------------------//
 
   // 신고한 사용자 리스트에 추가
-  async attachUserIdToUserUserReportPivot(
+  async attachUserIdToReportUserUserPivot(
     userId: number,
     accusedUserId: number,
     message: string | null,
@@ -123,7 +123,7 @@ export class UsersUserService {
   }
 
   // 신고한 사용자 리스트에서 삭제
-  async detachUserIdFromUserUserReportPivot(
+  async detachUserIdFromReportUserUserPivot(
     userId: number,
     accusedUserId: number,
   ): Promise<void> {
@@ -137,7 +137,7 @@ export class UsersUserService {
   async getUsersBeingReportedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<UserUserReport>> {
+  ): Promise<Paginated<ReportUserUser>> {
     const queryBuilder = this.reportUserRepository
       .createQueryBuilder('reportUser')
       .innerJoinAndSelect('reportUser.accusedUser', 'user')
@@ -146,7 +146,7 @@ export class UsersUserService {
         userId: userId,
       });
 
-    const config: PaginateConfig<UserUserReport> = {
+    const config: PaginateConfig<ReportUserUser> = {
       sortableColumns: ['userId'],
       searchableColumns: ['message'],
       defaultLimit: 20,

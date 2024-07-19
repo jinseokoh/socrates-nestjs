@@ -22,7 +22,7 @@ import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { UserMeetupReport } from 'src/domain/users/entities/user_meetup_report.entity';
+import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
@@ -44,8 +44,8 @@ export class UsersMeetupService {
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Join)
     private readonly joinRepository: Repository<Join>,
-    @InjectRepository(UserMeetupReport)
-    private readonly reportMeetupRepository: Repository<UserMeetupReport>,
+    @InjectRepository(ReportUserMeetup)
+    private readonly reportMeetupRepository: Repository<ReportUserMeetup>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
@@ -193,11 +193,11 @@ export class UsersMeetupService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? UserMeetupReport Pivot
+  //? ReportUserMeetup Pivot
   //?-------------------------------------------------------------------------//
 
   // 차단한 모임 리스트에 추가
-  async attachToUserMeetupReportPivot(
+  async attachToReportUserMeetupPivot(
     userId: number,
     meetupId: number,
     message: string,
@@ -212,7 +212,7 @@ export class UsersMeetupService {
   }
 
   // 차단한 모임 리스트에서 삭제
-  async detachFromUserMeetupReportPivot(
+  async detachFromReportUserMeetupPivot(
     userId: number,
     meetupId: number,
   ): Promise<void> {
@@ -233,7 +233,7 @@ export class UsersMeetupService {
   async getMeetupsReportedByMe(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<UserMeetupReport>> {
+  ): Promise<Paginated<ReportUserMeetup>> {
     const queryBuilder = this.reportMeetupRepository
       .createQueryBuilder('reportMeetup')
       .leftJoinAndSelect('reportMeetup.meetup', 'meetup')
@@ -242,7 +242,7 @@ export class UsersMeetupService {
         userId,
       });
 
-    const config: PaginateConfig<UserMeetupReport> = {
+    const config: PaginateConfig<ReportUserMeetup> = {
       sortableColumns: ['meetupId'],
       searchableColumns: ['meetup.title'],
       defaultLimit: 20,

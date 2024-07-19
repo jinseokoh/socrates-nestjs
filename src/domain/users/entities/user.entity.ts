@@ -12,13 +12,13 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { UserMeetupReport } from 'src/domain/users/entities/user_meetup_report.entity';
+import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Opinion } from 'src/domain/inquiries/entities/opinion.entity';
-import { UserUserReport } from 'src/domain/users/entities/user_user_report.entity';
+import { ReportUserUser } from 'src/domain/users/entities/report_user_user.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
 import { Interest } from 'src/domain/users/entities/interest.entity';
@@ -31,14 +31,14 @@ import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
-import { UserFeedReport } from 'src/domain/users/entities/user_feed_report.entity';
+import { ReportUserFeed } from 'src/domain/users/entities/report_user_feed.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
-import { UserFeedBookmark } from 'src/domain/users/entities/user_feed_bookmark.entity';
-import { UserUserBookmark } from 'src/domain/users/entities/user_user_bookmark.entity';
-import { UserMeetupBookmark } from 'src/domain/users/entities/user_meetup_bookmark.entity';
+import { BookmarkUserFeed } from 'src/domain/users/entities/user_feed_bookmark.entity';
+import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
+import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -228,31 +228,31 @@ export class User {
 
   // reports ---------------------------------------------------------------- //
 
-  @OneToMany(() => UserFeedReport, (report) => report.user)
-  public feedReports: UserFeedReport[];
+  @OneToMany(() => ReportUserFeed, (report) => report.user)
+  public feedReports: ReportUserFeed[];
 
-  @OneToMany(() => UserMeetupReport, (report) => report.user)
-  public meetupReports: UserMeetupReport[];
+  @OneToMany(() => ReportUserMeetup, (report) => report.user)
+  public meetupReports: ReportUserMeetup[];
 
-  @OneToMany(() => UserUserReport, (report) => report.user)
-  public userReports: UserUserReport[];
+  @OneToMany(() => ReportUserUser, (report) => report.user)
+  public userReports: ReportUserUser[];
 
-  @OneToMany(() => UserUserReport, (report) => report.accusedUser)
-  public reportedByUsers: UserUserReport[];
+  @OneToMany(() => ReportUserUser, (report) => report.accusedUser)
+  public reportedByUsers: ReportUserUser[];
 
   // bookmarks -------------------------------------------------------------- //
 
-  @OneToMany(() => UserFeedBookmark, (bookmark) => bookmark.user)
-  public feedBookmarks: UserFeedBookmark[];
+  @OneToMany(() => BookmarkUserFeed, (bookmark) => bookmark.user)
+  public feedBookmarks: BookmarkUserFeed[];
 
-  @OneToMany(() => UserMeetupBookmark, (bookmark) => bookmark.user)
-  public meetupBookmarks: UserFeedBookmark[];
+  @OneToMany(() => BookmarkUserMeetup, (bookmark) => bookmark.user)
+  public meetupBookmarks: BookmarkUserFeed[];
 
-  @OneToMany(() => UserUserBookmark, (bookmark) => bookmark.user)
-  public userBookmarks: UserUserBookmark[];
+  @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.user)
+  public userBookmarks: BookmarkUserUser[];
 
-  @OneToMany(() => UserUserBookmark, (bookmark) => bookmark.bookmarkedUser)
-  public bookmarkedByUsers: UserUserBookmark[];
+  @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.bookmarkedUser)
+  public bookmarkedByUsers: BookmarkUserUser[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany

@@ -29,12 +29,12 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
-import { UserMeetupReport } from 'src/domain/users/entities/user_meetup_report.entity';
+import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
-import { UserMeetupBookmark } from 'src/domain/users/entities/user_meetup_bookmark.entity';
+import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
 
 @Entity()
 export class Meetup {
@@ -212,11 +212,11 @@ export class Meetup {
   @OneToMany(() => Like, (like) => like.meetup)
   public usersLiked: Like[];
 
-  @OneToMany(() => UserMeetupBookmark, (bookmark) => bookmark.meetup)
-  public bookmarkedByUsers: UserMeetupBookmark[];
+  @OneToMany(() => BookmarkUserMeetup, (bookmark) => bookmark.meetup)
+  public bookmarkedByUsers: BookmarkUserMeetup[];
 
-  @OneToMany(() => UserMeetupReport, (reportMeetup) => reportMeetup.meetup)
-  public userReports: UserMeetupReport[];
+  @OneToMany(() => ReportUserMeetup, (reportMeetup) => reportMeetup.meetup)
+  public userReports: ReportUserMeetup[];
 
   //**------------------------------------------------------------------------*/
   //** many-to-many (belongsToMany)

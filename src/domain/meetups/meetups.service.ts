@@ -32,7 +32,7 @@ import { Room } from 'src/domain/chats/entities/room.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { LedgerType } from 'src/common/enums';
-import { UserMeetupReport } from 'src/domain/users/entities/user_meetup_report.entity';
+import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
 @Injectable()
 export class MeetupsService {
   private readonly logger = new Logger(MeetupsService.name);
@@ -469,7 +469,7 @@ export class MeetupsService {
     }
   }
 
-  async getMeetupReporterIds(id: number): Promise<Array<UserMeetupReport>> {
+  async getMeetupReporterIds(id: number): Promise<Array<ReportUserMeetup>> {
     try {
       const rows = await this.repository.manager.query(
         'SELECT userId FROM `user_meetup_report` WHERE meetupId = ?',

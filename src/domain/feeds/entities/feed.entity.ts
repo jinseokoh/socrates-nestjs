@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserFeedReport } from 'src/domain/users/entities/user_feed_report.entity';
+import { ReportUserFeed } from 'src/domain/users/entities/report_user_feed.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
@@ -18,7 +18,7 @@ import {
 } from 'typeorm';
 import { IsArray } from 'class-validator';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
-import { UserFeedBookmark } from 'src/domain/users/entities/user_feed_bookmark.entity';
+import { BookmarkUserFeed } from 'src/domain/users/entities/user_feed_bookmark.entity';
 import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
 
 // a user can like meetup
@@ -94,11 +94,11 @@ export class Feed {
   @OneToMany(() => Plea, (plea) => plea.feed)
   public pleas: Plea[];
 
-  @OneToMany(() => UserFeedBookmark, (bookmark) => bookmark.feed)
-  public bookmarkedByUsers: UserFeedBookmark[];
+  @OneToMany(() => BookmarkUserFeed, (bookmark) => bookmark.feed)
+  public bookmarkedByUsers: BookmarkUserFeed[];
 
-  @OneToMany(() => UserFeedReport, (report) => report.feed)
-  public reportedByUsers: UserFeedReport[];
+  @OneToMany(() => ReportUserFeed, (report) => report.feed)
+  public reportedByUsers: ReportUserFeed[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 (belongsTo)
