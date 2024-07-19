@@ -71,14 +71,14 @@ export class Comment {
   @Column({ type: 'int', unsigned: true, nullable: true })
   parentId: number | null;
 
-  @OneToMany(() => Comment, (comment) => comment.parent)
-  children: Comment[];
-
   @ManyToOne(() => Comment, (Comment) => Comment.children, {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'parentId' })
   parent: Comment;
+
+  @OneToMany(() => Comment, (comment) => comment.parent)
+  children: Comment[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

@@ -10,23 +10,23 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-//? 댓글 comment, thread, opinion, comment 신고
+//? 댓글 comment, thread, opinion 신고
 @Entity()
 export class Flag {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
-  @Column({ length: 64, nullable: false })
-  message: string;
+  @Column({ length: 80, nullable: true })
+  message: string | null;
+
+  @Column({ length: 80, nullable: true })
+  note: string | null;
 
   @Column({ length: 32, nullable: false })
-  entity: string;
+  entityType: string;
 
   @Column({ type: 'int', unsigned: false })
   entityId: number;
-
-  @Column({ length: 128, nullable: true })
-  note: string | null;
 
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })
@@ -47,6 +47,8 @@ export class Flag {
   //? many-to-one belongsTo
 
   @ManyToOne(() => User, (user) => user.flags, {
+    nullable: false,
+    onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   user?: User;

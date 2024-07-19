@@ -31,7 +31,7 @@ export class FeedsController {
   //? Create
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '커넥션 답변 생성/수정' })
+  @ApiOperation({ description: 'feed 생성' })
   @Post()
   async createFeed(
     @CurrentUserId() userId: number,
@@ -61,19 +61,10 @@ export class FeedsController {
   @Get(':id')
   async getFeedById(@Param('id') id: number): Promise<Feed> {
     return await this.feedsService.findById(id, [
-      'poll',
-      'comments',
-      'comments.user',
-      'comments.user.profile',
-      'userReports',
-      'userReactions',
       'user',
-      'user.profile',
-      'user.feeds',
-      'user.feeds.poll',
-      'user.feeds.comments',
-      'user.feeds.comments.user',
-      // 'user.sentFriendships',
+      'poll',
+      'feedLinks',
+      'pleas',
     ]);
   }
 

@@ -181,7 +181,7 @@ export class UsersUserService {
   async createFlag(dto: CreateFlagDto): Promise<Flag> {
     const flag = new Flag({
       message: dto.message,
-      entity: dto.entity,
+      entityType: dto.entityType,
       entityId: dto.entityId,
       userId: dto.userId,
     });
@@ -192,12 +192,12 @@ export class UsersUserService {
         .createQueryRunner()
         .manager.save(flag);
 
-      if (dto.entity === 'comment') {
+      if (dto.entityType === 'comment') {
         await this.dataSource
           .getRepository(Comment)
           .increment({ id: dto.entityId }, 'flagCount', 1);
       }
-      if (dto.entity === 'thread') {
+      if (dto.entityType === 'thread') {
         await this.dataSource
           .getRepository(Thread)
           .increment({ id: dto.entityId }, 'flagCount', 1);

@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -8,26 +8,22 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { CreateCommentDto } from 'src/domain/feeds/dto/create-comment.dto';
-
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
-import { FindOneOptions, Repository } from 'typeorm';
-import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
-import { ClientProxy } from '@nestjs/microservices';
+import { IsNull, Repository } from 'typeorm';
 import { UpdateCommentDto } from 'src/domain/feeds/dto/update-comment.dto';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
-export class CommentsService {
-  private readonly logger = new Logger(CommentsService.name);
+export class FeedCommentsService {
+  private readonly logger = new Logger(FeedCommentsService.name);
 
   constructor(
     @InjectRepository(Comment)
     private readonly repository: Repository<Comment>,
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
-    @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     // @Inject(SlackService) private readonly slack: SlackService,
     private eventEmitter: EventEmitter2,
   ) {}
@@ -39,45 +35,68 @@ export class CommentsService {
   async create(dto: CreateCommentDto): Promise<Comment> {
     // creation
     const comment = await this.repository.save(this.repository.create(dto));
+    if (dto.sendNotification) {
+      //? notify with event listener
+      const record = await this.findById(comment.id, [
+        'user',
+        'feed',
+        'feed.user',
+        'feed.user.profile',
+      ]);
 
-    // fetch data for notification recipient
-    const commentWithUser = await this.findById(comment.id, [
-      'user',
-      'feed',
-      'feed.user',
-      'feed.user.profile',
-    ]);
-    // notification with event listener ------------------------------------//
-    const event = new UserNotificationEvent();
-    event.name = 'feedComment';
-    event.userId = commentWithUser.feed.user.id;
-    event.token = commentWithUser.feed.user.pushToken;
-    event.options = commentWithUser.feed.user.profile?.options ?? {};
-    event.body = `내 발견글에 누군가 댓글을 남겼습니다.`;
-    event.data = {
-      page: `feeds/${dto.feedId}`,
-      args: '',
-    };
-    this.eventEmitter.emit('user.notified', event);
+      if (record.feed.user.id != dto.userId) {
+        const event = new UserNotificationEvent();
+        event.name = 'feedComment';
+        event.userId = record.feed.user.id;
+        event.token = record.feed.user.pushToken;
+        event.options = record.feed.user.profile?.options ?? {};
+        event.body = `내 피드에 누군가 댓글을 남겼습니다.`;
+        event.data = {
+          page: `feeds/${dto.feedId}`,
+          args: '',
+        };
+        this.eventEmitter.emit('user.notified', event);
+      }
+    }
 
-    this.feedRepository.increment({ id: dto.feedId }, `commentCount`, 1);
+    await this.feedRepository.increment({ id: dto.feedId }, `commentCount`, 1);
 
-    return commentWithUser;
+    return comment;
   }
 
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
 
-  async findAll(query: PaginateQuery): Promise<Paginated<Comment>> {
+  //? comments w/ replies (children)
+  async findAllInTraditionalStyle(
+    query: PaginateQuery,
+    feedId: number,
+  ): Promise<Paginated<Comment>> {
+    return paginate(query, this.repository, {
+      where: {
+        feedId: feedId,
+        parentId: IsNull(),
+      },
+      relations: ['user', 'children', 'children.user'],
+      sortableColumns: ['createdAt'],
+      defaultSortBy: [['createdAt', 'DESC']],
+      defaultLimit: 20,
+    });
+    // return await paginate<Comment>(query, queryBuilder, config);
+  }
+
+  //? comments w/ replyCount
+  async findAllInYoutubeStyle(
+    query: PaginateQuery,
+    feedId: number,
+  ): Promise<Paginated<Comment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
-      .innerJoinAndSelect('user.profile', 'profile')
-      .leftJoinAndSelect('comment.children', 'children')
-      .leftJoinAndSelect('children.user', 'replier')
+      .loadRelationCountAndMap('comment.replyCount', 'comment.children')
       .where('comment.parentId IS NULL')
-      .andWhere('comment.deletedAt IS NULL');
+      .andWhere('comment.feedId = :feedId', { feedId });
 
     const config: PaginateConfig<Comment> = {
       sortableColumns: ['id'],
@@ -93,25 +112,16 @@ export class CommentsService {
     return await paginate<Comment>(query, queryBuilder, config);
   }
 
-  async findAllById(
+  async findAllRepliesById(
+    query: PaginateQuery,
     feedId: number,
     commentId: number,
-    query: PaginateQuery,
   ): Promise<Paginated<Comment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
-      .innerJoinAndSelect('user.profile', 'profile')
       .where('comment.feedId = :feedId', { feedId })
       .andWhere('comment.parentId = :commentId', { commentId })
-      // .andWhere(
-      //   new Brackets((qb) => {
-      //     qb.where('comment.id = :commentId', { commentId }).orWhere(
-      //       'comment.parentId = :commentId',
-      //       { commentId },
-      //     );
-      //   }),
-      // )
       .andWhere('comment.deletedAt IS NULL');
 
     const config: PaginateConfig<Comment> = {
@@ -120,7 +130,6 @@ export class CommentsService {
       defaultSortBy: [['id', 'ASC']],
       filterableColumns: {
         isFlagged: [FilterOperator.EQ],
-        // userId: [FilterOperator.EQ, FilterOperator.IN],
       },
     };
 
@@ -142,16 +151,12 @@ export class CommentsService {
     }
   }
 
-  async findByUniqueKey(params: FindOneOptions): Promise<Comment | null> {
-    return await this.repository.findOne(params);
-  }
-
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  async update(id: number, dto: UpdateCommentDto): Promise<Comment> {
-    const comment = await this.repository.preload({ id, ...dto });
+  async update(dto: UpdateCommentDto, commentId: number): Promise<Comment> {
+    const comment = await this.repository.preload({ id: commentId, ...dto });
     if (!comment) {
       throw new NotFoundException(`entity not found`);
     }
@@ -173,11 +178,23 @@ export class CommentsService {
       return comment;
     } catch (e) {
       this.logger.log(e);
+      throw e;
     }
   }
 
+  //! not being used)
   async remove(id: number): Promise<Comment> {
     const comment = await this.findById(id);
     return await this.repository.remove(comment);
+  }
+
+  //! not being used) recursive tree 구조일 경우 사용.
+  public buildCommentTree(comment: Comment): Comment {
+    if (comment.children) {
+      comment.children = comment.children.map((child) =>
+        this.buildCommentTree(child),
+      );
+    }
+    return comment;
   }
 }

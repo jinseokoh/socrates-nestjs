@@ -2,58 +2,48 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateFeedDto {
-  @ApiProperty({ description: 'poll 답변' })
-  @IsArray()
-  @IsOptional()
-  choices: number[] | null;
-
-  @ApiProperty({ description: 'poll 답변' })
+  @ApiProperty({ description: 'slug' })
   @IsString()
-  answer: string;
+  slug: string;
+
+  @ApiProperty({ description: 'body' })
+  @IsString()
+  body: string;
 
   @ApiProperty({ description: '이미지들 (string[])' })
   @IsArray()
   @IsOptional()
   images: string[] | null;
 
-  @ApiProperty({ description: 'count' })
+  @ApiProperty({ description: 'view count' })
+  @IsNumber()
+  @IsOptional()
+  viewCount: number | null;
+
+  @ApiProperty({ description: 'like count' })
+  @IsNumber()
+  @IsOptional()
+  likeCount: number | null;
+
+  @ApiProperty({ description: 'bookmark count' })
+  @IsNumber()
+  @IsOptional()
+  bookmarkCount: number | null;
+
+  @ApiProperty({ description: 'comment count' })
   @IsNumber()
   @IsOptional()
   commentCount: number | null;
 
-  @ApiProperty({ description: 'count' })
+  @ApiProperty({ description: 'report count' })
   @IsNumber()
   @IsOptional()
   reportCount: number | null;
 
-  @ApiProperty({ description: 'count' })
-  @IsNumber()
+  @ApiProperty({ description: 'linkedFeedIds' })
+  @IsArray()
   @IsOptional()
-  sympathyCount: number | null;
-
-  @ApiProperty({ description: 'count' })
-  @IsNumber()
-  @IsOptional()
-  smileCount: number | null;
-
-  @ApiProperty({ description: 'count' })
-  @IsNumber()
-  @IsOptional()
-  surpriseCount: number | null;
-
-  @ApiProperty({ description: 'count' })
-  @IsNumber()
-  @IsOptional()
-  sorryCount: number | null;
-
-  @ApiProperty({ description: 'count' })
-  @IsNumber()
-  @IsOptional()
-  uneasyCount: number | null;
-
-  @ApiProperty({ description: 'feed 아이디', required: true })
-  @IsNumber()
-  feedId: number;
+  linkedFeedIds: number[];
 
   @ApiProperty({ description: 'user 아이디' })
   @IsNumber()

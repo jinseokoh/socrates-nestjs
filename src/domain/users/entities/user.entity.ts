@@ -49,10 +49,12 @@ export class User {
   username: string | null;
 
   @Column({ length: 32, unique: true, nullable: true })
+  @Exclude({ toPlainOnly: true })
   @ApiProperty({ description: 'phone' })
   phone: string | null;
 
   @Column({ length: 64, unique: true })
+  @Exclude({ toPlainOnly: true })
   @ApiProperty({ description: 'email' })
   email: string;
 
@@ -90,10 +92,12 @@ export class User {
   deviceType: string | null;
 
   @Column({ length: 255, nullable: true })
+  @Exclude({ toPlainOnly: true })
   @ApiProperty({ description: 'pushToken' })
   pushToken: string | null;
 
   @Column({ length: 64, nullable: true })
+  @Exclude({ toPlainOnly: true })
   @ApiProperty({ description: 'refreshTokenHash' })
   refreshTokenHash: string | null;
 

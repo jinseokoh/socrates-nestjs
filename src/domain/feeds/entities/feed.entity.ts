@@ -14,12 +14,12 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { IsArray } from 'class-validator';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { UserFeedBookmark } from 'src/domain/users/entities/user_feed_bookmark.entity';
+import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
 
 // a user can like meetup
 // https://github.com/typeorm/typeorm/issues/4653
@@ -82,8 +82,11 @@ export class Feed {
   //*-------------------------------------------------------------------------*/
   //* 1-to-many (hasMany)
 
-  @OneToMany(() => Feed, (feed) => feed.parentFeed)
-  subFeeds: Feed[];
+  @OneToMany(() => FeedFeedLink, (link) => link.feed)
+  public feedLinks: FeedFeedLink[];
+
+  @OneToMany(() => FeedFeedLink, (link) => link.linkedFeed)
+  public linkedByFeeds: FeedFeedLink[];
 
   @OneToMany(() => Comment, (comment) => comment.feed)
   comments: Comment[];
@@ -100,11 +103,8 @@ export class Feed {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 (belongsTo)
 
-  @ManyToOne(() => Feed, (feed) => feed.subFeeds)
-  parentFeed: Feed;
-
-  // @Column({ type: 'int', unsigned: true })
-  // public userId: number;
+  @Column({ type: 'int', unsigned: true })
+  public userId: number;
 
   @ManyToOne(() => User, (user) => user.feeds)
   public user: User;

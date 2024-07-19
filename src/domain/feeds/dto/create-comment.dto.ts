@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateCommentDto {
   @ApiProperty({ description: '댓글 🔍' })
@@ -37,4 +43,9 @@ export class CreateCommentDto {
   @IsNumber()
   @IsOptional()
   parentId?: number | null;
+
+  @ApiProperty({ description: 'whether or not sending notification' })
+  @IsBoolean()
+  @IsOptional()
+  sendNotification?: boolean;
 }

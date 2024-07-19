@@ -8,7 +8,6 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Sse,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -17,7 +16,7 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
-import { CommentsService } from 'src/domain/feeds/comments.service';
+import { FeedCommentsService } from 'src/domain/feeds/feed-comments.service';
 import { CreateCommentDto } from 'src/domain/feeds/dto/create-comment.dto';
 import { UpdateCommentDto } from 'src/domain/feeds/dto/update-comment.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
@@ -26,7 +25,7 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('feeds')
 export class FeedCommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(private readonly feedCommentsService: FeedCommentsService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
@@ -40,32 +39,32 @@ export class FeedCommentsController {
     @Param('feedId', ParseIntPipe) feedId: number,
     @Body() dto: CreateCommentDto,
   ): Promise<any> {
-    return await this.commentsService.create({
+    return await this.feedCommentsService.create({
       ...dto,
       userId,
       feedId,
+      sendNotification: dto.sendNotification ?? false,
     });
   }
 
-  @ApiOperation({ description: '답글 등록' })
+  @ApiOperation({ description: '답글 생성' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
   @Post(':feedId/comments/:commentId')
-  async createReply(
+  async createCommentReply(
     @CurrentUserId() userId: number,
-    @Param('feedId') feedId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body() dto: CreateCommentDto,
   ): Promise<any> {
-    let parentId = null;
-    if (commentId) {
-      const comment = await this.commentsService.findById(commentId);
-      parentId = comment.parentId ? comment.parentId : commentId;
-    }
-    return await this.commentsService.create({
+    const comment = await this.feedCommentsService.findById(commentId);
+    const parentId = comment.parentId ? comment.parentId : commentId;
+
+    return await this.feedCommentsService.create({
       ...dto,
       userId,
       feedId,
       parentId,
+      sendNotification: dto.sendNotification ?? false,
     });
   }
 
@@ -75,31 +74,53 @@ export class FeedCommentsController {
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':feedId/comments')
-  async getComments(
+  async findAllInTraditionalStyle(
     @Param('feedId', ParseIntPipe) feedId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Comment>> {
-    const queryParams = {
-      ...query,
-      ...{
-        filter: {
-          feedId: `$eq:${feedId}`,
-        },
-      },
-    };
+    const result = await this.feedCommentsService.findAllInTraditionalStyle(
+      query,
+      feedId,
+    );
 
-    return await this.commentsService.findAll(queryParams);
+    return result;
+    // recursive tree 인 경우.
+    // return {
+    //   ...result,
+    //   data: result.data.map((comment) =>
+    //     this.feedCommentsService.buildCommentTree(comment),
+    //   ),
+    // };
+  }
+
+  @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
+  @PaginateQueryOptions()
+  @Get(':feedId/comments-count')
+  async findAllInYoutubeStyle(
+    @Param('feedId', ParseIntPipe) feedId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<Comment>> {
+    const result = await this.feedCommentsService.findAllInYoutubeStyle(
+      query,
+      feedId,
+    );
+
+    return result;
   }
 
   @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':feedId/comments/:commentId')
-  async getCommentsById(
+  async findAllRepliesById(
     @Param('feedId', ParseIntPipe) feedId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Comment>> {
-    return await this.commentsService.findAllById(feedId, commentId, query);
+    return await this.feedCommentsService.findAllRepliesById(
+      query,
+      feedId,
+      commentId,
+    );
   }
 
   //?-------------------------------------------------------------------------//
@@ -113,7 +134,7 @@ export class FeedCommentsController {
     @Param('commentId') commentId: number,
     @Body() dto: UpdateCommentDto,
   ): Promise<Comment> {
-    return await this.commentsService.update(commentId, dto);
+    return await this.feedCommentsService.update(dto, commentId);
   }
 
   //?-------------------------------------------------------------------------//
@@ -126,6 +147,6 @@ export class FeedCommentsController {
     @Param('feedId', ParseIntPipe) feedId: number,
     @Param('commentId') commentId: number,
   ): Promise<Comment> {
-    return await this.commentsService.softRemove(commentId);
+    return await this.feedCommentsService.softRemove(commentId);
   }
 }

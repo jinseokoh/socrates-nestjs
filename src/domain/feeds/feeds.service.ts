@@ -25,6 +25,7 @@ import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { RequestFrom } from 'src/common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
+import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
 
 @Injectable()
 export class FeedsService {
@@ -37,6 +38,8 @@ export class FeedsService {
     private readonly pollRepository: Repository<Poll>,
     @InjectRepository(Plea)
     private readonly pleaRepository: Repository<Plea>,
+    @InjectRepository(FeedFeedLink)
+    private readonly feedFeedLinkRepository: Repository<FeedFeedLink>,
     private eventEmitter: EventEmitter2,
     private readonly s3Service: S3Service,
   ) {}
@@ -47,102 +50,19 @@ export class FeedsService {
 
   async create(dto: CreateFeedDto): Promise<Feed> {
     try {
-      // const poll = await this.pollRepository.findOne({
-      //   where: {
-      //     id: dto.pollId,
-      //   },
-      // });
-      const feed = await this.repository.findOne({
-        where: {
-          id: 1, // dto.userId,
-          // pollId: dto.pollId,
-        },
-      });
-      if (feed) {
-        // 수정
-        // await this.repository.manager.query(
-        //   'INSERT IGNORE INTO `feed` (userId, pollId, choices, answer, images) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE \
-        //   userId = VALUES(`userId`), \
-        //   pollId = VALUES(`pollId`), \
-        //   choices = VALUES(`choices`), \
-        //   answer = VALUES(`answer`), \
-        //   images = VALUES(`images`)',
-        //   [
-        //     dto.userId,
-        //     dto.pollId,
-        //     dto.choices ? JSON.stringify(dto.choices) : null,
-        //     dto.answer,
-        //     dto.images ? JSON.stringify(dto.images) : null,
-        //   ],
-        // );
-        //       // feed['choices'] = dto.choices;
-        //       // feed['answer'] = dto.answer;
-        //       feed['poll'] = poll;
-        //       return feed;
-      } else {
-        //! 생성 (user-friendship.service 와 중복 로직 있지만, transaction 때문에 비슷한 로직으로 다시 구성)
-        const feed = await this.repository.save(this.repository.create(dto));
-
-        //? 모든 plea 중 지금 나에게 보내온 요청이 있는지 검사
-        const pleas = await this.pleaRepository.find({
-          relations: ['sender', 'sender.profile', 'recipient'],
-          where: {
-            recipientId: dto.userId,
-            feedId: dto.feedId,
-          },
-        });
-
-        if (pleas.length > 0) {
-          //? plea 가 있다면, plea 상태 갱신
-          await Promise.all(
-            pleas.map(async (v) => {
-              try {
-                await this.repository.manager.query(
-                  'UPDATE plea SET feedId = ? WHERE id = ?',
-                  [feed.id, v.id],
-                );
-              } catch (e) {
-                console.error(e);
-              }
-            }),
-          );
-          //? plea 가 있다면, 자동 친구요청 보내기
-          await Promise.all(
-            pleas.map(async (v: Plea) => {
-              try {
-                const pleaId = v.id;
-                const requestFrom = RequestFrom.PLEA;
-                const message =
-                  '요청한 질문에 답변하여 자동발송된 친구신청입니다.';
-
-                await this.repository.manager.query(
-                  'INSERT IGNORE INTO `friendship` \
-                  (senderId, recipientId, requestFrom, message, pleaId) VALUES (?, ?, ?, ?, ?)',
-                  [v.recipientId, v.senderId, requestFrom, message, pleaId],
-                );
-
-                // notification with event listener ------------------------------------//
-                const event = new UserNotificationEvent();
-                event.name = 'friendRequest';
-                event.userId = v.sender.id; // 친구신청 받는사람의 id
-                event.token = v.sender.pushToken; // 친구신청 받는 사람의 token
-                event.options = v.sender.profile?.options ?? {};
-                event.body = `${v.recipient.username}님이 요청한 질문에 답변하여 자동으로 친구신청을 받았습니다.`;
-                event.data = {
-                  page: 'activities/requests',
-                  args: 'tab:7',
-                };
-                this.eventEmitter.emit('user.notified', event);
-              } catch (e) {
-                console.error(e);
-              }
-            }),
-          );
-        }
-        // feed['poll'] = poll;
-
-        return feed;
+      const feed = await this.repository.save(this.repository.create(dto));
+      if (dto.linkedFeedIds && dto.linkedFeedIds.length > 0) {
+        await Promise.all(
+          dto.linkedFeedIds.map(async (v: number) => {
+            const bookmark = this.feedFeedLinkRepository.create({
+              feed: { id: feed.id },
+              linkedFeed: { id: v },
+            });
+            return await this.feedFeedLinkRepository.save(bookmark);
+          }),
+        );
       }
+      return feed;
     } catch (e) {
       console.log(e);
       throw new BadRequestException();
@@ -154,7 +74,7 @@ export class FeedsService {
   //?-------------------------------------------------------------------------//
   async findAll(query: PaginateQuery): Promise<Paginated<Feed>> {
     return await paginate(query, this.repository, {
-      relations: ['user', 'user.profile', 'poll', 'comments', 'comments.user'],
+      relations: ['user'],
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultSortBy: [['id', 'DESC']],
@@ -171,19 +91,11 @@ export class FeedsService {
 
   // Meetup 상세보기
   async findById(id: number, relations: string[] = []): Promise<Feed> {
-    const includedComments = relations.includes('comments');
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
             where: { id },
             relations,
-            order: includedComments
-              ? {
-                  comments: {
-                    id: 'DESC',
-                  },
-                }
-              : undefined,
           })
         : await this.repository.findOneOrFail({
             where: { id },

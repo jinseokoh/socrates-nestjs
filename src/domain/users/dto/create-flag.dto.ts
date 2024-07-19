@@ -7,7 +7,7 @@ export class CreateFlagDto {
 
   @ApiProperty({ description: 'entity 정보', required: true })
   @IsString()
-  entity: string;
+  entityType: string;
 
   @ApiProperty({ description: 'entity 아이디', required: true })
   @IsNumber()

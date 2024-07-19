@@ -44,7 +44,9 @@ import { SignedUrl, AnyData } from 'src/common/types';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { initialUsername } from 'src/helpers/random-username';
 import { PurchaseCoinDto } from 'src/domain/users/dto/purchase-coin.dto';
-@UseInterceptors(ClassSerializerInterceptor)
+
+//! to include excluded properties in the response
+// @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UsersController {
