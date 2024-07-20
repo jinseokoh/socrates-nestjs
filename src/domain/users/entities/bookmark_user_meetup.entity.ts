@@ -8,9 +8,9 @@ import {
   Unique,
 } from 'typeorm';
 
-// a User can bookmark Meetup
-// 모델사용을 위해, many-to-many 대신 one-to-many 선호
-// https://github.com/typeorm/typeorm/issues/4653
+//? a User can bookmark Meetup
+//? 모델사용을 위해, many-to-many 대신 one-to-many 선호
+//? https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 @Unique('user_id_meetup_id_key', ['userId', 'meetupId'])
 export class BookmarkUserMeetup {

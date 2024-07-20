@@ -12,10 +12,6 @@ import { DataSource } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm/repository/Repository';
-import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
-import { Comment } from 'src/domain/feeds/entities/comment.entity';
-import { Flag } from 'src/domain/users/entities/flag.entity';
-import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
 
 @Injectable()
@@ -124,41 +120,5 @@ export class BookmarkUserUserService {
     const { count } = row;
 
     return { data: +count };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 댓글 신고
-  //?-------------------------------------------------------------------------//
-
-  // 댓글 신고 리스트에 추가
-  async createFlag(dto: CreateFlagDto): Promise<Flag> {
-    const flag = new Flag({
-      message: dto.message,
-      entityType: dto.entityType,
-      entityId: dto.entityId,
-      userId: dto.userId,
-    });
-
-    // additionally, increment flagCount of each
-    try {
-      const record = await this.dataSource
-        .createQueryRunner()
-        .manager.save(flag);
-
-      if (dto.entityType === 'comment') {
-        await this.dataSource
-          .getRepository(Comment)
-          .increment({ id: dto.entityId }, 'flagCount', 1);
-      }
-      if (dto.entityType === 'thread') {
-        await this.dataSource
-          .getRepository(Thread)
-          .increment({ id: dto.entityId }, 'flagCount', 1);
-      }
-
-      return record;
-    } catch (e) {
-      throw e;
-    }
   }
 }

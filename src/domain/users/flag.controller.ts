@@ -14,79 +14,79 @@ import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
-import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
-import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import { Flag } from 'src/domain/users/entities/flag.entity';
+import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
+import { FlagService } from 'src/domain/users/flag.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
-export class BookmarkUserFeedController {
-  constructor(
-    private readonly bookmarkUserFeedService: BookmarkUserFeedService,
-  ) {}
+export class FlagController {
+  constructor(private readonly flagService: FlagService) {}
 
   //?-------------------------------------------------------------------------//
-  //? BookmarkUserFeed Pivot
+  //? Flag Pivot
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '나의 북마크에서 feed 추가' })
-  @Post(':userId/bookmark_user_feed/:feedId')
-  async attach(
+  @Post(':userId/flags')
+  async create(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
-    @Body('message') message: string | null,
+    @Body() dto: CreateFlagDto,
   ): Promise<any> {
     //? checking if this meetup belongs to the user costs a database access,
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      return await this.bookmarkUserFeedService.attach(userId, feedId, message);
+      return await this.flagService.createFlag(userId, dto);
     } catch (e) {
       throw new BadRequestException();
     }
   }
 
   @ApiOperation({ description: '나의 북마크에서 feed 제거' })
-  @Delete(':userId/bookmark_user_feed/:feedId')
-  async detach(
+  @Delete(':userId/flags')
+  async delete(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
+    @Body() dto: CreateFlagDto,
   ): Promise<any> {
     //? checking if this meetup belongs to the user costs a database access,
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      return await this.bookmarkUserFeedService.detach(userId, feedId);
+      return await this.flagService.deleteFlag(userId, dto);
     } catch (e) {
       throw new BadRequestException();
     }
   }
 
   @ApiOperation({ description: '내가 북마크한 feed 리스트 (paginated)' })
-  @Get(':userId/bookmark_user_feed')
-  async getUsersBookmarkedByMe(
+  @Get(':userId/flags/:entityType')
+  async getUsersReportedByMe(
     @Param('userId', ParseIntPipe) userId: number,
+    @Param('entityType') entityType: string,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<BookmarkUserFeed>> {
-    return this.bookmarkUserFeedService.getFeedsBookmarkedByMe(userId, query);
+  ): Promise<Paginated<Flag>> {
+    return this.flagService.getFlagsByUserId(query, userId, entityType);
   }
 
-  @ApiOperation({ description: '내가 북마크한 feedIds 리스트' })
-  @Get(':userId/bookmark_user_feed/ids')
-  async getAllUserIdsBookmarkedByMe(
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<number[]> {
-    return await this.bookmarkUserFeedService.getAllIdsBookmarkedByMe(userId);
-  }
+  // @ApiOperation({ description: '내가 북마크한 feedIds 리스트' })
+  // @Get(':userId/flags/ids')
+  // async getAllUserIdsReportedByMe(
+  //   @Param('userId', ParseIntPipe) userId: number,
+  // ): Promise<number[]> {
+  //   return await this.flagService.getAllIdsReportedByMe(userId);
+  // }
 
   @ApiOperation({
     description: '내가 북마크한 feed 여부',
   })
-  @Get(':userId/bookmark_user_feed/:feedId')
-  async isBookmarked(
+  @Get(':userId/flags/:entity')
+  async isReported(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
+    @Param('entity', ParseIntPipe) entity: string,
   ): Promise<AnyData> {
-    return this.bookmarkUserFeedService.isBookmarked(userId, feedId);
+    const [entityType, entityId] = entity.split(',');
+    return this.flagService.isReported(userId, entityType, +entityId);
   }
 }

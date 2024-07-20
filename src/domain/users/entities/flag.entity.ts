@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -6,11 +8,12 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-//? 댓글 comment, thread, opinion 신고
+//? 댓글 user, meetup, feed, thread, comment 신고
 @Entity()
 export class Flag {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })

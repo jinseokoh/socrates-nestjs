@@ -9,9 +9,6 @@ import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
-import { ReportUserFeed } from 'src/domain/users/entities/report_user_feed.entity';
-import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
-import { ReportUserUser } from 'src/domain/users/entities/report_user_user.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { UsersService } from 'src/domain/users/users.service';
@@ -53,6 +50,11 @@ import { BookmarkUserUserController } from 'src/domain/users/bookmark_user_user.
 import { BookmarkUserMeetupController } from 'src/domain/users/bookmark_user_meetup.controller';
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
+import { ReportUserFeed } from 'src/domain/users/entities/report_user_feed.entity';
+import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
+import { ReportUserUser } from 'src/domain/users/entities/report_user_user.entity';
+import { FlagController } from 'src/domain/users/flag.controller';
+import { FlagService } from 'src/domain/users/flag.service';
 
 @Module({
   imports: [
@@ -95,6 +97,7 @@ import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.ser
     BookmarkUserFeedService,
     BookmarkUserMeetupService,
     BookmarkUserUserService,
+    FlagService,
     UsersService,
     UsersFeedService,
     UsersFriendshipService,
@@ -110,6 +113,7 @@ import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.ser
     BookmarkUserFeedController,
     BookmarkUserMeetupController,
     BookmarkUserUserController,
+    FlagController,
     UsersController,
     UserCategoriesController,
     UserFeedsController,

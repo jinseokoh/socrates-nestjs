@@ -12,82 +12,88 @@ import {
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
-import { Hate } from 'src/domain/users/entities/hate.entity';
-import { ReportUserUser } from 'src/domain/users/entities/report_user_user.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
-import { UsersUserService } from 'src/domain/users/users-user.service';
-import { Flag } from 'src/domain/users/entities/flag.entity';
+import { ReportUserMeetupService } from 'src/domain/users/report_user_meetup.service';
 import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
+import { Flag } from 'src/domain/users/entities/flag.entity';
+import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
-export class UserUsersController {
-  constructor(private readonly usersUserService: UsersUserService) {}
+export class ReportUserMeetupController {
+  constructor(
+    private readonly reportUserMeetupService: ReportUserMeetupService,
+  ) {}
 
   //?-------------------------------------------------------------------------//
-  //? Hate Pivot
+  //? ReportUserMeetup Pivot
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '차단한 사용자 리스트에 추가' })
-  @Post(':userId/users-hated/:otherId')
-  async attachUserIdToHatePivot(
+  @ApiOperation({ description: '나의 북마크에서 meetup 추가' })
+  @Post(':userId/report_user_meetup/:meetupId')
+  async attach(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('otherId', ParseIntPipe) otherId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body('message') message: string | null,
   ): Promise<any> {
     //? checking if this meetup belongs to the user costs a database access,
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersUserService.attachUserIdToHatePivot(
+      return await this.reportUserMeetupService.attach(
         userId,
-        otherId,
+        meetupId,
         message,
       );
-      return {
-        data: 'ok',
-      };
     } catch (e) {
       throw new BadRequestException();
     }
   }
 
-  @ApiOperation({ description: '차단한 사용자 리스트에서 삭제' })
-  @Delete(':userId/users-hated/:otherId')
-  async detachUserIdFromHatePivot(
+  @ApiOperation({ description: '나의 북마크에서 meetup 제거' })
+  @Delete(':userId/report_user_meetup/:meetupId')
+  async detach(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('otherId', ParseIntPipe) otherId: number,
-  ): Promise<any> {
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+  ): Promise<AnyData> {
     //? checking if this meetup belongs to the user costs a database access,
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersUserService.detachUserIdFromHatePivot(userId, otherId);
-      return {
-        data: 'ok',
-      };
+      return await this.reportUserMeetupService.detach(userId, meetupId);
     } catch (e) {
       throw new BadRequestException();
     }
   }
 
-  @ApiOperation({ description: '내가 차단한 사용자 리스트 (paginated)' })
-  @Get(':userId/users-hated')
-  async getUsersHatedByMe(
-    @Param('userId') userId: number,
+  @ApiOperation({ description: '내가 북마크한 meetup 리스트 (paginated)' })
+  @Get(':userId/report_user_meetup')
+  async getUsersReportedByMe(
+    @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Hate>> {
-    return this.usersUserService.getUsersHatedByMe(userId, query);
+  ): Promise<Paginated<ReportUserMeetup>> {
+    return this.reportUserMeetupService.getMeetupsReportedByMe(userId, query);
+  }
+
+  @ApiOperation({ description: '내가 북마크한 meetupIds 리스트' })
+  @Get(':userId/report_user_meetup/ids')
+  async getAllUserIdsReportedByMe(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.reportUserMeetupService.getAllIdsReportedByMe(userId);
   }
 
   @ApiOperation({
-    description: '내가 차단하거나 나를 차단한 사용자ID 리스트 (all)',
+    description: '내가 북마크한 meetup 여부',
   })
-  @Get(':userId/userids-hated')
-  async getUserIdsHatedByMe(@Param('userId') userId: number): Promise<AnyData> {
-    return this.usersUserService.getUserIdsEitherHatingOrBeingHated(userId);
+  @Get(':userId/report_user_meetup/:meetupId')
+  async isReported(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+  ): Promise<AnyData> {
+    return this.reportUserMeetupService.isReported(userId, meetupId);
   }
 
   //?-------------------------------------------------------------------------//
@@ -100,6 +106,6 @@ export class UserUsersController {
     @Param('userId', ParseIntPipe) userId: number,
     @Body() dto: CreateFlagDto,
   ): Promise<Flag> {
-    return await this.usersUserService.createFlag({ ...dto, userId });
+    return await this.reportUserMeetupService.createFlag({ ...dto, userId });
   }
 }

@@ -15,8 +15,6 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
-import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
-import { Flag } from 'src/domain/users/entities/flag.entity';
 import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -97,18 +95,5 @@ export class BookmarkUserMeetupController {
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<AnyData> {
     return this.bookmarkUserMeetupService.isBookmarked(userId, meetupId);
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 내가 만든 발견 리스트
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '사용자 댓글 신고' })
-  @Post(':userId/flags')
-  async createFlagOpinion(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() dto: CreateFlagDto,
-  ): Promise<Flag> {
-    return await this.bookmarkUserMeetupService.createFlag({ ...dto, userId });
   }
 }

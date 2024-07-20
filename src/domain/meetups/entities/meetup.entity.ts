@@ -129,6 +129,10 @@ export class Meetup {
   skill: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'view count' })
+  viewCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'join count' })
   joinCount: number;
 
@@ -141,19 +145,19 @@ export class Meetup {
   reportCount: number; // 신고
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'view count' })
-  viewCount: number;
+  @ApiProperty({ description: 'flag count' })
+  flagCount: number;
 
   @Column({ default: false })
   @ApiProperty({ description: 'has qa board?' })
   hasQa: boolean;
 
   @Column({ default: false })
-  @ApiProperty({ description: 'is full' })
+  @ApiProperty({ description: '게스트가 모두 결정되었는지 여부' })
   isFull: boolean;
 
   @Column({ default: false })
-  @ApiProperty({ description: 'is flagged' })
+  @ApiProperty({ description: '신고 여부' })
   isFlagged: boolean;
 
   @Column({ type: 'datetime', nullable: true })

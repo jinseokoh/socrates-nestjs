@@ -16,7 +16,6 @@ import { AnyData } from 'src/common/types';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { SkipThrottle } from '@nestjs/throttler';
-import { UpsertBookmarkDto } from 'src/domain/users/dto/upsert-bookmark.dto';
 import { UsersFeedService } from 'src/domain/users/users-feed.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -106,27 +105,5 @@ export class UserFeedsController {
     return {
       data,
     };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? Bookmark Pivot
-  //?-------------------------------------------------------------------------//
-
-  //? this one has more than 1 responsibility
-  //? - we send notification to the poster if if isNewBookmark is true (todo. need to improve the logic)
-  //? - update reaction entity itself (do we need to delete it if all 5 emotions are falsy?)
-  //? - update feed's reaction counts
-
-  //! cache invalidation
-  @ApiOperation({ description: 'Feed bookmark 리스트에 추가' })
-  @Post(':userId/feeds/:feedId')
-  async upsertBookmark(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
-  ): Promise<void> {
-    await this.usersFeedService.upsertBookmark({
-      userId: userId,
-      feedId: feedId,
-    });
   }
 }
