@@ -95,22 +95,6 @@ export class UserFeedsController {
     }
   }
 
-  @ApiOperation({ description: '내가 차단한 발견 리스트 (paginated)' })
-  @PaginateQueryOptions()
-  @Get(':userId/feeds-reported')
-  async getFeedsReportedByMe(
-    @Param('userId') userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Feed>> {
-    const { data, meta, links } =
-      await this.usersFeedService.getFeedsReportedByMe(userId, query);
-
-    return {
-      data: data.map((v) => v.feed),
-      meta: meta,
-      links: links,
-    } as Paginated<Feed>;
-  }
 
   @ApiOperation({ description: '내가 차단한 발견ID 리스트 (all)' })
   @PaginateQueryOptions()
@@ -144,22 +128,5 @@ export class UserFeedsController {
       userId: userId,
       feedId: feedId,
     });
-  }
-
-  @ApiOperation({ description: '내가 반응한 발견 리스트 (paginated)' })
-  @PaginateQueryOptions()
-  @Get(':userId/feeds-bookmarked')
-  async getFeedsBookmarked(
-    @Param('userId') userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Feed>> {
-    const { data, meta, links } =
-      await this.usersFeedService.getFeedsBookmarkedByMe(userId, query);
-
-    return {
-      data: data.map((v) => v.feed),
-      meta: meta,
-      links: links,
-    } as Paginated<Feed>;
   }
 }

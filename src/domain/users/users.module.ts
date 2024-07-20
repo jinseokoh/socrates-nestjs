@@ -44,9 +44,15 @@ import { UserPleaController } from 'src/domain/users/user-plea.controller';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
 import { AlarmsModule } from 'src/domain/alarms/alarms.module';
-import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
+import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
-import { BookmarkUserFeed } from 'src/domain/users/entities/user_feed_bookmark.entity';
+import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
+import { BookmarkUserFeedController } from 'src/domain/users/bookmark_user_feed.controller';
+import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
+import { BookmarkUserUserController } from 'src/domain/users/bookmark_user_user.controller';
+import { BookmarkUserMeetupController } from 'src/domain/users/bookmark_user_meetup.controller';
+import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
+import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
 
 @Module({
   imports: [
@@ -86,6 +92,9 @@ import { BookmarkUserFeed } from 'src/domain/users/entities/user_feed_bookmark.e
   ],
   exports: [UsersService],
   providers: [
+    BookmarkUserFeedService,
+    BookmarkUserMeetupService,
+    BookmarkUserUserService,
     UsersService,
     UsersFeedService,
     UsersFriendshipService,
@@ -98,6 +107,9 @@ import { BookmarkUserFeed } from 'src/domain/users/entities/user_feed_bookmark.e
     UserNotificationListener,
   ],
   controllers: [
+    BookmarkUserFeedController,
+    BookmarkUserMeetupController,
+    BookmarkUserUserController,
     UsersController,
     UserCategoriesController,
     UserFeedsController,

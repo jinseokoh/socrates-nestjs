@@ -19,7 +19,7 @@ import { CreatePleaDto } from 'src/domain/pleas/dto/create-plea.dto';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UpsertBookmarkDto } from 'src/domain/users/dto/upsert-bookmark.dto';
-import { BookmarkUserFeed } from 'src/domain/users/entities/user_feed_bookmark.entity';
+import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 
 @Injectable()
 export class UsersFeedService {
@@ -32,7 +32,7 @@ export class UsersFeedService {
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
     @InjectRepository(BookmarkUserFeed)
-    private readonly bookmarkRepository: Repository<BookmarkUserFeed>,
+    private readonly bookmarkUserFeedRepository: Repository<BookmarkUserFeed>,
     @InjectRepository(Plea)
     private readonly pleaRepository: Repository<Plea>,
     @InjectRepository(ReportUserFeed)
@@ -187,30 +187,30 @@ export class UsersFeedService {
     }
   }
 
-  // 내가 반응한 발견 리스트 (paginated)
-  async getFeedsBookmarkedByMe(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<BookmarkUserFeed>> {
-    const queryBuilder = this.bookmarkRepository
-      .createQueryBuilder('bookmark')
-      .innerJoinAndSelect('bookmark.feed', 'feed')
-      .innerJoinAndSelect('feed.poll', 'poll')
-      .innerJoinAndSelect('feed.user', 'user')
-      .leftJoinAndSelect('feed.bookmarkedByUsers', 'bookmarkedByUsers')
-      .where({
-        userId,
-      });
+  // // 내가 반응한 발견 리스트 (paginated)
+  // async getFeedsBookmarkedByMe(
+  //   userId: number,
+  //   query: PaginateQuery,
+  // ): Promise<Paginated<BookmarkUserFeed>> {
+  //   const queryBuilder = this.bookmarkRepository
+  //     .createQueryBuilder('bookmark')
+  //     .innerJoinAndSelect('bookmark.feed', 'feed')
+  //     .innerJoinAndSelect('feed.poll', 'poll')
+  //     .innerJoinAndSelect('feed.user', 'user')
+  //     .leftJoinAndSelect('feed.bookmarkedByUsers', 'bookmarkedByUsers')
+  //     .where({
+  //       userId,
+  //     });
 
-    const config: PaginateConfig<BookmarkUserFeed> = {
-      sortableColumns: ['id'],
-      defaultLimit: 20,
-      defaultSortBy: [['id', 'DESC']],
-      filterableColumns: {},
-    };
+  //   const config: PaginateConfig<BookmarkUserFeed> = {
+  //     sortableColumns: ['id'],
+  //     defaultLimit: 20,
+  //     defaultSortBy: [['id', 'DESC']],
+  //     filterableColumns: {},
+  //   };
 
-    return await paginate(query, queryBuilder, config);
-  }
+  //   return await paginate(query, queryBuilder, config);
+  // }
 
   //?-------------------------------------------------------------------------//
   //? Plea Pivot

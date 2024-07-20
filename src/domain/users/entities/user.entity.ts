@@ -36,9 +36,9 @@ import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
-import { BookmarkUserFeed } from 'src/domain/users/entities/user_feed_bookmark.entity';
-import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
+import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
+import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
