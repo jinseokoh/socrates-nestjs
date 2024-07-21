@@ -72,6 +72,7 @@ export class FeedsService {
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
+
   // 전체 feed 리스트 (paginated)
   async findAll(query: PaginateQuery): Promise<Paginated<Feed>> {
     return await paginate(query, this.feedRepository, {
@@ -88,6 +89,23 @@ export class FeedsService {
         // 'poll.slug': [FilterOperator.EQ, FilterOperator.IN],
       },
     });
+  }
+
+  // Feed 상세보기
+  async findById(id: number, relations: string[] = []): Promise<Feed> {
+    try {
+      return relations.length > 0
+        ? await this.feedRepository.findOneOrFail({
+            where: { id },
+            relations,
+          })
+        : await this.feedRepository.findOneOrFail({
+            where: { id },
+          });
+    } catch (e) {
+      this.logger.error(e);
+      throw new NotFoundException('entity not found');
+    }
   }
 
   // 내가 만든 feed 리스트 (paginated)
@@ -140,23 +158,6 @@ export class FeedsService {
     return items.map((v) => v.id);
   }
 
-  // Feed 상세보기
-  async findById(id: number, relations: string[] = []): Promise<Feed> {
-    try {
-      return relations.length > 0
-        ? await this.feedRepository.findOneOrFail({
-            where: { id },
-            relations,
-          })
-        : await this.feedRepository.findOneOrFail({
-            where: { id },
-          });
-    } catch (e) {
-      this.logger.error(e);
-      throw new NotFoundException('entity not found');
-    }
-  }
-
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//
@@ -167,6 +168,29 @@ export class FeedsService {
       throw new NotFoundException(`entity not found`);
     }
     return await this.feedRepository.save(feed);
+  }
+
+  async increaseViewCount(id: number): Promise<void> {
+    await this.feedRepository
+      .createQueryBuilder()
+      .update(Feed)
+      .where('id = :id', { id })
+      .set({ viewCount: () => 'viewCount + 1' })
+      .execute();
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? DELETE
+  //?-------------------------------------------------------------------------//
+
+  async softRemove(id: number): Promise<Feed> {
+    const meetup = await this.findById(id);
+    return await this.feedRepository.softRemove(meetup);
+  }
+
+  async remove(id: number): Promise<Feed> {
+    const meetup = await this.findById(id);
+    return await this.feedRepository.remove(meetup);
   }
 
   //?-------------------------------------------------------------------------//

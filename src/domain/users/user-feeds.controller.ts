@@ -34,19 +34,17 @@ export class UserFeedsController {
   //? 내가 만든 Feeds
   //?-------------------------------------------------------------------------//
 
-  //? 내가 만든 Feeds (paginated)
   @ApiOperation({ description: '내가 만든 Feeds (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/feeds')
-  async listMyFeeds(
+  async findMyFeeds(
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Feed>> {
     return await this.feedsService.findAllByUserId(query, userId);
   }
 
-  //? 내가 만든 Feeds (all)
-  @ApiOperation({ description: '내가 만든 Feeds' })
+  @ApiOperation({ description: '내가 만든 Feeds (all)' })
   @Get(':userId/feeds/all')
   async loadAllMyFeeds(
     @Param('userId', ParseIntPipe) userId: number,
@@ -54,8 +52,7 @@ export class UserFeedsController {
     return await this.feedsService.loadMyFeeds(userId);
   }
 
-  //? 내가 만든 Feed ids (all)
-  @ApiOperation({ description: '내가 만든 Feeds' })
+  @ApiOperation({ description: '내가 만든 Feed Ids' })
   @Get(':userId/feedids')
   async loadMyFeedIds(
     @Param('userId', ParseIntPipe) userId: number,
@@ -111,7 +108,7 @@ export class UserFeedsController {
     return await this.bookmarksService.findBookmarkedFeeds(query, userId);
   }
 
-  @ApiOperation({ description: '내가 북마크한 Feeds' })
+  @ApiOperation({ description: '내가 북마크한 Feeds (all)' })
   @Get(':userId/bookmarkedfeeds/all')
   async loadBookmarkedFeeds(
     @Param('userId', ParseIntPipe) userId: number,
@@ -119,7 +116,7 @@ export class UserFeedsController {
     return await this.bookmarksService.loadBookmarkedFeeds(userId);
   }
 
-  @ApiOperation({ description: '내가 북마크한 FeedIds' })
+  @ApiOperation({ description: '내가 북마크한 Feed Ids' })
   @Get(':userId/bookmarkedfeedids')
   async loadBookmarkedFeedIds(
     @Param('userId', ParseIntPipe) userId: number,
@@ -171,7 +168,7 @@ export class UserFeedsController {
     return await this.flagsService.findFlaggedFeeds(query, userId);
   }
 
-  @ApiOperation({ description: '내가 신고한 모든 Feeds' })
+  @ApiOperation({ description: '내가 신고한 모든 Feeds (all)' })
   @Get(':userId/flaggedfeeds/all')
   async loadFlaggedFeeds(
     @Param('userId', ParseIntPipe) userId: number,
@@ -179,7 +176,7 @@ export class UserFeedsController {
     return await this.flagsService.loadFlaggedFeeds(userId);
   }
 
-  @ApiOperation({ description: '내가 신고한 모든 FeedIds' })
+  @ApiOperation({ description: '내가 신고한 모든 Feed Ids' })
   @Get(':userId/flaggedfeedids')
   async loadFlaggedFeedIds(
     @Param('userId', ParseIntPipe) userId: number,

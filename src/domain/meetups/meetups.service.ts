@@ -40,7 +40,7 @@ export class MeetupsService {
   constructor(
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     @InjectRepository(Meetup)
-    private readonly repository: Repository<Meetup>,
+    private readonly meetupRepository: Repository<Meetup>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Career)
@@ -202,7 +202,7 @@ export class MeetupsService {
     const category = await this.categoryRepository.findOne({
       where: { slug },
     });
-    const categories = await this.repository.manager
+    const categories = await this.meetupRepository.manager
       .getTreeRepository(Category)
       .findAncestors(category);
     return categories
@@ -222,7 +222,7 @@ export class MeetupsService {
 
   // Meetup 리스트 w/ Pagination
   async findAll(query: PaginateQuery): Promise<Paginated<Meetup>> {
-    const queryBuilder = this.repository
+    const queryBuilder = this.meetupRepository
       .createQueryBuilder('meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
       .leftJoinAndSelect('meetup.user', 'user')
@@ -255,7 +255,7 @@ export class MeetupsService {
 
   // Meetup 리스트 w/ Pagination
   async fetchRoomsByMeetupId(id: number): Promise<Room[]> {
-    const meetup = await this.repository.findOneOrFail({
+    const meetup = await this.meetupRepository.findOneOrFail({
       where: { id },
       relations: ['rooms', 'rooms.user', 'rooms.user.profile'],
     });
@@ -268,7 +268,7 @@ export class MeetupsService {
     try {
       await this.increaseViewCount(id);
       return relations.length > 0
-        ? await this.repository.findOneOrFail({
+        ? await this.meetupRepository.findOneOrFail({
             where: { id },
             relations,
             order: {
@@ -277,7 +277,7 @@ export class MeetupsService {
               },
             },
           })
-        : await this.repository.findOneOrFail({
+        : await this.meetupRepository.findOneOrFail({
             where: { id },
           });
     } catch (e) {
@@ -290,25 +290,15 @@ export class MeetupsService {
   //?-------------------------------------------------------------------------//
 
   async update(id: number, dto: UpdateMeetupDto): Promise<Meetup> {
-    const meetup = await this.repository.preload({ id, ...dto });
+    const meetup = await this.meetupRepository.preload({ id, ...dto });
     if (!meetup) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.repository.save(meetup);
+    return await this.meetupRepository.save(meetup);
   }
 
   async increaseViewCount(id: number): Promise<void> {
-    // in case you need to return the increased viewCount, use:
-    //
-    // const meetup = await this.findById(id);
-    // const count = meetup.viewCount + 1;
-    // meetup.viewCount = count;
-    // await this.repository.save(meetup);
-    // return count;
-    //
-    // otherwise, it's better to use the followings, which is atomic
-    //
-    await this.repository
+    await this.meetupRepository
       .createQueryBuilder()
       .update(Meetup)
       .where('id = :id', { id })
@@ -322,12 +312,12 @@ export class MeetupsService {
 
   async softRemove(id: number): Promise<Meetup> {
     const meetup = await this.findById(id);
-    return await this.repository.softRemove(meetup);
+    return await this.meetupRepository.softRemove(meetup);
   }
 
   async remove(id: number): Promise<Meetup> {
     const meetup = await this.findById(id);
-    return await this.repository.remove(meetup);
+    return await this.meetupRepository.remove(meetup);
   }
 
   //?-------------------------------------------------------------------------//
@@ -387,7 +377,7 @@ export class MeetupsService {
 
   async getAllJoiners(id: number): Promise<any> {
     try {
-      const meetup = await this.repository.findOneOrFail({
+      const meetup = await this.meetupRepository.findOneOrFail({
         where: {
           id: id,
         },
@@ -403,7 +393,7 @@ export class MeetupsService {
 
   async getAllInvitees(id: number): Promise<any> {
     try {
-      const meetup = await this.repository.findOneOrFail({
+      const meetup = await this.meetupRepository.findOneOrFail({
         where: {
           id: id,
         },
@@ -424,7 +414,7 @@ export class MeetupsService {
 
   async getAllLikers(id: number): Promise<User[]> {
     try {
-      const meetup = await this.repository.findOneOrFail({
+      const meetup = await this.meetupRepository.findOneOrFail({
         where: {
           id: id,
         },
@@ -439,7 +429,7 @@ export class MeetupsService {
 
   async getAllLikeIds(id: number): Promise<any> {
     try {
-      const rows = await this.repository.manager.query(
+      const rows = await this.meetupRepository.manager.query(
         'SELECT userId FROM `like` WHERE meetupId = ?',
         [id],
       );
@@ -448,16 +438,5 @@ export class MeetupsService {
     } catch (e) {
       throw new NotFoundException('entity not found');
     }
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? test
-  //?-------------------------------------------------------------------------//
-
-  async getOpinions(id: number): Promise<void> {
-    this.redisClient.emit('sse.user_joined_meetup', {
-      meetupId: id,
-      username: 'elantra',
-    });
   }
 }
