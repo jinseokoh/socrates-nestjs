@@ -67,54 +67,32 @@ export class UserFeedsController {
   //? 내가 북마크한 Feeds
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '북마크에 Feed 생성' })
-  @Post(':userId/bookmark_feed/:feedId')
-  async attach(
+  @ApiOperation({ description: 'Feed 북마크 생성' })
+  @Post(':userId/feedbookmarks/:feedId')
+  async createFeedBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('feedId', ParseIntPipe) feedId: number,
     @Body('message') message: string | null,
   ): Promise<BookmarkUserFeed> {
-    return await this.bookmarksService.createBookmark(userId, feedId, message);
+    return await this.bookmarksService.createFeedBookmark(
+      userId,
+      feedId,
+      message,
+    );
   }
 
-  @ApiOperation({ description: '북마크에서 Feed 제거' })
-  @Delete(':userId/bookmark_feed/:feedId')
-  async detach(
+  @ApiOperation({ description: 'Feed 북마크 삭제' })
+  @Delete(':userId/feedbookmarks/:feedId')
+  async deleteFeedBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('feedId', ParseIntPipe) feedId: number,
   ): Promise<any> {
-    return await this.bookmarksService.deleteBookmark(userId, feedId);
+    return await this.bookmarksService.deleteFeedBookmark(userId, feedId);
   }
 
-  @ApiOperation({ description: '내가 북마크한 Feeds (paginated)' })
-  @PaginateQueryOptions()
-  @Get(':userId/bookmarked_feeds')
-  async findBookmarkedFeedsByUserId(
-    @Paginate() query: PaginateQuery,
-    @Param('userId') userId: number,
-  ): Promise<Paginated<Feed>> {
-    return await this.bookmarksService.findBookmarkedFeeds(query, userId);
-  }
-
-  @ApiOperation({ description: '내가 북마크한 Feeds' })
-  @Get(':userId/bookmarked_feeds/all')
-  async loadBookmarkedFeeds(
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<Feed[]> {
-    return await this.bookmarksService.loadBookmarkedFeeds(userId);
-  }
-
-  @ApiOperation({ description: '내가 북마크한 FeedIds' })
-  @Get(':userId/bookmarked_feedids')
-  async loadBookmarkedFeedIds(
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<number[]> {
-    return await this.bookmarksService.loadBookmarkedFeedIds(userId);
-  }
-
-  @ApiOperation({ description: '내가 북마크한 Feed 여부' })
-  @Get(':userId/bookmark_feed/:feedId')
-  async isBookmarked(
+  @ApiOperation({ description: 'Feed 북마크 여부' })
+  @Get(':userId/feedbookmarks/:feedId')
+  async isFeedBookmarked(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('feedId', ParseIntPipe) feedId: number,
   ): Promise<AnyData> {
@@ -123,9 +101,65 @@ export class UserFeedsController {
     };
   }
 
+  @ApiOperation({ description: '내가 북마크한 Feeds (paginated)' })
+  @PaginateQueryOptions()
+  @Get(':userId/bookmarkedfeeds')
+  async findBookmarkedFeedsByUserId(
+    @Paginate() query: PaginateQuery,
+    @Param('userId') userId: number,
+  ): Promise<Paginated<Feed>> {
+    return await this.bookmarksService.findBookmarkedFeeds(query, userId);
+  }
+
+  @ApiOperation({ description: '내가 북마크한 Feeds' })
+  @Get(':userId/bookmarkedfeeds/all')
+  async loadBookmarkedFeeds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<Feed[]> {
+    return await this.bookmarksService.loadBookmarkedFeeds(userId);
+  }
+
+  @ApiOperation({ description: '내가 북마크한 FeedIds' })
+  @Get(':userId/bookmarkedfeedids')
+  async loadBookmarkedFeedIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.bookmarksService.loadBookmarkedFeedIds(userId);
+  }
+
   //?-------------------------------------------------------------------------//
   //? 내가 신고한 Feeds
   //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: 'Feed 신고 생성' })
+  @Post(':userId/feedflags/:feedId')
+  async createFeedFlag(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+    @Body('message') message: string | null,
+  ): Promise<any> {
+    return await this.flagsService.createFeedFlag(userId, feedId, message);
+  }
+
+  @ApiOperation({ description: 'Feed 신고 삭제' })
+  @Delete(':userId/feedflags/:feedId')
+  async deleteFeedFlag(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+  ): Promise<any> {
+    return await this.flagsService.deleteFeedFlag(userId, feedId);
+  }
+
+  @ApiOperation({ description: 'Feed 신고 여부' })
+  @Get(':userId/feedflags/:feedId')
+  async isFeedFlagged(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+  ): Promise<AnyData> {
+    return {
+      data: this.flagsService.isFeedFlagged(userId, feedId),
+    };
+  }
 
   @ApiOperation({ description: '내가 신고한 Feeds (paginated)' })
   @PaginateQueryOptions()
@@ -134,10 +168,10 @@ export class UserFeedsController {
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
   ): Promise<Paginated<Feed>> {
-    return await this.flagsService.findFlaggedFeedsByUserId(query, userId);
+    return await this.flagsService.findFlaggedFeeds(query, userId);
   }
 
-  @ApiOperation({ description: '내가 신고한 Feeds' })
+  @ApiOperation({ description: '내가 신고한 모든 Feeds' })
   @Get(':userId/flagged_feeds/all')
   async loadFlaggedFeeds(
     @Param('userId', ParseIntPipe) userId: number,
@@ -145,22 +179,11 @@ export class UserFeedsController {
     return await this.flagsService.loadFlaggedFeeds(userId);
   }
 
-  @ApiOperation({ description: '내가 신고한 FeedIds' })
+  @ApiOperation({ description: '내가 신고한 모든 FeedIds' })
   @Get(':userId/flagged_feedids')
   async loadFlaggedFeedIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
     return await this.flagsService.loadFlaggedFeedIds(userId);
-  }
-
-  @ApiOperation({ description: '내가 북마크한 feed 여부' })
-  @Get(':userId/flag_feed/:feedId')
-  async isFeedFlagged(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
-  ): Promise<AnyData> {
-    return {
-      data: this.flagsService.isFeedFlagged(userId, feedId),
-    };
   }
 }

@@ -28,24 +28,7 @@ export class FlagsController {
   //? Flag Pivot
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '신고 생성' })
-  @Post(':userId/flags')
-  async create(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() dto: CreateFlagDto,
-  ): Promise<any> {
-    return await this.flagService.createFlag(userId, dto);
-  }
-
-  @ApiOperation({ description: '신고 제거' })
-  @Delete(':userId/flags')
-  async delete(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() dto: CreateFlagDto,
-  ): Promise<any> {
-    return await this.flagService.deleteFlag(userId, dto);
-  }
-
+  
   @ApiOperation({ description: '내가 북마크한 feed 리스트 (paginated)' })
   @Get(':userId/flags/:entityType')
   async getUsersReportedByMe(

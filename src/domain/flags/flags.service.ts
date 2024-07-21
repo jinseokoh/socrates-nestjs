@@ -17,7 +17,6 @@ import { DataSource } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm/repository/Repository';
-import { CreateFlagDto } from 'src/domain/flags/dto/create-flag.dto';
 import { Flag } from 'src/domain/flags/entities/flag.entity';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
@@ -45,48 +44,30 @@ export class FlagsService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? 생성
+  //? Feed
   //?-------------------------------------------------------------------------//
 
-  // - 신고 리스트에 추가
-  // - 가능하다면, 관련 entity flagCount 증가
-  async createFlag(userId: number, dto: CreateFlagDto): Promise<Flag> {
+  // Feed 신고 생성
+  // 가능하다면, feed flagCount 증가
+  async createFeedFlag(
+    userId: number,
+    feedId: number,
+    message: string,
+  ): Promise<Flag> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
-
       const flag = await queryRunner.manager.save(
-        queryRunner.manager.getRepository(Flag).create({ ...dto, userId }),
+        queryRunner.manager
+          .getRepository(Flag)
+          .create({ userId, entityType: 'feed', entityId: feedId, message }),
       );
-
-      switch (dto.entityType) {
-        case `feed`:
-          await queryRunner.manager.query(
-            'UPDATE `feed` SET flagCount = flagCount + 1 WHERE id = ?',
-            [dto.entityId],
-          );
-          break;
-        case `meetup`:
-          await queryRunner.manager.query(
-            'UPDATE `meetup` SET flagCount = flagCount + 1 WHERE id = ?',
-            [dto.entityId],
-          );
-          break;
-        case `comment`:
-          await queryRunner.manager.query(
-            'UPDATE `comment` SET flagCount = flagCount + 1 WHERE id = ?',
-            [dto.entityId],
-          );
-          break;
-        case `thread`:
-          await queryRunner.manager.query(
-            'UPDATE `thread` SET flagCount = flagCount + 1 WHERE id = ?',
-            [dto.entityId],
-          );
-          break;
-      }
+      await queryRunner.manager.query(
+        'UPDATE `feed` SET flagCount = flagCount + 1 WHERE id = ?',
+        [feedId],
+      );
       await queryRunner.commitTransaction();
       return flag;
     } catch (error) {
@@ -101,9 +82,9 @@ export class FlagsService {
     }
   }
 
-  // - 신고 리스트에서 삭제
-  // - 가능하다면, 관련 entity flagCount 감소
-  async deleteFlag(userId: number, dto: CreateFlagDto): Promise<AnyData> {
+  // Feed 신고 제거
+  // 가능하다면, feed flagCount 감소
+  async deleteFeedFlag(userId: number, feedId: number): Promise<any> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
@@ -111,35 +92,13 @@ export class FlagsService {
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
         'DELETE FROM `flag` where userId = ? AND entityType = ? AND entityId = ?',
-        [userId, dto.entityType, dto.entityId],
+        [userId, 'feed', feedId],
       );
       if (affectedRows > 0) {
-        switch (dto.entityType) {
-          case `feed`:
-            await queryRunner.manager.query(
-              'UPDATE `feed` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
-              [dto.entityId],
-            );
-            break;
-          case `meetup`:
-            await queryRunner.manager.query(
-              'UPDATE `meetup` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
-              [dto.entityId],
-            );
-            break;
-          case `comment`:
-            await queryRunner.manager.query(
-              'UPDATE `comment` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
-              [dto.entityId],
-            );
-            break;
-          case `thread`:
-            await queryRunner.manager.query(
-              'UPDATE `thread` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
-              [dto.entityId],
-            );
-            break;
-        }
+        await queryRunner.manager.query(
+          'UPDATE `feed` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
+          [feedId],
+        );
       }
       return { data: affectedRows };
     } catch (error) {
@@ -150,8 +109,70 @@ export class FlagsService {
     }
   }
 
+  // 내가 신고한 Feeds (paginated)
+  async findFlaggedFeeds(
+    query: PaginateQuery,
+    userId: number,
+  ): Promise<Paginated<Feed>> {
+    const queryBuilder = this.feedRepository
+      .createQueryBuilder('feed')
+      .innerJoin(Flag, 'flag', 'feed.id = flag.entityId')
+      .where('flag.userId = :userId', { userId })
+      .andWhere('flag.entityType = :entityType', { entityType: 'feed' });
+
+    const config: PaginateConfig<Feed> = {
+      sortableColumns: ['id'],
+      searchableColumns: ['body'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내가 신고한 모든 Feeds
+  async loadFlaggedFeeds(userId: number): Promise<Feed[]> {
+    const queryBuilder = this.feedRepository.createQueryBuilder('feed');
+    return queryBuilder
+      .innerJoinAndSelect(
+        Feed,
+        'feed',
+        'feed.id = flag.entityId AND flag.entityType = :entityType',
+        { entityType: 'feed' },
+      )
+      .addSelect(['feed.*'])
+      .where({
+        userId: userId,
+      })
+      .getMany();
+  }
+
+  // 내가 신고한 모든 FeedIds
+  async loadFlaggedFeedIds(userId: number): Promise<number[]> {
+    const rows = await this.flagRepository.manager.query(
+      'SELECT feedId FROM `flag` \
+      WHERE flag.userId = ? AND flag.entityType = ?',
+      [userId, 'feed'],
+    );
+
+    return rows.map((v: Flag) => v.entityId);
+  }
+
+  // 내가 북마크한 Feed 여부
+  async isFeedFlagged(userId: number, feedId: number): Promise<boolean> {
+    const [row] = await this.flagRepository.manager.query(
+      'SELECT COUNT(*) AS count FROM `flag` \
+      WHERE userId = ? AND entityType = ? AND entityId = ?',
+      [userId, 'feed', feedId],
+    );
+    const { count } = row;
+
+    return +count === 1;
+  }
+
   //?-------------------------------------------------------------------------//
-  //? GET
+  //? Meetup
   //?-------------------------------------------------------------------------//
 
   // 내가 신고한 entity 리스트 (paginated)
@@ -248,67 +269,6 @@ export class FlagsService {
   // -------------------------------------------------------------------------//
   //  Feeds
   // -------------------------------------------------------------------------//
-
-  // 내가 신고한 Feeds (paginated)
-  async findFlaggedFeedsByUserId(
-    query: PaginateQuery,
-    userId: number,
-  ): Promise<Paginated<Feed>> {
-    const queryBuilder = this.feedRepository
-      .createQueryBuilder('feed')
-      .innerJoin(Flag, 'flag', 'feed.id = flag.entityId')
-      .where('flag.userId = :userId', { userId })
-      .andWhere('flag.entityType = :entityType', { entityType: 'feed' });
-    const config: PaginateConfig<Feed> = {
-      sortableColumns: ['id'],
-      searchableColumns: ['body'],
-      defaultLimit: 20,
-      defaultSortBy: [['id', 'DESC']],
-      filterableColumns: {},
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // 내가 북마크한 모든 feeds
-  async loadFlaggedFeeds(userId: number): Promise<Feed[]> {
-    const queryBuilder = this.feedRepository.createQueryBuilder('feed');
-    return queryBuilder
-      .innerJoinAndSelect(
-        Feed,
-        'feed',
-        'feed.id = flag.entityId AND flag.entityType = :entityType',
-        { entityType: 'feed' },
-      )
-      .addSelect(['feed.*'])
-      .where({
-        userId: userId,
-      })
-      .getMany();
-  }
-
-  // 내가 신고한 모든 feedIds
-  async loadFlaggedFeedIds(userId: number): Promise<number[]> {
-    const rows = await this.flagRepository.manager.query(
-      'SELECT feedId FROM `flag` \
-      WHERE flag.userId = ? AND flag.entityType = ?',
-      [userId, 'feed'],
-    );
-
-    return rows.map((v: Flag) => v.entityId);
-  }
-
-  // 내가 북마크한 feed 여부
-  async isFeedFlagged(userId: number, feedId: number): Promise<boolean> {
-    const [row] = await this.flagRepository.manager.query(
-      'SELECT COUNT(*) AS count FROM `flag` \
-      WHERE userId = ? AND entityType = ? AND entityId = ?',
-      [userId, 'feed', feedId],
-    );
-    const { count } = row;
-
-    return +count === 1;
-  }
 
   // -------------------------------------------------------------------------//
   // Meetups

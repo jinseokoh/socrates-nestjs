@@ -41,9 +41,9 @@ export class BookmarkUserFeedService {
   //? BookmarkUserFeed Pivot
   //?-------------------------------------------------------------------------//
 
-  // 북마크에 feed 추가
+  // Feed 북마크 생성
   // feed 의 bookmarkCount++
-  async createBookmark(
+  async createFeedBookmark(
     userId: number,
     feedId: number,
     message: string | null,
@@ -66,7 +66,6 @@ export class BookmarkUserFeedService {
       return bookmark;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      console.log(error);
       if (error.code === 'ER_DUP_ENTRY') {
         throw new UnprocessableEntityException(`entity exists`);
       } else {
@@ -77,10 +76,11 @@ export class BookmarkUserFeedService {
     }
   }
 
-  // 북마크에 feed 삭제
+  // Feed 북마크 제거
   // feed 의 bookmarkCount--
-  async deleteBookmark(userId: number, feedId: number): Promise<any> {
+  async deleteFeedBookmark(userId: number, feedId: number): Promise<any> {
     const queryRunner = this.dataSource.createQueryRunner();
+
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
@@ -88,20 +88,17 @@ export class BookmarkUserFeedService {
         'DELETE FROM `bookmark_user_feed` WHERE userId = ? AND feedId = ?',
         [userId, feedId],
       );
-      await queryRunner.manager.query(
-        'UPDATE `feed` SET bookmarkCount = bookmarkCount - 1 WHERE id = ? AND bookmarkCount > 0',
-        [feedId],
-      );
+      if (affectedRows > 0) {
+        await queryRunner.manager.query(
+          'UPDATE `feed` SET bookmarkCount = bookmarkCount - 1 WHERE id = ? AND bookmarkCount > 0',
+          [feedId],
+        );
+      }
       await queryRunner.commitTransaction();
       return { data: affectedRows };
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      console.log(error);
-      if (error.code === 'ER_DUP_ENTRY') {
-        throw new UnprocessableEntityException(`entity exists`);
-      } else {
-        throw error;
-      }
+      throw error;
     } finally {
       await queryRunner.release();
     }
