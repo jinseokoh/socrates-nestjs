@@ -26,7 +26,7 @@ export class UserFeedsController {
   ) {}
 
   //?-------------------------------------------------------------------------//
-  //? 내가 만든
+  //? 내가 만든 Feeds
   //?-------------------------------------------------------------------------//
 
   //? 내가 만든 Feeds (paginated)
@@ -59,7 +59,7 @@ export class UserFeedsController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? 내가 북마크한
+  //? 내가 북마크한 Feeds
   //?-------------------------------------------------------------------------//
 
   //? 내가 북마크한 Feeds (paginated)
@@ -86,10 +86,10 @@ export class UserFeedsController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? 내가 차단한
+  //? 내가 신고한 Feeds
   //?-------------------------------------------------------------------------//
 
-  //? 내가 차단한 Feeds (paginated)
+  //? 내가 신고한 Feeds (paginated)
   @ApiOperation({ description: '내가 차단한 Feeds (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/flagged_feeds')
@@ -100,7 +100,7 @@ export class UserFeedsController {
     return await this.flagsService.findFlaggedFeedsByUserId(query, userId);
   }
 
-  //? 내가 차단한 FeedIds (all)
+  //? 내가 신고한 FeedIds (all)
   @ApiOperation({ description: '내가 차단한 FeedIds' })
   @Get(':userId/feeds/ids')
   async loadFlaggedFeedIds(

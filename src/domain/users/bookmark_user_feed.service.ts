@@ -102,9 +102,9 @@ export class BookmarkUserFeedService {
   // 내가 북마크한 모든 feedIds
   async loadBookmarkedFeedIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkUserFeedRepository.manager.query(
-      'SELECT userId, feedId \
+      'SELECT feedId \
       FROM `bookmark_user_feed` \
-      WHERE userId = ?',
+      WHERE bookmark_user_feed.userId = ?',
       [userId],
     );
 

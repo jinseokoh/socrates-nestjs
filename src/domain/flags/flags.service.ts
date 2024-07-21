@@ -251,7 +251,7 @@ export class FlagsService {
   //  Feeds
   // -------------------------------------------------------------------------//
 
-  // 내가 차단한 Feeds (paginated)
+  // 내가 신고한 Feeds (paginated)
   async findFlaggedFeedsByUserId(
     query: PaginateQuery,
     userId: number,
@@ -265,16 +265,49 @@ export class FlagsService {
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultLimit: 20,
-      defaultSortBy: [['id', 'ASC']],
+      defaultSortBy: [['id', 'DESC']],
       filterableColumns: {},
     };
 
     return await paginate(query, queryBuilder, config);
   }
 
+  // 내가 신고한 모든 feedIds
+  async loadFlaggedFeedIds(userId: number): Promise<number[]> {
+    const rows = await this.flagRepository.manager.query(
+      'SELECT feedId \
+      FROM `flag` \
+      WHERE flag.userId = ? AND flag.entityType = ?',
+      [userId, 'feed'],
+    );
+
+    return rows.map((v: Flag) => v.entityId);
+  }
+
   // -------------------------------------------------------------------------//
   // Meetups
   // -------------------------------------------------------------------------//
+
+  // 내가 차단한 Feeds (paginated)
+  async findFlaggedMeetupsByUserId(
+    query: PaginateQuery,
+    userId: number,
+  ): Promise<Paginated<Meetup>> {
+    const queryBuilder = this.meetupRepository
+      .createQueryBuilder('meetup')
+      .innerJoin(Flag, 'flag', 'meetup.id = flag.entityId')
+      .where('flag.userId = :userId', { userId })
+      .andWhere('flag.entityType = :entityType', { entityType: 'meetup' });
+    const config: PaginateConfig<Meetup> = {
+      sortableColumns: ['id'],
+      searchableColumns: ['title'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
 
   // 내가 차단한 Meetups
   async getFlaggedMeetupsByUserId(userId: number): Promise<any[]> {
