@@ -140,9 +140,7 @@ export class BookmarkUserFeedService {
         'feed.id = bookmark_user_feed.feedId',
       )
       .addSelect(['feed.*'])
-      .where({
-        userId: userId,
-      })
+      .where('bookmark_user_feed.userId = :userId', { userId })
       .getMany();
   }
 
@@ -154,7 +152,7 @@ export class BookmarkUserFeedService {
       [userId],
     );
 
-    return rows.map((v: BookmarkUserFeed) => v.feedId);
+    return rows.map((v: any) => v.feedId);
   }
 
   // 내가 북마크한 feed 여부

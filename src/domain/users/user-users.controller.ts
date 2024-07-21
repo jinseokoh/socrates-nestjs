@@ -16,8 +16,7 @@ import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
 import { UsersUserService } from 'src/domain/users/users-user.service';
-import { Flag } from 'src/domain/flags/entities/flag.entity';
-import { CreateFlagDto } from 'src/domain/flags/dto/create-flag.dto';
+import { Flag } from 'src/domain/users/entities/flag.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -87,18 +86,5 @@ export class UserUsersController {
   @Get(':userId/userids-hated')
   async getUserIdsHatedByMe(@Param('userId') userId: number): Promise<AnyData> {
     return this.usersUserService.getUserIdsEitherHatingOrBeingHated(userId);
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 내가 만든 발견 리스트
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '사용자 댓글 신고' })
-  @Post(':userId/flags')
-  async createFlagOpinion(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() dto: CreateFlagDto,
-  ): Promise<Flag> {
-    return await this.usersUserService.createFlag({ ...dto, userId });
   }
 }

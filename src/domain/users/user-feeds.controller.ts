@@ -15,7 +15,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { FeedsService } from 'src/domain/feeds/feeds.service';
-import { FlagsService } from 'src/domain/flags/flags.service';
+import { FlagsService } from 'src/domain/users/flags.service';
 import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { AnyData } from 'src/common/types';
@@ -97,7 +97,7 @@ export class UserFeedsController {
     @Param('feedId', ParseIntPipe) feedId: number,
   ): Promise<AnyData> {
     return {
-      data: this.bookmarksService.isFeedBookmarked(userId, feedId),
+      data: await this.bookmarksService.isFeedBookmarked(userId, feedId),
     };
   }
 
@@ -157,13 +157,13 @@ export class UserFeedsController {
     @Param('feedId', ParseIntPipe) feedId: number,
   ): Promise<AnyData> {
     return {
-      data: this.flagsService.isFeedFlagged(userId, feedId),
+      data: await this.flagsService.isFeedFlagged(userId, feedId),
     };
   }
 
   @ApiOperation({ description: '내가 신고한 Feeds (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/flagged_feeds')
+  @Get(':userId/flaggedfeeds')
   async findFlaggedFeedsByUserId(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
@@ -172,7 +172,7 @@ export class UserFeedsController {
   }
 
   @ApiOperation({ description: '내가 신고한 모든 Feeds' })
-  @Get(':userId/flagged_feeds/all')
+  @Get(':userId/flaggedfeeds/all')
   async loadFlaggedFeeds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Feed[]> {
@@ -180,7 +180,7 @@ export class UserFeedsController {
   }
 
   @ApiOperation({ description: '내가 신고한 모든 FeedIds' })
-  @Get(':userId/flagged_feedids')
+  @Get(':userId/flaggedfeedids')
   async loadFlaggedFeedIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {

@@ -17,7 +17,7 @@ import { DataSource } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm/repository/Repository';
-import { Flag } from 'src/domain/flags/entities/flag.entity';
+import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
@@ -136,27 +136,25 @@ export class FlagsService {
     const queryBuilder = this.feedRepository.createQueryBuilder('feed');
     return queryBuilder
       .innerJoinAndSelect(
-        Feed,
-        'feed',
-        'feed.id = flag.entityId AND flag.entityType = :entityType',
+        Flag,
+        'flag',
+        'flag.entityId = feed.id AND flag.entityType = :entityType',
         { entityType: 'feed' },
       )
       .addSelect(['feed.*'])
-      .where({
-        userId: userId,
-      })
+      .where('flag.userId = :userId', { userId })
       .getMany();
   }
 
   // 내가 신고한 모든 FeedIds
   async loadFlaggedFeedIds(userId: number): Promise<number[]> {
     const rows = await this.flagRepository.manager.query(
-      'SELECT feedId FROM `flag` \
+      'SELECT entityId FROM `flag` \
       WHERE flag.userId = ? AND flag.entityType = ?',
       [userId, 'feed'],
     );
 
-    return rows.map((v: Flag) => v.entityId);
+    return rows.map((v: any) => v.entityId);
   }
 
   // 내가 북마크한 Feed 여부

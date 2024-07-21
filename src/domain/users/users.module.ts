@@ -7,7 +7,7 @@ import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meet
 import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { Flag } from 'src/domain/flags/entities/flag.entity';
+import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
@@ -23,7 +23,6 @@ import { User } from 'src/domain/users/entities/user.entity';
 
 import { BookmarkUserMeetupController } from 'src/domain/users/bookmark_user_meetup.controller';
 import { BookmarkUserUserController } from 'src/domain/users/bookmark_user_user.controller';
-import { FlagsController } from 'src/domain/flags/flags.controller';
 import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
 import { UserFeedsController } from 'src/domain/users/user-feeds.controller';
 import { UserFriendshipController } from 'src/domain/users/user-friendshp.controller';
@@ -40,7 +39,7 @@ import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.ser
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
 import { FeedsService } from 'src/domain/feeds/feeds.service';
-import { FlagsService } from 'src/domain/flags/flags.service';
+import { FlagsService } from 'src/domain/users/flags.service';
 import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
 import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
 import { UsersMeetupService } from 'src/domain/users/users-meetup.service';
@@ -111,7 +110,6 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
   controllers: [
     BookmarkUserMeetupController,
     BookmarkUserUserController,
-    FlagsController,
     UsersController,
     UserCategoriesController,
     UserFeedsController,

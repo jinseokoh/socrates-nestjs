@@ -22,7 +22,7 @@ import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
 import { UsersMeetupService } from 'src/domain/users/users-meetup.service';
 import { UsersService } from 'src/domain/users/users.service';
-import { FlagsService } from 'src/domain/flags/flags.service';
+import { FlagsService } from 'src/domain/users/flags.service';
 
 // todo. move all the try catch from controller layer to service layer
 @UseInterceptors(ClassSerializerInterceptor)

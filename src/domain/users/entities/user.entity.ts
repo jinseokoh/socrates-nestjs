@@ -30,7 +30,7 @@ import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
-import { Flag } from 'src/domain/flags/entities/flag.entity';
+import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';

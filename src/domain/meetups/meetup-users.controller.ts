@@ -9,7 +9,7 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { AnyData } from 'src/common/types';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
-import { FlagsService } from 'src/domain/flags/flags.service';
+import { FlagsService } from 'src/domain/users/flags.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
