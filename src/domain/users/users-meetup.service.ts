@@ -13,8 +13,6 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
 import { JoinType, JoinStatus } from 'src/common/enums';
 import { AnyData } from 'src/common/types';
 import { ConfigService } from '@nestjs/config';

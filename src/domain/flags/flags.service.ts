@@ -91,9 +91,7 @@ export class FlagsService {
       return flag;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      console.log(error);
       if (error.code === 'ER_DUP_ENTRY') {
-        // plea already exists
         throw new UnprocessableEntityException(`entity exists`);
       } else {
         throw error;
@@ -272,11 +270,27 @@ export class FlagsService {
     return await paginate(query, queryBuilder, config);
   }
 
+  // 내가 북마크한 모든 feeds
+  async loadFlaggedFeeds(userId: number): Promise<Feed[]> {
+    const queryBuilder = this.feedRepository.createQueryBuilder('feed');
+    return queryBuilder
+      .innerJoinAndSelect(
+        Feed,
+        'feed',
+        'feed.id = flag.entityId AND flag.entityType = :entityType',
+        { entityType: 'feed' },
+      )
+      .addSelect(['feed.*'])
+      .where({
+        userId: userId,
+      })
+      .getMany();
+  }
+
   // 내가 신고한 모든 feedIds
   async loadFlaggedFeedIds(userId: number): Promise<number[]> {
     const rows = await this.flagRepository.manager.query(
-      'SELECT feedId \
-      FROM `flag` \
+      'SELECT feedId FROM `flag` \
       WHERE flag.userId = ? AND flag.entityType = ?',
       [userId, 'feed'],
     );
@@ -284,11 +298,23 @@ export class FlagsService {
     return rows.map((v: Flag) => v.entityId);
   }
 
+  // 내가 북마크한 feed 여부
+  async isFeedFlagged(userId: number, feedId: number): Promise<boolean> {
+    const [row] = await this.flagRepository.manager.query(
+      'SELECT COUNT(*) AS count FROM `flag` \
+      WHERE userId = ? AND entityType = ? AND entityId = ?',
+      [userId, 'feed', feedId],
+    );
+    const { count } = row;
+
+    return +count === 1;
+  }
+
   // -------------------------------------------------------------------------//
   // Meetups
   // -------------------------------------------------------------------------//
 
-  // 내가 차단한 Feeds (paginated)
+  // 내가 차단한 Meetups (paginated)
   async findFlaggedMeetupsByUserId(
     query: PaginateQuery,
     userId: number,
@@ -310,8 +336,8 @@ export class FlagsService {
   }
 
   // 내가 차단한 Meetups
-  async getFlaggedMeetupsByUserId(userId: number): Promise<any[]> {
-    const queryBuilder = this.flagRepository.createQueryBuilder('flag');
+  async loadFlaggedMeetupsByUserId(userId: number): Promise<Meetup[]> {
+    const queryBuilder = this.meetupRepository.createQueryBuilder('meetup');
     return queryBuilder
       .innerJoinAndSelect(
         Meetup,
@@ -324,15 +350,6 @@ export class FlagsService {
         userId: userId,
       })
       .getMany();
-
-    // const rows = await this.flagRepository.manager.query(
-    //   'SELECT feed.* FROM \
-    //   FROM `flag` \
-    //   INNER JOIN `feed` ON feed.id = flag.entityId \
-    //   WHERE userId = ? AND entityType = ?',
-    //   [userId, `meetup`],
-    // );
-    // return rows;
   }
 
   // Meetup 을 차단한 user 리스트

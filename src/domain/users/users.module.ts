@@ -21,7 +21,6 @@ import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 
-import { BookmarkUserFeedController } from 'src/domain/users/bookmark_user_feed.controller';
 import { BookmarkUserMeetupController } from 'src/domain/users/bookmark_user_meetup.controller';
 import { BookmarkUserUserController } from 'src/domain/users/bookmark_user_user.controller';
 import { FlagsController } from 'src/domain/flags/flags.controller';
@@ -110,7 +109,6 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
     UserNotificationListener,
   ],
   controllers: [
-    BookmarkUserFeedController,
     BookmarkUserMeetupController,
     BookmarkUserUserController,
     FlagsController,

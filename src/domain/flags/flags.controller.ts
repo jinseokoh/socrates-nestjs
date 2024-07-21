@@ -28,36 +28,22 @@ export class FlagsController {
   //? Flag Pivot
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '나의 북마크에서 feed 추가' })
+  @ApiOperation({ description: '신고 생성' })
   @Post(':userId/flags')
   async create(
     @Param('userId', ParseIntPipe) userId: number,
     @Body() dto: CreateFlagDto,
   ): Promise<any> {
-    //? checking if this meetup belongs to the user costs a database access,
-    //? which you can get around if you design your application carefully.
-    //? so user validation has been removed. keep that in mind.
-    try {
-      return await this.flagService.createFlag(userId, dto);
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    return await this.flagService.createFlag(userId, dto);
   }
 
-  @ApiOperation({ description: '나의 북마크에서 feed 제거' })
+  @ApiOperation({ description: '신고 제거' })
   @Delete(':userId/flags')
   async delete(
     @Param('userId', ParseIntPipe) userId: number,
     @Body() dto: CreateFlagDto,
   ): Promise<any> {
-    //? checking if this meetup belongs to the user costs a database access,
-    //? which you can get around if you design your application carefully.
-    //? so user validation has been removed. keep that in mind.
-    try {
-      return await this.flagService.deleteFlag(userId, dto);
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    return await this.flagService.deleteFlag(userId, dto);
   }
 
   @ApiOperation({ description: '내가 북마크한 feed 리스트 (paginated)' })

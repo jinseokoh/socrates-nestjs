@@ -200,7 +200,7 @@ export class UserMeetupsController {
   async getMeetupIdsReportdByMe(
     @Param('userId') userId: number,
   ): Promise<any[]> {
-    return await this.flagsService.getFlaggedMeetupsByUserId(userId);
+    return await this.flagsService.loadFlaggedMeetupsByUserId(userId);
   }
 
   //?-------------------------------------------------------------------------//

@@ -97,9 +97,8 @@ export class FeedsService {
   ): Promise<Paginated<Feed>> {
     const queryBuilder = this.feedRepository
       .createQueryBuilder('feed')
-      .innerJoinAndSelect('feed.poll', 'poll')
-      .innerJoinAndSelect('feed.user', 'user')
-      .leftJoinAndSelect('feed.comments', 'comments')
+      .leftJoinAndSelect('feed.poll', 'poll')
+      .leftJoinAndSelect('feed.user', 'user')
       .where({
         userId,
       });
@@ -122,9 +121,8 @@ export class FeedsService {
   async loadMyFeeds(userId: number): Promise<Feed[]> {
     return await this.feedRepository
       .createQueryBuilder('feed')
-      .innerJoinAndSelect('feed.poll', 'poll')
-      .innerJoinAndSelect('feed.user', 'user')
-      .leftJoinAndSelect('feed.comments', 'comments')
+      .leftJoinAndSelect('feed.poll', 'poll')
+      .leftJoinAndSelect('feed.user', 'user')
       .where({
         userId,
       })
@@ -135,9 +133,6 @@ export class FeedsService {
   async loadMyFeedIds(userId: number): Promise<number[]> {
     const items = await this.feedRepository
       .createQueryBuilder('feed')
-      .innerJoinAndSelect('feed.poll', 'poll')
-      .innerJoinAndSelect('feed.user', 'user')
-      .leftJoinAndSelect('feed.comments', 'comments')
       .where({
         userId,
       })

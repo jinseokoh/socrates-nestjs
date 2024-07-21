@@ -8,13 +8,18 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 //? 댓글 user, meetup, feed, thread, comment 신고
 @Entity()
+@Unique('user_id_entity_type_entity_id_key', [
+  'userId',
+  'entityType',
+  'entityId',
+])
 export class Flag {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
