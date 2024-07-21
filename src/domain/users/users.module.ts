@@ -1,68 +1,70 @@
+import { FeedFeedLink } from './../feeds/entities/feed_feed_link.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
+import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { Flag } from 'src/domain/flags/entities/flag.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
+import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
+
+import { BookmarkUserFeedController } from 'src/domain/users/bookmark_user_feed.controller';
+import { BookmarkUserMeetupController } from 'src/domain/users/bookmark_user_meetup.controller';
+import { BookmarkUserUserController } from 'src/domain/users/bookmark_user_user.controller';
+import { FlagsController } from 'src/domain/flags/flags.controller';
+import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
+import { UserFeedsController } from 'src/domain/users/user-feeds.controller';
+import { UserFriendshipController } from 'src/domain/users/user-friendshp.controller';
+import { UserImpressionsController } from 'src/domain/users/user-impressions.controller';
+import { UserLanguagesController } from 'src/domain/users/user-languages.controller';
+import { UserLedgersController } from 'src/domain/users/user-ledgers.controller';
+import { UserMeetupsController } from 'src/domain/users/user-meetups.controller';
+import { UserPleaController } from 'src/domain/users/user-plea.controller';
+import { UsersController } from 'src/domain/users/users.controller';
+import { UserSmsController } from 'src/domain/users/user-sms.controller';
+import { UserUsersController } from 'src/domain/users/user-users.controller';
+
+import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
+import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
+import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
+import { FeedsService } from 'src/domain/feeds/feeds.service';
+import { FlagsService } from 'src/domain/flags/flags.service';
+import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
+import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
+import { UsersMeetupService } from 'src/domain/users/users-meetup.service';
+import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { UsersService } from 'src/domain/users/users.service';
+import { UsersUserService } from 'src/domain/users/users-user.service';
+
 import { S3Module } from 'src/services/aws/s3.module';
+import { AlarmsModule } from 'src/domain/alarms/alarms.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
 import { SesModule } from 'src/services/aws/ses.module';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { UserUsersController } from 'src/domain/users/user-users.controller';
-import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
-import { UserMeetupsController } from 'src/domain/users/user-meetups.controller';
-import { UserSmsController } from 'src/domain/users/user-sms.controller';
-import { UsersController } from 'src/domain/users/users.controller';
-import { UserFeedsController } from 'src/domain/users/user-feeds.controller';
-import { UserImpressionsController } from 'src/domain/users/user-impressions.controller';
-import { UserLanguagesController } from 'src/domain/users/user-languages.controller';
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
-import { Flag } from 'src/domain/users/entities/flag.entity';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
-import { Poll } from 'src/domain/feeds/entities/poll.entity';
-import { UserFriendshipController } from 'src/domain/users/user-friendshp.controller';
-import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
-import { UsersFeedService } from 'src/domain/users/users-feed.service';
-import { UsersMeetupService } from 'src/domain/users/users-meetup.service';
-import { UsersUserService } from 'src/domain/users/users-user.service';
-import { UserLedgersController } from 'src/domain/users/user-ledgers.controller';
-import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
-import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
-import { UserPleaController } from 'src/domain/users/user-plea.controller';
-import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
-import { AlarmsModule } from 'src/domain/alarms/alarms.module';
-import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
-import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
-import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
-import { BookmarkUserFeedController } from 'src/domain/users/bookmark_user_feed.controller';
-import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
-import { BookmarkUserUserController } from 'src/domain/users/bookmark_user_user.controller';
-import { BookmarkUserMeetupController } from 'src/domain/users/bookmark_user_meetup.controller';
-import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
-import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
-import { ReportUserFeed } from 'src/domain/users/entities/report_user_feed.entity';
-import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
-import { ReportUserUser } from 'src/domain/users/entities/report_user_user.entity';
-import { FlagController } from 'src/domain/users/flag.controller';
-import { FlagService } from 'src/domain/users/flag.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Category,
       Feed,
-      Poll,
       Flag,
+      Poll,
       Friendship,
       Hate,
       Join,
@@ -77,9 +79,7 @@ import { FlagService } from 'src/domain/users/flag.service';
       BookmarkUserFeed,
       BookmarkUserMeetup,
       BookmarkUserUser,
-      ReportUserFeed,
-      ReportUserMeetup,
-      ReportUserUser,
+      FeedFeedLink,
     ]),
     ThrottlerModule.forRoot([
       {
@@ -97,9 +97,9 @@ import { FlagService } from 'src/domain/users/flag.service';
     BookmarkUserFeedService,
     BookmarkUserMeetupService,
     BookmarkUserUserService,
-    FlagService,
+    FeedsService,
+    FlagsService,
     UsersService,
-    UsersFeedService,
     UsersFriendshipService,
     UsersLedgerService,
     UsersMeetupService,
@@ -113,7 +113,7 @@ import { FlagService } from 'src/domain/users/flag.service';
     BookmarkUserFeedController,
     BookmarkUserMeetupController,
     BookmarkUserUserController,
-    FlagController,
+    FlagsController,
     UsersController,
     UserCategoriesController,
     UserFeedsController,

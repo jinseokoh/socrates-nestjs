@@ -29,7 +29,6 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
-import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
@@ -218,9 +217,6 @@ export class Meetup {
 
   @OneToMany(() => BookmarkUserMeetup, (bookmark) => bookmark.meetup)
   public bookmarkedByUsers: BookmarkUserMeetup[];
-
-  @OneToMany(() => ReportUserMeetup, (reportMeetup) => reportMeetup.meetup)
-  public userReports: ReportUserMeetup[];
 
   //**------------------------------------------------------------------------*/
   //** many-to-many (belongsToMany)

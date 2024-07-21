@@ -1,4 +1,4 @@
-import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Flag } from 'src/domain/flags/entities/flag.entity';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -13,10 +13,9 @@ import { DataSource } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Hate } from 'src/domain/users/entities/hate.entity';
-import { ReportUserUser } from 'src/domain/users/entities/report_user_user.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
-import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
+import { CreateFlagDto } from 'src/domain/flags/dto/create-flag.dto';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 
@@ -30,8 +29,6 @@ export class UsersUserService {
     private readonly repository: Repository<User>,
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
-    @InjectRepository(ReportUserUser)
-    private readonly reportUserRepository: Repository<ReportUserUser>,
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     private dataSource: DataSource, // for transaction

@@ -9,12 +9,15 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { AnyData } from 'src/common/types';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
-import { User } from 'src/domain/users/entities/user.entity';
+import { FlagsService } from 'src/domain/flags/flags.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
 export class MeetupUsersController {
-  constructor(private readonly meetupsService: MeetupsService) {}
+  constructor(
+    private readonly meetupsService: MeetupsService,
+    private readonly flagsService: FlagsService,
+  ) {}
 
   //?-------------------------------------------------------------------------//
   //? 참가신청 리스트
@@ -67,24 +70,24 @@ export class MeetupUsersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '이 모임을 신고한 사용자 리스트' })
-  @Get(':id/reporters')
+  @Get(':meetupId/flagged-users')
   async getMeetupReporters(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<AnyData> {
-    const reporters = await this.meetupsService.getMeetupReporters(id);
+    const users = await this.flagsService.getFlaggingUsersByMeetupId(meetupId);
     return {
-      data: reporters,
+      data: users,
     };
   }
 
   @ApiOperation({ description: '이 모임을 신고한 사용자ID 리스트' })
   @Get(':id/reporter_ids')
   async getMeetupReporterIds(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<AnyData> {
-    const ids = await this.meetupsService.getMeetupReporterIds(id);
+    const users = await this.flagsService.getFlaggingUsersByMeetupId(meetupId);
     return {
-      data: ids,
+      data: users,
     };
   }
 }

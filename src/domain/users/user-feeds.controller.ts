@@ -1,109 +1,111 @@
 import {
-  BadRequestException,
-  Body,
   ClassSerializerInterceptor,
   Controller,
-  Delete,
   Get,
   Param,
   ParseIntPipe,
-  Post,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { AnyData } from 'src/common/types';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { SkipThrottle } from '@nestjs/throttler';
-import { UsersFeedService } from 'src/domain/users/users-feed.service';
+import { FeedsService } from 'src/domain/feeds/feeds.service';
+import { FlagsService } from 'src/domain/flags/flags.service';
+import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UserFeedsController {
-  constructor(private readonly usersFeedService: UsersFeedService) {}
+  constructor(
+    private readonly feedsService: FeedsService,
+    private readonly flagsService: FlagsService,
+    private readonly bookmarkUserFeedService: BookmarkUserFeedService,
+  ) {}
 
   //?-------------------------------------------------------------------------//
-  //? 내가 만든 발견 리스트
+  //? 내가 만든
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '내가 만든 발견 리스트 (paginated)' })
+  //? 내가 만든 Feeds (paginated)
+  @ApiOperation({ description: '내가 만든 Paginated<Feeds>' })
   @PaginateQueryOptions()
   @Get(':userId/feeds')
   async listMyFeeds(
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Feed>> {
-    return await this.usersFeedService.listMyFeeds(userId, query);
+    return await this.feedsService.findAllByUserId(query, userId);
   }
 
-  @ApiOperation({ description: '내가 만든 발견 리스트 (all)' })
+  //? 내가 만든 Feeds (all)
+  @ApiOperation({ description: '내가 만든 Feeds' })
   @Get(':userId/feeds/all')
-  async loadMyFeeds(
+  async loadAllMyFeeds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Feed[]> {
-    return await this.usersFeedService.loadMyFeeds(userId);
+    return await this.feedsService.loadMyFeeds(userId);
+  }
+
+  //? 내가 만든 Feed ids (all)
+  @ApiOperation({ description: '내가 만든 Feeds' })
+  @Get(':userId/feeds/ids')
+  async loadMyFeedIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.feedsService.loadMyFeedIds(userId);
   }
 
   //?-------------------------------------------------------------------------//
-  //? ReportUserFeed Pivot
+  //? 내가 북마크한
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '차단한 발견 리스트에 추가' })
-  @Post(':userId/feeds-reported/:feedId')
-  async attachToFeedReportPivot(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
-    @Body('message') message: string,
-  ): Promise<any> {
-    //? checking if this feed belongs to the user costs a database access,
-    //? which you can get around if you design your application carefully.
-    //? so user validation has been removed. keep that in mind.
-    try {
-      await this.usersFeedService.attachToReportUserFeedPivot(
-        userId,
-        feedId,
-        message,
-      );
-
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
-  }
-
-  @ApiOperation({ description: '차단한 발견 리스트에서 삭제' })
-  @Delete(':userId/feeds-reported/:feedId')
-  async detachFromFeedReportPivot(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
-  ): Promise<any> {
-    //? checking if this feed belongs to the user costs a database access,
-    //? which you can get around if you design your application carefully.
-    //? so user validation has been removed. keep that in mind.
-    try {
-      await this.usersFeedService.detachFromReportUserFeedPivot(userId, feedId);
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
-  }
-
-
-  @ApiOperation({ description: '내가 차단한 발견ID 리스트 (all)' })
+  //? 내가 북마크한 Feeds (paginated)
+  @ApiOperation({ description: '내가 북마크한 Feeds (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/feedids-reported')
-  async getFeedIdsReportedByMe(
+  @Get(':userId/bookmarked_feeds')
+  async findBookmarkedFeedsByUserId(
+    @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
-  ): Promise<AnyData> {
-    const data = await this.usersFeedService.getFeedIdsReportedByMe(userId);
-    return {
-      data,
-    };
+  ): Promise<Paginated<Feed>> {
+    return await this.bookmarkUserFeedService.findBookmarkedFeedsByUserId(
+      query,
+      userId,
+    );
+  }
+
+  //? 내가 북마크한 FeedIds (all)
+  @ApiOperation({ description: '내가 북마크한 FeedIds' })
+  @Get(':userId/bookmared_feeds/ids')
+  async loadBookmarkedFeedIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.bookmarkUserFeedService.loadBookmarkedFeedIds(userId);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? 내가 차단한
+  //?-------------------------------------------------------------------------//
+
+  //? 내가 차단한 Feeds (paginated)
+  @ApiOperation({ description: '내가 차단한 Feeds (paginated)' })
+  @PaginateQueryOptions()
+  @Get(':userId/flagged_feeds')
+  async findFlaggedFeedsByUserId(
+    @Paginate() query: PaginateQuery,
+    @Param('userId') userId: number,
+  ): Promise<Paginated<Feed>> {
+    return await this.flagsService.findFlaggedFeedsByUserId(query, userId);
+  }
+
+  //? 내가 차단한 FeedIds (all)
+  @ApiOperation({ description: '내가 차단한 FeedIds' })
+  @Get(':userId/feeds/ids')
+  async loadFlaggedFeedIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.flagsService.loadFlaggedFeedIds(userId);
   }
 }

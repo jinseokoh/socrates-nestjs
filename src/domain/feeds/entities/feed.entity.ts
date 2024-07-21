@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ReportUserFeed } from 'src/domain/users/entities/report_user_feed.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
@@ -20,7 +19,7 @@ import { IsArray } from 'class-validator';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
-import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Flag } from 'src/domain/flags/entities/flag.entity';
 
 // a user can like meetup
 // https://github.com/typeorm/typeorm/issues/4653
@@ -97,9 +96,6 @@ export class Feed {
 
   @OneToMany(() => BookmarkUserFeed, (bookmark) => bookmark.feed)
   public bookmarkedByUsers: BookmarkUserFeed[];
-
-  @OneToMany(() => ReportUserFeed, (report) => report.feed)
-  public reportedByUsers: ReportUserFeed[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 (belongsTo)

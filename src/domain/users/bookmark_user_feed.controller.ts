@@ -14,6 +14,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 
@@ -60,23 +61,6 @@ export class BookmarkUserFeedController {
     } catch (e) {
       throw new BadRequestException();
     }
-  }
-
-  @ApiOperation({ description: '내가 북마크한 feed 리스트 (paginated)' })
-  @Get(':userId/bookmark_user_feed')
-  async getUsersBookmarkedByMe(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<BookmarkUserFeed>> {
-    return this.bookmarkUserFeedService.getFeedsBookmarkedByMe(userId, query);
-  }
-
-  @ApiOperation({ description: '내가 북마크한 feedIds 리스트' })
-  @Get(':userId/bookmark_user_feed/ids')
-  async getAllUserIdsBookmarkedByMe(
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<number[]> {
-    return await this.bookmarkUserFeedService.getAllIdsBookmarkedByMe(userId);
   }
 
   @ApiOperation({

@@ -12,13 +12,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Opinion } from 'src/domain/inquiries/entities/opinion.entity';
-import { ReportUserUser } from 'src/domain/users/entities/report_user_user.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
 import { Interest } from 'src/domain/users/entities/interest.entity';
@@ -31,9 +29,8 @@ import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
-import { ReportUserFeed } from 'src/domain/users/entities/report_user_feed.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
-import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Flag } from 'src/domain/flags/entities/flag.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
@@ -225,20 +222,6 @@ export class User {
 
   @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.user)
   public languageSkills: LanguageSkill[];
-
-  // reports ---------------------------------------------------------------- //
-
-  @OneToMany(() => ReportUserFeed, (report) => report.user)
-  public feedReports: ReportUserFeed[];
-
-  @OneToMany(() => ReportUserMeetup, (report) => report.user)
-  public meetupReports: ReportUserMeetup[];
-
-  @OneToMany(() => ReportUserUser, (report) => report.user)
-  public userReports: ReportUserUser[];
-
-  @OneToMany(() => ReportUserUser, (report) => report.accusedUser)
-  public reportedByUsers: ReportUserUser[];
 
   // bookmarks -------------------------------------------------------------- //
 

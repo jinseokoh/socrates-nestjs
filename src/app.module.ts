@@ -40,6 +40,7 @@ import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.
 import { SecretsModule } from 'src/domain/secrets/secrets.module';
 import { PleasModule } from 'src/domain/pleas/pleas.module';
 import { FeedsModule } from 'src/domain/feeds/feeds.module';
+import { FlagsModule } from 'src/domain/flags/flags.module';
 // import { CustomLogger } from 'src/helpers/custom-logger';
 @Module({
   imports: [
@@ -148,6 +149,7 @@ import { FeedsModule } from 'src/domain/feeds/feeds.module';
     ChatsModule,
     ContentsModule,
     FeedsModule,
+    FlagsModule,
     InquiriesModule,
     LanguagesModule,
     LedgersModule,

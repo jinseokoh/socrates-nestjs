@@ -13,12 +13,11 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Hate } from 'src/domain/users/entities/hate.entity';
-import { ReportUserUser } from 'src/domain/users/entities/report_user_user.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
 import { UsersUserService } from 'src/domain/users/users-user.service';
-import { Flag } from 'src/domain/users/entities/flag.entity';
-import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
+import { Flag } from 'src/domain/flags/entities/flag.entity';
+import { CreateFlagDto } from 'src/domain/flags/dto/create-flag.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()

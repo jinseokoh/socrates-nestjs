@@ -22,6 +22,7 @@ import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
 import { UsersMeetupService } from 'src/domain/users/users-meetup.service';
 import { UsersService } from 'src/domain/users/users.service';
+import { FlagsService } from 'src/domain/flags/flags.service';
 
 // todo. move all the try catch from controller layer to service layer
 @UseInterceptors(ClassSerializerInterceptor)
@@ -30,8 +31,9 @@ import { UsersService } from 'src/domain/users/users.service';
 export class UserMeetupsController {
   constructor(
     private readonly usersService: UsersService,
+    private readonly flagsService: FlagsService,
     private readonly usersMeetupService: UsersMeetupService,
-) {}
+  ) {}
 
   //?-------------------------------------------------------------------------//
   //? 내가 만든 모임 리스트
@@ -114,9 +116,10 @@ export class UserMeetupsController {
   async getMeetupIdsLikedByMe(
     @Param('userId') userId: number,
   ): Promise<AnyData> {
-    const data: number[] = await this.usersMeetupService.getMeetupIdsLikedByMe(
-      userId,
-    );
+    const data: number[] = [];
+    // await this.usersMeetupService.getMeetupIdsLikedByMe(
+    //   userId,
+    // );
     return { data };
   }
 
@@ -171,30 +174,33 @@ export class UserMeetupsController {
     }
   }
 
-  @ApiOperation({ description: '내가 차단한 모임 리스트 (paginated)' })
-  @PaginateQueryOptions()
-  @Get(':userId/meetups-reported')
-  async getMeetupsReportedByMe(
-    @Param('userId') userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Meetup>> {
-    const { data, meta, links } =
-      await this.usersMeetupService.getMeetupsReportedByMe(userId, query);
-
-    return {
-      data: data.map((v) => v.meetup),
-      meta: meta,
-      links: links,
-    } as Paginated<Meetup>;
-  }
+  // @ApiOperation({ description: '내가 차단한 모임 리스트 (paginated)' })
+  // @PaginateQueryOptions()
+  // @Get(':userId/meetups-reported')
+  // async getMeetupsReportedByMe(
+  //   @Param('userId') userId: number,
+  //   @Paginate() query: PaginateQuery,
+  // ): Promise<Paginated<Meetup>> {
+  //   const result =
+  //     await this.flagsService.getFlaggedMeetupsByUserId(
+  //       query,
+  //       userId,
+  //       'meetup',
+  //     );
+  //   return {
+  //     data: data.map((v) => v.meetup),
+  //     meta: meta,
+  //     links: links,
+  //   } as Paginated<Meetup>;
+  // }
 
   @ApiOperation({ description: '내가 차단한 모임ID 리스트 (all)' })
   @PaginateQueryOptions()
-  @Get(':userId/meetupids-reported')
+  @Get(':userId/meetups/flag')
   async getMeetupIdsReportdByMe(
     @Param('userId') userId: number,
-  ): Promise<AnyData> {
-    return await this.usersMeetupService.getMeetupIdsReportedByMe(userId);
+  ): Promise<any[]> {
+    return await this.flagsService.getFlaggedMeetupsByUserId(userId);
   }
 
   //?-------------------------------------------------------------------------//

@@ -13,7 +13,7 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Flag } from 'src/domain/flags/entities/flag.entity';
 
 @Entity()
 export class Comment {

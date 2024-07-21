@@ -14,15 +14,15 @@ import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
-import { Flag } from 'src/domain/users/entities/flag.entity';
-import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
-import { FlagService } from 'src/domain/users/flag.service';
+import { Flag } from 'src/domain/flags/entities/flag.entity';
+import { CreateFlagDto } from 'src/domain/flags/dto/create-flag.dto';
+import { FlagsService } from 'src/domain/flags/flags.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
-export class FlagController {
-  constructor(private readonly flagService: FlagService) {}
+export class FlagsController {
+  constructor(private readonly flagService: FlagsService) {}
 
   //?-------------------------------------------------------------------------//
   //? Flag Pivot

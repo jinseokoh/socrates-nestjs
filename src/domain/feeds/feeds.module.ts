@@ -20,6 +20,7 @@ import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
     S3Module,
     FcmModule,
   ],
+  // exports: [FeedsService],
   providers: [FeedsService, FeedCommentsService, PollsService],
   controllers: [PollsController, FeedsController, FeedCommentsController],
 })

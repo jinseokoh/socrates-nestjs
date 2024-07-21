@@ -17,21 +17,26 @@ import { DataSource } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm/repository/Repository';
-import { CreateFlagDto } from 'src/domain/users/dto/create-flag.dto';
-import { Flag } from 'src/domain/users/entities/flag.entity';
+import { CreateFlagDto } from 'src/domain/flags/dto/create-flag.dto';
+import { Flag } from 'src/domain/flags/entities/flag.entity';
 import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 
 @Injectable()
-export class FlagService {
+export class FlagsService {
   private readonly env: any;
-  private readonly logger = new Logger(FlagService.name);
+  private readonly logger = new Logger(FlagsService.name);
 
   constructor(
     @InjectRepository(Flag)
     private readonly flagRepository: Repository<Flag>,
+    @InjectRepository(Feed)
+    private readonly feedRepository: Repository<Feed>,
+    @InjectRepository(Meetup)
+    private readonly meetupRepository: Repository<Meetup>,
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     private dataSource: DataSource, // for transaction
@@ -40,10 +45,11 @@ export class FlagService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? 댓글 생성
+  //? 생성
   //?-------------------------------------------------------------------------//
 
-  // 댓글 신고 리스트에 추가 및 관련 모델의 flagCount 증가
+  // - 신고 리스트에 추가
+  // - 가능하다면, 관련 entity flagCount 증가
   async createFlag(userId: number, dto: CreateFlagDto): Promise<Flag> {
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -97,7 +103,8 @@ export class FlagService {
     }
   }
 
-  // 나의 북마크에서 feed 제거
+  // - 신고 리스트에서 삭제
+  // - 가능하다면, 관련 entity flagCount 감소
   async deleteFlag(userId: number, dto: CreateFlagDto): Promise<AnyData> {
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -145,11 +152,15 @@ export class FlagService {
     }
   }
 
-  // 내가 북마크한 entity 리스트 (paginated)
+  //?-------------------------------------------------------------------------//
+  //? GET
+  //?-------------------------------------------------------------------------//
+
+  // 내가 신고한 entity 리스트 (paginated)
   async getFlagsByUserId(
     query: PaginateQuery,
     userId: number,
-    entityType = null,
+    entityType: string | null = null,
   ): Promise<Paginated<Flag>> {
     let queryBuilder;
     switch (entityType) {
@@ -162,7 +173,6 @@ export class FlagService {
             'feed.id = flag.entityId AND flag.entityType = :entityType',
             { entityType: 'feed' },
           )
-          .innerJoinAndSelect('feed.user', 'user')
           .where({
             userId: userId,
           });
@@ -176,7 +186,6 @@ export class FlagService {
             'meetup.id = flag.entityId AND flag.entityType = :entityType',
             { entityType },
           )
-          .innerJoinAndSelect('meetup.user', 'user')
           .where({
             userId: userId,
           });
@@ -190,7 +199,6 @@ export class FlagService {
             'comment.id = flag.entityId AND flag.entityType = :entityType',
             { entityType },
           )
-          .innerJoinAndSelect('comment.user', 'user')
           .where({
             userId: userId,
           });
@@ -204,23 +212,27 @@ export class FlagService {
             'thread.id = flag.entityId AND flag.entityType = :entityType',
             { entityType },
           )
-          .innerJoinAndSelect('thread.user', 'user')
+          .where({
+            userId: userId,
+          });
+        break;
+      case `user`:
+        queryBuilder = this.flagRepository
+          .createQueryBuilder('flag')
+          .innerJoinAndSelect(
+            User,
+            'user',
+            'user.id = flag.entityId AND flag.entityType = :entityType',
+            { entityType },
+          )
           .where({
             userId: userId,
           });
         break;
       default:
-        queryBuilder = this.flagRepository
-          .createQueryBuilder('flag')
-          .innerJoinAndSelect(
-            Meetup,
-            'meetup',
-            'meetup.id = flag.entityId AND flag.entityType = :entityType',
-            { entityType: 'meetup' },
-          )
-          .where({
-            userId: userId,
-          });
+        queryBuilder = this.flagRepository.createQueryBuilder('flag').where({
+          userId: userId,
+        });
         break;
     }
 
@@ -235,17 +247,75 @@ export class FlagService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // // 내가 북마크한 모든 feedIds
-  // async getAllIdsReportedByMe(userId: number): Promise<number[]> {
-  //   const rows = await this.flagRepository.manager.query(
-  //     'SELECT userId, feedId \
-  //     FROM `flag` \
-  //     WHERE userId = ?',
-  //     [userId],
-  //   );
+  // -------------------------------------------------------------------------//
+  //  Feeds
+  // -------------------------------------------------------------------------//
 
-  //   return rows.map((v: Flag) => v.feedId);
-  // }
+  // 내가 차단한 Feeds (paginated)
+  async findFlaggedFeedsByUserId(
+    query: PaginateQuery,
+    userId: number,
+  ): Promise<Paginated<Feed>> {
+    const queryBuilder = this.feedRepository
+      .createQueryBuilder('feed')
+      .innerJoin(Flag, 'flag', 'feed.id = flag.entityId')
+      .where('flag.userId = :userId', { userId })
+      .andWhere('flag.entityType = :entityType', { entityType: 'feed' });
+    const config: PaginateConfig<Feed> = {
+      sortableColumns: ['id'],
+      searchableColumns: ['body'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'ASC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // -------------------------------------------------------------------------//
+  // Meetups
+  // -------------------------------------------------------------------------//
+
+  // 내가 차단한 Meetups
+  async getFlaggedMeetupsByUserId(userId: number): Promise<any[]> {
+    const queryBuilder = this.flagRepository.createQueryBuilder('flag');
+    return queryBuilder
+      .innerJoinAndSelect(
+        Meetup,
+        'meetup',
+        'meetup.id = flag.entityId AND flag.entityType = :entityType',
+        { entityType: 'meetup' },
+      )
+      .addSelect(['meetup.*'])
+      .where({
+        userId: userId,
+      })
+      .getMany();
+
+    // const rows = await this.flagRepository.manager.query(
+    //   'SELECT feed.* FROM \
+    //   FROM `flag` \
+    //   INNER JOIN `feed` ON feed.id = flag.entityId \
+    //   WHERE userId = ? AND entityType = ?',
+    //   [userId, `meetup`],
+    // );
+    // return rows;
+  }
+
+  // Meetup 을 차단한 user 리스트
+  async getFlaggingUsersByMeetupId(meetupId: number): Promise<any[]> {
+    const rows = await this.flagRepository.manager.query(
+      'SELECT user.* FROM \
+      FROM `flag` \
+      INNER JOIN `user` ON user.id = flag.userId \
+      WHERE entityId = ? AND entityType = ?',
+      [meetupId, `meetup`],
+    );
+
+    return rows;
+
+    // return rows.map((v: Flag) => v.feedId);
+  }
 
   // 내가 북마크한 feed 여부
   async isReported(

@@ -13,6 +13,7 @@ import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm/repository/Repository';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import { Feed } from 'src/domain/feeds/entities/feed.entity';
 
 @Injectable()
 export class BookmarkUserFeedService {
@@ -22,6 +23,8 @@ export class BookmarkUserFeedService {
   constructor(
     @InjectRepository(BookmarkUserFeed)
     private readonly bookmarkUserFeedRepository: Repository<BookmarkUserFeed>,
+    @InjectRepository(Feed)
+    private readonly feedRepository: Repository<Feed>,
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     private dataSource: DataSource, // for transaction
@@ -72,20 +75,22 @@ export class BookmarkUserFeedService {
   }
 
   // 내가 북마크한 feed 리스트 (paginated)
-  async getFeedsBookmarkedByMe(
-    userId: number,
+  async findBookmarkedFeedsByUserId(
     query: PaginateQuery,
-  ): Promise<Paginated<BookmarkUserFeed>> {
-    const queryBuilder = this.bookmarkUserFeedRepository
-      .createQueryBuilder('bookmark_user_feed')
-      .innerJoinAndSelect('bookmark_user_feed.feed', 'feed')
-      .where({
-        userId: userId,
-      });
+    userId: number,
+  ): Promise<Paginated<Feed>> {
+    const queryBuilder = this.feedRepository
+      .createQueryBuilder('feed')
+      .innerJoinAndSelect(
+        BookmarkUserFeed,
+        'bookmark_user_feed',
+        'feed.id = bookmark_user_feed.feedId',
+      )
+      .where('bookmark_user_feed.userId = :userId', { userId });
 
-    const config: PaginateConfig<BookmarkUserFeed> = {
+    const config: PaginateConfig<Feed> = {
       sortableColumns: ['id'],
-      searchableColumns: ['message'],
+      searchableColumns: ['body'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
       filterableColumns: {},
@@ -95,7 +100,7 @@ export class BookmarkUserFeedService {
   }
 
   // 내가 북마크한 모든 feedIds
-  async getAllIdsBookmarkedByMe(userId: number): Promise<number[]> {
+  async loadBookmarkedFeedIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkUserFeedRepository.manager.query(
       'SELECT userId, feedId \
       FROM `bookmark_user_feed` \

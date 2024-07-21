@@ -32,7 +32,7 @@ import { Room } from 'src/domain/chats/entities/room.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { LedgerType } from 'src/common/enums';
-import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
+
 @Injectable()
 export class MeetupsService {
   private readonly logger = new Logger(MeetupsService.name);
@@ -441,38 +441,6 @@ export class MeetupsService {
     try {
       const rows = await this.repository.manager.query(
         'SELECT userId FROM `like` WHERE meetupId = ?',
-        [id],
-      );
-
-      return rows.map((v: any) => v.userId);
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 블락한 모든 사용자 리스트
-  //?-------------------------------------------------------------------------//
-
-  async getMeetupReporters(id: number): Promise<any> {
-    try {
-      const meetup = await this.repository.findOneOrFail({
-        where: {
-          id: id,
-        },
-        relations: ['userReports', 'userReports.user'],
-      });
-
-      return meetup.userReports.map((v: any) => v.user);
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
-  }
-
-  async getMeetupReporterIds(id: number): Promise<Array<ReportUserMeetup>> {
-    try {
-      const rows = await this.repository.manager.query(
-        'SELECT userId FROM `user_meetup_report` WHERE meetupId = ?',
         [id],
       );
 

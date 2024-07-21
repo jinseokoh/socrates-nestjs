@@ -22,7 +22,6 @@ import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { ReportUserMeetup } from 'src/domain/users/entities/report_user_meetup.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
@@ -44,8 +43,6 @@ export class UsersMeetupService {
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Join)
     private readonly joinRepository: Repository<Join>,
-    @InjectRepository(ReportUserMeetup)
-    private readonly reportMeetupRepository: Repository<ReportUserMeetup>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
@@ -229,29 +226,29 @@ export class UsersMeetupService {
     }
   }
 
-  // 내가 차단한 모임 리스트 (paginated)
-  async getMeetupsReportedByMe(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<ReportUserMeetup>> {
-    const queryBuilder = this.reportMeetupRepository
-      .createQueryBuilder('reportMeetup')
-      .leftJoinAndSelect('reportMeetup.meetup', 'meetup')
-      .leftJoinAndSelect('meetup.venue', 'venue')
-      .where({
-        userId,
-      });
+  // // 내가 차단한 모임 리스트 (paginated)
+  // async getMeetupsReportedByMe(
+  //   userId: number,
+  //   query: PaginateQuery,
+  // ): Promise<Paginated<ReportUserMeetup>> {
+  //   const queryBuilder = this.reportMeetupRepository
+  //     .createQueryBuilder('reportMeetup')
+  //     .leftJoinAndSelect('reportMeetup.meetup', 'meetup')
+  //     .leftJoinAndSelect('meetup.venue', 'venue')
+  //     .where({
+  //       userId,
+  //     });
 
-    const config: PaginateConfig<ReportUserMeetup> = {
-      sortableColumns: ['meetupId'],
-      searchableColumns: ['meetup.title'],
-      defaultLimit: 20,
-      defaultSortBy: [['meetupId', 'DESC']],
-      filterableColumns: {},
-    };
+  //   const config: PaginateConfig<ReportUserMeetup> = {
+  //     sortableColumns: ['meetupId'],
+  //     searchableColumns: ['meetup.title'],
+  //     defaultLimit: 20,
+  //     defaultSortBy: [['meetupId', 'DESC']],
+  //     filterableColumns: {},
+  //   };
 
-    return await paginate(query, queryBuilder, config);
-  }
+  //   return await paginate(query, queryBuilder, config);
+  // }
 
   // 내가 차단한 모임ID 리스트 (all)
   async getMeetupIdsReportedByMe(userId: number): Promise<AnyData> {
