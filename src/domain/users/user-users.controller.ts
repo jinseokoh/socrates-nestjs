@@ -17,9 +17,9 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
 import { UserUsersService } from 'src/domain/users/user-users.service';
 import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
-import { FlagsService } from 'src/domain/users/flags.service';
-import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
+import { FlagUserService } from 'src/domain/users/flag_user.service';
 import { User } from 'src/domain/users/entities/user.entity';
+import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -27,7 +27,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 export class UserUsersController {
   constructor(
     private readonly userUsersService: UserUsersService,
-    private readonly flagsService: FlagsService,
+    private readonly flagsService: FlagUserService,
     private readonly bookmarksService: BookmarkUserUserService,
   ) {}
 
@@ -62,16 +62,16 @@ export class UserUsersController {
     return this.bookmarksService.isUserBookmarked(userId, targetUserId);
   }
 
-  @ApiOperation({ description: '내가 북마크한 Users (paginated)' })
+  @ApiOperation({ description: '내가 북마크/follow 하는 Users (paginated)' })
   @Get(':userId/bookmarkedusers')
   async findBookmarkedUsers(
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<BookmarkUserUser>> {
-    return await this.bookmarksService.findBookmarkedUsers(userId, query);
+  ): Promise<Paginated<User>> {
+    return await this.bookmarksService.findBookmarkedUsers(query, userId);
   }
 
-  @ApiOperation({ description: '내가 북마크한 Users (all)' })
+  @ApiOperation({ description: '내가 북마크/follow 하는 Users (all)' })
   @Get(':userId/bookmarkedusers/all')
   async loadBookmarkedUsers(
     @Param('userId', ParseIntPipe) userId: number,
@@ -79,12 +79,92 @@ export class UserUsersController {
     return await this.bookmarksService.loadBookmarkedUsers(userId);
   }
 
-  @ApiOperation({ description: '내가 북마크한 UserIds (all)' })
+  @ApiOperation({ description: '내가 북마크/follow 하는 UserIds (all)' })
   @Get(':userId/bookmarkeduserids')
   async loadBookmarkedUserIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
     return await this.bookmarksService.loadBookmarkedUserIds(userId);
+  }
+
+  //?-------------------------------------------------------------------------//
+  //? 내가 신고한 Users
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: 'User 신고 생성' })
+  @Post(':userId/userflags/:targetUserId')
+  async createUserFlag(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+    @Body('message') message: string | null,
+  ): Promise<any> {
+    return await this.flagsService.createUserFlag(
+      userId,
+      targetUserId,
+      message,
+    );
+  }
+
+  @ApiOperation({ description: 'User 신고 삭제' })
+  @Delete(':userId/userflags/:userId')
+  async deleteUserFlag(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+  ): Promise<any> {
+    return await this.flagsService.deleteUserFlag(userId, targetUserId);
+  }
+
+  @ApiOperation({ description: 'User 신고 여부' })
+  @Get(':userId/userflags/:targetUserId')
+  async isUserFlagged(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+  ): Promise<AnyData> {
+    return {
+      data: await this.flagsService.isUserFlagged(userId, targetUserId),
+    };
+  }
+
+  @ApiOperation({ description: '내가 신고한 Users (paginated)' })
+  @PaginateQueryOptions()
+  @Get(':userId/flaggedusers')
+  async findFlaggedUsersByUserId(
+    @Paginate() query: PaginateQuery,
+    @Param('userId') userId: number,
+  ): Promise<Paginated<User>> {
+    return await this.flagsService.findFlaggedUsers(query, userId);
+  }
+
+  @ApiOperation({ description: '내가 신고한 모든 Users (all)' })
+  @Get(':userId/flaggedusers/all')
+  async loadFlaggedUsers(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<User[]> {
+    return await this.flagsService.loadFlaggedUsers(userId);
+  }
+
+  @ApiOperation({ description: '내가 신고한 모든 UserIds' })
+  @Get(':userId/flaggeduserids')
+  async loadFlaggedUserIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.flagsService.loadFlaggedUserIds(userId);
+  }
+
+  @ApiOperation({ description: '나를 신고한 모든 Users (all)' })
+  @Get(':userId/flaggingusers/all')
+  async loadFlaggingUsers(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<User[]> {
+    return await this.flagsService.loadUserFlaggingUsers(userId);
+  }
+
+  @ApiOperation({ description: '나를 신고한 모든 UserIds' })
+  @Get(':userId/flagginguserids')
+  async loadFlaggingUserIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.flagsService.loadUserFlaggingUserIds(userId);
   }
 
   //?-------------------------------------------------------------------------//

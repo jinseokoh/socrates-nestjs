@@ -57,7 +57,7 @@ export class BookmarkUserUserService {
           .create({ userId, targetUserId }),
       );
       await queryRunner.manager.query(
-        'UPDATE `user` SET bookmarkCount = bookmarkCount + 1 WHERE id = ?',
+        'UPDATE `profile` SET bookmarkCount = bookmarkCount + 1 WHERE userId = ?',
         [targetUserId],
       );
 
@@ -75,7 +75,7 @@ export class BookmarkUserUserService {
         event.options = targetUser.profile?.options ?? {};
         event.body = `${targetUser.username} 님을 누군가 찜 했습니다.`;
         event.data = {
-          page: `meetups/${targetUserId}`,
+          page: `users/${targetUserId}`,
           args: '',
         };
         this.eventEmitter.emit('user.notified', event);
@@ -103,12 +103,12 @@ export class BookmarkUserUserService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
-        'DELETE FROM `bookmark_user_meetup` WHERE userId = ? AND targetUserId = ?',
+        'DELETE FROM `bookmark_user_user` WHERE userId = ? AND targetUserId = ?',
         [userId, targetUserId],
       );
       if (affectedRows > 0) {
         await queryRunner.manager.query(
-          'UPDATE `meetup` SET bookmarkCount = bookmarkCount - 1 WHERE id = ? AND bookmarkCount > 0',
+          'UPDATE `profile` SET bookmarkCount = bookmarkCount - 1 WHERE userId = ? AND bookmarkCount > 0',
           [targetUserId],
         );
       }
@@ -148,10 +148,10 @@ export class BookmarkUserUserService {
       .innerJoinAndSelect(
         BookmarkUserUser,
         'bookmark_user_user',
-        'bookmark_user_user.targetId = user.id',
+        'bookmark_user_user.targetUserId = user.id',
       )
       .innerJoinAndSelect('user.targetUser', 'targetUser')
-      .where('bookmark_user_user.targetUserId = : userId', { userId });
+      .where('bookmark_user_user.userId = : userId', { userId });
 
     const config: PaginateConfig<User> = {
       sortableColumns: ['id'],
@@ -167,7 +167,7 @@ export class BookmarkUserUserService {
   // 내가 북마크한 모든 Users
   async loadBookmarkedUsers(userId: number): Promise<User[]> {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
-    return queryBuilder
+    return await queryBuilder
       .innerJoinAndSelect(
         BookmarkUserUser,
         'bookmark_user_user',
@@ -187,5 +187,34 @@ export class BookmarkUserUserService {
     );
 
     return rows.map((v: any) => v.targetUserId);
+  }
+
+  //? 새롭게 추가 -----------------------------------------------------------------//
+
+  // 나를 북마크/following하는 Users
+  async loadBookmarkingUsers(userId: number): Promise<User[]> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    return await queryBuilder
+      .innerJoinAndSelect(
+        BookmarkUserUser,
+        'bookmark_user_user',
+        'bookmark_user_user.userId = user.id',
+      )
+      .addSelect(['user.*'])
+      .where('bookmark_user_user.targetUserId = :userId', {
+        userId,
+      })
+      .getMany();
+  }
+
+  // 나를 북마크/following하는 UserIds
+  async loadBookmarkingUserIds(userId: number): Promise<number[]> {
+    const rows = await this.bookmarkUserUserRepository.manager.query(
+      'SELECT userId FROM `bookmark_user_user` \
+      WHERE bookmark_user_user.targetUserId = ?',
+      [userId],
+    );
+
+    return rows.map((v: any) => v.userId);
   }
 }

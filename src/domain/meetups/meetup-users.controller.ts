@@ -11,7 +11,7 @@ import { AnyData } from 'src/common/types';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 import { User } from 'src/domain/users/entities/user.entity';
-import { FlagsService } from 'src/domain/users/flags.service';
+import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
@@ -19,12 +19,12 @@ export class MeetupUsersController {
   constructor(
     private readonly meetupsService: MeetupsService,
     private readonly bookmarksService: BookmarkUserMeetupService,
-    private readonly flagsService: FlagsService,
+    private readonly flagMeetupService: FlagMeetupService,
   ) {}
 
-  //?-------------------------------------------------------------------------//
-  //? 참가신청 리스트
-  //?-------------------------------------------------------------------------//
+  //! ----------------------------------------------------------------------- //
+  //! 참가신청 리스트
+  //! ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '이 모임에 신청한 사용자 리스트 (최대30명)' })
   @Get(':id/joiners')
@@ -51,7 +51,7 @@ export class MeetupUsersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '이 모임을 북마크/찜한 모든 Users' })
-  @Get(':id/bookmarkingusers')
+  @Get(':meetupId/bookmarkingusers')
   async loadBookmarkingUsers(
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<User[]> {
@@ -75,7 +75,7 @@ export class MeetupUsersController {
   async loadFlaggingUsers(
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<User[]> {
-    return await this.flagsService.loadFlaggingUsers(meetupId);
+    return await this.flagMeetupService.loadMeetupFlaggingUsers(meetupId);
   }
 
   @ApiOperation({ description: '이 모임을 신고한 모든 Users (all)' })
@@ -83,6 +83,6 @@ export class MeetupUsersController {
   async loadFlaggingUserIds(
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<number[]> {
-    return await this.flagsService.loadFlaggingUserIds(meetupId);
+    return await this.flagMeetupService.loadMeetupFlaggingUserIds(meetupId);
   }
 }

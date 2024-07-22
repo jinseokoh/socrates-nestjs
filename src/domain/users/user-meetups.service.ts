@@ -50,17 +50,17 @@ export class UserMeetupsService {
   //?-------------------------------------------------------------------------//
 
   // 내가 만든 모임 리스트
-  async getMyMeetups(
-    userId: number,
+  async findMyMeetups(
     query: PaginateQuery,
+    userId: number,
   ): Promise<Paginated<Meetup>> {
     const queryBuilder = this.meetupRepository
       .createQueryBuilder('meetup')
-      .innerJoinAndSelect('meetup.venue', 'venue')
-      .innerJoinAndSelect('meetup.user', 'user')
+      .leftJoinAndSelect('meetup.venue', 'venue')
+      .leftJoinAndSelect('meetup.user', 'user')
       .leftJoinAndSelect('meetup.rooms', 'rooms')
       .leftJoinAndSelect('rooms.user', 'participant')
-      .where({
+      .where('meetup.userId = :userId', {
         userId,
       });
 

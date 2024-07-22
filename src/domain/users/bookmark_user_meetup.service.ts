@@ -167,7 +167,7 @@ export class BookmarkUserMeetupService {
   // 내가 북마크한 모든 Meetups
   async loadBookmarkedMeetups(userId: number): Promise<Meetup[]> {
     const queryBuilder = this.meetupRepository.createQueryBuilder('meetup');
-    return queryBuilder
+    return await queryBuilder
       .innerJoinAndSelect(
         BookmarkUserMeetup,
         'bookmark_user_meetup',
@@ -194,7 +194,7 @@ export class BookmarkUserMeetupService {
   // Meetup 을 북마크/찜한 Users
   async loadBookmarkingUsers(meetupId: number): Promise<User[]> {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
-    return queryBuilder
+    return await queryBuilder
       .innerJoinAndSelect(
         BookmarkUserMeetup,
         'bookmark_user_meetup',

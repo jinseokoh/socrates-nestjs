@@ -21,10 +21,9 @@ import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 import { UsersService } from 'src/domain/users/users.service';
-import { FlagsService } from 'src/domain/users/flags.service';
+import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
-import { User } from 'src/domain/users/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -32,7 +31,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 export class UserMeetupsController {
   constructor(
     private readonly userMeetupsService: UserMeetupsService,
-    private readonly flagsService: FlagsService,
+    private readonly flagsService: FlagMeetupService,
     private readonly bookmarksService: BookmarkUserMeetupService,
     private readonly usersService: UsersService,
   ) {}
@@ -45,10 +44,10 @@ export class UserMeetupsController {
   @PaginateQueryOptions()
   @Get(':userId/meetups')
   async findMyMeetups(
-    @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
+    @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Paginated<Meetup>> {
-    return await this.userMeetupsService.getMyMeetups(userId, query);
+    return await this.userMeetupsService.findMyMeetups(query, userId);
   }
 
   @ApiOperation({ description: '내가 만든 Meetups (all)' })

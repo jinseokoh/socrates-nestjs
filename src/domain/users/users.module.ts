@@ -1,4 +1,3 @@
-import { FeedFeedLink } from './../feeds/entities/feed_feed_link.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -19,6 +18,7 @@ import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
+import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
 
 import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
 import { UserFeedsController } from 'src/domain/users/user-feeds.controller';
@@ -36,7 +36,9 @@ import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.ser
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
 import { FeedsService } from 'src/domain/feeds/feeds.service';
-import { FlagsService } from 'src/domain/users/flags.service';
+import { FlagFeedService } from 'src/domain/users/flag_feed.service';
+import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
+import { FlagUserService } from 'src/domain/users/flag_user.service';
 import { UserFeedsService } from 'src/domain/users/user-feeds.service';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
@@ -57,10 +59,13 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      BookmarkUserFeed,
+      BookmarkUserMeetup,
+      BookmarkUserUser,
       Category,
       Feed,
+      FeedFeedLink,
       Flag,
-      Poll,
       Friendship,
       Hate,
       Join,
@@ -68,13 +73,10 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
       Ledger,
       Meetup,
       Plea,
+      Poll,
       Profile,
       Secret,
       User,
-      BookmarkUserFeed,
-      BookmarkUserMeetup,
-      BookmarkUserUser,
-      FeedFeedLink,
     ]),
     ThrottlerModule.forRoot([
       {
@@ -93,20 +95,22 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
     BookmarkUserMeetupService,
     BookmarkUserUserService,
     FeedsService,
-    FlagsService,
+    FlagFeedService,
+    FlagMeetupService,
+    FlagUserService,
+    LanguageSkillSubscriber,
     UserFeedsService,
     UserMeetupsService,
-    UsersService,
+    UserNotificationListener,
     UsersFriendshipService,
     UsersLedgerService,
     UsersPleaService,
+    UsersService,
     UserSubscriber,
     UserUsersService,
-    LanguageSkillSubscriber,
-    UserNotificationListener,
   ],
   controllers: [
-    UsersController,
+    // UserFcmController, 미사용 comment out
     UserCategoriesController,
     UserFeedsController,
     UserFriendshipController,
@@ -115,9 +119,9 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
     UserLedgersController,
     UserMeetupsController,
     UserPleaController,
+    UsersController,
     UserSmsController,
     UserUsersController,
-    // UserFcmController, 미사용 comment out
   ],
 })
 export class UsersModule {}

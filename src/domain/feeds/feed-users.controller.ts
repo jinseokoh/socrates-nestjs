@@ -10,7 +10,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { FeedsService } from 'src/domain/feeds/feeds.service';
 import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
 import { User } from 'src/domain/users/entities/user.entity';
-import { FlagsService } from 'src/domain/users/flags.service';
+import { FlagFeedService } from 'src/domain/users/flag_feed.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('feeds')
@@ -18,7 +18,7 @@ export class FeedUsersController {
   constructor(
     private readonly feedsService: FeedsService,
     private readonly bookmarksService: BookmarkUserFeedService,
-    private readonly flagsService: FlagsService,
+    private readonly flagFeedService: FlagFeedService,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -50,7 +50,7 @@ export class FeedUsersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '이 Feed 를 북마크한 모든 Users' })
-  @Get(':id/bookmarkingusers')
+  @Get(':feedId/bookmarkingusers')
   async loadBookmarkingUsers(
     @Param('feedId', ParseIntPipe) feedId: number,
   ): Promise<User[]> {
@@ -74,7 +74,7 @@ export class FeedUsersController {
   async loadFlaggingUsers(
     @Param('feedId', ParseIntPipe) feedId: number,
   ): Promise<User[]> {
-    return await this.flagsService.loadFlaggingUsers(feedId);
+    return await this.flagFeedService.loadFeedFlaggingUsers(feedId);
   }
 
   @ApiOperation({ description: '이 모임을 신고한 모든 Users (all)' })
@@ -82,6 +82,6 @@ export class FeedUsersController {
   async loadFlaggingUserIds(
     @Param('feedId', ParseIntPipe) feedId: number,
   ): Promise<number[]> {
-    return await this.flagsService.loadFlaggingUserIds(feedId);
+    return await this.flagFeedService.loadFeedFlaggingUserIds(feedId);
   }
 }

@@ -1,27 +1,55 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { FeedCommentsController } from 'src/domain/feeds/feed-comments.controller';
-import { FeedsController } from 'src/domain/feeds/feeds.controller';
 import { FeedsService } from 'src/domain/feeds/feeds.service';
-import { PollsController } from 'src/domain/feeds/polls.controller';
-import { PollsService } from 'src/domain/feeds/polls.service';
-import { Poll } from 'src/domain/feeds/entities/poll.entity';
-import { Comment } from 'src/domain/feeds/entities/comment.entity';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { FeedCommentsService } from 'src/domain/feeds/feed-comments.service';
+import { FlagFeedService } from 'src/domain/users/flag_feed.service';
+import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
+import { FlagUserService } from 'src/domain/users/flag_user.service';
+import { PollsService } from 'src/domain/feeds/polls.service';
+import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
+import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import { Comment } from 'src/domain/feeds/entities/comment.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
+import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { Poll } from 'src/domain/feeds/entities/poll.entity';
+import { User } from 'src/domain/users/entities/user.entity';
+import { FeedCommentsController } from 'src/domain/feeds/feed-comments.controller';
+import { FeedUsersController } from 'src/domain/feeds/feed-users.controller';
+import { FeedsController } from 'src/domain/feeds/feeds.controller';
+import { PollsController } from 'src/domain/feeds/polls.controller';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
-import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Feed, Poll, Comment, Plea, FeedFeedLink]),
-    S3Module,
+    TypeOrmModule.forFeature([
+      BookmarkUserFeed,
+      Comment,
+      Feed,
+      FeedFeedLink,
+      Flag,
+      Plea,
+      Poll,
+      User,
+    ]),
     FcmModule,
+    S3Module,
   ],
   // exports: [FeedsService],
-  providers: [FeedsService, FeedCommentsService, PollsService],
-  controllers: [PollsController, FeedsController, FeedCommentsController],
+  providers: [
+    BookmarkUserFeedService,
+    FeedCommentsService,
+    FeedsService,
+    FlagFeedService,
+    PollsService,
+  ],
+  controllers: [
+    FeedCommentsController,
+    FeedsController,
+    FeedUsersController,
+    PollsController,
+  ],
 })
 export class FeedsModule {}

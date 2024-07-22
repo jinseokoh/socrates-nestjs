@@ -134,13 +134,13 @@ export class FeedsService {
   //?-------------------------------------------------------------------------//
 
   async softRemove(id: number): Promise<Feed> {
-    const meetup = await this.findById(id);
-    return await this.feedRepository.softRemove(meetup);
+    const feed = await this.findById(id);
+    return await this.feedRepository.softRemove(feed);
   }
 
   async remove(id: number): Promise<Feed> {
-    const meetup = await this.findById(id);
-    return await this.feedRepository.remove(meetup);
+    const feed = await this.findById(id);
+    return await this.feedRepository.remove(feed);
   }
 
   //?-------------------------------------------------------------------------//

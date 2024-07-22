@@ -147,7 +147,7 @@ export class BookmarkUserFeedService {
   // 내가 북마크한 모든 feeds
   async loadBookmarkedFeeds(userId: number): Promise<Feed[]> {
     const queryBuilder = this.feedRepository.createQueryBuilder('feed');
-    return queryBuilder
+    return await queryBuilder
       .innerJoinAndSelect(
         BookmarkUserFeed,
         'bookmark_user_feed',
@@ -174,7 +174,7 @@ export class BookmarkUserFeedService {
   // Feed 를 북마크한 Users
   async loadBookmarkingUsers(feedId: number): Promise<User[]> {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
-    return queryBuilder
+    return await queryBuilder
       .innerJoinAndSelect(
         BookmarkUserFeed,
         'bookmark_user_feed',

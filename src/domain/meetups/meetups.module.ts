@@ -13,7 +13,7 @@ import { MeetupThreadsController } from 'src/domain/meetups/meetup-threads.contr
 import { MeetupUsersController } from 'src/domain/meetups/meetup-users.controller';
 import { MeetupsController } from 'src/domain/meetups/meetups.controller';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
-import { FlagsService } from 'src/domain/users/flags.service';
+import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
 import { ThreadsService } from 'src/domain/meetups/threads.service';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
@@ -22,31 +22,31 @@ import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      BookmarkUserMeetup,
       Career,
       Category,
       Comment,
       Feed,
       Flag,
       Meetup,
-      BookmarkUserMeetup,
       Thread,
       User,
       Venue,
     ]),
-    S3Module,
     FcmModule,
+    S3Module,
   ],
   // exports: [MeetupsService], // we need this for what?
   providers: [
-    MeetupsService,
     BookmarkUserMeetupService,
+    FlagMeetupService,
+    MeetupsService,
     ThreadsService,
-    FlagsService,
   ],
   controllers: [
     MeetupsController,
-    MeetupUsersController,
     MeetupThreadsController,
+    MeetupUsersController,
   ],
 })
 export class MeetupsModule {}

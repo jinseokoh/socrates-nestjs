@@ -1,6 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,

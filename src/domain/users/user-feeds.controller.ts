@@ -14,7 +14,7 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { SkipThrottle } from '@nestjs/throttler';
-import { FlagsService } from 'src/domain/users/flags.service';
+import { FlagFeedService } from 'src/domain/users/flag_feed.service';
 import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { AnyData } from 'src/common/types';
@@ -26,7 +26,7 @@ import { UserFeedsService } from 'src/domain/users/user-feeds.service';
 export class UserFeedsController {
   constructor(
     private readonly userFeedsService: UserFeedsService,
-    private readonly flagsService: FlagsService,
+    private readonly flagsService: FlagFeedService,
     private readonly bookmarksService: BookmarkUserFeedService,
   ) {}
 
