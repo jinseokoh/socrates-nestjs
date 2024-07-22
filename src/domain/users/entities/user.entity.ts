@@ -188,10 +188,10 @@ export class User {
   @OneToMany(() => Join, (join) => join.askedUser)
   public askedJoins: Join[];
 
-  @OneToMany(() => Hate, (hate) => hate.sender)
+  @OneToMany(() => Hate, (hate) => hate.user)
   public usersHating: Hate[];
 
-  @OneToMany(() => Hate, (hate) => hate.recipient)
+  @OneToMany(() => Hate, (hate) => hate.targetUser)
   public usersHated: Hate[];
 
   @OneToMany(() => Plea, (plea) => plea.sender)
@@ -221,7 +221,7 @@ export class User {
   public feedBookmarks: BookmarkUserFeed[];
 
   @OneToMany(() => BookmarkUserMeetup, (bookmark) => bookmark.user)
-  public meetupBookmarks: BookmarkUserFeed[];
+  public meetupBookmarks: BookmarkUserMeetup[];
 
   @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.user)
   public userBookmarks: BookmarkUserUser[];

@@ -62,7 +62,7 @@ export class UserUsersController {
     return this.bookmarksService.isUserBookmarked(userId, targetUserId);
   }
 
-  @ApiOperation({ description: '내가 북마크/follow 하는 Users (paginated)' })
+  @ApiOperation({ description: '내가 북마크한/follow중인 Users (paginated)' })
   @Get(':userId/bookmarkedusers')
   async findBookmarkedUsers(
     @Param('userId', ParseIntPipe) userId: number,
@@ -71,7 +71,7 @@ export class UserUsersController {
     return await this.bookmarksService.findBookmarkedUsers(query, userId);
   }
 
-  @ApiOperation({ description: '내가 북마크/follow 하는 Users (all)' })
+  @ApiOperation({ description: '내가 북마크한/follow중인 Users (all)' })
   @Get(':userId/bookmarkedusers/all')
   async loadBookmarkedUsers(
     @Param('userId', ParseIntPipe) userId: number,
@@ -79,7 +79,7 @@ export class UserUsersController {
     return await this.bookmarksService.loadBookmarkedUsers(userId);
   }
 
-  @ApiOperation({ description: '내가 북마크/follow 하는 UserIds (all)' })
+  @ApiOperation({ description: '내가 북마크한/follow중인 UserIds (all)' })
   @Get(':userId/bookmarkeduserids')
   async loadBookmarkedUserIds(
     @Param('userId', ParseIntPipe) userId: number,
@@ -106,7 +106,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: 'User 신고 삭제' })
-  @Delete(':userId/userflags/:userId')
+  @Delete(':userId/userflags/:targetUserId')
   async deleteUserFlag(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('targetUserId', ParseIntPipe) targetUserId: number,

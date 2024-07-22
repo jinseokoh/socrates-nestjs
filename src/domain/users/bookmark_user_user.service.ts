@@ -150,8 +150,8 @@ export class BookmarkUserUserService {
         'bookmark_user_user',
         'bookmark_user_user.targetUserId = user.id',
       )
-      .innerJoinAndSelect('user.targetUser', 'targetUser')
-      .where('bookmark_user_user.userId = : userId', { userId });
+      .leftJoinAndSelect('user.profile', 'profile')
+      .where('bookmark_user_user.userId = :userId', { userId });
 
     const config: PaginateConfig<User> = {
       sortableColumns: ['id'],

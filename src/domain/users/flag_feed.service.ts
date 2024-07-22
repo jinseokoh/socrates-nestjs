@@ -155,8 +155,8 @@ export class FlagFeedService {
   async loadFlaggedFeedIds(userId: number): Promise<number[]> {
     const rows = await this.flagRepository.manager.query(
       'SELECT entityId FROM `flag` \
-      WHERE flag.userId = ? AND flag.entityType = ?',
-      [userId, 'feed'],
+      WHERE flag.entityType = ? AND flag.userId = ?',
+      [`feed`, userId],
     );
 
     return rows.map((v: any) => v.entityId);
@@ -170,7 +170,8 @@ export class FlagFeedService {
     return await queryBuilder
       .innerJoinAndSelect(Flag, 'flag', 'flag.userId = user.id')
       .addSelect(['user.*'])
-      .where('flag.entityType = `feed` AND flag.entityId = :feedId', {
+      .where('flag.entityType = :entityType AND flag.entityId = :feedId', {
+        entityType: `feed`,
         feedId,
       })
       .getMany();
@@ -180,8 +181,8 @@ export class FlagFeedService {
   async loadFeedFlaggingUserIds(feedId: number): Promise<number[]> {
     const rows = await this.flagRepository.manager.query(
       'SELECT userId FROM `flag` \
-      WHERE flag.entityType = `feed` AND flag.entity.id = ?',
-      [feedId],
+      WHERE flag.entityType = ? AND flag.entityId = ?',
+      [`feed`, feedId],
     );
 
     return rows.map((v: any) => v.userId);

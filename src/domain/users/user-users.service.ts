@@ -74,10 +74,10 @@ export class UserUsersService {
       });
 
     const config: PaginateConfig<Hate> = {
-      sortableColumns: ['recipientId'],
+      sortableColumns: ['id'],
       searchableColumns: ['message'],
       defaultLimit: 20,
-      defaultSortBy: [['recipientId', 'ASC']],
+      defaultSortBy: [['id', 'DESC']],
       filterableColumns: {},
     };
 
