@@ -1,5 +1,10 @@
 import { Flag } from 'src/domain/users/entities/flag.entity';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   PaginateConfig,
@@ -7,10 +12,8 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { AnyData } from 'src/common/types';
 import { DataSource } from 'typeorm';
-import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Repository } from 'typeorm/repository/Repository';
@@ -23,11 +26,10 @@ export class UserUsersService {
 
   constructor(
     @InjectRepository(User)
-    private readonly repository: Repository<User>,
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
     @Inject(ConfigService) private configService: ConfigService, // global
-    @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
@@ -37,45 +39,68 @@ export class UserUsersService {
   //! Hate Pivot (차단)
   //! ------------------------------------------------------------------------//
 
-  // 차단한 사용자 리스트에 추가
-  async attachUserIdToHatePivot(
-    senderId: number,
-    recipientId: number,
-    message: string,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `hate` (senderId, recipientId, message) VALUES (?, ?, ?)',
-      [senderId, recipientId, message],
-    );
+  // 사용자 차단 추가
+  async createHate(
+    userId: number,
+    targetUserId: number,
+    message: string | null,
+  ): Promise<Hate> {
+    try {
+      const hate = await this.hateRepository.save(
+        this.hateRepository.create({ userId, targetUserId, message }),
+      );
+      return hate;
+    } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    }
   }
 
-  // 차단한 사용자 리스트에서 삭제
-  async detachUserIdFromHatePivot(
-    senderId: number,
-    recipientId: number,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `hate` WHERE senderId = ? AND recipientId = ?',
-      [senderId, recipientId],
-    );
+  // 사용자 차단 삭제
+  async deleteHate(userId: number, targetUserId: number): Promise<any> {
+    try {
+      const { affectedRows } = await this.hateRepository.manager.query(
+        'DELETE FROM `hate` WHERE userId = ? AND targetUserId = ?',
+        [userId, targetUserId],
+      );
+      return { data: affectedRows };
+    } catch (error) {
+      throw error;
+    }
   }
 
-  // 내가 차단한 사용자 리스트 (paginated)
-  async getUsersHatedByMe(
+  // 사용자 차단 여부
+  async isHated(userId: number, targetUserId: number): Promise<boolean> {
+    try {
+      const [row] = await this.hateRepository.manager.query(
+        'SELECT COUNT(*) AS count FROM `hate` WHERE userId = ? AND targetUserId = ?',
+        [userId, targetUserId],
+      );
+      const { count } = row;
+
+      return +count === 1;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // 내가 차단한 Users (paginated)
+  async findBlockedUsers(
     userId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Hate>> {
-    const queryBuilder = this.hateRepository
-      .createQueryBuilder('hate')
-      .innerJoinAndSelect('hate.recipient', 'user')
+  ): Promise<Paginated<User>> {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect(Hate, 'hate', 'hate.targetUserId = user.id')
       .innerJoinAndSelect('user.profile', 'profile')
-      .where({
-        senderId: userId,
-      });
+      .where('hate.userId = :userId', { userId });
 
-    const config: PaginateConfig<Hate> = {
+    const config: PaginateConfig<User> = {
       sortableColumns: ['id'],
-      searchableColumns: ['message'],
+      searchableColumns: ['username'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {},
@@ -84,21 +109,27 @@ export class UserUsersService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내가 차단하거나 나를 차단한 사용자ID 리스트 (all)
-  async getUserIdsEitherHatingOrBeingHated(userId: number): Promise<AnyData> {
-    const rows = await this.repository.manager.query(
-      'SELECT senderId, recipientId \
-      FROM `hate` \
-      WHERE senderId = ? OR recipientId = ?',
-      [userId, userId],
-    );
-
-    const data = rows.map((v) => {
-      return v.senderId === userId ? v.recipientId : v.senderId;
-    });
-
-    return { data: [...new Set(data)] };
+  // 내가 차단한 Users (all)
+  async loadBlockedUsers(userId: number): Promise<User[]> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    return await queryBuilder
+      .innerJoinAndSelect(Hate, 'hate', 'hate.targetUserId = user.id')
+      .addSelect(['user.*'])
+      .where('hate.userId = :userId', { userId })
+      .getMany();
   }
 
-  
+  // 내가 차단하거나 나를 차단한 UserIds (all)
+  async loadUserIdsEitherHatingOrBeingHated(userId: number): Promise<number[]> {
+    const rows: { userId: number; targetUserId: number }[] =
+      await this.userRepository.manager.query(
+        'SELECT userId, targetUserId FROM `hate` WHERE userId = ? OR targetUserId = ?',
+        [userId, userId],
+      );
+    const data = rows.map((v: any) => {
+      return v.userId === userId ? v.targetUserId : v.userId;
+    });
+
+    return [...new Set(data)];
+  }
 }

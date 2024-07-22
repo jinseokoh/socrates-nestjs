@@ -88,7 +88,7 @@ export class UserUsersController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? 내가 신고한 Users
+  //? 내가 신고(Flag)한 Users
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'User 신고 생성' })
@@ -168,66 +168,65 @@ export class UserUsersController {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Hate Pivot
+  //? 내가 차단(Hate)한 Users
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '차단한 사용자 리스트에 추가' })
-  @Post(':userId/users-hated/:otherId')
-  async attachUserIdToHatePivot(
+  @ApiOperation({ description: '사용자 차단 추가' })
+  @Post(':userId/hates/:targetUserId')
+  async createHate(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('otherId', ParseIntPipe) otherId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
     @Body('message') message: string | null,
-  ): Promise<any> {
-    //? checking if this meetup belongs to the user costs a database access,
-    //? which you can get around if you design your application carefully.
-    //? so user validation has been removed. keep that in mind.
-    try {
-      await this.userUsersService.attachUserIdToHatePivot(
-        userId,
-        otherId,
-        message,
-      );
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
+  ): Promise<Hate> {
+    return await this.userUsersService.createHate(
+      userId,
+      targetUserId,
+      message,
+    );
   }
 
-  @ApiOperation({ description: '차단한 사용자 리스트에서 삭제' })
-  @Delete(':userId/users-hated/:otherId')
-  async detachUserIdFromHatePivot(
+  @ApiOperation({ description: '사용자 차단 삭제' })
+  @Delete(':userId/hates/:targetUserId')
+  async deleteHate(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('otherId', ParseIntPipe) otherId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
   ): Promise<any> {
-    //? checking if this meetup belongs to the user costs a database access,
-    //? which you can get around if you design your application carefully.
-    //? so user validation has been removed. keep that in mind.
-    try {
-      await this.userUsersService.detachUserIdFromHatePivot(userId, otherId);
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    return await this.userUsersService.deleteHate(userId, targetUserId);
   }
 
-  @ApiOperation({ description: '내가 차단한 사용자 리스트 (paginated)' })
-  @Get(':userId/users-hated')
-  async getUsersHatedByMe(
+  @ApiOperation({ description: '사용자 차단 여부' })
+  @Get(':userId/hates/:targetUserId')
+  async isHated(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+  ): Promise<any> {
+    return {
+      data: await this.userUsersService.isHated(userId, targetUserId),
+    };
+  }
+
+  @ApiOperation({ description: '내가 차단한 Users (paginated)' })
+  @Get(':userId/hatedusers')
+  async findBlockedUsers(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Hate>> {
-    return this.userUsersService.getUsersHatedByMe(userId, query);
+  ): Promise<Paginated<User>> {
+    return this.userUsersService.findBlockedUsers(userId, query);
+  }
+
+  @ApiOperation({ description: '내가 차단한 Users (all)' })
+  @Get(':userId/hatedusers/all')
+  async loadBlockedUsers(@Param('userId') userId: number): Promise<User[]> {
+    return this.userUsersService.loadBlockedUsers(userId);
   }
 
   @ApiOperation({
-    description: '내가 차단하거나 나를 차단한 사용자ID 리스트 (all)',
+    description: '내가 차단했거나 나를 차단한 UserIds (all)',
   })
-  @Get(':userId/userids-hated')
-  async getUserIdsHatedByMe(@Param('userId') userId: number): Promise<AnyData> {
-    return this.userUsersService.getUserIdsEitherHatingOrBeingHated(userId);
+  @Get(':userId/hateduserids')
+  async loadUserIdsEitherHatingOrBeingHated(
+    @Param('userId') userId: number,
+  ): Promise<number[]> {
+    return this.userUsersService.loadUserIdsEitherHatingOrBeingHated(userId);
   }
 }
