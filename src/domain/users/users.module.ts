@@ -13,7 +13,6 @@ import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
-import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
@@ -21,8 +20,6 @@ import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 
-import { BookmarkUserMeetupController } from 'src/domain/users/bookmark_user_meetup.controller';
-import { BookmarkUserUserController } from 'src/domain/users/bookmark_user_user.controller';
 import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
 import { UserFeedsController } from 'src/domain/users/user-feeds.controller';
 import { UserFriendshipController } from 'src/domain/users/user-friendshp.controller';
@@ -40,12 +37,13 @@ import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup
 import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
 import { FeedsService } from 'src/domain/feeds/feeds.service';
 import { FlagsService } from 'src/domain/users/flags.service';
+import { UserFeedsService } from 'src/domain/users/user-feeds.service';
+import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
 import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
-import { UsersMeetupService } from 'src/domain/users/users-meetup.service';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { UsersService } from 'src/domain/users/users.service';
-import { UsersUserService } from 'src/domain/users/users-user.service';
+import { UserUsersService } from 'src/domain/users/user-users.service';
 
 import { S3Module } from 'src/services/aws/s3.module';
 import { AlarmsModule } from 'src/domain/alarms/alarms.module';
@@ -68,7 +66,6 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
       Join,
       LanguageSkill,
       Ledger,
-      Like,
       Meetup,
       Plea,
       Profile,
@@ -97,19 +94,18 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
     BookmarkUserUserService,
     FeedsService,
     FlagsService,
+    UserFeedsService,
+    UserMeetupsService,
     UsersService,
     UsersFriendshipService,
     UsersLedgerService,
-    UsersMeetupService,
     UsersPleaService,
     UserSubscriber,
-    UsersUserService,
+    UserUsersService,
     LanguageSkillSubscriber,
     UserNotificationListener,
   ],
   controllers: [
-    BookmarkUserMeetupController,
-    BookmarkUserUserController,
     UsersController,
     UserCategoriesController,
     UserFeedsController,

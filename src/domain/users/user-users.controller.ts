@@ -15,14 +15,77 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
-import { UsersUserService } from 'src/domain/users/users-user.service';
-import { Flag } from 'src/domain/users/entities/flag.entity';
+import { UserUsersService } from 'src/domain/users/user-users.service';
+import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
+import { FlagsService } from 'src/domain/users/flags.service';
+import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UserUsersController {
-  constructor(private readonly usersUserService: UsersUserService) {}
+  constructor(
+    private readonly userUsersService: UserUsersService,
+    private readonly flagsService: FlagsService,
+    private readonly bookmarksService: BookmarkUserUserService,
+  ) {}
+
+  //?-------------------------------------------------------------------------//
+  //? 내가 북마크(BookmarkUserUser)한 Users
+  //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: 'User 북마크 생성' })
+  @Post(':userId/userbookmarks/:targetUserId')
+  async createUserBookmark(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+  ): Promise<any> {
+    return await this.bookmarksService.createUserBookmark(userId, targetUserId);
+  }
+
+  @ApiOperation({ description: 'User 북마크 삭제' })
+  @Delete(':userId/userbookmarks/:targetUserId')
+  async deleteUserBookmark(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+  ): Promise<AnyData> {
+    return await this.bookmarksService.deleteUserBookmark(userId, targetUserId);
+  }
+
+  @ApiOperation({ description: 'User 북마크 여부' })
+  @Get(':userId/userbookmarks/:targetUserId')
+  async isUserBookmarked(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+  ): Promise<AnyData> {
+    return this.bookmarksService.isUserBookmarked(userId, targetUserId);
+  }
+
+  @ApiOperation({ description: '내가 북마크한 Users (paginated)' })
+  @Get(':userId/bookmarkedusers')
+  async findBookmarkedUsers(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<BookmarkUserUser>> {
+    return await this.bookmarksService.findBookmarkedUsers(userId, query);
+  }
+
+  @ApiOperation({ description: '내가 북마크한 Users (all)' })
+  @Get(':userId/bookmarkedusers/all')
+  async loadBookmarkedUsers(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<User[]> {
+    return await this.bookmarksService.loadBookmarkedUsers(userId);
+  }
+
+  @ApiOperation({ description: '내가 북마크한 UserIds (all)' })
+  @Get(':userId/bookmarkeduserids')
+  async loadBookmarkedUserIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.bookmarksService.loadBookmarkedUserIds(userId);
+  }
 
   //?-------------------------------------------------------------------------//
   //? Hate Pivot
@@ -39,7 +102,7 @@ export class UserUsersController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersUserService.attachUserIdToHatePivot(
+      await this.userUsersService.attachUserIdToHatePivot(
         userId,
         otherId,
         message,
@@ -62,7 +125,7 @@ export class UserUsersController {
     //? which you can get around if you design your application carefully.
     //? so user validation has been removed. keep that in mind.
     try {
-      await this.usersUserService.detachUserIdFromHatePivot(userId, otherId);
+      await this.userUsersService.detachUserIdFromHatePivot(userId, otherId);
       return {
         data: 'ok',
       };
@@ -77,7 +140,7 @@ export class UserUsersController {
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Hate>> {
-    return this.usersUserService.getUsersHatedByMe(userId, query);
+    return this.userUsersService.getUsersHatedByMe(userId, query);
   }
 
   @ApiOperation({
@@ -85,6 +148,6 @@ export class UserUsersController {
   })
   @Get(':userId/userids-hated')
   async getUserIdsHatedByMe(@Param('userId') userId: number): Promise<AnyData> {
-    return this.usersUserService.getUserIdsEitherHatingOrBeingHated(userId);
+    return this.userUsersService.getUserIdsEitherHatingOrBeingHated(userId);
   }
 }

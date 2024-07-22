@@ -12,13 +12,13 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { AnyData } from 'src/common/types';
 import { DataSource } from 'typeorm';
 import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm/repository/Repository';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 
 @Injectable()
 export class BookmarkUserFeedService {
@@ -30,6 +30,8 @@ export class BookmarkUserFeedService {
     private readonly bookmarkUserFeedRepository: Repository<BookmarkUserFeed>,
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     @Inject(ConfigService) private configService: ConfigService, // global
     @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     private dataSource: DataSource, // for transaction
@@ -104,6 +106,18 @@ export class BookmarkUserFeedService {
     }
   }
 
+  // Feed 북마크 여부
+  async isFeedBookmarked(userId: number, feedId: number): Promise<boolean> {
+    const [row] = await this.bookmarkUserFeedRepository.manager.query(
+      'SELECT COUNT(*) AS count FROM `bookmark_user_feed` \
+      WHERE userId = ? AND feedId = ?',
+      [userId, feedId],
+    );
+    const { count } = row;
+
+    return +count === 1;
+  }
+
   // 내가 북마크한 feed 리스트 (paginated)
   async findBookmarkedFeeds(
     query: PaginateQuery,
@@ -114,7 +128,7 @@ export class BookmarkUserFeedService {
       .innerJoinAndSelect(
         BookmarkUserFeed,
         'bookmark_user_feed',
-        'feed.id = bookmark_user_feed.feedId',
+        'bookmark_user_feed.feedId = feed.id',
       )
       .innerJoinAndSelect('feed.user', 'user')
       .where('bookmark_user_feed.userId = :userId', { userId });
@@ -123,7 +137,7 @@ export class BookmarkUserFeedService {
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultLimit: 20,
-      defaultSortBy: [['id', 'ASC']],
+      defaultSortBy: [['id', 'DESC']],
       filterableColumns: {},
     };
 
@@ -137,7 +151,7 @@ export class BookmarkUserFeedService {
       .innerJoinAndSelect(
         BookmarkUserFeed,
         'bookmark_user_feed',
-        'feed.id = bookmark_user_feed.feedId',
+        'bookmark_user_feed.feedId = feed.id',
       )
       .addSelect(['feed.*'])
       .where('bookmark_user_feed.userId = :userId', { userId })
@@ -155,15 +169,32 @@ export class BookmarkUserFeedService {
     return rows.map((v: any) => v.feedId);
   }
 
-  // 내가 북마크한 feed 여부
-  async isFeedBookmarked(userId: number, feedId: number): Promise<boolean> {
-    const [row] = await this.bookmarkUserFeedRepository.manager.query(
-      'SELECT COUNT(*) AS count FROM `bookmark_user_feed` \
-      WHERE userId = ? AND feedId = ?',
-      [userId, feedId],
-    );
-    const { count } = row;
+  //? 새롭게 추가 -----------------------------------------------------------------//
 
-    return +count === 1;
+  // Feed 를 북마크한 Users
+  async loadBookmarkingUsers(feedId: number): Promise<User[]> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    return queryBuilder
+      .innerJoinAndSelect(
+        BookmarkUserFeed,
+        'bookmark_user_feed',
+        'bookmark_user_feed.userId = user.id',
+      )
+      .addSelect(['user.*'])
+      .where('bookmark_user_feed.feedId = :feedId', {
+        feedId,
+      })
+      .getMany();
+  }
+
+  // Feed 를 북마크한 UserIds
+  async loadBookmarkingUserIds(feedId: number): Promise<number[]> {
+    const rows = await this.bookmarkUserFeedRepository.manager.query(
+      'SELECT userId FROM `bookmark_user_feed` \
+      WHERE bookmark_user_feed.feedId = ?',
+      [feedId],
+    );
+
+    return rows.map((v: any) => v.userId);
   }
 }

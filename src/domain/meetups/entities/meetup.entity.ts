@@ -28,7 +28,6 @@ import { Join } from 'src/domain/meetups/entities/join.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
-import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Thread } from 'src/domain/meetups/entities/thread.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
@@ -127,21 +126,18 @@ export class Meetup {
   @ApiProperty({ description: 'skill level' })
   skill: number;
 
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'view count' })
-  viewCount: number;
-
+  // join, view bookmark, flag count  --------------------------------------- //
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'join count' })
   joinCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'like count' })
-  likeCount: number;
+  @ApiProperty({ description: 'view count' })
+  viewCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'report count' })
-  reportCount: number; // 신고
+  @ApiProperty({ description: 'bookmark count = like count' })
+  bookmarkCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'flag count' })
@@ -211,9 +207,6 @@ export class Meetup {
 
   @OneToMany(() => Join, (join) => join.meetup)
   public joins: Join[];
-
-  @OneToMany(() => Like, (like) => like.meetup)
-  public usersLiked: Like[];
 
   @OneToMany(() => BookmarkUserMeetup, (bookmark) => bookmark.meetup)
   public bookmarkedByUsers: BookmarkUserMeetup[];

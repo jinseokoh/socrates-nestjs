@@ -40,6 +40,7 @@ export class Feed {
   @IsArray()
   images: string[] | null;
 
+  // like, comment, view, bookmark, flag count ------------------------------ //
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'views' })
   viewCount: number;
@@ -49,12 +50,12 @@ export class Feed {
   likeCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'bookmark count' })
-  bookmarkCount: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'comment count' })
   commentCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'bookmark count' })
+  bookmarkCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'flag count' })
@@ -71,7 +72,7 @@ export class Feed {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  //*-------------------------------------------------------------------------*/
+  //* ----------------------------------------------------------------------- */
   //* 1-to-1 hasOne
 
   @OneToOne(() => Poll, (poll) => poll.feed, {

@@ -17,9 +17,9 @@ import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 
 @Injectable()
-export class UsersUserService {
+export class UserUsersService {
   private readonly env: any;
-  private readonly logger = new Logger(UsersUserService.name);
+  private readonly logger = new Logger(UserUsersService.name);
 
   constructor(
     @InjectRepository(User)
@@ -33,9 +33,9 @@ export class UsersUserService {
     this.env = this.configService.get('nodeEnv');
   }
 
-  //?-------------------------------------------------------------------------//
-  //? Hate Pivot (차단)
-  //?-------------------------------------------------------------------------//
+  //! ------------------------------------------------------------------------//
+  //! Hate Pivot (차단)
+  //! ------------------------------------------------------------------------//
 
   // 차단한 사용자 리스트에 추가
   async attachUserIdToHatePivot(

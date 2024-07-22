@@ -18,7 +18,6 @@ import { AnyData } from 'src/common/types';
 import { ConfigService } from '@nestjs/config';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { Join } from 'src/domain/meetups/entities/join.entity';
-import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -28,17 +27,15 @@ import { DataSource } from 'typeorm';
 import { Room } from 'src/domain/chats/entities/room.entity';
 
 @Injectable()
-export class UsersMeetupService {
+export class UserMeetupsService {
   private readonly env: any;
-  private readonly logger = new Logger(UsersMeetupService.name);
+  private readonly logger = new Logger(UserMeetupsService.name);
 
   constructor(
     @InjectRepository(User)
     private readonly repository: Repository<User>,
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
-    @InjectRepository(Like)
-    private readonly likeRepository: Repository<Like>,
     @InjectRepository(Join)
     private readonly joinRepository: Repository<Join>,
     @Inject(ConfigService) private configService: ConfigService, // global
@@ -49,7 +46,7 @@ export class UsersMeetupService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Meetups
+  //? My Meetups
   //?-------------------------------------------------------------------------//
 
   // 내가 만든 모임 리스트
@@ -68,10 +65,10 @@ export class UsersMeetupService {
       });
 
     const config: PaginateConfig<Meetup> = {
-      sortableColumns: ['createdAt'],
+      sortableColumns: ['id'],
       searchableColumns: ['title'],
       defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
+      defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         region: [FilterOperator.EQ, FilterOperator.IN],
         category: [FilterOperator.EQ, FilterOperator.IN],
@@ -84,187 +81,32 @@ export class UsersMeetupService {
     return await paginate(query, queryBuilder, config);
   }
 
-  //?-------------------------------------------------------------------------//
-  //? Like Pivot
-  //?-------------------------------------------------------------------------//
-
-  // 나의 찜 리스트에 추가
-  async attachToLikePivot(userId: number, meetupId: number): Promise<any> {
-    const [row] = await this.repository.query(
-      'SELECT COUNT(*) AS cnt FROM `like` WHERE userId = ?',
-      [userId],
-    );
-    const count = row.cnt;
-    if (+count > 30) {
-      throw new NotAcceptableException('max limit reached');
-    }
-
-    const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `like` (userId, meetupId) VALUES (?, ?)',
-      [userId, meetupId],
-    );
-
-    // fetch data for notification recipient
-    const meetup = await this.repository.manager.findOneOrFail(Meetup, {
-      where: { id: meetupId },
-      relations: [`user`, `user.profile`],
-    });
-    // notification with event listener ------------------------------------//
-    // todo. fine tune notifying logic to dedup the same id
-    const event = new UserNotificationEvent();
-    event.name = 'meetupLike';
-    event.userId = meetup.user.id;
-    event.token = meetup.user.pushToken;
-    event.options = meetup.user.profile?.options ?? {};
-    event.body = `${meetup.title} 모임에 누군가 찜을 했습니다.`;
-    event.data = {
-      page: `meetups/${meetupId}`,
-      args: '',
-    };
-    this.eventEmitter.emit('user.notified', event);
-
-    if (affectedRows > 0) {
-      await this.meetupRepository.increment({ id: meetupId }, 'likeCount', 1);
-    }
-  }
-
-  // 나의 찜 리스트에서 삭제
-  async detachFromLikePivot(userId: number, meetupId: number): Promise<any> {
-    const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `like` WHERE userId = ? AND meetupId = ?',
-      [userId, meetupId],
-    );
-    if (affectedRows > 0) {
-      // the following doesn't work at times.
-      // await this.meetupRrepository.decrement({ meetupId }, 'likeCount', 1);
-      //
-      // we need to make the likeCount always positive.
-      await this.repository.manager.query(
-        'UPDATE `meetup` SET likeCount = likeCount - 1 WHERE id = ? AND likeCount > 0',
-        [meetupId],
-      );
-    }
-  }
-
-  // 내가 찜한 모임 리스트 (paginated)
-  async getMeetupsLikedByMe(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Like>> {
-    const queryBuilder = this.likeRepository
-      .createQueryBuilder('like')
-      .innerJoinAndSelect('like.meetup', 'meetup')
+  // 내가 만든 Meetup 리스트 (all)
+  async loadMyMeetups(userId: number): Promise<Meetup[]> {
+    return await this.meetupRepository
+      .createQueryBuilder('meetup')
       .innerJoinAndSelect('meetup.venue', 'venue')
       .innerJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('meetup.rooms', 'rooms')
-      .leftJoinAndSelect('rooms.user', 'participant')
       .where({
         userId,
-      });
-
-    const config: PaginateConfig<Like> = {
-      sortableColumns: ['meetupId'],
-      searchableColumns: ['meetup.title'],
-      defaultLimit: 20,
-      defaultSortBy: [['meetupId', 'ASC']],
-      filterableColumns: {},
-    };
-
-    return await paginate(query, queryBuilder, config);
+      })
+      .getMany();
   }
 
-  // 내가 찜한 모임 ID 리스트 (all; 최대30)
-  async getMeetupIdsLikedByMe(userId: number): Promise<number[]> {
-    const items = await this.repository.manager.query(
-      'SELECT meetupId \
-      FROM `user` INNER JOIN `like` ON `user`.id = `like`.userId \
-      WHERE `user`.id = ?',
-      [userId],
-    );
-
-    console.log(items.map(({ meetupId }) => meetupId));
-
-    return items.map(({ meetupId }) => meetupId);
+  // 내가 만든 Meetup Ids 리스트 (all)
+  async loadMyMeetupIds(userId: number): Promise<number[]> {
+    const items = await this.meetupRepository
+      .createQueryBuilder('meetup')
+      .where({
+        userId,
+      })
+      .getMany();
+    return items.map((v) => v.id);
   }
 
-  //?-------------------------------------------------------------------------//
-  //? ReportUserMeetup Pivot
-  //?-------------------------------------------------------------------------//
-
-  // 차단한 모임 리스트에 추가
-  async attachToReportUserMeetupPivot(
-    userId: number,
-    meetupId: number,
-    message: string,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'INSERT IGNORE INTO `user_meetup_report` (userId, meetupId, message) VALUES (?, ?, ?)',
-      [userId, meetupId, message],
-    );
-    if (affectedRows > 0) {
-      await this.meetupRepository.increment({ id: meetupId }, 'reportCount', 1);
-    }
-  }
-
-  // 차단한 모임 리스트에서 삭제
-  async detachFromReportUserMeetupPivot(
-    userId: number,
-    meetupId: number,
-  ): Promise<void> {
-    const { affectedRows } = await this.repository.manager.query(
-      'DELETE FROM `user_meetup_report` WHERE userId = ? AND meetupId = ?',
-      [userId, meetupId],
-    );
-    if (affectedRows > 0) {
-      // await this.meetupRrepository.decrement({ meetupId }, 'reportCount', 1);
-      await this.repository.manager.query(
-        'UPDATE `meetup` SET reportCount = reportCount - 1 WHERE id = ? AND reportCount > 0',
-        [meetupId],
-      );
-    }
-  }
-
-  // // 내가 차단한 모임 리스트 (paginated)
-  // async getMeetupsReportedByMe(
-  //   userId: number,
-  //   query: PaginateQuery,
-  // ): Promise<Paginated<ReportUserMeetup>> {
-  //   const queryBuilder = this.reportMeetupRepository
-  //     .createQueryBuilder('reportMeetup')
-  //     .leftJoinAndSelect('reportMeetup.meetup', 'meetup')
-  //     .leftJoinAndSelect('meetup.venue', 'venue')
-  //     .where({
-  //       userId,
-  //     });
-
-  //   const config: PaginateConfig<ReportUserMeetup> = {
-  //     sortableColumns: ['meetupId'],
-  //     searchableColumns: ['meetup.title'],
-  //     defaultLimit: 20,
-  //     defaultSortBy: [['meetupId', 'DESC']],
-  //     filterableColumns: {},
-  //   };
-
-  //   return await paginate(query, queryBuilder, config);
-  // }
-
-  // 내가 차단한 모임ID 리스트 (all)
-  async getMeetupIdsReportedByMe(userId: number): Promise<AnyData> {
-    const items = await this.repository.manager.query(
-      'SELECT meetupId \
-      FROM `user` INNER JOIN `user_meetup_report` ON `user`.id = `user_meetup_report`.userId \
-      WHERE `user`.id = ?',
-      [userId],
-    );
-
-    return {
-      data: items.map(({ meetupId }) => meetupId),
-    };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? Join Pivot
-  //?-------------------------------------------------------------------------//
+  //! ------------------------------------------------------------------------//
+  //! Join Pivot
+  //! ------------------------------------------------------------------------//
 
   // 모임신청 리스트에 추가
   async attachToJoinPivot(
@@ -325,7 +167,7 @@ export class UsersMeetupService {
     status: JoinStatus,
     joinType: JoinType,
   ): Promise<void> {
-    let meetupChatOpen = false;
+    let chatOpen = false;
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
     try {
@@ -368,7 +210,7 @@ export class UsersMeetupService {
             'UPDATE `meetup` SET isFull = 1 WHERE id = ?',
             [meetupId],
           );
-          meetupChatOpen = true;
+          chatOpen = true;
         } else {
           // forget it. we have no rooms left.
           throw new BadRequestException(`no vacancy`);
@@ -410,10 +252,10 @@ export class UsersMeetupService {
         }
         this.eventEmitter.emit('user.notified', event);
         // notification with event listener ----------------------------------//
-        if (meetupChatOpen) {
+        if (chatOpen) {
           meetup.rooms.map((v: Room) => {
             const event = new UserNotificationEvent();
-            event.name = 'meetupChatOpen';
+            event.name = 'chatOpen';
             event.userId = v.user.id;
             event.token = v.user.pushToken;
             event.options = v.user.profile?.options ?? {};

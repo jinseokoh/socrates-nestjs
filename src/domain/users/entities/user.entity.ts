@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { Gender, Role, BaseCareer } from 'src/common/enums';
+import { Gender, Role } from 'src/common/enums';
 import {
   Column,
   CreateDateColumn,
@@ -12,7 +12,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
@@ -67,10 +66,6 @@ export class User {
   @Column({ type: 'enum', enum: Gender, nullable: true })
   @ApiProperty({ description: '성별' })
   gender: Gender | null;
-
-  @Column({ type: 'enum', enum: BaseCareer, nullable: true })
-  @ApiProperty({ description: '직군' })
-  career: BaseCareer | null;
 
   @Column({ nullable: true })
   @ApiProperty({ description: 'dob' })
@@ -214,9 +209,6 @@ export class User {
   @OneToMany(() => Room, (room) => room.user)
   public rooms: Room[];
 
-  @OneToMany(() => Like, (like) => like.user)
-  public meetupsLiked: Like[];
-
   @OneToMany(() => Interest, (interest) => interest.user)
   public categoriesInterested: Interest[];
 
@@ -234,7 +226,7 @@ export class User {
   @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.user)
   public userBookmarks: BookmarkUserUser[];
 
-  @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.bookmarkedUser)
+  @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.targetUser)
   public bookmarkedByUsers: BookmarkUserUser[];
 
   //*-------------------------------------------------------------------------*/

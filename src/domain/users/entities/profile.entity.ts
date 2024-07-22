@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
 import { IsArray } from 'class-validator';
+import { BaseCareer } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   BeforeInsert,
@@ -32,6 +32,10 @@ export class Profile {
   @ApiProperty({ description: '지역' })
   region: string | null;
 
+  @Column({ type: 'enum', enum: BaseCareer, nullable: true })
+  @ApiProperty({ description: '직군' })
+  career: BaseCareer | null;
+
   @Column({ length: 16, nullable: true })
   @ApiProperty({ description: '직업' })
   occupation: string | null;
@@ -56,6 +60,13 @@ export class Profile {
   @ApiProperty({ description: 'notification options' })
   options: object;
 
+  // join, pay, post, view, bookmark, flag count ---------------------------- //
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  joinCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  payCount: number;
+
   @Column({ type: 'int', unsigned: true, default: 0 })
   viewCount: number;
 
@@ -63,10 +74,12 @@ export class Profile {
   postCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  joinCount: number;
+  @ApiProperty({ description: 'bookmark count' })
+  bookmarkCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  payCount: number;
+  @ApiProperty({ description: 'flag count' })
+  flagCount: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -74,8 +87,8 @@ export class Profile {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //**--------------------------------------------------------------------------*/
-  //** 1-to-1 belongsTo
+  //* ------------------------------------------------------------------------- */
+  //* 1-to-1 belongsTo
 
   @Column({ type: 'int', unsigned: true, nullable: true })
   userId: number | null; // to make it available to Repository.
@@ -84,27 +97,29 @@ export class Profile {
   @JoinColumn()
   user: User;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ------------------------------------------------------------------------- */
+  //? constructor
 
   constructor(partial: Partial<Profile>) {
     Object.assign(this, partial);
   }
 
-  //??--------------------------------------------------------------------------*/
-  //?? programatically set a default using TypeORM hook
+  //? ------------------------------------------------------------------------- */
+  //? program tically set a default using TypeORM hook
+
   @BeforeInsert()
   setDefaults() {
     this.options = this.options || {
-      meetupLike: false, // 모임 찜
+      userBookmark: false, // 사용자 찜
+      meetupBookmark: false, // 모임 찜
       meetupThread: false, // 모임 댓글
       meetupRequest: false, // 모임신청
       meetupRequestApproval: false, // 모임신청 승인
       meetupInviteApproval: false, // 모임초대 승인
-      connectionReaction: false, // 발견 공감
-      connectionComment: false, // 발견 댓글
-      connectionPlea: false, // 친구신청 발견글 요청
-      connectionPleaDenial: false, // 친구신청 발견글 요청
+      feedBookmark: false, // 발견 공감
+      feedComment: false, // 발견 댓글
+      feedPlea: false, // 친구신청 발견글 요청
+      feedPleaDenial: false, // 친구신청 발견글 요청
       friendRequest: false, // 친구 신청
       friendRequestApproval: false, // 친구신청 승인
       friendRequestDenial: false, // 친구신청 발견글 요청

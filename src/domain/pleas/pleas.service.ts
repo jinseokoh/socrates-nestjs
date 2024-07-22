@@ -116,7 +116,7 @@ export class PleasService {
 
       //? notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
-      event.name = 'connectionPlea';
+      event.name = 'feedPlea';
       event.userId = recipient.id;
       event.token = recipient.pushToken;
       event.options = recipient.profile?.options ?? {};
@@ -237,7 +237,7 @@ export class PleasService {
 
       //? notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
-      event.name = 'connectionPleaDenial';
+      event.name = 'feedPleaDenial';
       event.userId = plea.senderId;
       event.token = plea.sender.pushToken;
       event.options = plea.sender.profile?.options ?? {};

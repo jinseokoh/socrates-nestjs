@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -20,24 +19,26 @@ import { Join } from 'src/domain/meetups/entities/join.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
-import { UsersMeetupService } from 'src/domain/users/users-meetup.service';
+import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 import { UsersService } from 'src/domain/users/users.service';
 import { FlagsService } from 'src/domain/users/flags.service';
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
+import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
+import { User } from 'src/domain/users/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UserMeetupsController {
   constructor(
-    private readonly usersService: UsersService,
+    private readonly userMeetupsService: UserMeetupsService,
     private readonly flagsService: FlagsService,
-    private readonly bookmarkUserMeetupService: BookmarkUserMeetupService,
-    private readonly userMeetupService: UsersMeetupService,
+    private readonly bookmarksService: BookmarkUserMeetupService,
+    private readonly usersService: UsersService,
   ) {}
 
   //?-------------------------------------------------------------------------//
-  //? 내가 만든 모임 리스트
+  //? 내가 만든 Meetups
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '내가 만든 Meetups (paginated)' })
@@ -47,166 +48,147 @@ export class UserMeetupsController {
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Meetup>> {
-    return await this.userMeetupService.getMyMeetups(userId, query);
+    return await this.userMeetupsService.getMyMeetups(userId, query);
+  }
+
+  @ApiOperation({ description: '내가 만든 Meetups (all)' })
+  @Get(':userId/meetups/all')
+  async loadAllMyMeetups(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<Meetup[]> {
+    return await this.userMeetupsService.loadMyMeetups(userId);
+  }
+
+  @ApiOperation({ description: '내가 만든 MeetupIds' })
+  @Get(':userId/meetupids')
+  async loadMyMeetupIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.userMeetupsService.loadMyMeetupIds(userId);
   }
 
   //?-------------------------------------------------------------------------//
-  //? Like Pivot
+  //? 내가 북마크/찜(BookmarkUserMeetup)한 Meetups
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '나의 찜 리스트에 추가' })
-  @Post(':userId/meetups-liked/:meetupId')
-  async attachToLikePivot(
+  @ApiOperation({ description: 'Meetup 북마크/찜 생성' })
+  @Post(':userId/meetupbookmarks/:meetupId')
+  async createMeetupBookmark(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+  ): Promise<BookmarkUserMeetup> {
+    return await this.bookmarksService.createMeetupBookmark(userId, meetupId);
+  }
+
+  @ApiOperation({ description: 'Meetup 북마크/찜 삭제' })
+  @Delete(':userId/meetupbookmarks/:meetupId')
+  async deleteMeetupBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<any> {
-    //? checking if this meetup belongs to the user costs a database access,
-    //? which you can get around if you design your application carefully.
-    //? so user validation has been removed. keep that in mind.
-
-    console.log(userId, meetupId);
-    try {
-      await this.userMeetupService.attachToLikePivot(userId, meetupId);
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    return await this.bookmarksService.deleteMeetupBookmark(userId, meetupId);
   }
 
-  @ApiOperation({ description: '나의 찜 리스트에서 삭제' })
-  @Delete(':userId/meetups-liked/:meetupId')
-  async detachFromLikePivot(
+  @ApiOperation({ description: 'Meetup 북마크/찜 여부' })
+  @Get(':userId/meetupbookmarks/:meetupId')
+  async isMeetupBookmarked(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
-  ): Promise<any> {
-    //? checking if this meetup belongs to the user costs a database access,
-    //? which you can get around if you design your application carefully.
-    //? so user validation has been removed. keep that in mind.
-    try {
-      await this.userMeetupService.detachFromLikePivot(userId, meetupId);
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
-  }
-
-  @ApiOperation({ description: '내가 찜한 모임 리스트 (paginated)' })
-  @PaginateQueryOptions()
-  @Get(':userId/meetups-liked')
-  async getMeetupsLikedByMe(
-    @Param('userId') userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Meetup>> {
-    const { data, meta, links } =
-      await this.userMeetupService.getMeetupsLikedByMe(userId, query);
-
-    return {
-      data: data.map((v) => v.meetup),
-      meta: meta,
-      links: links,
-    } as Paginated<Meetup>;
-  }
-
-  @ApiOperation({ description: '내가 찜한 모임ID 리스트 (all; 최대30)' })
-  @PaginateQueryOptions()
-  @Get(':userId/meetupids-liked')
-  async getMeetupIdsLikedByMe(
-    @Param('userId') userId: number,
   ): Promise<AnyData> {
-    const data: number[] = [];
-    // await this.userMeetupService.getMeetupIdsLikedByMe(
-    //   userId,
-    // );
-    return { data };
+    return {
+      data: await this.bookmarksService.isMeetupBookmarked(userId, meetupId),
+    };
   }
 
-  //?-------------------------------------------------------------------------//
-  //? ReportUserMeetup Pivot
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '차단한 모임 리스트에 추가' })
-  @Post(':userId/meetups-reported/:meetupId')
-  async attachToMeetupReportPivot(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('meetupId', ParseIntPipe) meetupId: number,
-    @Body('message') message: string,
-  ): Promise<any> {
-    //? checking if this meetup belongs to the user costs a database access,
-    //? which you can get around if you design your application carefully.
-    //? so user validation has been removed. keep that in mind.
-    try {
-      await this.userMeetupService.attachToReportUserMeetupPivot(
-        userId,
-        meetupId,
-        message,
-      );
-
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
-  }
-
-  @ApiOperation({ description: '차단한 모임 리스트에서 삭제' })
-  @Delete(':userId/meetups-reported/:meetupId')
-  async detachFromReportUserMeetupPivot(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('meetupId', ParseIntPipe) meetupId: number,
-  ): Promise<any> {
-    //? checking if this meetup belongs to the user costs a database access,
-    //? which you can get around if you design your application carefully.
-    //? so user validation has been removed. keep that in mind.
-    try {
-      await this.userMeetupService.detachFromReportUserMeetupPivot(
-        userId,
-        meetupId,
-      );
-      return {
-        data: 'ok',
-      };
-    } catch (e) {
-      throw new BadRequestException();
-    }
-  }
-
-  // @ApiOperation({ description: '내가 차단한 모임 리스트 (paginated)' })
-  // @PaginateQueryOptions()
-  // @Get(':userId/meetups-reported')
-  // async getMeetupsReportedByMe(
-  //   @Param('userId') userId: number,
-  //   @Paginate() query: PaginateQuery,
-  // ): Promise<Paginated<Meetup>> {
-  //   const result =
-  //     await this.flagsService.getFlaggedMeetupsByUserId(
-  //       query,
-  //       userId,
-  //       'meetup',
-  //     );
-  //   return {
-  //     data: data.map((v) => v.meetup),
-  //     meta: meta,
-  //     links: links,
-  //   } as Paginated<Meetup>;
-  // }
-
-  @ApiOperation({ description: '내가 차단한 모임ID 리스트 (all)' })
+  @ApiOperation({ description: '내가 북마크/찜한 Meetups (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/meetups/flag')
-  async getMeetupIdsReportdByMe(
+  @Get(':userId/bookmarkedmeetups')
+  async findBookmarkedMeetups(
+    @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
-  ): Promise<any[]> {
-    return await this.flagsService.loadFlaggedMeetupsByUserId(userId);
+  ): Promise<Paginated<Meetup>> {
+    return await this.bookmarksService.findBookmarkedMeetups(query, userId);
+  }
+
+  @ApiOperation({ description: '내가 북마크/찜한 Meetups (all)' })
+  @Get(':userId/bookmarkedmeetups/all')
+  async loadBookmarkedMeetups(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<Meetup[]> {
+    return await this.bookmarksService.loadBookmarkedMeetups(userId);
+  }
+
+  @ApiOperation({ description: '내가 북마크/찜한 MeetupIds' })
+  @Get(':userId/bookmarkedmeetupids')
+  async loadBookmarkedMeetupIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.bookmarksService.loadBookmarkedMeetupIds(userId);
   }
 
   //?-------------------------------------------------------------------------//
-  //? Join Pivot
+  //? 내가 신고한 Meetups
   //?-------------------------------------------------------------------------//
+
+  @ApiOperation({ description: 'Meetup 신고 생성' })
+  @Post(':userId/meetupflags/:meetupId')
+  async createMeetupFlag(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+    @Body('message') message: string | null,
+  ): Promise<any> {
+    return await this.flagsService.createMeetupFlag(userId, meetupId, message);
+  }
+
+  @ApiOperation({ description: 'Meetup 신고 삭제' })
+  @Delete(':userId/meetupflags/:meetupId')
+  async deleteMeetupFlag(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+  ): Promise<any> {
+    return await this.flagsService.deleteMeetupFlag(userId, meetupId);
+  }
+
+  @ApiOperation({ description: 'Meetup 신고 여부' })
+  @Get(':userId/meetupflags/:meetupId')
+  async isMeetupFlagged(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+  ): Promise<AnyData> {
+    return {
+      data: await this.flagsService.isMeetupFlagged(userId, meetupId),
+    };
+  }
+
+  @ApiOperation({ description: '내가 신고한 Meetups (paginated)' })
+  @PaginateQueryOptions()
+  @Get(':userId/flaggedmeetups')
+  async findFlaggedMeetupsByUserId(
+    @Paginate() query: PaginateQuery,
+    @Param('userId') userId: number,
+  ): Promise<Paginated<Meetup>> {
+    return await this.flagsService.findFlaggedMeetups(query, userId);
+  }
+
+  @ApiOperation({ description: '내가 신고한 모든 Meetups (all)' })
+  @Get(':userId/flaggedmeetups/all')
+  async loadFlaggedMeetups(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<Meetup[]> {
+    return await this.flagsService.loadFlaggedMeetups(userId);
+  }
+
+  @ApiOperation({ description: '내가 신고한 모든 MeetupIds' })
+  @Get(':userId/flaggedmeetupids')
+  async loadFlaggedMeetupIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.flagsService.loadFlaggedMeetupIds(userId);
+  }
+
+  //! -------------------------------------------------------------------------//
+  //! todo. Join Pivot
+  //! -------------------------------------------------------------------------//
 
   @ApiOperation({ description: '모임신청 리스트에 추가' })
   @PaginateQueryOptions()
@@ -218,7 +200,7 @@ export class UserMeetupsController {
     @Body() dto: CreateJoinDto, // optional message, and skill
   ): Promise<AnyData> {
     // 모임신청 생성
-    const meetup = await this.userMeetupService.attachToJoinPivot(
+    const meetup = await this.userMeetupsService.attachToJoinPivot(
       askingUserId,
       askedUserId,
       meetupId,
@@ -244,7 +226,7 @@ export class UserMeetupsController {
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() dto: AcceptOrDenyDto,
   ): Promise<AnyData> {
-    await this.userMeetupService.updateJoinToAcceptOrDeny(
+    await this.userMeetupsService.updateJoinToAcceptOrDeny(
       askingUserId,
       askedUserId,
       meetupId,
@@ -263,13 +245,13 @@ export class UserMeetupsController {
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Join>> {
-    return await this.userMeetupService.getMeetupsRequested(userId, query);
+    return await this.userMeetupsService.getMeetupsRequested(userId, query);
   }
 
   @ApiOperation({ description: '내가 신청한 모임ID 리스트 (all)' })
   @Get(':userId/meetupids-requested')
   async getMeetupIdsToJoin(@Param('userId') userId: number): Promise<AnyData> {
-    const data = await this.userMeetupService.getMeetupIdsRequested(userId);
+    const data = await this.userMeetupsService.getMeetupIdsRequested(userId);
     return { data };
   }
 
@@ -282,10 +264,8 @@ export class UserMeetupsController {
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Join>> {
-    const { data, meta, links } = await this.userMeetupService.getMeetupsInvited(
-      userId,
-      query,
-    );
+    const { data, meta, links } =
+      await this.userMeetupsService.getMeetupsInvited(userId, query);
 
     return {
       data: data,
@@ -297,6 +277,6 @@ export class UserMeetupsController {
   @ApiOperation({ description: '나를 초대한 모임ID 리스트 (all)' })
   @Get(':userId/meetupids-invited')
   async getMeetupIdsInvited(@Param('userId') userId: number): Promise<AnyData> {
-    return await this.userMeetupService.getMeetupIdsInvited(userId);
+    return await this.userMeetupsService.getMeetupIdsInvited(userId);
   }
 }

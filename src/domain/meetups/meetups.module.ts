@@ -17,6 +17,8 @@ import { FlagsService } from 'src/domain/users/flags.service';
 import { ThreadsService } from 'src/domain/meetups/threads.service';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
+import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
+import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -26,6 +28,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
       Feed,
       Flag,
       Meetup,
+      BookmarkUserMeetup,
       Thread,
       User,
       Venue,
@@ -34,7 +37,12 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
     FcmModule,
   ],
   // exports: [MeetupsService], // we need this for what?
-  providers: [MeetupsService, ThreadsService, FlagsService],
+  providers: [
+    MeetupsService,
+    BookmarkUserMeetupService,
+    ThreadsService,
+    FlagsService,
+  ],
   controllers: [
     MeetupsController,
     MeetupUsersController,

@@ -17,7 +17,6 @@ import {
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { AnyData, SignedUrl } from 'src/common/types';
 import { Career } from 'src/domain/careers/entities/career.entity';
-import { Like } from 'src/domain/meetups/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
@@ -403,38 +402,6 @@ export class MeetupsService {
       return meetup.joins
         .filter((v) => v.askingUser.id === meetup.userId)
         .map((v) => v.askedUser);
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 찜한 모든 사용자 리스트
-  //?-------------------------------------------------------------------------//
-
-  async getAllLikers(id: number): Promise<User[]> {
-    try {
-      const meetup = await this.meetupRepository.findOneOrFail({
-        where: {
-          id: id,
-        },
-        relations: ['usersLiked', 'usersLiked.user'],
-      });
-
-      return meetup.usersLiked.map((v: any) => v.user);
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
-  }
-
-  async getAllLikeIds(id: number): Promise<any> {
-    try {
-      const rows = await this.meetupRepository.manager.query(
-        'SELECT userId FROM `like` WHERE meetupId = ?',
-        [id],
-      );
-
-      return rows.map((v: any) => v.userId);
     } catch (e) {
       throw new NotFoundException('entity not found');
     }

@@ -8,20 +8,22 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { CreatePleaDto } from 'src/domain/pleas/dto/create-plea.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import {
+  FilterOperator,
+  paginate,
+  PaginateConfig,
+  Paginated,
+  PaginateQuery,
+} from 'nestjs-paginate';
 
 @Injectable()
-export class UsersFeedService {
+export class UserFeedsService {
   private readonly env: any;
-  private readonly logger = new Logger(UsersFeedService.name);
+  private readonly logger = new Logger(UserFeedsService.name);
 
   constructor(
-    @InjectRepository(User)
-    private readonly repository: Repository<User>,
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
-    @InjectRepository(BookmarkUserFeed)
-    private readonly bookmarkUserFeedRepository: Repository<BookmarkUserFeed>,
     @InjectRepository(Plea)
     private readonly pleaRepository: Repository<Plea>,
     @Inject(ConfigService) private configService: ConfigService, // global
@@ -32,31 +34,62 @@ export class UsersFeedService {
   }
 
   //?-------------------------------------------------------------------------//
-  //? Feeds
+  //? My Feeds
   //?-------------------------------------------------------------------------//
 
+  // 내가 만든 feed 리스트 (paginated)
+  async findMyFeeds(
+    query: PaginateQuery,
+    userId: number,
+  ): Promise<Paginated<Feed>> {
+    const queryBuilder = this.feedRepository
+      .createQueryBuilder('feed')
+      .innerJoinAndSelect('feed.user', 'user')
+      .leftJoinAndSelect('feed.poll', 'poll')
+      .where({
+        userId,
+      });
 
-  // 이 회원의 Feed 리스트 전부 보기
-  async loadMyFeeds(userId: number): Promise<Feed[]> {
-    try {
-      return this.feedRepository
-        .createQueryBuilder('feed')
-        .leftJoinAndSelect('feed.poll', 'poll')
-        .leftJoinAndSelect('feed.user', 'author')
-        .leftJoinAndSelect('feed.comments', 'comment')
-        .leftJoinAndSelect('comment.user', 'user')
-        .where({
-          userId,
-        })
-        .getMany();
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
+    const config: PaginateConfig<Feed> = {
+      sortableColumns: ['id'],
+      searchableColumns: ['body'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {
+        slug: [FilterOperator.EQ, FilterOperator.IN],
+        expiredAt: [FilterOperator.GTE, FilterOperator.LT],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
   }
 
-  //?-------------------------------------------------------------------------//
-  //? Plea Pivot
-  //?-------------------------------------------------------------------------//
+  // 내가 만든 Feed 리스트 (all)
+  async loadMyFeeds(userId: number): Promise<Feed[]> {
+    return await this.feedRepository
+      .createQueryBuilder('feed')
+      .leftJoinAndSelect('feed.poll', 'poll')
+      .leftJoinAndSelect('feed.user', 'user')
+      .where({
+        userId,
+      })
+      .getMany();
+  }
+
+  // 내가 만든 Feed Ids 리스트 (all)
+  async loadMyFeedIds(userId: number): Promise<number[]> {
+    const items = await this.feedRepository
+      .createQueryBuilder('feed')
+      .where({
+        userId,
+      })
+      .getMany();
+    return items.map((v) => v.id);
+  }
+
+  //! ------------------------------------------------------------------------//
+  //! Plea Pivot
+  //! ------------------------------------------------------------------------//
 
   // 발견요청 리스트에 추가
   async attachToPleaPivot(dto: CreatePleaDto): Promise<Plea> {

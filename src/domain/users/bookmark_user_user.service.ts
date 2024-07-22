@@ -1,4 +1,9 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   PaginateConfig,
@@ -6,13 +11,14 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { AnyData } from 'src/common/types';
 import { DataSource } from 'typeorm';
-import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm/repository/Repository';
 import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
+import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
+import { User } from 'src/domain/users/entities/user.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class BookmarkUserUserService {
@@ -20,10 +26,12 @@ export class BookmarkUserUserService {
   private readonly logger = new Logger(BookmarkUserUserService.name);
 
   constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     @InjectRepository(BookmarkUserUser)
     private readonly bookmarkUserUserRepository: Repository<BookmarkUserUser>,
     @Inject(ConfigService) private configService: ConfigService, // global
-    @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
+    private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
@@ -33,59 +41,121 @@ export class BookmarkUserUserService {
   //? BookmarkUserUser Pivot
   //?-------------------------------------------------------------------------//
 
-  // 나의 북마크에서 user 추가
-  async attach(
+  // User 북마크 생성
+  async createUserBookmark(
     userId: number,
-    bookmarkedUserId: number,
-    message: string | null,
+    targetUserId: number,
+  ): Promise<BookmarkUserUser> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const bookmark = await queryRunner.manager.save(
+        queryRunner.manager
+          .getRepository(BookmarkUserUser)
+          .create({ userId, targetUserId }),
+      );
+      await queryRunner.manager.query(
+        'UPDATE `user` SET bookmarkCount = bookmarkCount + 1 WHERE id = ?',
+        [targetUserId],
+      );
+
+      if (false) {
+        // notification with event listener ------------------------------------//
+        const targetUser = await queryRunner.manager.findOneOrFail(User, {
+          where: { id: targetUserId },
+          relations: [`user`, `user.profile`],
+        });
+        // todo. fine tune notifying logic to dedup the same id
+        const event = new UserNotificationEvent();
+        event.name = 'userBookmark';
+        event.userId = targetUser.id;
+        event.token = targetUser.pushToken;
+        event.options = targetUser.profile?.options ?? {};
+        event.body = `${targetUser.username} 님을 누군가 찜 했습니다.`;
+        event.data = {
+          page: `meetups/${targetUserId}`,
+          args: '',
+        };
+        this.eventEmitter.emit('user.notified', event);
+      }
+
+      await queryRunner.commitTransaction();
+      return bookmark;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // User 북마크 제거
+  async deleteUserBookmark(userId: number, targetUserId: number): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const { affectedRows } = await queryRunner.manager.query(
+        'DELETE FROM `bookmark_user_meetup` WHERE userId = ? AND targetUserId = ?',
+        [userId, targetUserId],
+      );
+      if (affectedRows > 0) {
+        await queryRunner.manager.query(
+          'UPDATE `meetup` SET bookmarkCount = bookmarkCount - 1 WHERE id = ? AND bookmarkCount > 0',
+          [targetUserId],
+        );
+      }
+      await queryRunner.commitTransaction();
+      return { data: affectedRows };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // User 북마크 여부
+  async isUserBookmarked(
+    userId: number,
+    targetUserId: number,
   ): Promise<AnyData> {
-    try {
-      const { affectedRows } =
-        await this.bookmarkUserUserRepository.manager.query(
-          'INSERT IGNORE INTO `bookmark_user_user` (userId, bookmarkedUserId, message) VALUES (?, ?, ?) \
-    ON DUPLICATE KEY UPDATE \
-    userId = VALUES(`userId`), \
-    bookmarkedUserId = VALUES(`bookmarkedUserId`), \
-    message = VALUES(`message`)',
-          [userId, bookmarkedUserId, message],
-        );
-      return { data: affectedRows };
-    } catch (e) {
-      console.log(e);
-      throw e;
-    }
+    const [row] = await this.bookmarkUserUserRepository.manager.query(
+      'SELECT COUNT(*) AS count \
+      FROM `bookmark_user_user` \
+      WHERE userId = ? AND targetUserId = ?',
+      [userId, targetUserId],
+    );
+    const { count } = row;
+
+    return { data: +count };
   }
 
-  // 나의 북마크에서 user 제거
-  async detach(userId: number, bookmarkedUserId: number): Promise<AnyData> {
-    try {
-      const { affectedRows } =
-        await this.bookmarkUserUserRepository.manager.query(
-          'DELETE FROM `bookmark_user_user` WHERE userId = ? AND bookmarkedUserId = ?',
-          [userId, bookmarkedUserId],
-        );
-      return { data: affectedRows };
-    } catch (e) {
-      console.log(e);
-      throw e;
-    }
-  }
-
-  // 내가 북마크한 user 리스트 (paginated)
-  async getUsersBookmarkedByMe(
-    userId: number,
+  // 내가 북마크한 Users (paginated)
+  async findBookmarkedUsers(
     query: PaginateQuery,
-  ): Promise<Paginated<BookmarkUserUser>> {
-    const queryBuilder = this.bookmarkUserUserRepository
-      .createQueryBuilder('bookmark_user_user')
-      .innerJoinAndSelect('bookmark_user_user.bookmarkedUser', 'bookmarkedUser')
-      .where({
-        userId: userId,
-      });
+    userId: number,
+  ): Promise<Paginated<User>> {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect(
+        BookmarkUserUser,
+        'bookmark_user_user',
+        'bookmark_user_user.targetId = user.id',
+      )
+      .innerJoinAndSelect('user.targetUser', 'targetUser')
+      .where('bookmark_user_user.targetUserId = : userId', { userId });
 
-    const config: PaginateConfig<BookmarkUserUser> = {
+    const config: PaginateConfig<User> = {
       sortableColumns: ['id'],
-      searchableColumns: ['message'],
+      searchableColumns: ['username'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
       filterableColumns: {},
@@ -94,31 +164,28 @@ export class BookmarkUserUserService {
     return await paginate(query, queryBuilder, config);
   }
 
+  // 내가 북마크한 모든 Users
+  async loadBookmarkedUsers(userId: number): Promise<User[]> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    return queryBuilder
+      .innerJoinAndSelect(
+        BookmarkUserUser,
+        'bookmark_user_user',
+        'bookmark_user_user.targetUserId = user.id',
+      )
+      .addSelect(['user.*'])
+      .where('bookmark_user_user.userId = :userId', { userId })
+      .getMany();
+  }
+
   // 내가 북마크한 모든 userIds
-  async getAllIdsBookmarkedByMe(userId: number): Promise<number[]> {
+  async loadBookmarkedUserIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkUserUserRepository.manager.query(
-      'SELECT userId, bookmarkedUserId \
-      FROM `bookmark_user_user` \
-      WHERE userId = ?',
+      'SELECT targetUserId FROM `bookmark_user_user` \
+      WHERE bookmark_user_user.userId = ?',
       [userId],
     );
 
-    return rows.map((v: BookmarkUserUser) => v.bookmarkedUserId);
-  }
-
-  // 내가 북마크한 user 여부
-  async isBookmarked(
-    userId: number,
-    bookmarkedUserId: number,
-  ): Promise<AnyData> {
-    const [row] = await this.bookmarkUserUserRepository.manager.query(
-      'SELECT COUNT(*) AS count \
-      FROM `bookmark_user_user` \
-      WHERE userId = ? AND bookmarkedUserId = ?',
-      [userId, bookmarkedUserId],
-    );
-    const { count } = row;
-
-    return { data: +count };
+    return rows.map((v: any) => v.targetUserId);
   }
 }

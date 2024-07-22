@@ -2,16 +2,17 @@ import { IData } from 'src/domain/alarms/entities/alarm.interface';
 
 export class UserNotificationEvent {
   name:
-    | 'meetupLike'
+    | 'userBookmark'
+    | 'meetupBookmark'
     | 'meetupThread'
     | 'meetupRequest'
     | 'meetupRequestApproval'
     | 'meetupInviteApproval'
-    | 'meetupChatOpen'
-    | 'connectionReaction'
+    | 'chatOpen'
+    | 'feedBookmark'
     | 'feedComment'
-    | 'connectionPlea'
-    | 'connectionPleaDenial'
+    | 'feedPlea'
+    | 'feedPleaDenial'
     | 'friendRequest'
     | 'friendRequestApproval'
     | 'friendRequestDenial'

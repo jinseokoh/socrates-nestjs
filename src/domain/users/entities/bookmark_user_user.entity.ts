@@ -11,7 +11,7 @@ import {
 //? 모델사용을 위해, many-to-many 대신 one-to-many 선호
 //? https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-@Unique('user_id_bookmarked_user_id_key', ['userId', 'bookmarkedUserId'])
+@Unique('user_id_target_user_id_key', ['userId', 'targetUserId'])
 export class BookmarkUserUser {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
@@ -22,7 +22,7 @@ export class BookmarkUserUser {
 
   //? unsigned int 로 사용하기 위해 명시적인 정의가 필요.
   @Column({ type: 'int', unsigned: true })
-  bookmarkedUserId: number;
+  targetUserId: number;
 
   @Column({ length: 80, nullable: true })
   message: string | null;
@@ -39,7 +39,7 @@ export class BookmarkUserUser {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  public bookmarkedUser: User;
+  public targetUser: User;
 
   //? ----------------------------------------------------------------------- //
   //? constructor

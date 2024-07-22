@@ -108,56 +108,6 @@ export class FeedsService {
     }
   }
 
-  // 내가 만든 feed 리스트 (paginated)
-  async findAllByUserId(
-    query: PaginateQuery,
-    userId: number,
-  ): Promise<Paginated<Feed>> {
-    const queryBuilder = this.feedRepository
-      .createQueryBuilder('feed')
-      .leftJoinAndSelect('feed.poll', 'poll')
-      .leftJoinAndSelect('feed.user', 'user')
-      .where({
-        userId,
-      });
-
-    const config: PaginateConfig<Feed> = {
-      sortableColumns: ['id'],
-      searchableColumns: ['body'],
-      defaultLimit: 20,
-      defaultSortBy: [['id', 'DESC']],
-      filterableColumns: {
-        slug: [FilterOperator.EQ, FilterOperator.IN],
-        expiredAt: [FilterOperator.GTE, FilterOperator.LT],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // 내가 만든 Feed 리스트 (all)
-  async loadMyFeeds(userId: number): Promise<Feed[]> {
-    return await this.feedRepository
-      .createQueryBuilder('feed')
-      .leftJoinAndSelect('feed.poll', 'poll')
-      .leftJoinAndSelect('feed.user', 'user')
-      .where({
-        userId,
-      })
-      .getMany();
-  }
-
-  // 내가 만든 Feed Ids 리스트 (all)
-  async loadMyFeedIds(userId: number): Promise<number[]> {
-    const items = await this.feedRepository
-      .createQueryBuilder('feed')
-      .where({
-        userId,
-      })
-      .getMany();
-    return items.map((v) => v.id);
-  }
-
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//

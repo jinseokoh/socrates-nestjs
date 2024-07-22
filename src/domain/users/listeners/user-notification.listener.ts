@@ -45,7 +45,7 @@ export class UserNotificationListener {
       await this.alarmsService.create(alarmDto);
     }
 
-    if (event.name == 'connectionPleaDenial') {
+    if (event.name == 'feedPleaDenial') {
       const alarmDto = new CreateAlarmDto();
       alarmDto.alarmType = AlarmType.SETTING;
       alarmDto.userId = event.userId;
