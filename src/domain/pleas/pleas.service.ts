@@ -54,8 +54,8 @@ export class PleasService {
       // validation ----------------------------------------------------------//
       const friendship = await queryRunner.manager.findOne(Friendship, {
         where: [
-          { senderId: dto.senderId, recipientId: dto.recipientId },
-          { senderId: dto.recipientId, recipientId: dto.senderId },
+          { userId: dto.userId, recipientId: dto.recipientId },
+          { userId: dto.recipientId, recipientId: dto.userId },
         ],
       });
       if (friendship) {
@@ -69,7 +69,7 @@ export class PleasService {
 
       // validation ----------------------------------------------------------//
       const sender = await queryRunner.manager.findOneOrFail(User, {
-        where: { id: dto.senderId },
+        where: { id: dto.userId },
         relations: [`profile`],
       });
       if (sender?.isBanned) {
@@ -91,7 +91,7 @@ export class PleasService {
       // validation ----------------------------------------------------------//
       const oldPlea = await queryRunner.manager.findOne(Plea, {
         where: {
-          senderId: dto.senderId,
+          userId: dto.userId,
           feedId: dto.feedId,
         },
       });
@@ -106,7 +106,7 @@ export class PleasService {
         ledgerType: LedgerType.CREDIT_ESCROW,
         balance: newBalance,
         note: `요청 사례금 (대상#${dto.recipientId})`,
-        userId: dto.senderId,
+        userId: dto.userId,
       });
       await queryRunner.manager.save(ledger);
 
@@ -225,7 +225,7 @@ export class PleasService {
           debit: plea.reward - 1,
           ledgerType: LedgerType.DEBIT_REFUND,
           balance: newBalance,
-          note: `요청거절 사례금 환불 (발송#${plea.senderId},수신#${plea.recipientId})`,
+          note: `요청거절 사례금 환불 (발송#${plea.userId},수신#${plea.recipientId})`,
           userId: plea.sender.id,
         });
         await queryRunner.manager.save(ledger);
@@ -238,7 +238,7 @@ export class PleasService {
       //? notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
       event.name = 'feedPleaDenial';
-      event.userId = plea.senderId;
+      event.userId = plea.userId;
       event.token = plea.sender.pushToken;
       event.options = plea.sender.profile?.options ?? {};
       event.body = `${plea.recipient.username}님이 발견글 작성요청을 거절했습니다. (${plea.reward - 1}코인 환불처리완료)`;

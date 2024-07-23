@@ -12,11 +12,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 
 @Entity()
-export class Comment {
+export class InquiryComment {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
@@ -31,10 +30,6 @@ export class Comment {
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'flag count' })
   flagCount: number;
-
-  @Column({ type: 'datetime', nullable: true })
-  @ApiProperty({ description: '1달 동안만 사용가능' })
-  expiredAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -51,18 +46,18 @@ export class Comment {
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.comments, {
+  @ManyToOne(() => User, (user) => user.inquiryComments, {
     onDelete: 'CASCADE',
   })
   user: User;
 
   @Column({ type: 'int', unsigned: true })
-  feedId: number; // to make it available to Repository.
+  inquiryId: number; // to make it available to Repository.
 
-  @ManyToOne(() => Feed, (feed) => feed.comments, {
+  @ManyToOne(() => Inquiry, (inquiry) => inquiry.inquiryComments, {
     onDelete: 'CASCADE',
   })
-  feed: Feed;
+  inquiry: Inquiry;
 
   //**--------------------------------------------------------------------------*/
   //** one to many (self recursive relations)
@@ -72,19 +67,23 @@ export class Comment {
   @Column({ type: 'int', unsigned: true, nullable: true })
   parentId: number | null;
 
-  @ManyToOne(() => Comment, (Comment) => Comment.children, {
-    onDelete: 'SET NULL',
-  })
-  @JoinColumn({ name: 'parentId' })
-  parent: Comment;
+  @OneToMany(() => InquiryComment, (opinion) => opinion.parent)
+  children: InquiryComment[];
 
-  @OneToMany(() => Comment, (comment) => comment.parent)
-  children: Comment[];
+  @ManyToOne(
+    () => InquiryComment,
+    (InquiryComment) => InquiryComment.children,
+    {
+      onDelete: 'SET NULL',
+    },
+  )
+  @JoinColumn({ name: 'parentId' })
+  parent: InquiryComment;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  constructor(partial: Partial<Comment>) {
+  constructor(partial: Partial<InquiryComment>) {
     Object.assign(this, partial);
   }
 }

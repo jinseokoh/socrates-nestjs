@@ -36,30 +36,30 @@ export class UserUsersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'User 북마크 생성' })
-  @Post(':userId/userbookmarks/:targetUserId')
+  @Post(':userId/userbookmarks/:recipientId')
   async createUserBookmark(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<any> {
-    return await this.bookmarksService.createUserBookmark(userId, targetUserId);
+    return await this.bookmarksService.createUserBookmark(userId, recipientId);
   }
 
   @ApiOperation({ description: 'User 북마크 삭제' })
-  @Delete(':userId/userbookmarks/:targetUserId')
+  @Delete(':userId/userbookmarks/:recipientId')
   async deleteUserBookmark(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<AnyData> {
-    return await this.bookmarksService.deleteUserBookmark(userId, targetUserId);
+    return await this.bookmarksService.deleteUserBookmark(userId, recipientId);
   }
 
   @ApiOperation({ description: 'User 북마크 여부' })
-  @Get(':userId/userbookmarks/:targetUserId')
+  @Get(':userId/userbookmarks/:recipientId')
   async isUserBookmarked(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<AnyData> {
-    return this.bookmarksService.isUserBookmarked(userId, targetUserId);
+    return this.bookmarksService.isUserBookmarked(userId, recipientId);
   }
 
   @ApiOperation({ description: '내가 북마크한/follow중인 Users (paginated)' })
@@ -92,36 +92,36 @@ export class UserUsersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'User 신고 생성' })
-  @Post(':userId/userflags/:targetUserId')
+  @Post(':userId/userflags/:recipientId')
   async createUserFlag(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body('message') message: string | null,
   ): Promise<any> {
     return await this.flagsService.createUserFlag(
       userId,
-      targetUserId,
+      recipientId,
       message,
     );
   }
 
   @ApiOperation({ description: 'User 신고 삭제' })
-  @Delete(':userId/userflags/:targetUserId')
+  @Delete(':userId/userflags/:recipientId')
   async deleteUserFlag(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<any> {
-    return await this.flagsService.deleteUserFlag(userId, targetUserId);
+    return await this.flagsService.deleteUserFlag(userId, recipientId);
   }
 
   @ApiOperation({ description: 'User 신고 여부' })
-  @Get(':userId/userflags/:targetUserId')
+  @Get(':userId/userflags/:recipientId')
   async isUserFlagged(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<AnyData> {
     return {
-      data: await this.flagsService.isUserFlagged(userId, targetUserId),
+      data: await this.flagsService.isUserFlagged(userId, recipientId),
     };
   }
 
@@ -172,36 +172,36 @@ export class UserUsersController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '사용자 차단 추가' })
-  @Post(':userId/hates/:targetUserId')
+  @Post(':userId/hates/:recipientId')
   async createHate(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body('message') message: string | null,
   ): Promise<Hate> {
     return await this.userUsersService.createHate(
       userId,
-      targetUserId,
+      recipientId,
       message,
     );
   }
 
   @ApiOperation({ description: '사용자 차단 삭제' })
-  @Delete(':userId/hates/:targetUserId')
+  @Delete(':userId/hates/:recipientId')
   async deleteHate(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<any> {
-    return await this.userUsersService.deleteHate(userId, targetUserId);
+    return await this.userUsersService.deleteHate(userId, recipientId);
   }
 
   @ApiOperation({ description: '사용자 차단 여부' })
-  @Get(':userId/hates/:targetUserId')
+  @Get(':userId/hates/:recipientId')
   async isHated(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('targetUserId', ParseIntPipe) targetUserId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<any> {
     return {
-      data: await this.userUsersService.isHated(userId, targetUserId),
+      data: await this.userUsersService.isHated(userId, recipientId),
     };
   }
 

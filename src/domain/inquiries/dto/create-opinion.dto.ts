@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class CreateOpinionDto {
+export class CreateInquiryCommentDto {
   @ApiProperty({ description: '댓글 🔍' })
   @IsString()
   body: string;

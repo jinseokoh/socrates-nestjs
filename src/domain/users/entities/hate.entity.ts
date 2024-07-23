@@ -11,7 +11,7 @@ import {
 // user can hate other user
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-@Unique('user_id_target_user_id_key', ['userId', 'targetUserId'])
+@Unique('user_id_recipient_id_key', ['userId', 'recipientId'])
 export class Hate {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
@@ -22,7 +22,7 @@ export class Hate {
 
   //? unsigned int 로 사용하기 위해 명시적인 정의가 필요.
   @Column({ type: 'int', unsigned: true })
-  targetUserId: number;
+  recipientId: number;
 
   @Column({ length: 80, nullable: true })
   message: string | null;
@@ -31,7 +31,7 @@ export class Hate {
   public user: User;
 
   @ManyToOne(() => User, (user) => user.usersHated)
-  public targetUser: User;
+  public recipient: User;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

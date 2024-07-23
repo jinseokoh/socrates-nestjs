@@ -44,7 +44,7 @@ export class FlagUserService {
   // 가능하다면, user flagCount 증가
   async createUserFlag(
     userId: number,
-    targetUserId: number,
+    recipientId: number,
     message: string,
   ): Promise<Flag> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -56,13 +56,13 @@ export class FlagUserService {
         queryRunner.manager.getRepository(Flag).create({
           userId,
           entityType: 'user',
-          entityId: targetUserId,
+          entityId: recipientId,
           message,
         }),
       );
       await queryRunner.manager.query(
         'UPDATE `profile` SET flagCount = flagCount + 1 WHERE userId = ?',
-        [targetUserId],
+        [recipientId],
       );
       await queryRunner.commitTransaction();
       return flag;
@@ -80,7 +80,7 @@ export class FlagUserService {
 
   // User 신고 제거
   // 가능하다면, user flagCount 감소
-  async deleteUserFlag(userId: number, targetUserId: number): Promise<any> {
+  async deleteUserFlag(userId: number, recipientId: number): Promise<any> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
@@ -88,12 +88,12 @@ export class FlagUserService {
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
         'DELETE FROM `flag` where userId = ? AND entityType = ? AND entityId = ?',
-        [userId, `user`, targetUserId],
+        [userId, `user`, recipientId],
       );
       if (affectedRows > 0) {
         await queryRunner.manager.query(
           'UPDATE `profile` SET flagCount = flagCount - 1 WHERE userId = ? AND flagCount > 0',
-          [targetUserId],
+          [recipientId],
         );
       }
       return { data: affectedRows };
@@ -106,11 +106,11 @@ export class FlagUserService {
   }
 
   // User 신고 여부
-  async isUserFlagged(userId: number, targetUserId: number): Promise<boolean> {
+  async isUserFlagged(userId: number, recipientId: number): Promise<boolean> {
     const [row] = await this.flagRepository.manager.query(
       'SELECT COUNT(*) AS count FROM `flag` \
       WHERE userId = ? AND entityType = ? AND entityId = ?',
-      [userId, `user`, targetUserId],
+      [userId, `user`, recipientId],
     );
     const { count } = row;
 

@@ -38,18 +38,18 @@ export class Join {
   updatedAt: Date;
 
   @PrimaryColumn({ type: 'int', unsigned: true })
-  askingUserId: number | null; // to make it available to Repository.
+  userId: number | null; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.askingJoins, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'askingUserId' })
+  @JoinColumn({ name: 'userId' })
   public askingUser!: User;
 
   @PrimaryColumn({ type: 'int', unsigned: true })
-  askedUserId: number | null; // to make it available to Repository.
+  recipientId: number | null; // to make it available to Repository.
 
   @PrimaryColumn({ type: 'int', unsigned: true })
   public meetupId!: number;
@@ -62,7 +62,7 @@ export class Join {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'askedUserId' })
+  @JoinColumn({ name: 'recipientId' })
   public askedUser!: User;
 
   @ManyToOne(() => Meetup, (meetup) => meetup.id, {

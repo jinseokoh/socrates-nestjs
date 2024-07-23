@@ -110,8 +110,8 @@ export class UserMeetupsService {
 
   // 모임신청 리스트에 추가
   async attachToJoinPivot(
-    askingUserId: number,
-    askedUserId: number,
+    userId: number,
+    recipientId: number,
     meetupId: number,
     dto: CreateJoinDto,
   ): Promise<Meetup> {
@@ -121,14 +121,14 @@ export class UserMeetupsService {
     });
 
     let joinType = JoinType.REQUEST;
-    if (meetup.userId == askedUserId) {
+    if (meetup.userId == recipientId) {
       // 1. 방장에게 신청하는 경우, 30명 까지로 제한.
       if (
-        meetup.joins.filter((v) => meetup.userId === v.askedUserId).length > 30
+        meetup.joins.filter((v) => meetup.userId === v.recipientId).length > 30
       ) {
         throw new NotAcceptableException('max limit reached');
       }
-      // await this.attachToLikePivot(askingUserId, meetupId);
+      // await this.attachToLikePivot(userId, meetupId);
     } else {
       // 2. 방장이 초대하는 경우, 갯수 제한 없음.
       joinType = JoinType.INVITATION;
@@ -136,8 +136,8 @@ export class UserMeetupsService {
 
     try {
       await this.repository.manager.query(
-        'INSERT IGNORE INTO `join` (askingUserId, askedUserId, meetupId, message, skill, joinType) VALUES (?, ?, ?, ?, ?, ?)',
-        [askingUserId, askedUserId, meetupId, dto.message, dto.skill, joinType],
+        'INSERT IGNORE INTO `join` (userId, recipientId, meetupId, message, skill, joinType) VALUES (?, ?, ?, ?, ?, ?)',
+        [userId, recipientId, meetupId, dto.message, dto.skill, joinType],
       );
 
       // notification with event listener ------------------------------------//
@@ -161,8 +161,8 @@ export class UserMeetupsService {
 
   // 모임신청 승인/거부
   async updateJoinToAcceptOrDeny(
-    askingUserId: number,
-    askedUserId: number,
+    userId: number,
+    recipientId: number,
     meetupId: number,
     status: JoinStatus,
     joinType: JoinType,
@@ -175,23 +175,23 @@ export class UserMeetupsService {
       await queryRunner.startTransaction();
 
       await queryRunner.manager.query(
-        'UPDATE `join` SET status = ? WHERE askingUserId = ? AND askedUserId = ? AND meetupId = ?',
-        [status, askingUserId, askedUserId, meetupId],
+        'UPDATE `join` SET status = ? WHERE userId = ? AND recipientId = ? AND meetupId = ?',
+        [status, userId, recipientId, meetupId],
       );
 
       //? room record 생성
       if (status === JoinStatus.ACCEPTED) {
         if (joinType === JoinType.REQUEST) {
-          // 모임 신청 (add askingUserId to `room`) 수락
+          // 모임 신청 (add userId to `room`) 수락
           await queryRunner.manager.query(
             'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
-            ['guest', askingUserId, meetupId],
+            ['guest', userId, meetupId],
           );
         } else {
-          // 모임 초대 (add askedUserId to `room`) 수락
+          // 모임 초대 (add recipientId to `room`) 수락
           await queryRunner.manager.query(
             'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
-            ['guest', askedUserId, meetupId],
+            ['guest', recipientId, meetupId],
           );
         }
 
@@ -225,7 +225,7 @@ export class UserMeetupsService {
         });
 
         const recipient = await queryRunner.manager.findOneOrFail(User, {
-          where: { id: askingUserId },
+          where: { id: userId },
           relations: [`profile`],
         });
         // notification with event listener ----------------------------------//
@@ -290,7 +290,7 @@ export class UserMeetupsService {
       .leftJoinAndSelect('rooms.user', 'participant')
       .where({
         joinType: JoinType.REQUEST,
-        askingUserId: userId,
+        userId: userId,
       });
 
     const config: PaginateConfig<Join> = {
@@ -308,7 +308,7 @@ export class UserMeetupsService {
   async getMeetupIdsRequested(userId: number): Promise<number[]> {
     const items = await this.repository.manager.query(
       'SELECT meetupId FROM `join` \
-INNER JOIN `user` ON `user`.id = `join`.askingUserId \
+INNER JOIN `user` ON `user`.id = `join`.userId \
 INNER JOIN `meetup` ON `meetup`.id = `join`.meetupId \
 WHERE `joinType` = ? AND `user`.id = ?',
       [JoinType.REQUEST, userId],
@@ -331,7 +331,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .leftJoinAndSelect('rooms.user', 'participant')
       .where({
         joinType: JoinType.INVITATION,
-        askedUserId: userId,
+        recipientId: userId,
       });
 
     const config: PaginateConfig<Join> = {
@@ -349,7 +349,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
   async getMeetupIdsInvited(userId: number): Promise<AnyData> {
     const items = await this.repository.manager.query(
       'SELECT meetupId FROM `join` \
-INNER JOIN `user` ON `user`.id = `join`.askedUserId \
+INNER JOIN `user` ON `user`.id = `join`.recipientId \
 INNER JOIN `meetup` ON `meetup`.id = `join`.meetupId \
 WHERE `joinType` = ? AND `user`.id = ?',
       [JoinType.INVITATION, userId],

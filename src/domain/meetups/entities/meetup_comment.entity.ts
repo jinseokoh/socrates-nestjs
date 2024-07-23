@@ -15,7 +15,7 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 
 @Entity()
-export class Thread {
+export class MeetupComment {
   @PrimaryGeneratedColumn('increment', {
     type: 'int',
     unsigned: true,
@@ -62,7 +62,7 @@ export class Thread {
   @Column({ type: 'int', unsigned: true, nullable: true })
   meetupId: number | null; // to make it available to Repository.
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.threads, { cascade: true })
+  @ManyToOne(() => Meetup, (meetup) => meetup.meetupComments, { cascade: true })
   meetup: Meetup;
 
   //**--------------------------------------------------------------------------*/
@@ -73,19 +73,19 @@ export class Thread {
   @Column({ type: 'int', unsigned: true, nullable: true })
   parentId: number | null;
 
-  @OneToMany(() => Thread, (thread) => thread.parent)
-  children: Thread[];
+  @OneToMany(() => MeetupComment, (thread) => thread.parent)
+  children: MeetupComment[];
 
-  @ManyToOne(() => Thread, (Thread) => Thread.children, {
+  @ManyToOne(() => MeetupComment, (MeetupComment) => MeetupComment.children, {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'parentId' })
-  parent: Thread;
+  parent: MeetupComment;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  constructor(partial: Partial<Thread>) {
+  constructor(partial: Partial<MeetupComment>) {
     Object.assign(this, partial);
   }
 }

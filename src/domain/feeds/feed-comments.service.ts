@@ -7,11 +7,11 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CreateCommentDto } from 'src/domain/feeds/dto/create-comment.dto';
+import { CreateFeedCommentDto } from 'src/domain/feeds/dto/create-comment.dto';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { Comment } from 'src/domain/feeds/entities/comment.entity';
+import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { IsNull, Repository } from 'typeorm';
-import { UpdateCommentDto } from 'src/domain/feeds/dto/update-comment.dto';
+import { UpdateFeedCommentDto } from 'src/domain/feeds/dto/update-comment.dto';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -20,8 +20,8 @@ export class FeedCommentsService {
   private readonly logger = new Logger(FeedCommentsService.name);
 
   constructor(
-    @InjectRepository(Comment)
-    private readonly repository: Repository<Comment>,
+    @InjectRepository(FeedComment)
+    private readonly repository: Repository<FeedComment>,
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
     // @Inject(SlackService) private readonly slack: SlackService,
@@ -32,7 +32,7 @@ export class FeedCommentsService {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  async create(dto: CreateCommentDto): Promise<Comment> {
+  async create(dto: CreateFeedCommentDto): Promise<FeedComment> {
     // creation
     const comment = await this.repository.save(this.repository.create(dto));
     if (dto.sendNotification) {
@@ -46,7 +46,7 @@ export class FeedCommentsService {
 
       if (record.feed.user.id != dto.userId) {
         const event = new UserNotificationEvent();
-        event.name = 'feedComment';
+        event.name = 'feedFeedComment';
         event.userId = record.feed.user.id;
         event.token = record.feed.user.pushToken;
         event.options = record.feed.user.profile?.options ?? {};
@@ -72,7 +72,7 @@ export class FeedCommentsService {
   async findAllInTraditionalStyle(
     query: PaginateQuery,
     feedId: number,
-  ): Promise<Paginated<Comment>> {
+  ): Promise<Paginated<FeedComment>> {
     return paginate(query, this.repository, {
       where: {
         feedId: feedId,
@@ -83,14 +83,14 @@ export class FeedCommentsService {
       defaultSortBy: [['createdAt', 'DESC']],
       defaultLimit: 20,
     });
-    // return await paginate<Comment>(query, queryBuilder, config);
+    // return await paginate<FeedComment>(query, queryBuilder, config);
   }
 
   //? comments w/ replyCount
   async findAllInYoutubeStyle(
     query: PaginateQuery,
     feedId: number,
-  ): Promise<Paginated<Comment>> {
+  ): Promise<Paginated<FeedComment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
@@ -98,7 +98,7 @@ export class FeedCommentsService {
       .where('comment.parentId IS NULL')
       .andWhere('comment.feedId = :feedId', { feedId });
 
-    const config: PaginateConfig<Comment> = {
+    const config: PaginateConfig<FeedComment> = {
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultLimit: 20,
@@ -109,14 +109,14 @@ export class FeedCommentsService {
       },
     };
 
-    return await paginate<Comment>(query, queryBuilder, config);
+    return await paginate<FeedComment>(query, queryBuilder, config);
   }
 
   async findAllRepliesById(
     query: PaginateQuery,
     feedId: number,
     commentId: number,
-  ): Promise<Paginated<Comment>> {
+  ): Promise<Paginated<FeedComment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
@@ -124,7 +124,7 @@ export class FeedCommentsService {
       .andWhere('comment.parentId = :commentId', { commentId })
       .andWhere('comment.deletedAt IS NULL');
 
-    const config: PaginateConfig<Comment> = {
+    const config: PaginateConfig<FeedComment> = {
       sortableColumns: ['id'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
@@ -133,10 +133,10 @@ export class FeedCommentsService {
       },
     };
 
-    return await paginate<Comment>(query, queryBuilder, config);
+    return await paginate<FeedComment>(query, queryBuilder, config);
   }
 
-  async findById(id: number, relations: string[] = []): Promise<Comment> {
+  async findById(id: number, relations: string[] = []): Promise<FeedComment> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -155,7 +155,7 @@ export class FeedCommentsService {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  async update(dto: UpdateCommentDto, commentId: number): Promise<Comment> {
+  async update(dto: UpdateFeedCommentDto, commentId: number): Promise<FeedComment> {
     const comment = await this.repository.preload({ id: commentId, ...dto });
     if (!comment) {
       throw new NotFoundException(`entity not found`);
@@ -167,7 +167,7 @@ export class FeedCommentsService {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async softRemove(id: number): Promise<Comment> {
+  async softRemove(id: number): Promise<FeedComment> {
     try {
       const comment = await this.findById(id);
       await this.repository.softRemove(comment);
@@ -183,16 +183,16 @@ export class FeedCommentsService {
   }
 
   //! not being used)
-  async remove(id: number): Promise<Comment> {
+  async remove(id: number): Promise<FeedComment> {
     const comment = await this.findById(id);
     return await this.repository.remove(comment);
   }
 
   //! not being used) recursive tree 구조일 경우 사용.
-  public buildCommentTree(comment: Comment): Comment {
+  public buildFeedCommentTree(comment: FeedComment): FeedComment {
     if (comment.children) {
       comment.children = comment.children.map((child) =>
-        this.buildCommentTree(child),
+        this.buildFeedCommentTree(child),
       );
     }
     return comment;

@@ -44,7 +44,7 @@ export class BookmarkUserUserService {
   // User 북마크 생성
   async createUserBookmark(
     userId: number,
-    targetUserId: number,
+    recipientId: number,
   ): Promise<BookmarkUserUser> {
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -54,28 +54,28 @@ export class BookmarkUserUserService {
       const bookmark = await queryRunner.manager.save(
         queryRunner.manager
           .getRepository(BookmarkUserUser)
-          .create({ userId, targetUserId }),
+          .create({ userId, recipientId }),
       );
       await queryRunner.manager.query(
         'UPDATE `profile` SET bookmarkCount = bookmarkCount + 1 WHERE userId = ?',
-        [targetUserId],
+        [recipientId],
       );
 
       if (false) {
         // notification with event listener ------------------------------------//
-        const targetUser = await queryRunner.manager.findOneOrFail(User, {
-          where: { id: targetUserId },
+        const recipient = await queryRunner.manager.findOneOrFail(User, {
+          where: { id: recipientId },
           relations: [`user`, `user.profile`],
         });
         // todo. fine tune notifying logic to dedup the same id
         const event = new UserNotificationEvent();
         event.name = 'userBookmark';
-        event.userId = targetUser.id;
-        event.token = targetUser.pushToken;
-        event.options = targetUser.profile?.options ?? {};
-        event.body = `${targetUser.username} 님을 누군가 찜 했습니다.`;
+        event.userId = recipient.id;
+        event.token = recipient.pushToken;
+        event.options = recipient.profile?.options ?? {};
+        event.body = `${recipient.username} 님을 누군가 찜 했습니다.`;
         event.data = {
-          page: `users/${targetUserId}`,
+          page: `users/${recipientId}`,
           args: '',
         };
         this.eventEmitter.emit('user.notified', event);
@@ -96,20 +96,20 @@ export class BookmarkUserUserService {
   }
 
   // User 북마크 제거
-  async deleteUserBookmark(userId: number, targetUserId: number): Promise<any> {
+  async deleteUserBookmark(userId: number, recipientId: number): Promise<any> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
-        'DELETE FROM `bookmark_user_user` WHERE userId = ? AND targetUserId = ?',
-        [userId, targetUserId],
+        'DELETE FROM `bookmark_user_user` WHERE userId = ? AND recipientId = ?',
+        [userId, recipientId],
       );
       if (affectedRows > 0) {
         await queryRunner.manager.query(
           'UPDATE `profile` SET bookmarkCount = bookmarkCount - 1 WHERE userId = ? AND bookmarkCount > 0',
-          [targetUserId],
+          [recipientId],
         );
       }
       await queryRunner.commitTransaction();
@@ -125,13 +125,13 @@ export class BookmarkUserUserService {
   // User 북마크 여부
   async isUserBookmarked(
     userId: number,
-    targetUserId: number,
+    recipientId: number,
   ): Promise<AnyData> {
     const [row] = await this.bookmarkUserUserRepository.manager.query(
       'SELECT COUNT(*) AS count \
       FROM `bookmark_user_user` \
-      WHERE userId = ? AND targetUserId = ?',
-      [userId, targetUserId],
+      WHERE userId = ? AND recipientId = ?',
+      [userId, recipientId],
     );
     const { count } = row;
 
@@ -148,7 +148,7 @@ export class BookmarkUserUserService {
       .innerJoinAndSelect(
         BookmarkUserUser,
         'bookmark_user_user',
-        'bookmark_user_user.targetUserId = user.id',
+        'bookmark_user_user.recipientId = user.id',
       )
       .leftJoinAndSelect('user.profile', 'profile')
       .where('bookmark_user_user.userId = :userId', { userId });
@@ -171,7 +171,7 @@ export class BookmarkUserUserService {
       .innerJoinAndSelect(
         BookmarkUserUser,
         'bookmark_user_user',
-        'bookmark_user_user.targetUserId = user.id',
+        'bookmark_user_user.recipientId = user.id',
       )
       .addSelect(['user.*'])
       .where('bookmark_user_user.userId = :userId', { userId })
@@ -181,12 +181,12 @@ export class BookmarkUserUserService {
   // 내가 북마크한 모든 userIds
   async loadBookmarkedUserIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkUserUserRepository.manager.query(
-      'SELECT targetUserId FROM `bookmark_user_user` \
+      'SELECT recipientId FROM `bookmark_user_user` \
       WHERE bookmark_user_user.userId = ?',
       [userId],
     );
 
-    return rows.map((v: any) => v.targetUserId);
+    return rows.map((v: any) => v.recipientId);
   }
 
   //? 새롭게 추가 -----------------------------------------------------------------//
@@ -201,7 +201,7 @@ export class BookmarkUserUserService {
         'bookmark_user_user.userId = user.id',
       )
       .addSelect(['user.*'])
-      .where('bookmark_user_user.targetUserId = :userId', {
+      .where('bookmark_user_user.recipientId = :userId', {
         userId,
       })
       .getMany();
@@ -211,7 +211,7 @@ export class BookmarkUserUserService {
   async loadBookmarkingUserIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkUserUserRepository.manager.query(
       'SELECT userId FROM `bookmark_user_user` \
-      WHERE bookmark_user_user.targetUserId = ?',
+      WHERE bookmark_user_user.recipientId = ?',
       [userId],
     );
 

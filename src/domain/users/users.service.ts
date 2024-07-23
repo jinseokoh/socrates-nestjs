@@ -307,7 +307,7 @@ export class UsersService {
   async quit(id: number, dto: DeleteUserDto): Promise<any> {
     const user = await this.findById(id);
     try {
-      await this._deleteOpinion(id);
+      await this._deleteInquiryComment(id);
       await this._deleteConnection(id);
       await this._deleteFlag(id);
       await this._deleteHate(id);
@@ -320,11 +320,11 @@ export class UsersService {
       await this._deletePlea(id);
       await this._deleteProfile(id);
       await this._deleteProvider(id);
-      await this._deleteComment(id);
+      await this._deleteFeedComment(id);
       await this._deleteReportUserFeed(id);
       await this._deleteReportUserMeetup(id);
       await this._deleteReportUserUser(id);
-      await this._deleteThread(id);
+      await this._deleteMeetupComment(id);
       await this._voidPersonalInformation(id, dto.message ?? '');
       // await this.softRemove(id);
     } catch (e) {
@@ -341,7 +341,7 @@ export class UsersService {
     };
   }
 
-  async _deleteOpinion(id: number) {
+  async _deleteInquiryComment(id: number) {
     await this.repository.manager.query(
       'UPDATE `opinion` SET deletedAt=NOW() WHERE userId = ?',
       [id],
@@ -360,13 +360,13 @@ export class UsersService {
   }
   async _deleteFriendship(id: number) {
     await this.repository.manager.query(
-      'DELETE FROM `friendship` WHERE senderId = ? OR recipientId = ?',
+      'DELETE FROM `friendship` WHERE userId = ? OR recipientId = ?',
       [id, id],
     );
   }
   async _deleteHate(id: number) {
     await this.repository.manager.query(
-      'DELETE FROM `hate` WHERE senderId = ? OR recipientId = ?',
+      'DELETE FROM `hate` WHERE userId = ? OR recipientId = ?',
       [id, id],
     );
   }
@@ -390,7 +390,7 @@ export class UsersService {
   }
   async _deleteJoin(id: number) {
     await this.repository.manager.query(
-      'DELETE FROM `join` WHERE askingUserId = ? OR askedUserId = ?',
+      'DELETE FROM `join` WHERE userId = ? OR recipientId = ?',
       [id, id],
     );
   }
@@ -419,7 +419,7 @@ export class UsersService {
   }
   async _deletePlea(id: number) {
     await this.repository.manager.query(
-      'DELETE FROM `plea` WHERE senderId = ? OR recipientId = ?',
+      'DELETE FROM `plea` WHERE userId = ? OR recipientId = ?',
       [id, id],
     );
   }
@@ -441,7 +441,7 @@ export class UsersService {
       [id],
     );
   }
-  async _deleteComment(id: number) {
+  async _deleteFeedComment(id: number) {
     await this.repository.manager.query(
       'UPDATE `comment` SET deletedAt=NOW() WHERE userId = ?',
       [id],
@@ -465,7 +465,7 @@ export class UsersService {
       [id, id],
     );
   }
-  async _deleteThread(id: number) {
+  async _deleteMeetupComment(id: number) {
     await this.repository.manager.query(
       'UPDATE `thread` SET deletedAt=NOW() WHERE userId = ?',
       [id],

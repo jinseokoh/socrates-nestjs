@@ -6,7 +6,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -15,18 +14,17 @@ import {
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Opinion } from 'src/domain/inquiries/entities/opinion.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { Impression } from 'src/domain/users/entities/impression.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
-import { Thread } from 'src/domain/meetups/entities/thread.entity';
+import { InquiryComment } from 'src/domain/inquiries/entities/inquiry_comment.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { Comment } from 'src/domain/feeds/entities/comment.entity';
+import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
@@ -35,6 +33,7 @@ import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
 import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
+import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -147,10 +146,10 @@ export class User {
   })
   meetups: Meetup[];
 
-  @OneToMany(() => Thread, (thread) => thread.user, {
+  @OneToMany(() => MeetupComment, (thread) => thread.user, {
     // cascade: ['insert', 'update'],
   })
-  threads: Thread[];
+  threads: MeetupComment[];
 
   @OneToMany(() => Feed, (feed) => feed.user, {
     // cascade: ['insert', 'update'],
@@ -167,11 +166,11 @@ export class User {
   })
   inquiries: Inquiry[];
 
-  @OneToMany(() => Comment, (comment) => comment.user)
-  public comments: Comment[];
+  @OneToMany(() => FeedComment, (comment) => comment.user)
+  public feedComments: FeedComment[];
 
-  @OneToMany(() => Opinion, (opinion) => opinion.user)
-  public opinions: Opinion[];
+  @OneToMany(() => InquiryComment, (comment) => comment.user)
+  public inquiryComments: InquiryComment[];
 
   @OneToMany(() => Impression, (impression) => impression.user)
   public impressions: Impression[];
@@ -191,7 +190,7 @@ export class User {
   @OneToMany(() => Hate, (hate) => hate.user)
   public usersHating: Hate[];
 
-  @OneToMany(() => Hate, (hate) => hate.targetUser)
+  @OneToMany(() => Hate, (hate) => hate.recipient)
   public usersHated: Hate[];
 
   @OneToMany(() => Plea, (plea) => plea.sender)
@@ -226,7 +225,7 @@ export class User {
   @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.user)
   public userBookmarks: BookmarkUserUser[];
 
-  @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.targetUser)
+  @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.recipient)
   public bookmarkedByUsers: BookmarkUserUser[];
 
   //*-------------------------------------------------------------------------*/
@@ -235,9 +234,6 @@ export class User {
   // @ManyToMany(() => Region, (region) => region.meetups)
   // @JoinTable({ name: 'meetup_region' }) // owning side
   // regions: Region[];
-
-  @ManyToMany(() => Inquiry, (inquiry) => inquiry.flaggedUsers)
-  flaggedInquiries: Inquiry[];
 
   //?-------------------------------------------------------------------------?/
   //? constructor

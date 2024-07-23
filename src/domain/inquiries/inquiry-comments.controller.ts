@@ -15,17 +15,17 @@ import {
 
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { Opinion } from 'src/domain/inquiries/entities/opinion.entity';
-import { OpinionsService } from 'src/domain/inquiries/opinions.service';
-import { CreateOpinionDto } from 'src/domain/inquiries/dto/create-opinion.dto';
-import { UpdateOpinionDto } from 'src/domain/inquiries/dto/update-opinion.dto';
+import { InquiryComment } from 'src/domain/inquiries/entities/inquiry_comment.entity';
+import { InquiryCommentsService } from 'src/domain/inquiries/inquiry-comments.service';
+import { CreateInquiryCommentDto } from 'src/domain/inquiries/dto/create-opinion.dto';
+import { UpdateInquiryCommentDto } from 'src/domain/inquiries/dto/update-opinion.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('inquiries')
-export class InquiryOpinionsController {
-  constructor(private readonly opinionsService: OpinionsService) {}
+export class InquiryInquiryCommentsController {
+  constructor(private readonly opinionsService: InquiryCommentsService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
@@ -37,7 +37,7 @@ export class InquiryOpinionsController {
   async create(
     @CurrentUserId() userId: number,
     @Param('inquiryId') inquiryId: number,
-    @Body() dto: CreateOpinionDto,
+    @Body() dto: CreateInquiryCommentDto,
   ): Promise<any> {
     return await this.opinionsService.create({
       ...dto,
@@ -52,10 +52,10 @@ export class InquiryOpinionsController {
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':inquiryId/opinions')
-  async getOpinions(
+  async getInquiryComments(
     @Param('inquiryId', ParseIntPipe) inquiryId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Opinion>> {
+  ): Promise<Paginated<InquiryComment>> {
     const queryParams = {
       ...query,
       ...{
@@ -70,11 +70,11 @@ export class InquiryOpinionsController {
   @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':inquiryId/opinions/:opinionId')
-  async getOpinionsById(
+  async getInquiryCommentsById(
     @Param('inquiryId', ParseIntPipe) inquiryId: number,
     @Param('opinionId', ParseIntPipe) opinionId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Opinion>> {
+  ): Promise<Paginated<InquiryComment>> {
     return await this.opinionsService.findAllById(inquiryId, opinionId, query);
   }
 
@@ -86,8 +86,8 @@ export class InquiryOpinionsController {
   @Patch(':inquiryId/opinions/:opinionId')
   async update(
     @Param('opinionId') id: number,
-    @Body() dto: UpdateOpinionDto,
-  ): Promise<Opinion> {
+    @Body() dto: UpdateInquiryCommentDto,
+  ): Promise<InquiryComment> {
     return await this.opinionsService.update(id, dto);
   }
 
@@ -100,7 +100,7 @@ export class InquiryOpinionsController {
   async remove(
     @Param('inquiryId', ParseIntPipe) inquiryId: number,
     @Param('opinionId') id: number,
-  ): Promise<Opinion> {
+  ): Promise<InquiryComment> {
     return await this.opinionsService.softRemove(id);
   }
 }

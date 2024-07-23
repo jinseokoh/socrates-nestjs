@@ -15,17 +15,17 @@ import {
 
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { Comment } from 'src/domain/feeds/entities/comment.entity';
+import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { FeedCommentsService } from 'src/domain/feeds/feed-comments.service';
-import { CreateCommentDto } from 'src/domain/feeds/dto/create-comment.dto';
-import { UpdateCommentDto } from 'src/domain/feeds/dto/update-comment.dto';
+import { CreateFeedCommentDto } from 'src/domain/feeds/dto/create-comment.dto';
+import { UpdateFeedCommentDto } from 'src/domain/feeds/dto/update-comment.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('feeds')
 export class FeedCommentsController {
-  constructor(private readonly feedCommentsService: FeedCommentsService) {}
+  constructor(private readonly feedFeedCommentsService: FeedCommentsService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE
@@ -33,13 +33,13 @@ export class FeedCommentsController {
 
   @ApiOperation({ description: '댓글 생성' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':feedId/comments')
-  async createComment(
+  @Post(':feedId/feed_comments')
+  async createFeedComment(
     @CurrentUserId() userId: number,
     @Param('feedId', ParseIntPipe) feedId: number,
-    @Body() dto: CreateCommentDto,
+    @Body() dto: CreateFeedCommentDto,
   ): Promise<any> {
-    return await this.feedCommentsService.create({
+    return await this.feedFeedCommentsService.create({
       ...dto,
       userId,
       feedId,
@@ -49,17 +49,17 @@ export class FeedCommentsController {
 
   @ApiOperation({ description: '답글 생성' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':feedId/comments/:commentId')
-  async createCommentReply(
+  @Post(':feedId/feed_comments/:commentId')
+  async createFeedCommentReply(
     @CurrentUserId() userId: number,
     @Param('feedId', ParseIntPipe) feedId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
-    @Body() dto: CreateCommentDto,
+    @Body() dto: CreateFeedCommentDto,
   ): Promise<any> {
-    const comment = await this.feedCommentsService.findById(commentId);
+    const comment = await this.feedFeedCommentsService.findById(commentId);
     const parentId = comment.parentId ? comment.parentId : commentId;
 
-    return await this.feedCommentsService.create({
+    return await this.feedFeedCommentsService.create({
       ...dto,
       userId,
       feedId,
@@ -73,12 +73,12 @@ export class FeedCommentsController {
   //?-------------------------------------------------------------------------//
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':feedId/comments')
+  @Get(':feedId/feed_comments')
   async findAllInTraditionalStyle(
     @Param('feedId', ParseIntPipe) feedId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Comment>> {
-    const result = await this.feedCommentsService.findAllInTraditionalStyle(
+  ): Promise<Paginated<FeedComment>> {
+    const result = await this.feedFeedCommentsService.findAllInTraditionalStyle(
       query,
       feedId,
     );
@@ -88,19 +88,19 @@ export class FeedCommentsController {
     // return {
     //   ...result,
     //   data: result.data.map((comment) =>
-    //     this.feedCommentsService.buildCommentTree(comment),
+    //     this.feedFeedCommentsService.buildFeedCommentTree(comment),
     //   ),
     // };
   }
 
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':feedId/comments-count')
+  @Get(':feedId/feed_comments-count')
   async findAllInYoutubeStyle(
     @Param('feedId', ParseIntPipe) feedId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Comment>> {
-    const result = await this.feedCommentsService.findAllInYoutubeStyle(
+  ): Promise<Paginated<FeedComment>> {
+    const result = await this.feedFeedCommentsService.findAllInYoutubeStyle(
       query,
       feedId,
     );
@@ -110,13 +110,13 @@ export class FeedCommentsController {
 
   @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':feedId/comments/:commentId')
+  @Get(':feedId/feed_comments/:commentId')
   async findAllRepliesById(
     @Param('feedId', ParseIntPipe) feedId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Comment>> {
-    return await this.feedCommentsService.findAllRepliesById(
+  ): Promise<Paginated<FeedComment>> {
+    return await this.feedFeedCommentsService.findAllRepliesById(
       query,
       feedId,
       commentId,
@@ -128,13 +128,13 @@ export class FeedCommentsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '댓글 수정' })
-  @Patch(':feedId/comments/:commentId')
+  @Patch(':feedId/feed_comments/:commentId')
   async update(
     @Param('feedId', ParseIntPipe) feedId: number,
     @Param('commentId') commentId: number,
-    @Body() dto: UpdateCommentDto,
-  ): Promise<Comment> {
-    return await this.feedCommentsService.update(dto, commentId);
+    @Body() dto: UpdateFeedCommentDto,
+  ): Promise<FeedComment> {
+    return await this.feedFeedCommentsService.update(dto, commentId);
   }
 
   //?-------------------------------------------------------------------------//
@@ -142,11 +142,11 @@ export class FeedCommentsController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: '댓글 soft 삭제' })
-  @Delete(':feedId/comments/:commentId')
+  @Delete(':feedId/feed_comments/:commentId')
   async remove(
     @Param('feedId', ParseIntPipe) feedId: number,
     @Param('commentId') commentId: number,
-  ): Promise<Comment> {
-    return await this.feedCommentsService.softRemove(commentId);
+  ): Promise<FeedComment> {
+    return await this.feedFeedCommentsService.softRemove(commentId);
   }
 }

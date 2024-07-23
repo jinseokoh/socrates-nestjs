@@ -10,9 +10,9 @@ import {
 } from 'nestjs-paginate';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { SignedUrl } from 'src/common/types';
-import { CreateThreadDto } from 'src/domain/meetups/dto/create-thread.dto';
-import { UpdateThreadDto } from 'src/domain/meetups/dto/update-thread.dto';
-import { Thread } from 'src/domain/meetups/entities/thread.entity';
+import { CreateMeetupCommentDto } from 'src/domain/meetups/dto/create-meetup_comment.dto';
+import { UpdateMeetupCommentDto } from 'src/domain/meetups/dto/update-meetup_comment.dto';
+import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { randomImageName } from 'src/helpers/random-filename';
 import { S3Service } from 'src/services/aws/s3.service';
@@ -22,12 +22,12 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
 @Injectable()
-export class ThreadsService {
-  private readonly logger = new Logger(ThreadsService.name);
+export class MeetupCommentsService {
+  private readonly logger = new Logger(MeetupCommentsService.name);
 
   constructor(
-    @InjectRepository(Thread)
-    private readonly repository: Repository<Thread>,
+    @InjectRepository(MeetupComment)
+    private readonly repository: Repository<MeetupComment>,
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
@@ -39,7 +39,7 @@ export class ThreadsService {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  async create(dto: CreateThreadDto): Promise<Thread> {
+  async create(dto: CreateMeetupCommentDto): Promise<MeetupComment> {
     // creation
     const thread = await this.repository.save(this.repository.create(dto));
 
@@ -52,7 +52,7 @@ export class ThreadsService {
     ]);
     // notification with event listener ------------------------------------//
     const event = new UserNotificationEvent();
-    event.name = 'meetupThread';
+    event.name = 'meetupMeetupComment';
     event.userId = threadWithUser.meetup.user.id;
     event.token = threadWithUser.meetup.user.pushToken;
     event.options = threadWithUser.meetup.user.profile?.options ?? {};
@@ -74,7 +74,7 @@ export class ThreadsService {
   //?-------------------------------------------------------------------------//
 
   // 댓글 리스트
-  async findAll(query: PaginateQuery): Promise<Paginated<Thread>> {
+  async findAll(query: PaginateQuery): Promise<Paginated<MeetupComment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('thread')
       .innerJoinAndSelect('thread.user', 'user')
@@ -85,7 +85,7 @@ export class ThreadsService {
     // to make all flagged thread disappear
     // .andWhere('children.isFlagged = :isFlagged', { isFlagged: false });
 
-    const config: PaginateConfig<Thread> = {
+    const config: PaginateConfig<MeetupComment> = {
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultLimit: 20,
@@ -104,7 +104,7 @@ export class ThreadsService {
     meetupId: number,
     threadId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Thread>> {
+  ): Promise<Paginated<MeetupComment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('thread')
       .innerJoinAndSelect('thread.user', 'user')
@@ -120,7 +120,7 @@ export class ThreadsService {
       // )
       .andWhere('thread.deletedAt IS NULL');
 
-    const config: PaginateConfig<Thread> = {
+    const config: PaginateConfig<MeetupComment> = {
       sortableColumns: ['id'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
@@ -129,11 +129,11 @@ export class ThreadsService {
       },
     };
 
-    return await paginate<Thread>(query, queryBuilder, config);
+    return await paginate<MeetupComment>(query, queryBuilder, config);
   }
 
   // required when checking if the thread exists
-  async findById(id: number, relations: string[] = []): Promise<Thread> {
+  async findById(id: number, relations: string[] = []): Promise<MeetupComment> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -159,7 +159,7 @@ export class ThreadsService {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  async update(id: number, dto: UpdateThreadDto): Promise<Thread> {
+  async update(id: number, dto: UpdateMeetupCommentDto): Promise<MeetupComment> {
     const thread = await this.repository.preload({ id, ...dto });
     // user validation here might be a good option to be added
     if (!thread) {
@@ -172,13 +172,13 @@ export class ThreadsService {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async softRemove(id: number): Promise<Thread> {
+  async softRemove(id: number): Promise<MeetupComment> {
     const thread = await this.findById(id);
     // user validation here might be a good option to be added
     return await this.repository.softRemove(thread);
   }
 
-  async remove(id: number): Promise<Thread> {
+  async remove(id: number): Promise<MeetupComment> {
     const thread = await this.findById(id);
     // user validation here might be a good option to be added
     return await this.repository.remove(thread);

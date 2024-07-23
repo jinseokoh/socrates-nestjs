@@ -191,23 +191,23 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '모임신청 리스트에 추가' })
   @PaginateQueryOptions()
-  @Post(':askingUserId/joins/:askedUserId/meetups/:meetupId')
+  @Post(':userId/joins/:recipientId/meetups/:meetupId')
   async attachToJoinPivot(
-    @Param('askingUserId', ParseIntPipe) askingUserId: number,
-    @Param('askedUserId', ParseIntPipe) askedUserId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() dto: CreateJoinDto, // optional message, and skill
   ): Promise<AnyData> {
     // 모임신청 생성
     const meetup = await this.userMeetupsService.attachToJoinPivot(
-      askingUserId,
-      askedUserId,
+      userId,
+      recipientId,
       meetupId,
       dto,
     );
     // user's interests 추가
     await this.usersService.upsertCategoryWithSkill(
-      askingUserId,
+      userId,
       meetup.subCategory,
       dto.skill,
     );
@@ -218,16 +218,16 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '모임신청 수락/거부' })
   @PaginateQueryOptions()
-  @Patch(':askingUserId/joins/:askedUserId/meetups/:meetupId')
+  @Patch(':userId/joins/:recipientId/meetups/:meetupId')
   async updateJoinToAcceptOrDeny(
-    @Param('askingUserId', ParseIntPipe) askingUserId: number,
-    @Param('askedUserId', ParseIntPipe) askedUserId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() dto: AcceptOrDenyDto,
   ): Promise<AnyData> {
     await this.userMeetupsService.updateJoinToAcceptOrDeny(
-      askingUserId,
-      askedUserId,
+      userId,
+      recipientId,
       meetupId,
       dto.status,
       dto.joinType,

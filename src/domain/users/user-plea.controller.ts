@@ -71,13 +71,13 @@ export class UserPleaController {
   //--------------------------------------------------------------------------//
 
   @ApiOperation({ description: '요청들 삭제' })
-  @Delete(':senderId/pleas/:recipientId')
+  @Delete(':userId/pleas/:recipientId')
   async deletePleas(
-    @Param('senderId', ParseIntPipe) senderId: number,
+    @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<void> {
     try {
-      await this.usersPleaService.deletePleas(senderId, recipientId);
+      await this.usersPleaService.deletePleas(userId, recipientId);
     } catch (e) {
       throw new BadRequestException();
     }

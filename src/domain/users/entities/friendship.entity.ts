@@ -43,7 +43,7 @@ export class Friendship {
   updatedAt: Date;
 
   @PrimaryColumn({ type: 'int', unsigned: true })
-  senderId: number; // to make it available to Repository.
+  userId: number; // to make it available to Repository.
 
   @PrimaryColumn({ type: 'int', unsigned: true })
   recipientId: number; // to make it available to Repository.
@@ -59,7 +59,7 @@ export class Friendship {
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'senderId' })
+  @JoinColumn({ name: 'userId' })
   public sender!: User;
 
   @ManyToOne(() => User, (user) => user.id, {

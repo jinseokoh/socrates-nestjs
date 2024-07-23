@@ -9,7 +9,7 @@ import {
 import { SignedUrl } from 'src/common/types';
 import { CreateInquiryDto } from 'src/domain/inquiries/dto/create-inquiry.dto';
 import { UpdateInquiryDto } from 'src/domain/inquiries/dto/update-inquiry.dto';
-import { Opinion } from 'src/domain/inquiries/entities/opinion.entity';
+import { InquiryComment } from 'src/domain/inquiries/entities/inquiry_comment.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 import { randomImageName } from 'src/helpers/random-filename';
@@ -20,8 +20,8 @@ export class InquiriesService {
   constructor(
     @InjectRepository(Inquiry)
     private readonly repository: Repository<Inquiry>,
-    @InjectRepository(Opinion)
-    private readonly opinionRepository: Repository<Opinion>,
+    @InjectRepository(InquiryComment)
+    private readonly opinionRepository: Repository<InquiryComment>,
     private readonly s3Service: S3Service,
   ) {}
 

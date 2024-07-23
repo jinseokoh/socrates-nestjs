@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
-import { Comment } from 'src/domain/feeds/entities/comment.entity';
+import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -89,8 +89,8 @@ export class Feed {
   @OneToMany(() => FeedFeedLink, (link) => link.linkedFeed)
   public linkedByFeeds: FeedFeedLink[];
 
-  @OneToMany(() => Comment, (comment) => comment.feed)
-  comments: Comment[];
+  @OneToMany(() => FeedComment, (comment) => comment.feed)
+  comments: FeedComment[];
 
   @OneToMany(() => Plea, (plea) => plea.feed)
   public pleas: Plea[];
@@ -114,9 +114,6 @@ export class Feed {
   // @ManyToMany(() => Career, (career) => career.meetups)
   // @JoinTable({ name: 'meetup_career' }) // owning side
   // careers: Career[];
-
-  @ManyToMany(() => Inquiry, (inquiry) => inquiry.flaggedFeeds)
-  flaggedInquiries: Inquiry[];
 
   //?-------------------------------------------------------------------------?/
   //? constructor

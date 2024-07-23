@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateCommentDto {
+export class CreateFeedCommentDto {
   @ApiProperty({ description: '댓글 🔍' })
   @IsString()
   body: string;

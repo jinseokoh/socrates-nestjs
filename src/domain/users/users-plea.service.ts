@@ -23,10 +23,10 @@ export class UsersPleaService {
   // Read
   //--------------------------------------------------------------------------//
 
-  async findByIds(senderId: number, recipientId: number): Promise<Plea[]> {
+  async findByIds(userId: number, recipientId: number): Promise<Plea[]> {
     try {
       return await this.pleaRepository.find({
-        where: { senderId, recipientId },
+        where: { userId, recipientId },
       });
     } catch (e) {
       throw new NotFoundException('entity not found');
@@ -44,7 +44,7 @@ export class UsersPleaService {
       .innerJoinAndSelect('plea.sender', 'sender')
       .innerJoinAndSelect('plea.poll', 'poll')
       .where({
-        senderId: userId,
+        userId: userId,
         recipientId: myId,
       })
       .getMany();
@@ -61,7 +61,7 @@ export class UsersPleaService {
       .innerJoinAndSelect('plea.recipient', 'recipient')
       .innerJoinAndSelect('plea.poll', 'poll')
       .where({
-        senderId: myId,
+        userId: myId,
         recipientId: userId,
       })
       .getMany();
@@ -79,7 +79,7 @@ export class UsersPleaService {
       .where({
         recipientId: userId,
       })
-      .groupBy('plea.senderId')
+      .groupBy('plea.userId')
       .getMany();
 
     return items;
@@ -91,7 +91,7 @@ export class UsersPleaService {
       .innerJoinAndSelect('plea.poll', 'poll')
       .innerJoinAndSelect('plea.recipient', 'recipient')
       .where({
-        senderId: userId,
+        userId: userId,
       })
       .groupBy('plea.recipientId')
       .getMany();
@@ -103,8 +103,8 @@ export class UsersPleaService {
   // Delete
   //--------------------------------------------------------------------------//
 
-  async deletePleas(senderId: number, recipientId: number): Promise<void> {
-    const pleas = await this.findByIds(senderId, recipientId);
+  async deletePleas(userId: number, recipientId: number): Promise<void> {
+    const pleas = await this.findByIds(userId, recipientId);
     console.log('to be deleted => ', pleas);
     await Promise.all(
       pleas.map(async (v: Plea) => await this.pleaRepository.softDelete(v.id)),
@@ -120,7 +120,7 @@ export class UsersPleaService {
       .where({
         recipientId: userId,
       })
-      .groupBy('plea.senderId')
+      .groupBy('plea.userId')
       .getMany();
 
     return items.map((v) => v.sender);

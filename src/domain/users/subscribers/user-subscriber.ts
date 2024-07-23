@@ -34,13 +34,13 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
           userId: event.entity.id,
           options: {
             meetupBookmark: false, // 모임 찜
-            meetupThread: false, // 모임 댓글
+            meetupMeetupComment: false, // 모임 댓글
             meetupRequest: false, // 모임신청
             meetupRequestApproval: false, // 모임신청 승인
             meetupInviteApproval: false, // 모임초대 승인
             meetupChatOpen: false, // 모임 채팅방 오픈
             feedBookmark: false, // 발견 공감
-            feedComment: false, // 발견 댓글
+            feedFeedComment: false, // 발견 댓글
             feedPlea: false, // 친구신청 발견글 요청
             feedPleaDenial: false, // 친구신청 발견글 요청 거절
             friendRequest: false, // 친구 신청

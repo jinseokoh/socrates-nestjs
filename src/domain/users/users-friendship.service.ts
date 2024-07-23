@@ -67,8 +67,8 @@ export class UsersFriendshipService {
       // validation ----------------------------------------------------------//
       const friendship = await queryRunner.manager.findOne(Friendship, {
         where: [
-          { senderId: dto.senderId, recipientId: dto.recipientId },
-          { senderId: dto.recipientId, recipientId: dto.senderId },
+          { userId: dto.userId, recipientId: dto.recipientId },
+          { userId: dto.recipientId, recipientId: dto.userId },
         ],
       });
       if (friendship) {
@@ -82,7 +82,7 @@ export class UsersFriendshipService {
 
       // validation ----------------------------------------------------------//
       const sender = await queryRunner.manager.findOneOrFail(User, {
-        where: { id: dto.senderId },
+        where: { id: dto.userId },
         relations: [`profile`],
       });
       if (sender?.isBanned) {
@@ -109,15 +109,15 @@ export class UsersFriendshipService {
           ledgerType: LedgerType.CREDIT_SPEND,
           balance: newBalance,
           note: `친구 신청료 (대상#${dto.recipientId})`,
-          userId: dto.senderId,
+          userId: dto.userId,
         });
         await queryRunner.manager.save(ledger);
       }
       await queryRunner.manager.query(
         'INSERT IGNORE INTO `friendship` \
-        (senderId, recipientId, requestFrom, message, pleaId) VALUES (?, ?, ?, ?, ?)',
+        (userId, recipientId, requestFrom, message, pleaId) VALUES (?, ?, ?, ?, ?)',
         [
-          dto.senderId,
+          dto.userId,
           dto.recipientId,
           dto.requestFrom,
           dto.message,
@@ -159,7 +159,7 @@ export class UsersFriendshipService {
   //! 친구신청 수락 (using transaction)
   //! profile balance will be adjusted w/ ledger model event subscriber.
   async updateFriendshipWithStatus(
-    senderId: number,
+    userId: number,
     recipientId: number,
     status: FriendshipStatus,
   ): Promise<void> {
@@ -173,7 +173,7 @@ export class UsersFriendshipService {
       // validation ----------------------------------------------------------//
       const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
         where: {
-          senderId: senderId,
+          userId: userId,
           recipientId: recipientId,
         },
         relations: ['sender', 'sender.profile', 'recipient', 'plea'],
@@ -191,7 +191,7 @@ export class UsersFriendshipService {
           debit: friendship.plea.reward,
           ledgerType: LedgerType.DEBIT_REWARD,
           balance: newBalance,
-          note: `요청 사례금 (발송#${friendship.recipientId},수신#${friendship.senderId})`,
+          note: `요청 사례금 (발송#${friendship.recipientId},수신#${friendship.userId})`,
           userId: friendship.sender.id,
         });
         await queryRunner.manager.save(ledger);
@@ -206,8 +206,8 @@ export class UsersFriendshipService {
       }
 
       await this.repository.manager.query(
-        'UPDATE `friendship` SET status = ? WHERE senderId = ? AND recipientId = ?',
-        [status, senderId, recipientId],
+        'UPDATE `friendship` SET status = ? WHERE userId = ? AND recipientId = ?',
+        [status, userId, recipientId],
       );
 
       await queryRunner.commitTransaction();
@@ -256,7 +256,7 @@ export class UsersFriendshipService {
   //         Ledger = 요청받은 사용자에게 reward 차감 (무효처리)
   //         Ledger = 요청보낸 사용자에게 reward-1 환불
   //
-  async deleteFriendship(senderId: number, recipientId: number): Promise<void> {
+  async deleteFriendship(userId: number, recipientId: number): Promise<void> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -267,7 +267,7 @@ export class UsersFriendshipService {
       // validation ----------------------------------------------------------//
       const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
         where: {
-          senderId: senderId,
+          userId: userId,
           recipientId: recipientId,
         },
         relations: [
@@ -288,7 +288,7 @@ export class UsersFriendshipService {
           debit: friendship.plea.reward - 1,
           ledgerType: LedgerType.DEBIT_REFUND,
           balance: newBalance,
-          note: `요청중지 사례금 환불 (발송#${friendship.recipientId},수신#${friendship.senderId})`,
+          note: `요청중지 사례금 환불 (발송#${friendship.recipientId},수신#${friendship.userId})`,
           userId: recipientId,
         });
         await queryRunner.manager.save(ledger);
@@ -299,8 +299,8 @@ export class UsersFriendshipService {
       }
 
       await queryRunner.manager.query(
-        'DELETE FROM `friendship` WHERE senderId = ? AND recipientId = ?',
-        [senderId, recipientId],
+        'DELETE FROM `friendship` WHERE userId = ? AND recipientId = ?',
+        [userId, recipientId],
       );
 
       await queryRunner.commitTransaction();
@@ -308,7 +308,7 @@ export class UsersFriendshipService {
       //? notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
       event.name = 'friendRequestDenial';
-      event.userId = senderId;
+      event.userId = userId;
       event.token = friendship.sender.pushToken;
       event.options = friendship.sender.profile?.options ?? {};
       event.body = friendship.plea
@@ -367,7 +367,7 @@ export class UsersFriendshipService {
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .innerJoinAndSelect('recipient.profile', 'profile')
       .where({
-        senderId: userId,
+        userId: userId,
         status: Not(FriendshipStatus.ACCEPTED),
       });
 
@@ -394,7 +394,7 @@ export class UsersFriendshipService {
       .innerJoinAndSelect('sender.profile', 'sprofile')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .innerJoinAndSelect('recipient.profile', 'rprofile')
-      .where([{ senderId: userId }, { recipientId: userId }]);
+      .where([{ userId: userId }, { recipientId: userId }]);
 
     const config: PaginateConfig<Friendship> = {
       sortableColumns: ['createdAt'],
@@ -413,22 +413,22 @@ export class UsersFriendshipService {
   // 친구관계 ID 리스트 (all)
   async getFriendshipIds(userId: number): Promise<AnyData> {
     const rows = await this.repository.manager.query(
-      'SELECT status, senderId, recipientId \
+      'SELECT status, userId, recipientId \
       FROM `friendship` \
-      WHERE senderId = ? OR recipientId = ?',
+      WHERE userId = ? OR recipientId = ?',
       [userId, userId],
     );
 
     const pendingIds = rows
       .filter((v: any) => v.status !== 'accepted')
       .map((v: any) => {
-        return v.senderId === userId ? v.recipientId : v.senderId;
+        return v.userId === userId ? v.recipientId : v.userId;
       });
 
     const friendIds = rows
       .filter((v: any) => v.status === 'accepted')
       .map((v: any) => {
-        return v.senderId === userId ? v.recipientId : v.senderId;
+        return v.userId === userId ? v.recipientId : v.userId;
       });
 
     // todo. remove dups

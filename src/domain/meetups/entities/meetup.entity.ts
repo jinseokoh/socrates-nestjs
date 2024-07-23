@@ -29,9 +29,8 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Venue } from 'src/domain/venues/entities/venue.entity';
 import { Career } from 'src/domain/careers/entities/career.entity';
-import { Thread } from 'src/domain/meetups/entities/thread.entity';
+import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
-import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
 
 @Entity()
@@ -199,8 +198,8 @@ export class Meetup {
   //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany using one-to-many (hasMany)
 
-  @OneToMany(() => Thread, (thread) => thread.meetup)
-  public threads: Thread[];
+  @OneToMany(() => MeetupComment, (meetupComment) => meetupComment.meetup)
+  public meetupComments: MeetupComment[];
 
   @OneToMany(() => Room, (room) => room.meetup)
   public rooms: Room[];
@@ -223,13 +222,6 @@ export class Meetup {
   @ManyToMany(() => Category, (category) => category.meetups)
   @JoinTable({ name: 'meetup_category' }) // owning side
   categories: Category[];
-
-  @ManyToMany(() => Inquiry, (inquiry) => inquiry.flaggedMeetups, {
-    nullable: false,
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-  })
-  flaggedInquiries: Inquiry[];
 
   //?-------------------------------------------------------------------------*/
   //? constructor

@@ -7,22 +7,22 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CreateOpinionDto } from 'src/domain/inquiries/dto/create-opinion.dto';
+import { CreateInquiryCommentDto } from 'src/domain/inquiries/dto/create-opinion.dto';
 
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
-import { Opinion } from 'src/domain/inquiries/entities/opinion.entity';
+import { InquiryComment } from 'src/domain/inquiries/entities/inquiry_comment.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 import { ClientProxy } from '@nestjs/microservices';
-import { UpdateOpinionDto } from 'src/domain/inquiries/dto/update-opinion.dto';
+import { UpdateInquiryCommentDto } from 'src/domain/inquiries/dto/update-opinion.dto';
 
 @Injectable()
-export class OpinionsService {
-  private readonly logger = new Logger(OpinionsService.name);
+export class InquiryCommentsService {
+  private readonly logger = new Logger(InquiryCommentsService.name);
 
   constructor(
-    @InjectRepository(Opinion)
-    private readonly repository: Repository<Opinion>,
+    @InjectRepository(InquiryComment)
+    private readonly repository: Repository<InquiryComment>,
     @InjectRepository(Inquiry)
     private readonly inquiryRepository: Repository<Inquiry>,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
@@ -32,7 +32,7 @@ export class OpinionsService {
   //? CREATE
   //?-------------------------------------------------------------------------//
 
-  async create(dto: CreateOpinionDto): Promise<Opinion> {
+  async create(dto: CreateInquiryCommentDto): Promise<InquiryComment> {
     // creation
     const opinion = await this.repository.save(this.repository.create(dto));
     const opinionWithUser = await this.findById(opinion.id, [
@@ -51,7 +51,7 @@ export class OpinionsService {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  async findAll(query: PaginateQuery): Promise<Paginated<Opinion>> {
+  async findAll(query: PaginateQuery): Promise<Paginated<InquiryComment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('opinion')
       .innerJoinAndSelect('opinion.user', 'user')
@@ -61,7 +61,7 @@ export class OpinionsService {
       .where('opinion.parentId IS NULL')
       .andWhere('opinion.deletedAt IS NULL');
 
-    const config: PaginateConfig<Opinion> = {
+    const config: PaginateConfig<InquiryComment> = {
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultLimit: 20,
@@ -72,14 +72,14 @@ export class OpinionsService {
       },
     };
 
-    return await paginate<Opinion>(query, queryBuilder, config);
+    return await paginate<InquiryComment>(query, queryBuilder, config);
   }
 
   async findAllById(
     inquiryId: number,
     opinionId: number,
     query: PaginateQuery,
-  ): Promise<Paginated<Opinion>> {
+  ): Promise<Paginated<InquiryComment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('opinion')
       .innerJoinAndSelect('opinion.user', 'user')
@@ -96,7 +96,7 @@ export class OpinionsService {
       // )
       .andWhere('opinion.deletedAt IS NULL');
 
-    const config: PaginateConfig<Opinion> = {
+    const config: PaginateConfig<InquiryComment> = {
       sortableColumns: ['id'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
@@ -106,10 +106,10 @@ export class OpinionsService {
       },
     };
 
-    return await paginate<Opinion>(query, queryBuilder, config);
+    return await paginate<InquiryComment>(query, queryBuilder, config);
   }
 
-  async findById(id: number, relations: string[] = []): Promise<Opinion> {
+  async findById(id: number, relations: string[] = []): Promise<InquiryComment> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -124,7 +124,7 @@ export class OpinionsService {
     }
   }
 
-  async findByUniqueKey(params: FindOneOptions): Promise<Opinion | null> {
+  async findByUniqueKey(params: FindOneOptions): Promise<InquiryComment | null> {
     return await this.repository.findOne(params);
   }
 
@@ -132,7 +132,7 @@ export class OpinionsService {
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
-  async update(id: number, dto: UpdateOpinionDto): Promise<Opinion> {
+  async update(id: number, dto: UpdateInquiryCommentDto): Promise<InquiryComment> {
     const opinion = await this.repository.preload({ id, ...dto });
     if (!opinion) {
       throw new NotFoundException(`entity not found`);
@@ -144,7 +144,7 @@ export class OpinionsService {
   //? DELETE
   //?-------------------------------------------------------------------------//
 
-  async softRemove(id: number): Promise<Opinion> {
+  async softRemove(id: number): Promise<InquiryComment> {
     const opinion = await this.findById(id);
     await this.repository.softRemove(opinion);
     // no column named opinionCount. just remove it. that's all.
@@ -155,7 +155,7 @@ export class OpinionsService {
     return opinion;
   }
 
-  async remove(id: number): Promise<Opinion> {
+  async remove(id: number): Promise<InquiryComment> {
     const opinion = await this.findById(id);
     return await this.repository.remove(opinion);
   }

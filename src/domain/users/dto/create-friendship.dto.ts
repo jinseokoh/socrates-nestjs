@@ -9,10 +9,10 @@ import {
 } from 'class-validator';
 import { FriendshipStatus } from 'src/common/enums';
 export class CreateFriendshipDto {
-  @ApiProperty({ description: 'senderId' })
+  @ApiProperty({ description: 'userId' })
   @IsNumber()
   @IsOptional()
-  senderId: number;
+  userId: number;
 
   @ApiProperty({ description: 'recipientId' })
   @IsNumber()

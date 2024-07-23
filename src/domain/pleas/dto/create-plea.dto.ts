@@ -6,10 +6,10 @@ export class CreatePleaDto {
   @IsOptional()
   id: number;
 
-  @ApiProperty({ description: 'senderId' })
+  @ApiProperty({ description: 'userId' })
   @IsNumber()
   @IsOptional()
-  senderId: number;
+  userId: number;
 
   @ApiProperty({ description: 'recipientId' })
   @IsNumber()

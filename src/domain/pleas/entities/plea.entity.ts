@@ -15,7 +15,7 @@ import {
 
 @Entity()
 @Unique('sender_id_recipient_id_feed_id_key', [
-  'senderId',
+  'userId',
   'recipientId',
   'feedId',
 ])
@@ -51,7 +51,7 @@ export class Plea {
   deletedAt: Date | null;
 
   @Column({ type: 'int', unsigned: true })
-  senderId: number;
+  userId: number;
 
   @Column({ type: 'int', unsigned: true })
   recipientId: number;
@@ -67,7 +67,7 @@ export class Plea {
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'senderId' })
+  @JoinColumn({ name: 'userId' })
   public sender!: User;
 
   @ManyToOne(() => User, (user) => user.id, {

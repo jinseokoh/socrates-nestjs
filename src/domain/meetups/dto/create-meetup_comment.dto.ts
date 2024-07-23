@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class CreateThreadDto {
+export class CreateMeetupCommentDto {
   @ApiProperty({ description: '질문내용' })
   @IsString()
   body: string;

@@ -105,9 +105,9 @@ export class UserFeedsService {
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.sender', 'sender')
       .where({
-        askedUserId: userId,
+        recipientId: userId,
       })
-      .groupBy('plea.senderId')
+      .groupBy('plea.userId')
       .getMany();
 
     return items.map((v) => v.sender);

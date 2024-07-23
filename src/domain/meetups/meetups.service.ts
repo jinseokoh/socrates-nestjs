@@ -271,7 +271,7 @@ export class MeetupsService {
             where: { id },
             relations,
             order: {
-              threads: {
+              meetupComments: {
                 id: 'DESC',
               },
             },

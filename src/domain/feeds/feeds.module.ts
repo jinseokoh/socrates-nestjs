@@ -8,7 +8,7 @@ import { FlagUserService } from 'src/domain/users/flag_user.service';
 import { PollsService } from 'src/domain/feeds/polls.service';
 import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
-import { Comment } from 'src/domain/feeds/entities/comment.entity';
+import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
@@ -26,7 +26,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
   imports: [
     TypeOrmModule.forFeature([
       BookmarkUserFeed,
-      Comment,
+      FeedComment,
       Feed,
       FeedFeedLink,
       Flag,
