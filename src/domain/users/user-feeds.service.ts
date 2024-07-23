@@ -5,8 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
-import { CreatePleaDto } from 'src/domain/pleas/dto/create-plea.dto';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
+import { CreatePleaDto } from 'src/domain/feeds/dto/create-plea.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   FilterOperator,
@@ -103,13 +103,13 @@ export class UserFeedsService {
   async getUniqueUsersPleaded(userId: number): Promise<User[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
-      .innerJoinAndSelect('plea.sender', 'sender')
+      .innerJoinAndSelect('plea.user', 'sender')
       .where({
         recipientId: userId,
       })
       .groupBy('plea.userId')
       .getMany();
 
-    return items.map((v) => v.sender);
+    return items.map((v) => v.user);
   }
 }

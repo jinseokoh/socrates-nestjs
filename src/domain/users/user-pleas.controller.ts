@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -7,18 +8,22 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { CreatePleaDto } from 'src/domain/pleas/dto/create-plea.dto';
-import { UpdatePleaDto } from 'src/domain/pleas/dto/update-plea.dto';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
-import { PleasService } from 'src/domain/pleas/pleas.service';
+import { CreatePleaDto } from 'src/domain/feeds/dto/create-plea.dto';
+import { UpdatePleaDto } from 'src/domain/feeds/dto/update-plea.dto';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
+import { UserPleasService } from 'src/domain/users/user-pleas.service';
 
-@Controller('pleas')
-export class PleasController {
-  constructor(private readonly pleasService: PleasService) {}
+@UseInterceptors(ClassSerializerInterceptor)
+@SkipThrottle()
+@Controller('users')
+export class UserPleasController {
+  constructor(private readonly pleasService: UserPleasService) {}
 
   //?-------------------------------------------------------------------------//
   //? CREATE

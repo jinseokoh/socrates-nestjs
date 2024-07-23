@@ -1,4 +1,3 @@
-import { Exclude } from 'class-transformer';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -10,10 +9,18 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 @Entity()
-@Unique('poster_id_user_id_key', ['posterId', 'userId'])
+@Unique('user_id_recipient_id_key', ['userId', 'recipientId'])
 export class Impression {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
+
+  //? unsigned int 로 사용하기 위해 명시적인 정의가 필요.
+  @Column({ type: 'int', unsigned: true })
+  userId: number; // to make it available to Repository.
+
+  //? unsigned int 로 사용하기 위해 명시적인 정의가 필요.
+  @Column({ type: 'int', unsigned: true })
+  recipientId: number;
 
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
   appearance: number;
@@ -30,7 +37,7 @@ export class Impression {
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
   manner: number;
 
-  @Column({ length: 32, nullable: true })
+  @Column({ length: 80, nullable: true })
   note: string | null;
 
   @CreateDateColumn()
@@ -39,19 +46,22 @@ export class Impression {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  posterId: number | null; // to make it available to Repository.
-
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Column({ type: 'int', unsigned: true })
-  userId: number; // to make it available to Repository.
-
-  @ManyToOne(() => User, (user) => user.impressions, {
+  @ManyToOne(() => User, (user) => user.sentImpressions, {
+    nullable: false,
+    onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  user?: User;
+  public user: User;
+
+  @ManyToOne(() => User, (user) => user.receivedImpressions, {
+    nullable: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  public recipient: User;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

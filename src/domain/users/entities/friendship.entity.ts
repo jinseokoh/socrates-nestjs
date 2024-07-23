@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { FriendRequestType, FriendStatus } from 'src/common/enums';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -62,7 +62,7 @@ export class Friendship {
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'CASCADE',
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })
   public user!: User;
@@ -70,7 +70,7 @@ export class Friendship {
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
     onUpdate: 'CASCADE',
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'recipientId' })
   public recipient!: User;

@@ -14,7 +14,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { IsArray } from 'class-validator';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';

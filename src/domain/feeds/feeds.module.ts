@@ -12,7 +12,7 @@ import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { FeedCommentsController } from 'src/domain/feeds/feed-comments.controller';

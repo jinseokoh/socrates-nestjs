@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -19,6 +19,12 @@ import { IsArray } from 'class-validator';
 export class Poll {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
+
+  @Column({ type: 'int', unsigned: true, default: null })
+  userId: number | null; // to make it available to Repository.
+
+  @Column({ type: 'int', unsigned: true, default: null })
+  feedId: number | null; // to make it available to Repository.
 
   @Column({ length: 255, nullable: false })
   @ApiProperty({ description: 'question' })
@@ -40,18 +46,11 @@ export class Poll {
   @ApiProperty({ description: 'whether or not allow multiple answers' })
   isMultiple: boolean;
 
-  @Column({ default: true })
-  @ApiProperty({ description: 'isActive' })
-  isActive: boolean;
-
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @DeleteDateColumn()
-  deletedAt: Date | null;
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany using one-to-many
@@ -62,14 +61,8 @@ export class Poll {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Column({ type: 'int', unsigned: true, default: null })
-  userId: number | null; // to make it available to Repository.
-
   @ManyToOne(() => User, (user) => user.polls, {})
   user: User | null;
-
-  @Column({ type: 'int', unsigned: true, default: null })
-  feedId: number | null; // to make it available to Repository.
 
   @ManyToOne(() => Feed, (feed) => feed.poll, {})
   @JoinColumn()

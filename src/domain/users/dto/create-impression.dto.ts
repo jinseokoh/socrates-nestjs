@@ -34,5 +34,5 @@ export class CreateImpressionDto {
   @ApiProperty({ description: '평가하는 사용자 아이디', required: false })
   @IsNumber()
   @IsOptional()
-  posterId: number;
+  recipientId: number;
 }

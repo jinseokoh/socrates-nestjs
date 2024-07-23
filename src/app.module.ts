@@ -38,7 +38,6 @@ import * as redisStore from 'cache-manager-ioredis';
 import { DuplicateEntryErrorInterceptor } from 'src/common/interceptors/duplicate-entry-error.interceptor';
 import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.filter';
 import { SecretsModule } from 'src/domain/secrets/secrets.module';
-import { PleasModule } from 'src/domain/pleas/pleas.module';
 import { FeedsModule } from 'src/domain/feeds/feeds.module';
 // import { CustomLogger } from 'src/helpers/custom-logger';
 @Module({
@@ -152,7 +151,6 @@ import { FeedsModule } from 'src/domain/feeds/feeds.module';
     LanguagesModule,
     LedgersModule,
     MeetupsModule,
-    PleasModule,
     SecretsModule,
     UsersModule,
   ],

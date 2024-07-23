@@ -380,11 +380,11 @@ export class MeetupsService {
         where: {
           id: id,
         },
-        relations: ['joins', 'joins.askingUser', 'joins.askedUser'],
+        relations: ['joins', 'joins.user', 'joins.recipient'],
       });
       return meetup.joins
-        .filter((v) => v.askedUser.id === meetup.userId)
-        .map((v) => v.askingUser);
+        .filter((v) => v.recipient.id === meetup.userId)
+        .map((v) => v.user);
     } catch (e) {
       throw new NotFoundException('entity not found');
     }
@@ -396,12 +396,12 @@ export class MeetupsService {
         where: {
           id: id,
         },
-        relations: ['joins', 'joins.askingUser', 'joins.askedUser'],
+        relations: ['joins', 'joins.user', 'joins.recipient'],
       });
 
       return meetup.joins
-        .filter((v) => v.askingUser.id === meetup.userId)
-        .map((v) => v.askedUser);
+        .filter((v) => v.user.id === meetup.userId)
+        .map((v) => v.recipient);
     } catch (e) {
       throw new NotFoundException('entity not found');
     }

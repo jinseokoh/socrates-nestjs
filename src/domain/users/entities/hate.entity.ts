@@ -1,7 +1,7 @@
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -27,10 +27,13 @@ export class Hate {
   @Column({ length: 80, nullable: true })
   message: string | null;
 
-  @ManyToOne(() => User, (user) => user.usersHating)
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @ManyToOne(() => User, (user) => user.sentBans)
   public user: User;
 
-  @ManyToOne(() => User, (user) => user.usersHated)
+  @ManyToOne(() => User, (user) => user.receivedBans)
   public recipient: User;
 
   //??--------------------------------------------------------------------------*/

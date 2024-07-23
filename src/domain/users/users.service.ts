@@ -716,14 +716,14 @@ ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), otp=VALUES(otp), updatedAt=(CONVERT
     try {
       await this.repository.manager.query(
         'INSERT IGNORE INTO `impression` \
-  (appearance, knowledge, confidence, humor, manner, posterId, userId) VALUES (?, ?, ?, ?, ?, ?, ?) \
+  (appearance, knowledge, confidence, humor, manner, recipientId, userId) VALUES (?, ?, ?, ?, ?, ?, ?) \
   ON DUPLICATE KEY UPDATE \
   appearance = VALUES(`appearance`), \
   knowledge = VALUES(`knowledge`), \
   confidence = VALUES(`confidence`), \
   humor = VALUES(`humor`), \
   manner = VALUES(`manner`), \
-  posterId = VALUES(`posterId`), \
+  recipientId = VALUES(`recipientId`), \
   userId = VALUES(`userId`)',
         [
           dto.appearance,
@@ -731,13 +731,13 @@ ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), otp=VALUES(otp), updatedAt=(CONVERT
           dto.confidence,
           dto.humor,
           dto.manner,
-          dto.posterId, // 평가하는 사용자
+          dto.recipientId, // 평가하는 사용자
           dto.userId, // 평가받는 사용자
         ],
       );
 
       const user = await this.findById(id, ['impressions']);
-      if (user.impressions && user.impressions.length > 1) {
+      if (user.sentImpressions && user.sentImpressions.length > 1) {
         const impressions = await this.getImpressionAverageById(id);
         // const dto = new UpdateProfileDto();
         // dto.impressions = impressions;

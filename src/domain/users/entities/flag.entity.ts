@@ -20,11 +20,8 @@ export class Flag {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
-  @Column({ length: 80, nullable: true })
-  message: string | null;
-
-  @Column({ length: 80, nullable: true })
-  note: string | null;
+  @Column({ type: 'int', unsigned: true })
+  userId: number; // to make it available to Repository.
 
   @Column({ length: 32, nullable: false })
   entityType: string;
@@ -32,12 +29,15 @@ export class Flag {
   @Column({ type: 'int', unsigned: false })
   entityId: number;
 
+  @Column({ length: 80, nullable: true })
+  message: string | null;
+
+  @Column({ length: 80, nullable: true })
+  note: string | null;
+
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })
   createdAt: Date;
-
-  @Column({ type: 'int', unsigned: true })
-  userId: number; // to make it available to Repository.
 
   //? -------------------------------------------------------------------------/
   //? many-to-one belongsTo

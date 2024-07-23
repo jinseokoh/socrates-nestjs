@@ -53,7 +53,7 @@ export class MeetupComment {
   @Column({ type: 'int', unsigned: true, nullable: true })
   userId: number | null; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.threads, { cascade: true })
+  @ManyToOne(() => User, (user) => user.meetupComments, { cascade: true })
   user: User;
 
   //**--------------------------------------------------------------------------*/

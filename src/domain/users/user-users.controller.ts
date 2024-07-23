@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -12,10 +11,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
-import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
-import { UserUsersService } from 'src/domain/users/user-users.service';
 import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
 import { FlagUserService } from 'src/domain/users/flag_user.service';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -26,7 +23,6 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 @Controller('users')
 export class UserUsersController {
   constructor(
-    private readonly userUsersService: UserUsersService,
     private readonly flagsService: FlagUserService,
     private readonly bookmarksService: BookmarkUserUserService,
   ) {}
@@ -98,11 +94,7 @@ export class UserUsersController {
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body('message') message: string | null,
   ): Promise<any> {
-    return await this.flagsService.createUserFlag(
-      userId,
-      recipientId,
-      message,
-    );
+    return await this.flagsService.createUserFlag(userId, recipientId, message);
   }
 
   @ApiOperation({ description: 'User 신고 삭제' })
@@ -165,68 +157,5 @@ export class UserUsersController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
     return await this.flagsService.loadUserFlaggingUserIds(userId);
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? 내가 차단(Hate)한 Users
-  //?-------------------------------------------------------------------------//
-
-  @ApiOperation({ description: '사용자 차단 추가' })
-  @Post(':userId/hates/:recipientId')
-  async createHate(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('recipientId', ParseIntPipe) recipientId: number,
-    @Body('message') message: string | null,
-  ): Promise<Hate> {
-    return await this.userUsersService.createHate(
-      userId,
-      recipientId,
-      message,
-    );
-  }
-
-  @ApiOperation({ description: '사용자 차단 삭제' })
-  @Delete(':userId/hates/:recipientId')
-  async deleteHate(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('recipientId', ParseIntPipe) recipientId: number,
-  ): Promise<any> {
-    return await this.userUsersService.deleteHate(userId, recipientId);
-  }
-
-  @ApiOperation({ description: '사용자 차단 여부' })
-  @Get(':userId/hates/:recipientId')
-  async isHated(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('recipientId', ParseIntPipe) recipientId: number,
-  ): Promise<any> {
-    return {
-      data: await this.userUsersService.isHated(userId, recipientId),
-    };
-  }
-
-  @ApiOperation({ description: '내가 차단한 Users (paginated)' })
-  @Get(':userId/hatedusers')
-  async findBlockedUsers(
-    @Param('userId') userId: number,
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<User>> {
-    return this.userUsersService.findBlockedUsers(userId, query);
-  }
-
-  @ApiOperation({ description: '내가 차단한 Users (all)' })
-  @Get(':userId/hatedusers/all')
-  async loadBlockedUsers(@Param('userId') userId: number): Promise<User[]> {
-    return this.userUsersService.loadBlockedUsers(userId);
-  }
-
-  @ApiOperation({
-    description: '내가 차단했거나 나를 차단한 UserIds (all)',
-  })
-  @Get(':userId/hateduserids')
-  async loadUserIdsEitherHatingOrBeingHated(
-    @Param('userId') userId: number,
-  ): Promise<number[]> {
-    return this.userUsersService.loadUserIdsEitherHatingOrBeingHated(userId);
   }
 }

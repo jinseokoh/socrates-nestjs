@@ -8,13 +8,31 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
+@Unique('user_id_recipient_id_meetup_id_key', [
+  'userId',
+  'recipientId',
+  'meetupId',
+])
 export class Join {
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
+  id: number;
+
+  @Column({ type: 'int', unsigned: true })
+  userId: number | null; // to make it available to Repository.
+
+  @Column({ type: 'int', unsigned: true })
+  recipientId: number | null; // to make it available to Repository.
+
+  @Column({ type: 'int', unsigned: true })
+  meetupId!: number;
+
   @Column({ type: 'enum', enum: JoinStatus, nullable: true })
   @ApiProperty({ description: 'ACCEPTED|DENIED' })
   status: JoinStatus;
@@ -23,7 +41,7 @@ export class Join {
   @ApiProperty({ description: 'INVITATION|REQUEST' })
   joinType: JoinType;
 
-  @Column({ length: 64, nullable: true })
+  @Column({ length: 80, nullable: true })
   @ApiProperty({ description: 'message' })
   message: string | null;
 
@@ -37,33 +55,24 @@ export class Join {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  userId: number | null; // to make it available to Repository.
-
-  @ManyToOne(() => User, (user) => user.askingJoins, {
+  @ManyToOne(() => User, (user) => user.sentJoins, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'userId' })
-  public askingUser!: User;
-
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  recipientId: number | null; // to make it available to Repository.
-
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  public meetupId!: number;
+  public user!: User;
 
   //? -------------------------------------------------------------------------/
   //? many-to-many belongsToMany using many-to-one
 
-  @ManyToOne(() => User, (user) => user.askedJoins, {
+  @ManyToOne(() => User, (user) => user.receivedJoins, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'recipientId' })
-  public askedUser!: User;
+  public recipient!: User;
 
   @ManyToOne(() => Meetup, (meetup) => meetup.id, {
     nullable: false,

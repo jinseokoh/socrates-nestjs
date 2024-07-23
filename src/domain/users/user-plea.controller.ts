@@ -9,7 +9,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
 
 @UseInterceptors(ClassSerializerInterceptor)

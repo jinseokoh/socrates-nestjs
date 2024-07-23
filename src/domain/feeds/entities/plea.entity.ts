@@ -4,7 +4,6 @@ import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -23,6 +22,15 @@ export class Plea {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   public id: number;
 
+  @Column({ type: 'int', unsigned: true })
+  userId: number;
+
+  @Column({ type: 'int', unsigned: true })
+  recipientId: number;
+
+  @Column({ type: 'int', unsigned: true })
+  feedId: number;
+
   // @Column({
   //   type: 'enum',
   //   enum: PleaStatus,
@@ -31,11 +39,11 @@ export class Plea {
   // @ApiProperty({ description: 'ACCEPTED|PENDING|NILL' })
   // status: PleaStatus;
 
-  @Column({ type: 'tinyint', unsigned: true, nullable: true })
-  reward: number | null;
-
   @Column({ length: 64, nullable: true })
   message: string | null;
+
+  @Column({ type: 'tinyint', unsigned: true, nullable: true })
+  reward: number | null;
 
   @Column({ type: 'datetime', nullable: true })
   @ApiProperty({ description: '1달 동안만 사용가능' })
@@ -47,18 +55,6 @@ export class Plea {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn()
-  deletedAt: Date | null;
-
-  @Column({ type: 'int', unsigned: true })
-  userId: number;
-
-  @Column({ type: 'int', unsigned: true })
-  recipientId: number;
-
-  @Column({ type: 'int', unsigned: true })
-  feedId: number;
-
   //? -------------------------------------------------------------------------/
   //? many-to-many belongsToMany using many-to-one
 
@@ -68,7 +64,7 @@ export class Plea {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'userId' })
-  public sender!: User;
+  public user!: User;
 
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,

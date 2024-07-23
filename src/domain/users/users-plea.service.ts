@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
 
 @Injectable()
 export class UsersPleaService {
@@ -41,7 +41,7 @@ export class UsersPleaService {
   ): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
-      .innerJoinAndSelect('plea.sender', 'sender')
+      .innerJoinAndSelect('plea.user', 'sender')
       .innerJoinAndSelect('plea.poll', 'poll')
       .where({
         userId: userId,
@@ -75,7 +75,7 @@ export class UsersPleaService {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.poll', 'poll')
-      .innerJoinAndSelect('plea.sender', 'sender')
+      .innerJoinAndSelect('plea.user', 'sender')
       .where({
         recipientId: userId,
       })
@@ -116,13 +116,13 @@ export class UsersPleaService {
   async getUniqueUsersPleaded(userId: number): Promise<User[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
-      .innerJoinAndSelect('plea.sender', 'sender')
+      .innerJoinAndSelect('plea.user', 'sender')
       .where({
         recipientId: userId,
       })
       .groupBy('plea.userId')
       .getMany();
 
-    return items.map((v) => v.sender);
+    return items.map((v) => v.user);
   }
 }

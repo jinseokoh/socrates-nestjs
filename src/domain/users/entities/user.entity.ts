@@ -28,7 +28,7 @@ import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
@@ -117,7 +117,7 @@ export class User {
   @ApiProperty({ description: 'deletedAt' })
   deletedAt: Date | null;
 
-  //*-------------------------------------------------------------------------*/
+  //* ----------------------------------------------------------------------- */
   //* 1-to-1 hasOne
 
   @OneToOne(() => Profile, (profile) => profile.user, {
@@ -125,8 +125,7 @@ export class User {
   })
   profile: Profile;
 
-  /*-------------------------------------------------------------------------*/
-
+  //* ----------------------------------------------------------------------- */
   //* 1-to-many hasMany
 
   @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.user)
@@ -142,72 +141,70 @@ export class User {
   })
   providers: Provider[];
 
+  @OneToMany(() => Poll, (poll) => poll.user, {
+    // cascade: ['insert', 'update'],
+  })
+  polls: Poll[];
+
+  @OneToMany(() => Flag, (flag) => flag.user)
+  public flags: Flag[];
+
   @OneToMany(() => Meetup, (meetup) => meetup.user, {
     // cascade: ['insert', 'update'],
   })
   meetups: Meetup[];
 
-  @OneToMany(() => MeetupComment, (thread) => thread.user, {
+  @OneToMany(() => MeetupComment, (comment) => comment.user, {
     // cascade: ['insert', 'update'],
   })
-  threads: MeetupComment[];
+  meetupComments: MeetupComment[];
 
   @OneToMany(() => Feed, (feed) => feed.user, {
     // cascade: ['insert', 'update'],
   })
   feeds: Feed[];
 
-  @OneToMany(() => Poll, (poll) => poll.user, {
-    // cascade: ['insert', 'update'],
-  })
-  polls: Poll[];
+  @OneToMany(() => FeedComment, (comment) => comment.user)
+  public feedComments: FeedComment[];
 
   @OneToMany(() => Inquiry, (inquiry) => inquiry.user, {
     // cascade: ['insert', 'update'],
   })
   inquiries: Inquiry[];
 
-  @OneToMany(() => FeedComment, (comment) => comment.user)
-  public feedComments: FeedComment[];
+  @OneToMany(() => InquiryComment, (comment) => comment.user)
+  public inquiryComments: InquiryComment[];
 
   @OneToMany(() => ContentComment, (comment) => comment.user)
   public contentComments: ContentComment[];
 
-  @OneToMany(() => InquiryComment, (comment) => comment.user)
-  public inquiryComments: InquiryComment[];
-
-  @OneToMany(() => Impression, (impression) => impression.user)
-  public impressions: Impression[];
-
-  @OneToMany(() => Flag, (flag) => flag.user)
-  public flags: Flag[];
-
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany using one-to-many
 
-  @OneToMany(() => Join, (join) => join.askingUser)
-  public askingJoins: Join[];
-
-  @OneToMany(() => Join, (join) => join.askedUser)
-  public askedJoins: Join[];
+  @OneToMany(() => Join, (join) => join.user)
+  public sentJoins: Join[];
+  @OneToMany(() => Join, (join) => join.recipient)
+  public receivedJoins: Join[];
 
   @OneToMany(() => Hate, (hate) => hate.user)
-  public usersHating: Hate[];
-
+  public sentBans: Hate[];
   @OneToMany(() => Hate, (hate) => hate.recipient)
-  public usersHated: Hate[];
-
-  @OneToMany(() => Plea, (plea) => plea.sender)
-  public sentPleas: Plea[];
-
-  @OneToMany(() => Plea, (plea) => plea.recipient)
-  public receivedPleas: Plea[];
+  public receivedBans: Hate[];
 
   @OneToMany(() => Friendship, (friendship) => friendship.user)
   public sentFriendships: Friendship[];
-
   @OneToMany(() => Friendship, (friendship) => friendship.recipient)
   public receivedFriendships: Friendship[];
+
+  @OneToMany(() => Plea, (plea) => plea.user)
+  public sentPleas: Plea[];
+  @OneToMany(() => Plea, (plea) => plea.recipient)
+  public receivedPleas: Plea[];
+
+  @OneToMany(() => Impression, (impression) => impression.user)
+  public sentImpressions: Impression[];
+  @OneToMany(() => Impression, (impression) => impression.recipient)
+  public receivedImpressions: Impression[];
 
   @OneToMany(() => Room, (room) => room.user)
   public rooms: Room[];

@@ -13,9 +13,9 @@ import {
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
-import { CreatePleaDto } from 'src/domain/pleas/dto/create-plea.dto';
-import { UpdatePleaDto } from 'src/domain/pleas/dto/update-plea.dto';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { CreatePleaDto } from 'src/domain/feeds/dto/create-plea.dto';
+import { UpdatePleaDto } from 'src/domain/feeds/dto/update-plea.dto';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
@@ -26,8 +26,8 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 
 @Injectable()
-export class PleasService {
-  private readonly logger = new Logger(PleasService.name);
+export class UserPleasService {
+  private readonly logger = new Logger(UserPleasService.name);
 
   constructor(
     @InjectRepository(Plea)
@@ -220,13 +220,13 @@ export class PleasService {
 
       if (plea.feedId === null) {
         // plea.reward - 1 환불
-        const newBalance = plea.sender.profile?.balance + plea.reward - 1;
+        const newBalance = plea.user.profile?.balance + plea.reward - 1;
         const ledger = new Ledger({
           debit: plea.reward - 1,
           ledgerType: LedgerType.DEBIT_REFUND,
           balance: newBalance,
           note: `요청거절 사례금 환불 (발송#${plea.userId},수신#${plea.recipientId})`,
-          userId: plea.sender.id,
+          userId: plea.user.id,
         });
         await queryRunner.manager.save(ledger);
       }
@@ -239,8 +239,8 @@ export class PleasService {
       const event = new UserNotificationEvent();
       event.name = 'feedPleaDenial';
       event.userId = plea.userId;
-      event.token = plea.sender.pushToken;
-      event.options = plea.sender.profile?.options ?? {};
+      event.token = plea.user.pushToken;
+      event.options = plea.user.profile?.options ?? {};
       event.body = `${plea.recipient.username}님이 발견글 작성요청을 거절했습니다. (${plea.reward - 1}코인 환불처리완료)`;
       event.data = {
         page: `settings/coin`,

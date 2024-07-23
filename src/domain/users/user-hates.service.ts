@@ -1,4 +1,3 @@
-import { Flag } from 'src/domain/users/entities/flag.entity';
 import {
   Inject,
   Injectable,
@@ -12,7 +11,6 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { AnyData } from 'src/common/types';
 import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Hate } from 'src/domain/users/entities/hate.entity';
@@ -20,9 +18,9 @@ import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 
 @Injectable()
-export class UserUsersService {
+export class UserHatesService {
   private readonly env: any;
-  private readonly logger = new Logger(UserUsersService.name);
+  private readonly logger = new Logger(UserHatesService.name);
 
   constructor(
     @InjectRepository(User)

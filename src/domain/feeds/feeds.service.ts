@@ -20,7 +20,7 @@ import { UpdateFeedDto } from 'src/domain/feeds/dto/update-feed.dto';
 import { randomImageName } from 'src/helpers/random-filename';
 import { SignedUrl } from 'src/common/types';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
 

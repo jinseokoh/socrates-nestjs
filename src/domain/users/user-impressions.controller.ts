@@ -29,14 +29,14 @@ export class UserImpressionsController {
   @ApiOperation({ description: '첫인상 평가 데이터 추가' })
   @Post(':userId/impressions')
   async create(
-    @CurrentUserId() posterId: number,
+    @CurrentUserId() recipientId: number,
     @Param('userId') userId: number,
     @Body() dto: CreateImpressionDto,
   ): Promise<AnyData> {
     try {
       const res = await this.usersService.createImpression({
         ...dto,
-        posterId,
+        recipientId,
         userId,
       });
 

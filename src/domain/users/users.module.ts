@@ -13,7 +13,7 @@ import { Join } from 'src/domain/meetups/entities/join.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Plea } from 'src/domain/pleas/entities/plea.entity';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
@@ -22,7 +22,7 @@ import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
 
 import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
 import { UserFeedsController } from 'src/domain/users/user-feeds.controller';
-import { UserFriendshipController } from 'src/domain/users/user-friendshp.controller';
+import { UserFriendshipController } from 'src/domain/users/user-friends.controller';
 import { UserImpressionsController } from 'src/domain/users/user-impressions.controller';
 import { UserLanguagesController } from 'src/domain/users/user-languages.controller';
 import { UserLedgersController } from 'src/domain/users/user-ledgers.controller';
@@ -30,6 +30,7 @@ import { UserMeetupsController } from 'src/domain/users/user-meetups.controller'
 import { UserPleaController } from 'src/domain/users/user-plea.controller';
 import { UsersController } from 'src/domain/users/users.controller';
 import { UserSmsController } from 'src/domain/users/user-sms.controller';
+import { UserHatesController } from 'src/domain/users/user-hates.controller';
 import { UserUsersController } from 'src/domain/users/user-users.controller';
 
 import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
@@ -40,12 +41,12 @@ import { FlagFeedService } from 'src/domain/users/flag_feed.service';
 import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
 import { FlagUserService } from 'src/domain/users/flag_user.service';
 import { UserFeedsService } from 'src/domain/users/user-feeds.service';
+import { UserHatesService } from 'src/domain/users/user-hates.service';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
 import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { UsersService } from 'src/domain/users/users.service';
-import { UserUsersService } from 'src/domain/users/user-users.service';
 
 import { S3Module } from 'src/services/aws/s3.module';
 import { AlarmsModule } from 'src/domain/alarms/alarms.module';
@@ -55,6 +56,10 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
 import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
+import { UserJoinsController } from 'src/domain/users/user-joins.controller';
+import { UserJoinsService } from 'src/domain/users/user-joins.service';
+import { UserPleasService } from 'src/domain/users/user-pleas.service';
+import { UserPleasController } from 'src/domain/users/user-pleas.controller';
 
 @Module({
   imports: [
@@ -100,6 +105,9 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
     FlagUserService,
     LanguageSkillSubscriber,
     UserFeedsService,
+    UserJoinsService,
+    UserPleasService,
+    UserHatesService,
     UserMeetupsService,
     UserNotificationListener,
     UsersFriendshipService,
@@ -107,14 +115,17 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
     UsersPleaService,
     UsersService,
     UserSubscriber,
-    UserUsersService,
   ],
   controllers: [
     // UserFcmController, 미사용 comment out
     UserCategoriesController,
     UserFeedsController,
+    UserHatesController,
+    UsersController,
     UserFriendshipController,
     UserImpressionsController,
+    UserJoinsController,
+    UserPleasController,
     UserLanguagesController,
     UserLedgersController,
     UserMeetupsController,
