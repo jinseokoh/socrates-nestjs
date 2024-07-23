@@ -46,9 +46,9 @@ export class ContentsController {
   }
 
   @ApiOperation({ description: '공지사항 상세보기' })
-  @Get('active')
-  async getActiveContents(): Promise<Content[]> {
-    return await this.contentsService.getActiveContents();
+  @Get(':slug')
+  async getActiveContents(@Param('slug') slug: string): Promise<Content[]> {
+    return await this.contentsService.loadContentsBySlug(slug);
   }
 
   @ApiOperation({ description: '공지사항 상세보기' })

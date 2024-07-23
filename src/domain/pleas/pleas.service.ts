@@ -19,7 +19,7 @@ import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
-import { FriendshipStatus, LedgerType } from 'src/common/enums';
+import { FriendStatus, LedgerType } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -59,7 +59,7 @@ export class PleasService {
         ],
       });
       if (friendship) {
-        if (friendship.status === FriendshipStatus.ACCEPTED) {
+        if (friendship.status === FriendStatus.ACCEPTED) {
           throw new UnprocessableEntityException(`relationship exists`);
         } else {
           // friendship already exists

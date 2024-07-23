@@ -18,7 +18,7 @@ import { AnyData } from 'src/common/types';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto';
 import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
-import { FriendshipStatus } from 'src/common/enums';
+import { FriendStatus } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -54,7 +54,7 @@ export class UserFriendshipController {
   async updateFriendshipWithStatus(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
-    @Body('status') status: FriendshipStatus,
+    @Body('status') status: FriendStatus,
   ): Promise<AnyData> {
     await this.usersFriendshipService.updateFriendshipWithStatus(
       userId,

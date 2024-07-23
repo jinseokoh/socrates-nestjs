@@ -1,55 +1,60 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { FriendshipStatus, RequestFrom } from 'src/common/enums';
+import { FriendRequestType, FriendStatus } from 'src/common/enums';
 import { Plea } from 'src/domain/pleas/entities/plea.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
+  PrimaryGeneratedColumn,
+  Unique,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToOne,
-  PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
+@Unique('user_id_recipient_id_key', ['userId', 'recipientId'])
 export class Friendship {
-  @Column({
-    type: 'enum',
-    enum: FriendshipStatus,
-    default: FriendshipStatus.PENDING,
-  })
-  @ApiProperty({ description: 'init|pending|accepted' })
-  status: FriendshipStatus;
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
+  id: number;
 
-  @Column({ length: 64, nullable: true })
+  @Column({ type: 'int', unsigned: true })
+  userId: number; // to make it available to Repository.
+
+  @Column({ type: 'int', unsigned: true })
+  recipientId: number; // to make it available to Repository.
+
+  @Column({ type: 'int', unsigned: true, default: null })
+  pleaId: number | null; // to make it available to Repository.
+
+  @Column({ length: 80, nullable: true })
   @ApiProperty({ description: 'message' })
   message: string | null;
 
   @Column({
     type: 'enum',
-    enum: RequestFrom,
-    default: RequestFrom.CONNECTION,
+    enum: FriendRequestType,
+    default: FriendRequestType.DISCLOSED,
   })
-  @ApiProperty({ description: 'connection|profile|plea' })
-  requestFrom: RequestFrom;
+  @ApiProperty({ description: 'anonymous|disclosed' })
+  friendRequestType: FriendRequestType;
+
+  @Column({
+    type: 'enum',
+    enum: FriendStatus,
+    default: FriendStatus.PENDING,
+  })
+  @ApiProperty({ description: 'pending|accepted' })
+  status: FriendStatus;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  userId: number; // to make it available to Repository.
-
-  @PrimaryColumn({ type: 'int', unsigned: true })
-  recipientId: number; // to make it available to Repository.
-
-  @Column({ type: 'int', unsigned: true, default: null })
-  pleaId: number | null; // to make it available to Repository.
 
   //? -------------------------------------------------------------------------/
   //? many-to-many belongsToMany using many-to-one
@@ -60,7 +65,7 @@ export class Friendship {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'userId' })
-  public sender!: User;
+  public user!: User;
 
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,

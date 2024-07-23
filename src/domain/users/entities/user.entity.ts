@@ -34,6 +34,7 @@ import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.e
 import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
 import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
 import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
+import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -169,6 +170,9 @@ export class User {
   @OneToMany(() => FeedComment, (comment) => comment.user)
   public feedComments: FeedComment[];
 
+  @OneToMany(() => ContentComment, (comment) => comment.user)
+  public contentComments: ContentComment[];
+
   @OneToMany(() => InquiryComment, (comment) => comment.user)
   public inquiryComments: InquiryComment[];
 
@@ -199,7 +203,7 @@ export class User {
   @OneToMany(() => Plea, (plea) => plea.recipient)
   public receivedPleas: Plea[];
 
-  @OneToMany(() => Friendship, (friendship) => friendship.sender)
+  @OneToMany(() => Friendship, (friendship) => friendship.user)
   public sentFriendships: Friendship[];
 
   @OneToMany(() => Friendship, (friendship) => friendship.recipient)

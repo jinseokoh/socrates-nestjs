@@ -15,7 +15,7 @@ import { Repository } from 'typeorm';
 export class ContentsService {
   constructor(
     @InjectRepository(Content)
-    private readonly repository: Repository<Content>,
+    private readonly contentRepository: Repository<Content>,
   ) {}
 
   //?-------------------------------------------------------------------------//
@@ -23,16 +23,18 @@ export class ContentsService {
   //?-------------------------------------------------------------------------//
 
   async create(dto: CreateContentDto): Promise<Content> {
-    return await this.repository.save(this.repository.create(dto));
+    return await this.contentRepository.save(
+      this.contentRepository.create(dto),
+    );
   }
 
   //?-------------------------------------------------------------------------//
   //? READ
   //?-------------------------------------------------------------------------//
 
-  // 리스트
+  // Content 리스트
   async findAll(query: PaginateQuery): Promise<Paginated<Content>> {
-    const queryBuilder = this.repository.createQueryBuilder('content');
+    const queryBuilder = this.contentRepository.createQueryBuilder('content');
 
     const config: PaginateConfig<Content> = {
       sortableColumns: ['id', 'title'],
@@ -48,25 +50,16 @@ export class ContentsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // Poll 리스트
-  async getActiveContents(): Promise<Content[]> {
-    return await this.repository.find({
-      where: {
-        isPublished: true,
-      },
-    });
-  }
-
   // 상세보기
   async findById(id: number, relations: string[] = []): Promise<Content> {
     try {
       await this.increaseViewCount(id);
       return relations.length > 0
-        ? await this.repository.findOneOrFail({
+        ? await this.contentRepository.findOneOrFail({
             where: { id },
             relations,
           })
-        : await this.repository.findOneOrFail({
+        : await this.contentRepository.findOneOrFail({
             where: { id },
           });
     } catch (e) {
@@ -74,57 +67,66 @@ export class ContentsService {
     }
   }
 
-  // async findBySlug(slug: string, relations: string[] = []): Promise<Content> {
-  //   try {
-  //     return relations.length > 0
-  //       ? await this.repository.findOneOrFail({
-  //           where: { slug },
-  //           relations,
-  //         })
-  //       : await this.repository.findOneOrFail({
-  //           where: { slug },
-  //         });
-  //   } catch (e) {
-  //     throw new NotFoundException('entity not found');
-  //   }
-  // }
-
-  async count(title: string): Promise<number> {
-    return await this.repository.count({
-      where: {
-        title,
-      },
-    });
+  // Content 리스트
+  async loadContents(): Promise<Content[]> {
+    return await this.contentRepository.createQueryBuilder('content').getMany();
   }
+
+  // Content 리스트 by Slug
+  async loadContentsBySlug(
+    slug: string,
+    relations: string[] = [],
+  ): Promise<Content[]> {
+    try {
+      return relations.length > 0
+        ? await this.contentRepository.find({
+            where: { slug },
+            relations,
+          })
+        : await this.contentRepository.find({
+            where: { slug },
+          });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  // async count(title: string): Promise<number> {
+  //   return await this.contentRepository.count({
+  //     where: {
+  //       title,
+  //     },
+  //   });
+  // }
 
   //?-------------------------------------------------------------------------//
   //? UPDATE
   //?-------------------------------------------------------------------------//
 
   async update(id: number, dto: UpdateContentDto): Promise<Content> {
-    const content = await this.repository.preload({ id, ...dto });
+    const content = await this.contentRepository.preload({ id, ...dto });
     if (!content) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.repository.save(content);
+    return await this.contentRepository.save(content);
   }
 
   async increaseViewCount(id: number): Promise<void> {
-    await this.repository.manager.query(
+    await this.contentRepository.manager.query(
       'UPDATE `content` SET viewCount = viewCount + 1 WHERE id = ?',
       [id],
     );
   }
 
   async increaseLikeCount(id: number): Promise<void> {
-    await this.repository.manager.query(
+    await this.contentRepository.manager.query(
       'UPDATE `content` SET likeCount = likeCount + 1 WHERE id = ?',
       [id],
     );
   }
 
   async decreaseLikeCount(id: number): Promise<void> {
-    await this.repository.manager.query(
+    await this.contentRepository.manager.query(
       'UPDATE `content` SET likeCount = likeCount - 1 WHERE id = ? AND likeCount > 0',
       [id],
     );
@@ -136,6 +138,6 @@ export class ContentsService {
 
   async remove(id: number): Promise<Content> {
     const content = await this.findById(id);
-    return await this.repository.remove(content);
+    return await this.contentRepository.softRemove(content);
   }
 }

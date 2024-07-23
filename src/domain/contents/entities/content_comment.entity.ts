@@ -12,10 +12,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { Content } from 'src/domain/contents/entities/content.entity';
 
 @Entity()
-export class FeedComment {
+export class ContentComment {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
@@ -26,10 +26,6 @@ export class FeedComment {
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'like count' })
   likeCount: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'flag count' })
-  flagCount: number;
 
   @Column({ type: 'datetime', nullable: true })
   @ApiProperty({ description: '1달 동안만 사용가능' })
@@ -50,18 +46,18 @@ export class FeedComment {
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
 
-  @ManyToOne(() => User, (user) => user.feedComments, {
+  @ManyToOne(() => User, (user) => user.contentComments, {
     onDelete: 'CASCADE',
   })
   user: User;
 
   @Column({ type: 'int', unsigned: true })
-  feedId: number; // to make it available to Repository.
+  contentId: number; // to make it available to Repository.
 
-  @ManyToOne(() => Feed, (feed) => feed.comments, {
+  @ManyToOne(() => Content, (content) => content.comments, {
     onDelete: 'CASCADE',
   })
-  feed: Feed;
+  content: Content;
 
   //**--------------------------------------------------------------------------*/
   //** one to many (self recursive relations)
@@ -71,19 +67,23 @@ export class FeedComment {
   @Column({ type: 'int', unsigned: true, nullable: true })
   parentId: number | null;
 
-  @ManyToOne(() => FeedComment, (FeedComment) => FeedComment.children, {
-    onDelete: 'SET NULL',
-  })
+  @ManyToOne(
+    () => ContentComment,
+    (ContentComment) => ContentComment.children,
+    {
+      onDelete: 'SET NULL',
+    },
+  )
   @JoinColumn({ name: 'parentId' })
-  parent: FeedComment;
+  parent: ContentComment;
 
-  @OneToMany(() => FeedComment, (comment) => comment.parent)
-  children: FeedComment[];
+  @OneToMany(() => ContentComment, (comment) => comment.parent)
+  children: ContentComment[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
 
-  constructor(partial: Partial<FeedComment>) {
+  constructor(partial: Partial<ContentComment>) {
     Object.assign(this, partial);
   }
 }

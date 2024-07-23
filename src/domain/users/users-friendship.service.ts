@@ -14,7 +14,7 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { LedgerType, FriendshipStatus } from 'src/common/enums';
+import { LedgerType, FriendStatus } from 'src/common/enums';
 import { AnyData } from 'src/common/types';
 import { DataSource, Not } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
@@ -72,7 +72,7 @@ export class UsersFriendshipService {
         ],
       });
       if (friendship) {
-        if (friendship.status === FriendshipStatus.ACCEPTED) {
+        if (friendship.status === FriendStatus.ACCEPTED) {
           throw new UnprocessableEntityException(`relationship exists`);
         } else {
           // friendship 이미 존재
@@ -115,11 +115,11 @@ export class UsersFriendshipService {
       }
       await queryRunner.manager.query(
         'INSERT IGNORE INTO `friendship` \
-        (userId, recipientId, requestFrom, message, pleaId) VALUES (?, ?, ?, ?, ?)',
+        (userId, recipientId, friendRequestType, message, pleaId) VALUES (?, ?, ?, ?, ?)',
         [
           dto.userId,
           dto.recipientId,
-          dto.requestFrom,
+          dto.friendRequestType,
           dto.message,
           dto.pleaId,
         ],
@@ -161,7 +161,7 @@ export class UsersFriendshipService {
   async updateFriendshipWithStatus(
     userId: number,
     recipientId: number,
-    status: FriendshipStatus,
+    status: FriendStatus,
   ): Promise<void> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
@@ -182,17 +182,17 @@ export class UsersFriendshipService {
       if (
         friendship.plea &&
         friendship.plea.feedId !== null &&
-        status === FriendshipStatus.ACCEPTED
+        status === FriendStatus.ACCEPTED
       ) {
         //? plea.reward 를 friendship sender (== plea recipient; 작성자) 에게 지급
         const newBalance =
-          friendship.sender.profile?.balance + friendship.plea.reward;
+          friendship.user.profile?.balance + friendship.plea.reward;
         const ledger = new Ledger({
           debit: friendship.plea.reward,
           ledgerType: LedgerType.DEBIT_REWARD,
           balance: newBalance,
           note: `요청 사례금 (발송#${friendship.recipientId},수신#${friendship.userId})`,
-          userId: friendship.sender.id,
+          userId: friendship.user.id,
         });
         await queryRunner.manager.save(ledger);
         // soft delete the plea
@@ -214,14 +214,14 @@ export class UsersFriendshipService {
 
       // notification with event listener ------------------------------------//
       if (
-        friendship.status == FriendshipStatus.PENDING &&
-        status == FriendshipStatus.ACCEPTED
+        friendship.status == FriendStatus.PENDING &&
+        status == FriendStatus.ACCEPTED
       ) {
         const event = new UserNotificationEvent();
         event.name = 'friendRequestApproval';
-        event.userId = friendship.sender?.id;
-        event.token = friendship.sender?.pushToken;
-        event.options = friendship.sender?.profile?.options ?? {};
+        event.userId = friendship.user?.id;
+        event.token = friendship.user?.pushToken;
+        event.options = friendship.user?.profile?.options ?? {};
         event.body = friendship.plea
           ? `요청한 ${friendship.recipient.username}님이 친구관계를 맺었습니다. (${friendship.plea.reward}코인수령 완료)`
           : `${friendship.recipient.username}님이 신청을 수락하여 친구관계를 맺었습니다.`;
@@ -309,8 +309,8 @@ export class UsersFriendshipService {
       const event = new UserNotificationEvent();
       event.name = 'friendRequestDenial';
       event.userId = userId;
-      event.token = friendship.sender.pushToken;
-      event.options = friendship.sender.profile?.options ?? {};
+      event.token = friendship.user.pushToken;
+      event.options = friendship.user.profile?.options ?? {};
       event.body = friendship.plea
         ? `발견글 작성요청한 ${friendship.recipient.username}님이 나와의 친구관계를 유보했습니다.`
         : `${friendship.recipient.username}님이 나와의 친구관계를 유보했습니다.`;
@@ -336,12 +336,12 @@ export class UsersFriendshipService {
   ): Promise<Paginated<Friendship>> {
     const queryBuilder = this.friendshipRepository
       .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.sender', 'sender')
+      .innerJoinAndSelect('friendship.user', 'sender')
       .innerJoinAndSelect('sender.profile', 'profile')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .where({
         recipientId: userId,
-        status: Not(FriendshipStatus.ACCEPTED),
+        status: Not(FriendStatus.ACCEPTED),
       });
 
     const config: PaginateConfig<Friendship> = {
@@ -363,12 +363,12 @@ export class UsersFriendshipService {
   ): Promise<Paginated<Friendship>> {
     const queryBuilder = this.friendshipRepository
       .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.sender', 'sender')
+      .innerJoinAndSelect('friendship.user', 'sender')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .innerJoinAndSelect('recipient.profile', 'profile')
       .where({
         userId: userId,
-        status: Not(FriendshipStatus.ACCEPTED),
+        status: Not(FriendStatus.ACCEPTED),
       });
 
     const config: PaginateConfig<Friendship> = {
@@ -390,7 +390,7 @@ export class UsersFriendshipService {
   ): Promise<Paginated<Friendship>> {
     const queryBuilder = this.friendshipRepository
       .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.sender', 'sender')
+      .innerJoinAndSelect('friendship.user', 'sender')
       .innerJoinAndSelect('sender.profile', 'sprofile')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .innerJoinAndSelect('recipient.profile', 'rprofile')

@@ -7,7 +7,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { FriendshipStatus } from 'src/common/enums';
+import { FriendStatus } from 'src/common/enums';
 export class CreateFriendshipDto {
   @ApiProperty({ description: 'userId' })
   @IsNumber()
@@ -22,7 +22,7 @@ export class CreateFriendshipDto {
   @ApiProperty({ description: 'request 보내는 origin' })
   @IsNotEmpty()
   @IsString()
-  requestFrom: string;
+  friendRequestType: string;
 
   @ApiProperty({ description: '친구신청시 보내는 글' })
   @IsNotEmpty()
@@ -36,12 +36,12 @@ export class CreateFriendshipDto {
 
   @ApiProperty({
     description: 'status',
-    default: FriendshipStatus.PENDING,
+    default: FriendStatus.PENDING,
     required: true,
   })
-  @IsEnum(FriendshipStatus)
+  @IsEnum(FriendStatus)
   @IsOptional()
-  status: FriendshipStatus;
+  status: FriendStatus;
 
   @ApiProperty({ description: 'plea Id' })
   @IsNumber()

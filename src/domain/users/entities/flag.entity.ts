@@ -3,12 +3,10 @@ import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
-  UpdateDateColumn,
 } from 'typeorm';
 
 //? 댓글 user, meetup, feed, thread, comment 신고
@@ -37,14 +35,6 @@ export class Flag {
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })
   createdAt: Date;
-
-  @UpdateDateColumn()
-  @ApiProperty({ description: 'updatedAt' })
-  updatedAt: Date;
-
-  @DeleteDateColumn()
-  @ApiProperty({ description: 'deletedAt' })
-  deletedAt: Date | null;
 
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.

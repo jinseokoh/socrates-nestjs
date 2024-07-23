@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ContentType } from 'src/common/enums';
+import { IsArray } from 'class-validator';
+import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -12,25 +15,19 @@ export class Content {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
-  @Column({ length: 64 })
-  title: string;
+  @Column({ length: 16, nullable: false })
+  slug: string;
 
-  @Column({ type: 'text', nullable: true })
-  body: string | null;
+  @Column({ length: 64, nullable: true })
+  title: string | null;
 
-  @Column({ length: 255, nullable: true })
-  image: string | null;
+  @Column({ type: 'text', nullable: false })
+  body: string;
 
-  @Column({
-    type: 'enum',
-    enum: ContentType,
-    default: ContentType.ANNOUNCEMENTS,
-  })
-  contentType: ContentType;
-
-  @Column({ default: false })
-  @ApiProperty({ description: "whether or not it's published" })
-  isPublished: boolean;
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: '이미지' })
+  @IsArray()
+  images: string[] | null;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'views' })
@@ -40,11 +37,24 @@ export class Content {
   @ApiProperty({ description: 'likes' })
   likeCount: number;
 
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'comment count' })
+  commentCount: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date | null;
+
+  //* ----------------------------------------------------------------------- */
+  //* 1-to-many (hasMany)
+
+  @OneToMany(() => ContentComment, (comment) => comment.content)
+  comments: ContentComment[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

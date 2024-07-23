@@ -1,14 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
-import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -31,12 +29,15 @@ export class Feed {
   @Column({ length: 16, nullable: false })
   slug: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ length: 64, nullable: true })
+  title: string | null;
+
+  @Column({ type: 'text', nullable: false })
   @ApiProperty({ description: 'feed 내용' })
   body: string;
 
   @Column('json', { nullable: true })
-  @ApiProperty({ description: '작품이미지' })
+  @ApiProperty({ description: '이미지' })
   @IsArray()
   images: string[] | null;
 
@@ -80,7 +81,7 @@ export class Feed {
   })
   poll: Poll;
 
-  //*-------------------------------------------------------------------------*/
+  //* ----------------------------------------------------------------------- */
   //* 1-to-many (hasMany)
 
   @OneToMany(() => FeedFeedLink, (link) => link.feed)
