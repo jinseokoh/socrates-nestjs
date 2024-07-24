@@ -27,9 +27,11 @@ export class Feed {
   id: number;
 
   @Column({ length: 16, nullable: false })
+  @ApiProperty({ description: 'slug' })
   slug: string;
 
   @Column({ length: 64, nullable: true })
+  @ApiProperty({ description: '제목' })
   title: string | null;
 
   @Column({ type: 'text', nullable: false })

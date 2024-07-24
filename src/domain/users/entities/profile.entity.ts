@@ -17,11 +17,15 @@ export class Profile {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  userId: number | null; // to make it available to Repository.
+
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: '보유 코인수' })
   balance: number;
 
   @Column({ length: 255, nullable: true })
+  @ApiProperty({ description: '소개글' })
   bio: string | null;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
@@ -90,12 +94,9 @@ export class Profile {
   //* ------------------------------------------------------------------------- */
   //* 1-to-1 belongsTo
 
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  userId: number | null; // to make it available to Repository.
-
   @OneToOne(() => User, (user) => user.profile)
   @JoinColumn()
-  user: User;
+  user: User | null;
 
   //? ------------------------------------------------------------------------- */
   //? constructor

@@ -14,11 +14,17 @@ export class Withdrawal {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  userId: number | null; // to make it available to Repository.
+
   @Column({ length: 128, unique: true })
-  @ApiProperty({ description: 'email' })
+  @ApiProperty({
+    description:
+      'provider 의 providerId 를 모두 저장하여, 같은 id 가 탈퇴이후 다시 사용되는지 체크하기 위함',
+  })
   providerId: string;
 
-  @Column({ length: 128, nullable: true })
+  @Column({ length: 80, nullable: true })
   @ApiProperty({ description: 'reason to quit' })
   reason: string | null;
 
@@ -30,9 +36,6 @@ export class Withdrawal {
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
-
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  userId: number | null; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.withdrawals, {
     onDelete: 'CASCADE',

@@ -16,11 +16,17 @@ import { User } from 'src/domain/users/entities/user.entity';
 
 @Entity()
 export class MeetupComment {
-  @PrimaryGeneratedColumn('increment', {
-    type: 'int',
-    unsigned: true,
-  })
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
+
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  userId: number | null; // to make it available to Repository.
+
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  meetupId: number | null; // to make it available to Repository.
+
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  parentId: number | null;
 
   @Column({ length: 255, nullable: false })
   @ApiProperty({ description: '제목' })
@@ -50,17 +56,11 @@ export class MeetupComment {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  userId: number | null; // to make it available to Repository.
-
   @ManyToOne(() => User, (user) => user.meetupComments, { cascade: true })
   user: User;
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
-
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  meetupId: number | null; // to make it available to Repository.
 
   @ManyToOne(() => Meetup, (meetup) => meetup.meetupComments, { cascade: true })
   meetup: Meetup;
@@ -70,17 +70,14 @@ export class MeetupComment {
   // data structure ref)
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  parentId: number | null;
-
-  @OneToMany(() => MeetupComment, (thread) => thread.parent)
-  children: MeetupComment[];
-
   @ManyToOne(() => MeetupComment, (MeetupComment) => MeetupComment.children, {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'parentId' })
   parent: MeetupComment;
+
+  @OneToMany(() => MeetupComment, (thread) => thread.parent)
+  children: MeetupComment[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

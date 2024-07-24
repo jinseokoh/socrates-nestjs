@@ -19,6 +19,15 @@ export class FeedComment {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
+  @Column({ type: 'int', unsigned: true })
+  userId: number; // to make it available to Repository.
+
+  @Column({ type: 'int', unsigned: true })
+  feedId: number; // to make it available to Repository.
+
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  parentId: number | null;
+
   @Column({ length: 255 })
   @ApiProperty({ description: '내용' })
   body: string;
@@ -47,29 +56,16 @@ export class FeedComment {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Column({ type: 'int', unsigned: true })
-  userId: number; // to make it available to Repository.
-
-  @ManyToOne(() => User, (user) => user.feedComments, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => User, (user) => user.feedComments, { cascade: true })
   user: User;
 
-  @Column({ type: 'int', unsigned: true })
-  feedId: number; // to make it available to Repository.
-
-  @ManyToOne(() => Feed, (feed) => feed.comments, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Feed, (feed) => feed.comments, { cascade: true })
   feed: Feed;
 
   //**--------------------------------------------------------------------------*/
   //** one to many (self recursive relations)
   // data structure ref)
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
-
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  parentId: number | null;
 
   @ManyToOne(() => FeedComment, (FeedComment) => FeedComment.children, {
     onDelete: 'SET NULL',

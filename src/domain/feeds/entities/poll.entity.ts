@@ -8,6 +8,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -33,16 +34,16 @@ export class Poll {
   @IsArray()
   options: string[] | null;
 
-  @Column('json', { nullable: true })
-  @ApiProperty({ description: '진행 결과' })
-  aggregatedAnswers: { [key: string]: number };
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  answerCount: number;
-
   @Column({ default: false })
   @ApiProperty({ description: 'whether or not allow multiple answers' })
   isMultiple: boolean;
+
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: '진행 결과' })
+  answerAggregation: { [key: string]: number };
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  answerCount: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -50,11 +51,11 @@ export class Poll {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //*-------------------------------------------------------------------------*/
-  //* many-to-many belongsToMany using one-to-many
+  // //*-------------------------------------------------------------------------*/
+  // //* many-to-many belongsToMany using one-to-many
 
-  @OneToMany(() => Feed, (feed) => feed.poll)
-  public feeds: Feed[];
+  // @OneToMany(() => Feed, (feed) => feed.poll)
+  // public feeds: Feed[];
 
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
@@ -62,7 +63,7 @@ export class Poll {
   @ManyToOne(() => User, (user) => user.polls, {})
   user: User | null;
 
-  @ManyToOne(() => Feed, (feed) => feed.poll, {})
+  @OneToOne(() => Feed, (feed) => feed.poll, {})
   @JoinColumn()
   feed: Feed | null;
 

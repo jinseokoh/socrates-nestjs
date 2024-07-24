@@ -1,12 +1,5 @@
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
-import { User } from 'src/domain/users/entities/user.entity';
-import {
-  Column,
-  Entity,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Language {
@@ -25,9 +18,6 @@ export class Language {
   @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.language)
   public usersSkilled: LanguageSkill[];
 
-  // used to have this many to many relationship.
-  // @ManyToMany(() => User, (user) => user.languages)
-  // users: User[];
   //?-------------------------------------------------------------------------?/
   //? constructor
 

@@ -325,7 +325,10 @@ export class UsersService {
       await this._deleteReportUserMeetup(id);
       await this._deleteReportUserUser(id);
       await this._deleteMeetupComment(id);
-      await this._voidPersonalInformation(id, dto.message ?? '');
+      await this._voidPersonalInformationAndUpsertWithdrawals(
+        id,
+        dto.message ?? '',
+      );
       // await this.softRemove(id);
     } catch (e) {
       console.log(e);
@@ -472,7 +475,7 @@ export class UsersService {
     );
   }
 
-  async _voidPersonalInformation(id: number, message: string): Promise<any> {
+  async _voidPersonalInformationAndUpsertWithdrawals(id: number, message: string): Promise<any> {
     const user = await this.findById(id, ['providers']);
     const realname =
       user.realname && user.realname.length > 1
@@ -498,12 +501,11 @@ export class UsersService {
     await Promise.all(
       user.providers.map(async (v: Provider) => {
         await this.repository.manager.query(
-          'INSERT IGNORE INTO `withdrawal` \
-(providerId, reason, userId) VALUES (?, ?, ?) \
+          'INSERT IGNORE INTO `withdrawal` (userId, providerId, reason) VALUES (?, ?, ?) \
 ON DUPLICATE KEY UPDATE \
+userId = VALUES(`userId`), \
 providerId = VALUES(`providerId`), \
-reason = VALUES(`reason`), \
-userId = VALUES(`userId`)',
+reason = VALUES(`reason`)',
           [v.providerId, message, id],
         );
       }),

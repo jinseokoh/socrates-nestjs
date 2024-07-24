@@ -19,6 +19,15 @@ export class InquiryComment {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
+  @Column({ type: 'int', unsigned: true })
+  userId: number; // to make it available to Repository.
+
+  @Column({ type: 'int', unsigned: true })
+  inquiryId: number; // to make it available to Repository.
+
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  parentId: number | null;
+
   @Column({ length: 255 })
   @ApiProperty({ description: '내용' })
   body: string;
@@ -30,6 +39,10 @@ export class InquiryComment {
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'flag count' })
   flagCount: number;
+
+  @Column({ type: 'datetime', nullable: true })
+  @ApiProperty({ description: '1달 동안만 사용가능' })
+  expiredAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -43,19 +56,11 @@ export class InquiryComment {
   //**--------------------------------------------------------------------------*/
   //** many-to-1 belongsTo
 
-  @Column({ type: 'int', unsigned: true })
-  userId: number; // to make it available to Repository.
-
-  @ManyToOne(() => User, (user) => user.inquiryComments, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => User, (user) => user.inquiryComments, { cascade: true })
   user: User;
 
-  @Column({ type: 'int', unsigned: true })
-  inquiryId: number; // to make it available to Repository.
-
   @ManyToOne(() => Inquiry, (inquiry) => inquiry.inquiryComments, {
-    onDelete: 'CASCADE',
+    cascade: true,
   })
   inquiry: Inquiry;
 
@@ -63,9 +68,6 @@ export class InquiryComment {
   //** one to many (self recursive relations)
   // data structure ref)
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
-
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  parentId: number | null;
 
   @OneToMany(() => InquiryComment, (opinion) => opinion.parent)
   children: InquiryComment[];
