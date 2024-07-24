@@ -52,33 +52,27 @@ export class UserImpressionsService {
           dto.recipientId, // 평가받는 사용자
         ],
       );
-
       const user = await this.repository.findOneOrFail({
         where: { id: dto.recipientId },
         relations: ['receivedImpressions'],
       });
-
-      console.log(user);
       if (user.receivedImpressions && user.receivedImpressions.length > 1) {
-        const impressionAverage = await this.getImpressionAverageById(
-          dto.userId,
-        );
+        const average = await this.getImpressionAverageById(dto.recipientId);
         // todo. save it to profile model.
         // const dto = new UpdateProfileDto();
         // dto.impressions = impressions;
         // await this.usersService.updateProfile(id, dto);
-        return impressionAverage;
-      } else {
-        return {
-          appropriateness: dto.appropriateness,
-          attitude: dto.attitude,
-          empathy: dto.empathy,
-          humor: dto.humor,
-          manner: dto.manner,
-        };
+        return average;
       }
+      return {
+        appropriateness: dto.appropriateness,
+        attitude: dto.attitude,
+        empathy: dto.empathy,
+        humor: dto.humor,
+        manner: dto.manner,
+      };
     } catch (e) {
-      this.logger.log(e);
+      this.logger.log('[🖥️]', e);
       throw new BadRequestException();
     }
   }
@@ -93,29 +87,19 @@ AVG(attitude) AS attitude, \
 AVG(empathy) AS empathy, \
 AVG(humor) AS humor, \
 AVG(manner) AS manner \
-FROM impression \
-GROUP BY recipientId HAVING recipientId = ?',
+FROM impression GROUP BY recipientId HAVING recipientId = ?',
         [recipientId],
       );
-      console.log(row);
-
       return {
-        appropriateness: parseFloat(row['appropriateness']).toFixed(1),
-        attitude: parseFloat(row['attitude']).toFixed(1),
-        empathy: parseFloat(row['empathy']).toFixed(1),
-        humor: parseFloat(row['humor']).toFixed(1),
-        manner: parseFloat(row['manner']).toFixed(1),
+        appropriateness: +(+row['appropriateness']).toFixed(1),
+        attitude: +(+row['attitude']).toFixed(1),
+        empathy: +(+row['empathy']).toFixed(1),
+        humor: +(+row['humor']).toFixed(1),
+        manner: +(+row['manner']).toFixed(1),
       };
-
-      // return {
-      //   appropriateness: +parseFloat(row['appropriateness']).toFixed(2),
-      //   attitude: +parseFloat(row['attitude']).toFixed(2),
-      //   empathy: +parseFloat(row['empathy']).toFixed(2),
-      //   humor: +parseFloat(row['humor']).toFixed(2),
-      //   manner: +parseFloat(row['manner']).toFixed(2),
-      // };
     } catch (e) {
-      throw new NotFoundException('entity not found');
+      this.logger.log('[🖥️]', e);
+      throw new NotFoundException();
     }
   }
 }

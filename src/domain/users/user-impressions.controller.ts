@@ -34,17 +34,14 @@ export class UserImpressionsController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body() dto: CreateImpressionDto,
-  ): Promise<AnyData> {
+  ): Promise<any> {
+    console.log(dto);
     try {
-      const res = await this.userImpressionsService.upsertImpression({
+      return await this.userImpressionsService.upsertImpression({
         ...dto,
         userId,
         recipientId,
       });
-
-      return {
-        data: res,
-      };
     } catch (e) {
       throw new BadRequestException();
     }
