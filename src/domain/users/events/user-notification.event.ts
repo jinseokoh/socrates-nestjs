@@ -1,4 +1,4 @@
-import { IData } from 'src/domain/alarms/entities/alarm.interface';
+import { IData } from "src/common/interfaces";
 
 export class UserNotificationEvent {
   name:

@@ -46,7 +46,9 @@ import { UserCategoriesService } from 'src/domain/users/user-categories.service'
 import { UserFeedsService } from 'src/domain/users/user-feeds.service';
 import { UserFriendsService } from 'src/domain/users/user-friends.service';
 import { UserHatesService } from 'src/domain/users/user-hates.service';
+import { UserImpressionsService } from 'src/domain/users/user-impressions.service';
 import { UserJoinsService } from 'src/domain/users/user-joins.service';
+import { UserLanguagesService } from 'src/domain/users/user-languages.service';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 import { UserPleasService } from 'src/domain/users/user-pleas.service';
 import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
@@ -108,7 +110,9 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
     UserFeedsService,
     UserFriendsService,
     UserHatesService,
+    UserImpressionsService,
     UserJoinsService,
+    UserLanguagesService,
     UserMeetupsService,
     UserNotificationListener,
     UserPleasService,

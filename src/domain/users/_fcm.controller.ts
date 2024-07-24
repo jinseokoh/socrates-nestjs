@@ -13,12 +13,11 @@ import { FcmService } from 'src/services/fcm/fcm.service';
 import { FcmTopicDto } from 'src/domain/users/dto/fcm-topic.dto';
 import { SkipThrottle } from '@nestjs/throttler';
 
-//! @deprecated
-//! 미사용
+//! 미사용중이지만 2차개발시 사용예정
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
-@Controller('users')
-export class UserFcmController {
+@Controller('fcm')
+export class FcmController {
   constructor(
     private readonly fcmService: FcmService,
     private readonly usersService: UsersService,
@@ -29,7 +28,7 @@ export class UserFcmController {
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'topic 으로 FCM 발송' })
-  @Post('fcm')
+  @Post('topic')
   async sendToTopic(@Body() dto: FcmTopicDto): Promise<any> {
     await this.fcmService.sendToTopic(
       dto.topic,
@@ -40,7 +39,6 @@ export class UserFcmController {
       },
       {
         page: '',
-        args: '',
       },
     );
   }
@@ -65,7 +63,6 @@ export class UserFcmController {
       },
       {
         page: '',
-        args: '',
       },
     );
   }

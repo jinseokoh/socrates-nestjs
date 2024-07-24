@@ -7,6 +7,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   UseInterceptors,
@@ -28,9 +29,12 @@ export class UserCategoriesController {
   //? Create
   //?-------------------------------------------------------------------------//
 
-  @ApiOperation({ description: '나의 관심사 리스트에 추가' })
+  @ApiOperation({
+    description:
+      '나의 관심사 리스트에 추가. (ids 건 slugs 건 하나의 endpoint 로 처리)',
+  })
   @Post(':userId/categories')
-  async create(
+  async syncCategoriesWithEitherIdsOrSlugs(
     @Param('userId') userId: number,
     @Body() dto: SyncCategoryDto,
   ): Promise<Array<Interest>> {
@@ -57,22 +61,18 @@ export class UserCategoriesController {
     throw new BadRequestException(`required fields is missing`);
   }
 
-  @ApiOperation({ description: '나의 관심사 리스트에 추가' })
-  @Put(':userId/categories/:slug')
+  @ApiOperation({ description: '나의 관심사 리스트에 upsert' })
+  @Patch(':userId/categories/:slug')
   async addCategoryWithSkill(
     @Param('userId') userId: number,
     @Param('slug') slug: string,
     @Body('skill') skill: number | null,
   ): Promise<Array<Interest>> {
-    try {
-      return await this.userCategoriesService.upsertCategoryWithSkill(
-        userId,
-        slug,
-        skill,
-      );
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    return await this.userCategoriesService.upsertCategoryWithSkill(
+      userId,
+      slug,
+      skill,
+    );
   }
 
   //?-------------------------------------------------------------------------//

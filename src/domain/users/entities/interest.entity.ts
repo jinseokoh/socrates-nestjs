@@ -1,11 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 
 // a user can like meetup
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
+@Unique('user_id_category_id_key', ['userId', 'categoryId'])
 export class Interest {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;

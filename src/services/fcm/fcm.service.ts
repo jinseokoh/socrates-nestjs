@@ -1,7 +1,7 @@
 import { BadRequestException, Logger } from '@nestjs/common';
 import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator';
 import * as firebaseAdmin from 'firebase-admin';
-import { IData } from 'src/domain/alarms/entities/alarm.interface';
+import { IData } from 'src/common/interfaces';
 
 //** reference) https://blog.logrocket.com/implement-in-app-notifications-nestjs-mysql-firebase/
 @Injectable()
@@ -20,10 +20,7 @@ export class FcmService {
         body: notification.body,
         imageUrl: notification.imageUrl,
       },
-      data: {
-        page: data.page,
-        args: data.args,
-      },
+      data: data,
       apns: {
         fcmOptions: {
           imageUrl: notification?.imageUrl,
@@ -55,10 +52,7 @@ export class FcmService {
         body: notification.body,
         imageUrl: notification.imageUrl,
       },
-      data: {
-        page: data.page,
-        args: data.args,
-      },
+      data: data,
       apns: {
         fcmOptions: {
           imageUrl: notification?.imageUrl,

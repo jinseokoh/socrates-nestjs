@@ -8,7 +8,8 @@ import {
   IsString,
 } from 'class-validator';
 import { AlarmType } from 'src/common/enums';
-import { IData, ISender } from 'src/domain/alarms/entities/alarm.interface';
+import { IData } from 'src/common/interfaces';
+import { ISender } from 'src/domain/alarms/entities/alarm.interface';
 
 export class CreateAlarmDto {
   @ApiProperty({ description: '사용자 id', required: true })

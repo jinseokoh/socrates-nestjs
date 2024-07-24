@@ -1,13 +1,9 @@
 import { AlarmType } from 'src/common/enums';
+import { IData } from 'src/common/interfaces';
 
 export interface IAlarmKey {
   userId: number; // partition key
   id: string | null; // sort key
-}
-
-export interface IData {
-  page: string;
-  args: any;
 }
 
 export interface ISender {

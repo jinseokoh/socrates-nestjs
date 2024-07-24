@@ -67,6 +67,10 @@ export interface ICounts {
   polls: number;
   feeds: number;
 }
+//? need to be compatible with FCM data payload signature
+export interface IData {
+  [key: string]: string;
+}
 
 // export interface IFcmTokenPayload {
 //   tokens: string[];
