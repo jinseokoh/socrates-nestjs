@@ -16,13 +16,13 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { SyncCategoryDto } from 'src/domain/users/dto/sync-category.dto';
 import { Interest } from 'src/domain/users/entities/interest.entity';
-import { UsersService } from 'src/domain/users/users.service';
+import { UserCategoriesService } from 'src/domain/users/user-categories.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UserCategoriesController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly userCategoriesService: UserCategoriesService) {}
 
   //?-------------------------------------------------------------------------//
   //? Create
@@ -36,14 +36,17 @@ export class UserCategoriesController {
   ): Promise<Array<Interest>> {
     if (dto.ids) {
       try {
-        return await this.usersService.syncCategoriesWithIds(userId, dto.ids);
+        return await this.userCategoriesService.syncCategoriesWithIds(
+          userId,
+          dto.ids,
+        );
       } catch (e) {
         throw new BadRequestException();
       }
     }
     if (dto.slugs) {
       try {
-        return await this.usersService.syncCategoriesWithSlugs(
+        return await this.userCategoriesService.syncCategoriesWithSlugs(
           userId,
           dto.slugs,
         );
@@ -62,7 +65,7 @@ export class UserCategoriesController {
     @Body('skill') skill: number | null,
   ): Promise<Array<Interest>> {
     try {
-      return await this.usersService.upsertCategoryWithSkill(
+      return await this.userCategoriesService.upsertCategoryWithSkill(
         userId,
         slug,
         skill,
@@ -81,7 +84,7 @@ export class UserCategoriesController {
   async getCategories(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Array<Interest>> {
-    return await this.usersService.getCategories(userId);
+    return await this.userCategoriesService.getCategories(userId);
   }
 
   //?-------------------------------------------------------------------------//
@@ -96,7 +99,7 @@ export class UserCategoriesController {
     @Body('ids') ids: number[],
   ): Promise<Array<Interest>> {
     try {
-      return await this.usersService.removeCategories(userId, ids);
+      return await this.userCategoriesService.removeCategories(userId, ids);
     } catch (e) {
       throw new BadRequestException();
     }

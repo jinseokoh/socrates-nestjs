@@ -7,7 +7,7 @@ export interface IAlarmKey {
 
 export interface IData {
   page: string;
-  args: string;
+  args: any;
 }
 
 export interface ISender {

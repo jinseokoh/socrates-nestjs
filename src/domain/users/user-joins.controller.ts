@@ -17,8 +17,8 @@ import { Join } from 'src/domain/meetups/entities/join.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
-import { UsersService } from 'src/domain/users/users.service';
 import { UserJoinsService } from 'src/domain/users/user-joins.service';
+import { UserCategoriesService } from 'src/domain/users/user-categories.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -26,7 +26,7 @@ import { UserJoinsService } from 'src/domain/users/user-joins.service';
 export class UserJoinsController {
   constructor(
     private readonly userJoinsService: UserJoinsService,
-    private readonly usersService: UsersService,
+    private readonly userCategoriesService: UserCategoriesService,
   ) {}
 
   @ApiOperation({ description: '모임신청 리스트에 추가' })
@@ -46,7 +46,7 @@ export class UserJoinsController {
       dto,
     );
     // user's interests 추가
-    await this.usersService.upsertCategoryWithSkill(
+    await this.userCategoriesService.upsertCategoryWithSkill(
       userId,
       meetup.subCategory,
       dto.skill,

@@ -66,11 +66,17 @@ export class AlarmsController {
     };
   }
 
-  // not being used
-  @ApiOperation({ description: 'Banner 상세보기' })
+  //! do we need this?
+  @ApiOperation({ description: 'Alarm 상세보기' })
   @Get(':id')
-  async getAlarmById(@Param('id') id: number): Promise<IAlarm> {
-    throw new Error('My first Sentry error!');
+  async getAlarmById(
+    @CurrentUserId() userId: number,
+    @Param('id') id: string,
+  ): Promise<IAlarm> {
+    return await this.alarmsService.findById({
+      userId,
+      id,
+    } as IAlarmKey);
   }
 
   //?-------------------------------------------------------------------------//
@@ -81,8 +87,11 @@ export class AlarmsController {
   async markAsRead(
     @CurrentUserId() userId: number,
     @Param('id') id: string,
-  ): Promise<void> {
+  ): Promise<any> {
     await this.alarmsService.markAsRead(userId, id);
+    return {
+      data: 'ok',
+    };
   }
 
   //?-------------------------------------------------------------------------//
@@ -95,12 +104,10 @@ export class AlarmsController {
     @CurrentUserId() userId: number,
     @Param('id') id: string,
   ): Promise<any> {
-    const key = {
+    await this.alarmsService.delete({
       userId: userId,
       id: id,
-    } as IAlarmKey;
-
-    await this.alarmsService.delete(key);
+    } as IAlarmKey);
     return {
       data: 'ok',
     };

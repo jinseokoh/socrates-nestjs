@@ -1,18 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from 'src/app.service';
 import { Public } from 'src/common/decorators/public.decorator';
+import { ICounts } from 'src/common/interfaces';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Public()
   @Get('/counts')
-  async counts(): Promise<{
-    users: number;
-    meetups: number;
-    polls: number;
-    connections: number;
-  }> {
+  async counts(): Promise<ICounts> {
     return await this.appService.getCounts();
   }
 

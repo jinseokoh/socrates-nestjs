@@ -42,18 +42,19 @@ export class CreateAlarmDto {
   @IsOptional()
   data: IData | null;
 
-  @ApiProperty({ description: 'link (navigation 용)', required: false })
+  @ApiProperty({ description: 'link (navigation 용)' })
   @IsString()
   @IsOptional()
   link: string | null;
 
-  @ApiProperty({ description: '사용자', required: false })
+  @ApiProperty({ description: '사용자' })
   @IsObject()
   @IsOptional()
   user: ISender | null;
 
   @ApiProperty({ description: '읽음 여부' })
   @IsBoolean()
+  @IsOptional()
   isRead: boolean;
 
   // 빈칸으로 남겨두면 자동생성

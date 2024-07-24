@@ -1,4 +1,4 @@
-import { Schema } from 'dynamoose';
+import { Schema, type } from 'dynamoose';
 import { AlarmType } from 'src/common/enums';
 
 export const AlarmSchema = new Schema(
@@ -18,7 +18,8 @@ export const AlarmSchema = new Schema(
       enum: [
         AlarmType.GENERAL,
         AlarmType.MEETUP,
-        AlarmType.CONNECTION,
+        AlarmType.FEED,
+        AlarmType.CHAT,
         AlarmType.ACTIVITY,
         AlarmType.SETTING,
       ],
@@ -31,8 +32,9 @@ export const AlarmSchema = new Schema(
       schema: {
         page: String,
         args: {
-          type: String,
-          default: '',
+          type: [String, Number, Object],
+          default: null,
+          required: false,
         },
       },
     },

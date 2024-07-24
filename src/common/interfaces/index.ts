@@ -61,9 +61,11 @@ export interface IKeyVal {
   key: string;
   val: string;
 }
-export interface IPackCompositeIds {
-  artistId: number;
-  artworkIds: number[];
+export interface ICounts {
+  users: number;
+  meetups: number;
+  polls: number;
+  feeds: number;
 }
 
 // export interface IFcmTokenPayload {
