@@ -13,7 +13,7 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { JoinType, JoinStatus } from 'src/common/enums';
+import { JoinRequestType, JoinStatus } from 'src/common/enums';
 import { AnyData } from 'src/common/types';
 import { ConfigService } from '@nestjs/config';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
@@ -61,7 +61,7 @@ export class UserJoinsService {
       relations: ['joins', 'user', 'user.profile'],
     });
 
-    let joinType = JoinType.REQUEST;
+    let joinType = JoinRequestType.REQUEST;
     if (meetup.userId == recipientId) {
       // 1. 방장에게 신청하는 경우, 30명 까지로 제한.
       if (
@@ -72,7 +72,7 @@ export class UserJoinsService {
       // await this.attachToLikePivot(userId, meetupId);
     } else {
       // 2. 방장이 초대하는 경우, 갯수 제한 없음.
-      joinType = JoinType.INVITATION;
+      joinType = JoinRequestType.INVITATION;
     }
 
     try {
@@ -106,7 +106,7 @@ export class UserJoinsService {
     recipientId: number,
     meetupId: number,
     status: JoinStatus,
-    joinType: JoinType,
+    joinType: JoinRequestType,
   ): Promise<void> {
     let chatOpen = false;
     // create a new query runner
@@ -122,7 +122,7 @@ export class UserJoinsService {
 
       //? room record 생성
       if (status === JoinStatus.ACCEPTED) {
-        if (joinType === JoinType.REQUEST) {
+        if (joinType === JoinRequestType.REQUEST) {
           // 모임 신청 (add userId to `room`) 수락
           await queryRunner.manager.query(
             'INSERT IGNORE INTO `room` (partyType, userId, meetupId) VALUES (?, ?, ?)',
@@ -171,7 +171,7 @@ export class UserJoinsService {
         });
         // notification with event listener ----------------------------------//
         const event = new UserNotificationEvent();
-        if (joinType === JoinType.REQUEST) {
+        if (joinType === JoinRequestType.REQUEST) {
           event.name = 'meetupRequestApproval';
           event.token = recipient.pushToken;
           event.options = recipient.profile?.options ?? {};
@@ -230,7 +230,7 @@ export class UserJoinsService {
       .leftJoinAndSelect('meetup.rooms', 'rooms')
       .leftJoinAndSelect('rooms.user', 'participant')
       .where({
-        joinType: JoinType.REQUEST,
+        joinType: JoinRequestType.REQUEST,
         userId: userId,
       });
 
@@ -252,7 +252,7 @@ export class UserJoinsService {
 INNER JOIN `user` ON `user`.id = `join`.userId \
 INNER JOIN `meetup` ON `meetup`.id = `join`.meetupId \
 WHERE `joinType` = ? AND `user`.id = ?',
-      [JoinType.REQUEST, userId],
+      [JoinRequestType.REQUEST, userId],
     );
 
     return items.map(({ meetupId }) => meetupId);
@@ -271,7 +271,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
       .leftJoinAndSelect('meetup.rooms', 'rooms')
       .leftJoinAndSelect('rooms.user', 'participant')
       .where({
-        joinType: JoinType.INVITATION,
+        joinType: JoinRequestType.INVITATION,
         recipientId: userId,
       });
 
@@ -293,7 +293,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
 INNER JOIN `user` ON `user`.id = `join`.recipientId \
 INNER JOIN `meetup` ON `meetup`.id = `join`.meetupId \
 WHERE `joinType` = ? AND `user`.id = ?',
-      [JoinType.INVITATION, userId],
+      [JoinRequestType.INVITATION, userId],
     );
 
     return {

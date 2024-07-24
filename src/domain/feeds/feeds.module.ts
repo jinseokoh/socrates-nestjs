@@ -10,7 +10,7 @@ import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.ser
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
+import { FeedLink } from 'src/domain/feeds/entities/feed_link.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
@@ -28,7 +28,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
       BookmarkUserFeed,
       FeedComment,
       Feed,
-      FeedFeedLink,
+      FeedLink,
       Flag,
       Plea,
       Poll,

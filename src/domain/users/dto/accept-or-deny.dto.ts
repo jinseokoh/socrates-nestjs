@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
-import { JoinStatus, JoinType } from 'src/common/enums';
+import { JoinStatus, JoinRequestType } from 'src/common/enums';
 
 export class AcceptOrDenyDto {
   @ApiProperty({ description: 'join status' })
@@ -8,6 +8,6 @@ export class AcceptOrDenyDto {
   status: JoinStatus;
 
   @ApiProperty({ description: 'join type' })
-  @IsEnum(JoinType)
-  joinType: JoinType;
+  @IsEnum(JoinRequestType)
+  joinType: JoinRequestType;
 }

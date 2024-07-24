@@ -24,7 +24,7 @@ export class LanguageSkill {
   public languageId: number;
 
   @Column({ type: 'tinyint', unsigned: true })
-  @ApiProperty({ description: '능숙도' })
+  @ApiProperty({ description: '언어 능숙도' })
   skill: number;
 
   @ManyToOne(() => User, (user) => user.languageSkills, { cascade: true })

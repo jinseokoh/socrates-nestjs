@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { JoinStatus, JoinType } from 'src/common/enums';
+import { JoinStatus, JoinRequestType } from 'src/common/enums';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -33,14 +33,6 @@ export class Join {
   @Column({ type: 'int', unsigned: true })
   meetupId!: number;
 
-  @Column({ type: 'enum', enum: JoinStatus, nullable: true })
-  @ApiProperty({ description: 'ACCEPTED|DENIED' })
-  status: JoinStatus;
-
-  @Column({ type: 'enum', enum: JoinType, default: JoinType.REQUEST })
-  @ApiProperty({ description: 'INVITATION|REQUEST' })
-  joinType: JoinType;
-
   @Column({ length: 80, nullable: true })
   @ApiProperty({ description: 'message' })
   message: string | null;
@@ -48,6 +40,18 @@ export class Join {
   @Column({ type: 'tinyint', unsigned: true, nullable: true })
   @ApiProperty({ description: 'skill level' })
   skill: number;
+
+  @Column({
+    type: 'enum',
+    enum: JoinRequestType,
+    default: JoinRequestType.REQUEST,
+  })
+  @ApiProperty({ description: 'invitation|request' })
+  joinType: JoinRequestType;
+
+  @Column({ type: 'enum', enum: JoinStatus, nullable: true })
+  @ApiProperty({ description: 'pending|accepted|denied' })
+  status: JoinStatus;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -58,7 +62,7 @@ export class Join {
   @ManyToOne(() => User, (user) => user.sentJoins, {
     nullable: false,
     onUpdate: 'CASCADE',
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })
   public user!: User;

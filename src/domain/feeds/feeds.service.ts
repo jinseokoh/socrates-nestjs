@@ -22,7 +22,7 @@ import { SignedUrl } from 'src/common/types';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
+import { FeedLink } from 'src/domain/feeds/entities/feed_link.entity';
 
 @Injectable()
 export class FeedsService {
@@ -35,8 +35,8 @@ export class FeedsService {
     private readonly pollRepository: Repository<Poll>,
     @InjectRepository(Plea)
     private readonly pleaRepository: Repository<Plea>,
-    @InjectRepository(FeedFeedLink)
-    private readonly feedFeedLinkRepository: Repository<FeedFeedLink>,
+    @InjectRepository(FeedLink)
+    private readonly feedLinkRepository: Repository<FeedLink>,
     private eventEmitter: EventEmitter2,
     private readonly s3Service: S3Service,
   ) {}
@@ -53,11 +53,12 @@ export class FeedsService {
       if (dto.linkedFeedIds && dto.linkedFeedIds.length > 0) {
         await Promise.all(
           dto.linkedFeedIds.map(async (v: number) => {
-            const bookmark = this.feedFeedLinkRepository.create({
+            const feedLink = this.feedLinkRepository.create({
               feed: { id: feed.id },
-              linkedFeed: { id: v },
+              entityType: `feed`,
+              entityId: v,
             });
-            return await this.feedFeedLinkRepository.save(bookmark);
+            return await this.feedLinkRepository.save(feedLink);
           }),
         );
       }

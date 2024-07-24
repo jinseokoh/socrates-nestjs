@@ -13,7 +13,7 @@ export * from './gender';
 export * from './inquiry-type';
 export * from './interest';
 export * from './join-status';
-export * from './join-type';
+export * from './join-request-type';
 export * from './keyword';
 export * from './ledger-type';
 export * from './meetup-type';

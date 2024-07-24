@@ -18,7 +18,7 @@ import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
+import { FeedLink } from 'src/domain/feeds/entities/feed_link.entity';
 
 import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
 import { UserFeedsController } from 'src/domain/users/user-feeds.controller';
@@ -69,7 +69,7 @@ import { UserPleasController } from 'src/domain/users/user-pleas.controller';
       BookmarkUserUser,
       Category,
       Feed,
-      FeedFeedLink,
+      FeedLink,
       Flag,
       Friendship,
       Hate,

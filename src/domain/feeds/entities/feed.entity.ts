@@ -15,7 +15,7 @@ import {
 } from 'typeorm';
 import { IsArray } from 'class-validator';
 import { Plea } from 'src/domain/feeds/entities/plea.entity';
-import { FeedFeedLink } from 'src/domain/feeds/entities/feed_feed_link.entity';
+import { FeedLink } from 'src/domain/feeds/entities/feed_link.entity';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 
@@ -86,11 +86,8 @@ export class Feed {
   //* ----------------------------------------------------------------------- */
   //* 1-to-many (hasMany)
 
-  @OneToMany(() => FeedFeedLink, (link) => link.feed)
-  public feedLinks: FeedFeedLink[];
-
-  @OneToMany(() => FeedFeedLink, (link) => link.linkedFeed)
-  public linkedByFeeds: FeedFeedLink[];
+  @OneToMany(() => FeedLink, (link) => link.feed)
+  public feedLinks: FeedLink[];
 
   @OneToMany(() => FeedComment, (comment) => comment.feed)
   comments: FeedComment[];

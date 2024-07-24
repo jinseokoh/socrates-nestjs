@@ -72,10 +72,10 @@ export class Profile {
   payCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  viewCount: number;
+  postCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  postCount: number;
+  viewCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'bookmark count' })

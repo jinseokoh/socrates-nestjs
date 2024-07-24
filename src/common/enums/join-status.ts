@@ -1,4 +1,5 @@
 export enum JoinStatus {
-  ACCEPTED = 'accepted', // 찜
-  DENIED = 'denied', // 신청
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  DENIED = 'denied',
 }

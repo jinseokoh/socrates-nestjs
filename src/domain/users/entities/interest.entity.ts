@@ -1,24 +1,32 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 // a user can like meetup
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 export class Interest {
-  @PrimaryColumn({ type: 'int', unsigned: true })
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
+  id: number;
+
+  @Column({ type: 'int', unsigned: true })
   public userId: number;
 
-  @PrimaryColumn({ type: 'int', unsigned: true })
+  @Column({ type: 'int', unsigned: true })
   public categoryId: number;
 
   @Column({ type: 'tinyint', unsigned: true, nullable: true })
+  @ApiProperty({ description: '취미/관심사 능숙도' })
   skill: number | null;
 
-  @ManyToOne(() => User, (user) => user.categoriesInterested)
+  @ManyToOne(() => User, (user) => user.categoriesInterested, {
+    cascade: true,
+  })
   public user: User;
 
-  @ManyToOne(() => Category, (category) => category.usersInterested)
+  @ManyToOne(() => Category, (category) => category.usersInterested, {
+    cascade: true,
+  })
   public category: Category;
 }

@@ -1,4 +1,4 @@
-export enum JoinType {
+export enum JoinRequestType {
   INVITATION = 'invitation',
   REQUEST = 'request',
 }

@@ -206,14 +206,14 @@ export class User {
   @OneToMany(() => Impression, (impression) => impression.recipient)
   public receivedImpressions: Impression[];
 
-  @OneToMany(() => Room, (room) => room.user)
-  public rooms: Room[];
-
   @OneToMany(() => Interest, (interest) => interest.user)
   public categoriesInterested: Interest[];
 
   @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.user)
   public languageSkills: LanguageSkill[];
+
+  @OneToMany(() => Room, (room) => room.user)
+  public rooms: Room[];
 
   // bookmarks -------------------------------------------------------------- //
 
