@@ -10,10 +10,10 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
-import { UpdateVenueDto } from 'src/domain/venues/dto/update-venue.dto';
-import { Venue } from 'src/domain/venues/entities/venue.entity';
-import { VenuesService } from 'src/domain/venues/venues.service';
+import { CreateVenueDto } from 'src/domain/meetups/dto/create-meetup_venue.dto';
+import { UpdateVenueDto } from 'src/domain/meetups/dto/update-meetup_venue.dto';
+import { Venue } from 'src/domain/meetups/entities/venue.entity';
+import { VenuesService } from 'src/domain/meetups/meetup-venues.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('venues')

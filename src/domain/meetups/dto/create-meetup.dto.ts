@@ -20,7 +20,7 @@ import { Day } from 'src/common/enums/day';
 import { Expense } from 'src/common/enums/expense';
 import { TargetGender } from 'src/common/enums/gender';
 import { Time } from 'src/common/enums/time';
-import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
+import { CreateVenueDto } from 'src/domain/meetups/dto/create-meetup_venue.dto';
 export class CreateMeetupDto {
   @ApiProperty({ description: 'category', default: Category.CHALLENGE })
   @IsEnum(Category)

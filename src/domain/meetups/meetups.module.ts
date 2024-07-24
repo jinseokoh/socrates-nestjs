@@ -8,18 +8,17 @@ import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Venue } from 'src/domain/venues/entities/venue.entity';
-
+import { Venue } from 'src/domain/meetups/entities/venue.entity';
+import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
 import { MeetupUsersController } from 'src/domain/meetups/meetup-users.controller';
 import { MeetupsController } from 'src/domain/meetups/meetups.controller';
+import { MeetupCommentsController } from 'src/domain/meetups/meetup-comments.controller';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
 import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
 import { MeetupCommentsService } from 'src/domain/meetups/meetup-comments.service';
+import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
-import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
-import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
-import { MeetupCommentsController } from 'src/domain/meetups/meetup-comments.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([

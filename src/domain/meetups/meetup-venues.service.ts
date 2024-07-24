@@ -7,9 +7,9 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CreateVenueDto } from 'src/domain/venues/dto/create-venue.dto';
-import { UpdateVenueDto } from 'src/domain/venues/dto/update-venue.dto';
-import { Venue } from 'src/domain/venues/entities/venue.entity';
+import { CreateVenueDto } from 'src/domain/meetups/dto/create-meetup_venue.dto';
+import { UpdateVenueDto } from 'src/domain/meetups/dto/update-meetup_venue.dto';
+import { Venue } from 'src/domain/meetups/entities/venue.entity';
 import { Repository } from 'typeorm';
 @Injectable()
 export class VenuesService {

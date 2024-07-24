@@ -1,11 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
