@@ -68,16 +68,16 @@ export class UserPleasService {
       }
 
       // validation ----------------------------------------------------------//
-      const sender = await queryRunner.manager.findOneOrFail(User, {
+      const user = await queryRunner.manager.findOneOrFail(User, {
         where: { id: dto.userId },
         relations: [`profile`],
       });
-      if (sender?.isBanned) {
+      if (user?.isBanned) {
         throw new UnprocessableEntityException(`a banned user`);
       }
       if (
-        sender.profile?.balance === null ||
-        sender.profile?.balance - dto.reward < 0
+        user.profile?.balance === null ||
+        user.profile?.balance - dto.reward < 0
       ) {
         throw new BadRequestException(`insufficient balance`);
       }
@@ -100,7 +100,7 @@ export class UserPleasService {
       }
 
       // initialize
-      const newBalance = sender.profile?.balance - dto.reward;
+      const newBalance = user.profile?.balance - dto.reward;
       const ledger = new Ledger({
         credit: dto.reward,
         ledgerType: LedgerType.CREDIT_ESCROW,
@@ -120,7 +120,7 @@ export class UserPleasService {
       event.userId = recipient.id;
       event.token = recipient.pushToken;
       event.options = recipient.profile?.options ?? {};
-      event.body = `${sender.username}님이 나에게 발견글 작성 요청을 보냈습니다. ${dto.message}`;
+      event.body = `${user.username}님이 나에게 발견글 작성 요청을 보냈습니다. ${dto.message}`;
       event.data = {
         page: `connections`,
         args: 'load:plea',
@@ -215,7 +215,7 @@ export class UserPleasService {
         where: {
           id: id,
         },
-        relations: ['sender', 'sender.profile', 'recipient'],
+        relations: ['user', 'user.profile', 'recipient'],
       });
 
       if (plea.feedId === null) {

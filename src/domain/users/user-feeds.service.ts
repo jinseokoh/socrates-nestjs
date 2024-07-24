@@ -103,7 +103,7 @@ export class UserFeedsService {
   async getUniqueUsersPleaded(userId: number): Promise<User[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
-      .innerJoinAndSelect('plea.user', 'sender')
+      .innerJoinAndSelect('plea.user', 'user')
       .where({
         recipientId: userId,
       })

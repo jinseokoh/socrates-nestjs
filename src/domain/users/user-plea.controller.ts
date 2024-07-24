@@ -23,7 +23,7 @@ export class UserPleaController {
   //--------------------------------------------------------------------------//
 
   @ApiOperation({
-    description: '내가 모든 사용자에게 받은 요청 리스트 grouped by sender',
+    description: '내가 모든 사용자에게 받은 요청 리스트 grouped by user',
   })
   @Get(':userId/pleas-from')
   async getReceivedPleasByUserId(

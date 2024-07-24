@@ -34,7 +34,7 @@ export class UserImpressionsController {
     @Body() dto: CreateImpressionDto,
   ): Promise<AnyData> {
     try {
-      const res = await this.usersService.createImpression({
+      const res = await this.usersService.upsertImpression({
         ...dto,
         recipientId,
         userId,

@@ -713,7 +713,7 @@ ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), otp=VALUES(otp), updatedAt=(CONVERT
   //? 첫인상
   //?-------------------------------------------------------------------------//
 
-  async createImpression(dto: CreateImpressionDto): Promise<number[]> {
+  async upsertImpression(dto: CreateImpressionDto): Promise<number[]> {
     const id = dto.userId;
     try {
       await this.repository.manager.query(

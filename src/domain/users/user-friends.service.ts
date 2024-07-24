@@ -28,9 +28,9 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 
 @Injectable()
-export class UsersFriendshipService {
+export class UserFriendsService {
   private readonly env: any;
-  private readonly logger = new Logger(UsersFriendshipService.name);
+  private readonly logger = new Logger(UserFriendsService.name);
 
   constructor(
     @InjectRepository(User)
@@ -38,7 +38,6 @@ export class UsersFriendshipService {
     @InjectRepository(Friendship)
     private readonly friendshipRepository: Repository<Friendship>,
     @Inject(ConfigService) private configService: ConfigService, // global
-
     private dataSource: DataSource, // for transaction
     private eventEmitter: EventEmitter2,
   ) {
@@ -49,13 +48,9 @@ export class UsersFriendshipService {
   //? Friendship Pivot
   //?-------------------------------------------------------------------------//
 
-  // -------------------------------------------------------------------------//
-  // Create
-  // -------------------------------------------------------------------------//
-
   //! 친구신청 생성 (using transaction)
-  //! profile's balance will be adjusted w/ ledger model event subscriber.
-  //! - for hated(blocked) users, app needs to take care of 'em instead of server.
+  //! - profile's balance will be adjusted w/ ledger model event subscriber.
+  //! - for hated(blocked) users, a client needs to take care of 'em instead of server.
   async createFriendship(dto: CreateFriendshipDto): Promise<User> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
@@ -81,16 +76,16 @@ export class UsersFriendshipService {
       }
 
       // validation ----------------------------------------------------------//
-      const sender = await queryRunner.manager.findOneOrFail(User, {
+      const user = await queryRunner.manager.findOneOrFail(User, {
         where: { id: dto.userId },
         relations: [`profile`],
       });
-      if (sender?.isBanned) {
+      if (user?.isBanned) {
         throw new UnprocessableEntityException(`a banned user`);
       }
       if (
-        (dto.cost > 0 && sender.profile?.balance === null) ||
-        sender.profile?.balance - dto.cost < 0
+        (dto.cost > 0 && user.profile?.balance === null) ||
+        user.profile?.balance - dto.cost < 0
       ) {
         throw new BadRequestException(`insufficient balance`);
       }
@@ -102,8 +97,8 @@ export class UsersFriendshipService {
       });
 
       if (dto.cost > 0) {
-        const newBalance = sender.profile?.balance - dto.cost;
-        sender.profile.balance = newBalance;
+        const newBalance = user.profile?.balance - dto.cost;
+        user.profile.balance = newBalance; // no data persistence happens here.
         const ledger = new Ledger({
           credit: dto.cost,
           ledgerType: LedgerType.CREDIT_SPEND,
@@ -115,13 +110,13 @@ export class UsersFriendshipService {
       }
       await queryRunner.manager.query(
         'INSERT IGNORE INTO `friendship` \
-        (userId, recipientId, friendRequestType, message, pleaId) VALUES (?, ?, ?, ?, ?)',
+        (userId, recipientId, pleaId, friendRequestType, message) VALUES (?, ?, ?, ?, ?)',
         [
           dto.userId,
           dto.recipientId,
+          dto.pleaId,
           dto.friendRequestType,
           dto.message,
-          dto.pleaId,
         ],
       );
       await queryRunner.commitTransaction();
@@ -132,14 +127,14 @@ export class UsersFriendshipService {
       event.userId = recipient.id;
       event.token = recipient.pushToken;
       event.options = recipient.profile?.options ?? {};
-      event.body = `${sender.username}님으로부터 친구신청을 받았습니다. ${dto.message}`;
+      event.body = `${user.username}님으로부터 친구신청을 받았습니다. ${dto.message}`;
       event.data = {
         page: 'activities/requests',
         args: 'tab:7',
       };
       this.eventEmitter.emit('user.notified', event);
 
-      return sender;
+      return user;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       if (error.name === 'EntityNotFoundError') {
@@ -176,15 +171,15 @@ export class UsersFriendshipService {
           userId: userId,
           recipientId: recipientId,
         },
-        relations: ['sender', 'sender.profile', 'recipient', 'plea'],
+        relations: ['user', 'user.profile', 'recipient', 'plea'],
       });
 
       if (
         friendship.plea &&
-        friendship.plea.feedId !== null &&
+        friendship.plea.feedId &&
         status === FriendStatus.ACCEPTED
       ) {
-        //? plea.reward 를 friendship sender (== plea recipient; 작성자) 에게 지급
+        //? plea.reward 를 friendship user (== plea recipient; 작성자) 에게 지급
         const newBalance =
           friendship.user.profile?.balance + friendship.plea.reward;
         const ledger = new Ledger({
@@ -271,8 +266,8 @@ export class UsersFriendshipService {
           recipientId: recipientId,
         },
         relations: [
-          'sender',
-          'sender.profile',
+          'user',
+          'user.profile',
           'recipient',
           'recipient.profile',
           'plea',
@@ -336,8 +331,8 @@ export class UsersFriendshipService {
   ): Promise<Paginated<Friendship>> {
     const queryBuilder = this.friendshipRepository
       .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.user', 'sender')
-      .innerJoinAndSelect('sender.profile', 'profile')
+      .innerJoinAndSelect('friendship.user', 'user')
+      .innerJoinAndSelect('user.profile', 'profile')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .where({
         recipientId: userId,
@@ -363,7 +358,7 @@ export class UsersFriendshipService {
   ): Promise<Paginated<Friendship>> {
     const queryBuilder = this.friendshipRepository
       .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.user', 'sender')
+      .innerJoinAndSelect('friendship.user', 'user')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .innerJoinAndSelect('recipient.profile', 'profile')
       .where({
@@ -390,8 +385,8 @@ export class UsersFriendshipService {
   ): Promise<Paginated<Friendship>> {
     const queryBuilder = this.friendshipRepository
       .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.user', 'sender')
-      .innerJoinAndSelect('sender.profile', 'sprofile')
+      .innerJoinAndSelect('friendship.user', 'user')
+      .innerJoinAndSelect('user.profile', 'sprofile')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
       .innerJoinAndSelect('recipient.profile', 'rprofile')
       .where([{ userId: userId }, { recipientId: userId }]);

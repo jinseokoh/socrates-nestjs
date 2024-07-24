@@ -17,7 +17,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto';
-import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
+import { UserFriendsService } from 'src/domain/users/user-friends.service';
 import { FriendStatus } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 
@@ -25,9 +25,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 @SkipThrottle()
 @Controller('users')
 export class UserFriendshipController {
-  constructor(
-    private readonly usersFriendshipService: UsersFriendshipService,
-  ) {}
+  constructor(private readonly userFriendsService: UserFriendsService) {}
 
   //?-------------------------------------------------------------------------//
   //? Friendship Pivot
@@ -41,7 +39,7 @@ export class UserFriendshipController {
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body() dto: CreateFriendshipDto,
   ): Promise<User> {
-    return await this.usersFriendshipService.createFriendship({
+    return await this.userFriendsService.createFriendship({
       ...dto,
       userId,
       recipientId,
@@ -56,7 +54,7 @@ export class UserFriendshipController {
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body('status') status: FriendStatus,
   ): Promise<AnyData> {
-    await this.usersFriendshipService.updateFriendshipWithStatus(
+    await this.userFriendsService.updateFriendshipWithStatus(
       userId,
       recipientId,
       status,
@@ -73,7 +71,7 @@ export class UserFriendshipController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<AnyData> {
-    await this.usersFriendshipService.deleteFriendship(userId, recipientId);
+    await this.userFriendsService.deleteFriendship(userId, recipientId);
     return {
       data: 'ok',
     };
@@ -88,10 +86,7 @@ export class UserFriendshipController {
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
-    return await this.usersFriendshipService.getFriendshipsReceived(
-      userId,
-      query,
-    );
+    return await this.userFriendsService.getFriendshipsReceived(userId, query);
   }
 
   @ApiOperation({ description: '보낸 친구신청 리스트 (paginated)' })
@@ -101,7 +96,7 @@ export class UserFriendshipController {
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
-    return await this.usersFriendshipService.getFriendshipsSent(userId, query);
+    return await this.userFriendsService.getFriendshipsSent(userId, query);
   }
 
   @ApiOperation({
@@ -113,7 +108,7 @@ export class UserFriendshipController {
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
-    return this.usersFriendshipService.getMyFriendships(userId, query);
+    return this.userFriendsService.getMyFriendships(userId, query);
   }
 
   //--------------------------------------------------------------------------//
@@ -124,6 +119,6 @@ export class UserFriendshipController {
     @Param('userId') userId: number,
     // @Query('status') status: string | undefined,
   ): Promise<AnyData> {
-    return this.usersFriendshipService.getFriendshipIds(userId);
+    return this.userFriendsService.getFriendshipIds(userId);
   }
 }

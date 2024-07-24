@@ -13,11 +13,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-@Unique('sender_id_recipient_id_feed_id_key', [
-  'userId',
-  'recipientId',
-  'feedId',
-])
+@Unique('user_id_recipient_id_feed_id_key', ['userId', 'recipientId', 'feedId'])
 export class Plea {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   public id: number;

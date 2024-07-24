@@ -43,7 +43,7 @@ import { FlagUserService } from 'src/domain/users/flag_user.service';
 import { UserFeedsService } from 'src/domain/users/user-feeds.service';
 import { UserHatesService } from 'src/domain/users/user-hates.service';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
-import { UsersFriendshipService } from 'src/domain/users/users-friendship.service';
+import { UserFriendsService } from 'src/domain/users/user-friends.service';
 import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { UsersService } from 'src/domain/users/users.service';
@@ -110,7 +110,7 @@ import { UserPleasController } from 'src/domain/users/user-pleas.controller';
     UserHatesService,
     UserMeetupsService,
     UserNotificationListener,
-    UsersFriendshipService,
+    UserFriendsService,
     UsersLedgerService,
     UsersPleaService,
     UsersService,

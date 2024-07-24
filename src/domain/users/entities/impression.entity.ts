@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -23,19 +24,28 @@ export class Impression {
   recipientId: number;
 
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
-  appearance: number;
+  @ApiProperty({ description: '🥰 관심 🥱 무관심' })
+  empathy: number;
 
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
-  knowledge: number;
-
-  @Column({ type: 'tinyint', unsigned: true, default: 1 })
+  @ApiProperty({ description: '😎 자신감 🫣 열등감' })
   confidence: number;
 
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
+  @ApiProperty({ description: '😝 유머러스 🥶 유머코드다름' })
   humor: number;
 
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
+  @ApiProperty({ description: '🤠 매너 😬 비매너' })
   manner: number;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 1 })
+  @ApiProperty({ description: '😀 긍정적 😱 부정적' })
+  attitude: number;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 1 })
+  @ApiProperty({ description: '😀 적절한 😡 부적절한' })
+  inappropriateness: number;
 
   @Column({ length: 80, nullable: true })
   note: string | null;

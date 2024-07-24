@@ -41,7 +41,7 @@ export class UsersPleaService {
   ): Promise<Plea[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
-      .innerJoinAndSelect('plea.user', 'sender')
+      .innerJoinAndSelect('plea.user', 'user')
       .innerJoinAndSelect('plea.poll', 'poll')
       .where({
         userId: userId,
@@ -75,7 +75,7 @@ export class UsersPleaService {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
       .innerJoinAndSelect('plea.poll', 'poll')
-      .innerJoinAndSelect('plea.user', 'sender')
+      .innerJoinAndSelect('plea.user', 'user')
       .where({
         recipientId: userId,
       })
@@ -116,7 +116,7 @@ export class UsersPleaService {
   async getUniqueUsersPleaded(userId: number): Promise<User[]> {
     const items = await this.pleaRepository
       .createQueryBuilder('plea')
-      .innerJoinAndSelect('plea.user', 'sender')
+      .innerJoinAndSelect('plea.user', 'user')
       .where({
         recipientId: userId,
       })
