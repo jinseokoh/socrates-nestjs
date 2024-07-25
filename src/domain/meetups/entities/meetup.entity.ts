@@ -127,20 +127,28 @@ export class Meetup {
 
   // join, view bookmark, flag count  --------------------------------------- //
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'join count' })
-  joinCount: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'view count' })
   viewCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'comment count' })
+  commentCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'bookmark count = like count' })
   bookmarkCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'likes' })
+  likeCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'flag count' })
   flagCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'join count' })
+  joinCount: number;
 
   @Column({ default: false })
   @ApiProperty({ description: 'has qa board?' })

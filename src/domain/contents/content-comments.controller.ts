@@ -12,57 +12,59 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
+import { ContentCommentsService } from 'src/domain/contents/content-comments.service';
+import { CreateContentCommentDto } from 'src/domain/contents/dto/create-content_comment.dto';
+import { UpdateContentCommentDto } from 'src/domain/contents/dto/update-content_comment.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { CreateMeetupCommentDto } from 'src/domain/meetups/dto/create-meetup_comment.dto';
-import { UpdateMeetupCommentDto } from 'src/domain/meetups/dto/update-meetup_comment.dto';
-import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
-import { MeetupCommentsService } from 'src/domain/meetups/meetup-comments.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('meetups')
-export class MeetupCommentsController {
-  constructor(private readonly meetupCommentsService: MeetupCommentsService) {}
+@Controller('contents')
+export class ContentCommentsController {
+  constructor(
+    private readonly contentCommentsService: ContentCommentsService,
+  ) {}
 
   //? ----------------------------------------------------------------------- //
   //? CREATE
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '댓글 생성' })
-  @Post(':meetupId/comments')
-  async createMeetupComment(
+  @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
+  @Post(':contentId/comments')
+  async createContentComment(
     @CurrentUserId() userId: number,
-    @Param('meetupId', ParseIntPipe) meetupId: number,
-    @Body() dto: CreateMeetupCommentDto,
-  ): Promise<MeetupComment> {
-    return await this.meetupCommentsService.create({
+    @Param('contentId', ParseIntPipe) contentId: number,
+    @Body() dto: CreateContentCommentDto,
+  ): Promise<any> {
+    return await this.contentCommentsService.create({
       ...dto,
       userId,
-      meetupId,
+      contentId,
       sendNotification: dto.sendNotification ?? false,
     });
   }
 
   @ApiOperation({ description: '답글 생성' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':meetupId/comments/:commentId')
-  async createMeetupCommentReply(
+  @Post(':contentId/comments/:commentId')
+  async createContentCommentReply(
     @CurrentUserId() userId: number,
-    @Param('meetupId', ParseIntPipe) meetupId: number,
+    @Param('contentId', ParseIntPipe) contentId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
-    @Body() dto: CreateMeetupCommentDto,
+    @Body() dto: CreateContentCommentDto,
   ): Promise<any> {
-    let parentId = null;
-    if (commentId) {
-      const comment = await this.meetupCommentsService.findById(commentId);
-      parentId = comment.parentId ? comment.parentId : commentId;
-    }
-    return await this.meetupCommentsService.create({
+    const comment = await this.contentCommentsService.findById(commentId);
+    const parentId = comment.parentId ? comment.parentId : commentId;
+
+    return await this.contentCommentsService.create({
       ...dto,
       userId,
-      meetupId,
+      contentId,
       parentId,
       sendNotification: dto.sendNotification ?? false,
     });
@@ -71,17 +73,16 @@ export class MeetupCommentsController {
   //? ----------------------------------------------------------------------- //
   //? READ
   //? ----------------------------------------------------------------------- //
-
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':meetupId/comments')
+  @Get(':contentId/comments')
   async findAllInTraditionalStyle(
-    @Param('meetupId', ParseIntPipe) meetupId: number,
+    @Param('contentId', ParseIntPipe) contentId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<MeetupComment>> {
-    const result = await this.meetupCommentsService.findAllInTraditionalStyle(
+  ): Promise<Paginated<ContentComment>> {
+    const result = await this.contentCommentsService.findAllInTraditionalStyle(
       query,
-      meetupId,
+      contentId,
     );
 
     return result;
@@ -89,38 +90,37 @@ export class MeetupCommentsController {
     // return {
     //   ...result,
     //   data: result.data.map((comment) =>
-    //     this.meetupCommentsService.buildMeetupCommentTree(comment),
+    //     this.contentCommentsService.buildContentCommentTree(comment),
     //   ),
     // };
   }
 
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':meetupId/comments_counts')
+  @Get(':contentId/comments_counts')
   async findAllInYoutubeStyle(
-    @Param('meetupId', ParseIntPipe) meetupId: number,
+    @Param('contentId', ParseIntPipe) contentId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<MeetupComment>> {
-    const result = await this.meetupCommentsService.findAllInYoutubeStyle(
+  ): Promise<Paginated<ContentComment>> {
+    const result = await this.contentCommentsService.findAllInYoutubeStyle(
       query,
-      meetupId,
+      contentId,
     );
 
     return result;
   }
 
-  //? 답글 리스트, 최상단 부모는 리턴되지 않음.
   @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':meetupId/comments/:commentId')
-  async getMeetupCommentRepliesById(
-    @Param('meetupId', ParseIntPipe) meetupId: number,
+  @Get(':contentId/comments/:commentId')
+  async findAllRepliesById(
+    @Param('contentId', ParseIntPipe) contentId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<MeetupComment>> {
-    return await this.meetupCommentsService.findAllRepliesById(
+  ): Promise<Paginated<ContentComment>> {
+    return await this.contentCommentsService.findAllRepliesById(
       query,
-      meetupId,
+      contentId,
       commentId,
     );
   }
@@ -130,13 +130,13 @@ export class MeetupCommentsController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '댓글 수정' })
-  @Patch(':meetupId/comments/:commentId')
+  @Patch(':contentId/comments/:commentId')
   async update(
-    @Param('meetupId', ParseIntPipe) meetupId: number,
-    @Param('commentId', ParseIntPipe) commentId: number,
-    @Body() dto: UpdateMeetupCommentDto,
-  ): Promise<MeetupComment> {
-    return await this.meetupCommentsService.update(dto, commentId);
+    @Param('contentId', ParseIntPipe) contentId: number,
+    @Param('commentId') commentId: number,
+    @Body() dto: UpdateContentCommentDto,
+  ): Promise<ContentComment> {
+    return await this.contentCommentsService.update(dto, commentId);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -144,12 +144,11 @@ export class MeetupCommentsController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '댓글 soft 삭제' })
-  @Delete(':meetupId/comments/:commentId')
+  @Delete(':contentId/comments/:commentId')
   async remove(
-    // @CurrentUserId() userId: number,
-    @Param('meetupId', ParseIntPipe) meetupId: number,
-    @Param('commentId', ParseIntPipe) commentId: number,
-  ): Promise<MeetupComment> {
-    return await this.meetupCommentsService.softRemove(commentId);
+    @Param('contentId', ParseIntPipe) contentId: number,
+    @Param('commentId') commentId: number,
+  ): Promise<ContentComment> {
+    return await this.contentCommentsService.softRemove(commentId);
   }
 }

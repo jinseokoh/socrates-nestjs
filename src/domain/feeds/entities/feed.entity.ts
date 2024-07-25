@@ -49,16 +49,16 @@ export class Feed {
   viewCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'likes' })
-  likeCount: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'comment count' })
   commentCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'bookmark count' })
   bookmarkCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'likes' })
+  likeCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'flag count' })

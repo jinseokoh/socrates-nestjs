@@ -8,8 +8,8 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateMeetupCommentDto {
-  @ApiProperty({ description: '질문내용' })
+export class CreateContentCommentDto {
+  @ApiProperty({ description: '댓글 🔍' })
   @IsString()
   body: string;
 
@@ -34,10 +34,10 @@ export class CreateMeetupCommentDto {
   @IsOptional()
   userId: number;
 
-  @ApiProperty({ description: 'meetup 아이디' })
+  @ApiProperty({ description: '관련 Content 아이디' })
   @IsNumber()
   @IsOptional()
-  meetupId: number | null;
+  contentId: number;
 
   @ApiProperty({ description: '상위 댓글 아이디', required: false })
   @IsNumber()

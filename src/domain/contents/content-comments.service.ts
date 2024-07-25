@@ -1,36 +1,33 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
-  paginate,
   PaginateConfig,
-  Paginated,
   PaginateQuery,
+  Paginated,
+  paginate,
 } from 'nestjs-paginate';
-import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
-import { SignedUrl } from 'src/common/types';
-import { CreateMeetupCommentDto } from 'src/domain/meetups/dto/create-meetup_comment.dto';
-import { UpdateMeetupCommentDto } from 'src/domain/meetups/dto/update-meetup_comment.dto';
-import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
-import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
-import { randomImageName } from 'src/helpers/random-filename';
-import { S3Service } from 'src/services/aws/s3.service';
 import { IsNull, Repository } from 'typeorm';
+import { Content } from 'src/domain/contents/entities/content.entity';
+import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
+import { CreateContentCommentDto } from 'src/domain/contents/dto/create-content_comment.dto';
+import { UpdateContentCommentDto } from 'src/domain/contents/dto/update-content_comment.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { randomImageName } from 'src/helpers/random-filename';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
+import { SignedUrl } from 'src/common/types';
+import { S3Service } from 'src/services/aws/s3.service';
 
 @Injectable()
-export class MeetupCommentsService {
-  private readonly logger = new Logger(MeetupCommentsService.name);
+export class ContentCommentsService {
+  private readonly logger = new Logger(ContentCommentsService.name);
 
   constructor(
-    @InjectRepository(MeetupComment)
-    private readonly repository: Repository<MeetupComment>,
-    @InjectRepository(Meetup)
-    private readonly meetupRepository: Repository<Meetup>,
-    @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
+    @InjectRepository(ContentComment)
+    private readonly repository: Repository<ContentComment>,
+    @InjectRepository(Content)
+    private readonly contentRepository: Repository<Content>,
+    // @Inject(SlackService) private readonly slack: SlackService,
     private readonly s3Service: S3Service,
     private eventEmitter: EventEmitter2,
   ) {}
@@ -39,34 +36,15 @@ export class MeetupCommentsService {
   //? CREATE
   //? ----------------------------------------------------------------------- //
 
-  async create(dto: CreateMeetupCommentDto): Promise<MeetupComment> {
+  // 작성자가 없으므로 notification 로직은 제외
+  async create(dto: CreateContentCommentDto): Promise<ContentComment> {
     // creation
     const comment = await this.repository.save(this.repository.create(dto));
-
-    if (dto.sendNotification) {
-      //? notify with event listener
-      const record = await this.findById(comment.id, [
-        'user',
-        'meetup',
-        'meetup.user',
-        'meetup.user.profile',
-      ]);
-
-      if (record.meetup.user.id != dto.userId) {
-        const event = new UserNotificationEvent();
-        event.name = 'meetupComment';
-        event.userId = record.meetup.user.id;
-        event.token = record.meetup.user.pushToken;
-        event.options = record.meetup.user.profile?.options ?? {};
-        event.body = `${record.meetup.title} 모임에 누군가 댓글을 달았습니다.`;
-        event.data = {
-          page: `meetups/${dto.meetupId}`,
-        };
-        this.eventEmitter.emit('user.notified', event);
-      }
-    }
-
-    this.meetupRepository.increment({ id: dto.meetupId }, `commentCount`, 1);
+    await this.contentRepository.increment(
+      { id: dto.contentId },
+      `commentCount`,
+      1,
+    );
 
     return comment;
   }
@@ -78,11 +56,11 @@ export class MeetupCommentsService {
   //? comments w/ replies (children)
   async findAllInTraditionalStyle(
     query: PaginateQuery,
-    meetupId: number,
-  ): Promise<Paginated<MeetupComment>> {
+    contentId: number,
+  ): Promise<Paginated<ContentComment>> {
     return paginate(query, this.repository, {
       where: {
-        meetupId: meetupId,
+        contentId: contentId,
         parentId: IsNull(),
       },
       relations: ['user', 'children', 'children.user'],
@@ -90,49 +68,49 @@ export class MeetupCommentsService {
       defaultSortBy: [['createdAt', 'DESC']],
       defaultLimit: 20,
     });
-    // return await paginate<FeedComment>(query, queryBuilder, config);
+    // return await paginate<ContentComment>(query, queryBuilder, config);
   }
 
   //? comments w/ replyCount
   async findAllInYoutubeStyle(
     query: PaginateQuery,
-    meetupId: number,
-  ): Promise<Paginated<MeetupComment>> {
+    contentId: number,
+  ): Promise<Paginated<ContentComment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
       .loadRelationCountAndMap('comment.replyCount', 'comment.children')
       .where('comment.parentId IS NULL')
-      .andWhere('comment.meetupId = :meetupId', { meetupId });
+      .andWhere('comment.contentId = :contentId', { contentId });
 
-    const config: PaginateConfig<MeetupComment> = {
+    const config: PaginateConfig<ContentComment> = {
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
-        meetupId: [FilterOperator.EQ],
+        contentId: [FilterOperator.EQ],
         isFlagged: [FilterOperator.EQ],
       },
     };
 
-    return await paginate<MeetupComment>(query, queryBuilder, config);
+    return await paginate<ContentComment>(query, queryBuilder, config);
   }
 
   // 답글 리스트
   async findAllRepliesById(
     query: PaginateQuery,
-    meetupId: number,
+    contentId: number,
     commentId: number,
-  ): Promise<Paginated<MeetupComment>> {
+  ): Promise<Paginated<ContentComment>> {
     const queryBuilder = this.repository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
-      .where('comment.meetupId = :meetupId', { meetupId })
+      .where('comment.contentId = :contentId', { contentId })
       .andWhere('comment.parentId = :commentId', { commentId })
       .andWhere('comment.deletedAt IS NULL');
 
-    const config: PaginateConfig<MeetupComment> = {
+    const config: PaginateConfig<ContentComment> = {
       sortableColumns: ['id'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
@@ -141,11 +119,13 @@ export class MeetupCommentsService {
       },
     };
 
-    return await paginate<MeetupComment>(query, queryBuilder, config);
+    return await paginate<ContentComment>(query, queryBuilder, config);
   }
 
-  // required when checking if the comment exists
-  async findById(id: number, relations: string[] = []): Promise<MeetupComment> {
+  async findById(
+    id: number,
+    relations: string[] = [],
+  ): Promise<ContentComment> {
     try {
       return relations.length > 0
         ? await this.repository.findOneOrFail({
@@ -160,21 +140,14 @@ export class MeetupCommentsService {
     }
   }
 
-  // reserved. no use cases as of yet.
-  async count(body: string): Promise<number> {
-    return await this.repository.countBy({
-      body: body,
-    });
-  }
-
   //? ----------------------------------------------------------------------- //
   //? UPDATE
   //? ----------------------------------------------------------------------- //
 
   async update(
-    dto: UpdateMeetupCommentDto,
+    dto: UpdateContentCommentDto,
     commentId: number,
-  ): Promise<MeetupComment> {
+  ): Promise<ContentComment> {
     const comment = await this.repository.preload({ id: commentId, ...dto });
     // user validation here might be a good option to be added
     if (!comment) {
@@ -187,13 +160,13 @@ export class MeetupCommentsService {
   //? DELETE
   //? ----------------------------------------------------------------------- //
 
-  async softRemove(id: number): Promise<MeetupComment> {
+  async softRemove(id: number): Promise<ContentComment> {
     try {
       const comment = await this.findById(id);
       await this.repository.softRemove(comment);
-      await this.meetupRepository.manager.query(
-        `UPDATE meetup SET commentCount = commentCount - 1 WHERE id = ? AND commentCount > 0`,
-        [comment.meetupId],
+      await this.contentRepository.manager.query(
+        `UPDATE content SET commentCount = commentCount - 1 WHERE id = ? AND commentCount > 0`,
+        [comment.contentId],
       );
       return comment;
     } catch (e) {
@@ -203,9 +176,19 @@ export class MeetupCommentsService {
   }
 
   //! not being used.
-  async remove(id: number): Promise<MeetupComment> {
+  async remove(id: number): Promise<ContentComment> {
     const comment = await this.findById(id);
     return await this.repository.remove(comment);
+  }
+
+  //! not being used) recursive tree 구조일 경우 사용.
+  public buildContentCommentTree(comment: ContentComment): ContentComment {
+    if (comment.children) {
+      comment.children = comment.children.map((child) =>
+        this.buildContentCommentTree(child),
+      );
+    }
+    return comment;
   }
 
   //? ----------------------------------------------------------------------- //

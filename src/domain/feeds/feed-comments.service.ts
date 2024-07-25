@@ -7,13 +7,17 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CreateFeedCommentDto } from 'src/domain/feeds/dto/create-comment.dto';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { IsNull, Repository } from 'typeorm';
-import { UpdateFeedCommentDto } from 'src/domain/feeds/dto/update-comment.dto';
+import { CreateFeedCommentDto } from 'src/domain/feeds/dto/create-feed_comment.dto';
+import { UpdateFeedCommentDto } from 'src/domain/feeds/dto/update-feed_comment.dto';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { randomImageName } from 'src/helpers/random-filename';
+import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
+import { SignedUrl } from 'src/common/types';
+import { S3Service } from 'src/services/aws/s3.service';
 
 @Injectable()
 export class FeedCommentsService {
@@ -25,6 +29,7 @@ export class FeedCommentsService {
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
     // @Inject(SlackService) private readonly slack: SlackService,
+    private readonly s3Service: S3Service,
     private eventEmitter: EventEmitter2,
   ) {}
 
@@ -46,14 +51,13 @@ export class FeedCommentsService {
 
       if (record.feed.user.id != dto.userId) {
         const event = new UserNotificationEvent();
-        event.name = 'feedFeedComment';
+        event.name = 'feedComment';
         event.userId = record.feed.user.id;
         event.token = record.feed.user.pushToken;
         event.options = record.feed.user.profile?.options ?? {};
         event.body = `내 피드에 누군가 댓글을 남겼습니다.`;
         event.data = {
           page: `feeds/${dto.feedId}`,
-          args: '',
         };
         this.eventEmitter.emit('user.notified', event);
       }
@@ -112,6 +116,7 @@ export class FeedCommentsService {
     return await paginate<FeedComment>(query, queryBuilder, config);
   }
 
+  // 답글 리스트
   async findAllRepliesById(
     query: PaginateQuery,
     feedId: number,
@@ -155,8 +160,12 @@ export class FeedCommentsService {
   //? UPDATE
   //? ----------------------------------------------------------------------- //
 
-  async update(dto: UpdateFeedCommentDto, commentId: number): Promise<FeedComment> {
+  async update(
+    dto: UpdateFeedCommentDto,
+    commentId: number,
+  ): Promise<FeedComment> {
     const comment = await this.repository.preload({ id: commentId, ...dto });
+    // user validation here might be a good option to be added
     if (!comment) {
       throw new NotFoundException(`entity not found`);
     }
@@ -182,7 +191,7 @@ export class FeedCommentsService {
     }
   }
 
-  //! not being used)
+  //! not being used.
   async remove(id: number): Promise<FeedComment> {
     const comment = await this.findById(id);
     return await this.repository.remove(comment);
@@ -196,5 +205,21 @@ export class FeedCommentsService {
       );
     }
     return comment;
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? UPLOAD
+  //? ----------------------------------------------------------------------- //
+
+  // S3 직접 업로드를 위한 signedUrl 리턴
+  async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
+    const fileUri = randomImageName(dto.name ?? 'comment', dto.mimeType);
+    const path = `${process.env.NODE_ENV}/comments/${userId}/${fileUri}`;
+    const url = await this.s3Service.generateSignedUrl(path);
+
+    return {
+      upload: url,
+      image: `https://cdn.mesoapp.kr/${path}`,
+    };
   }
 }
