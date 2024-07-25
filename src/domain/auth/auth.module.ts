@@ -8,13 +8,11 @@ import { JwtAuthStrategy } from 'src/domain/auth/strategies/jwt-auth.strategy';
 import { JwtRefreshStrategy } from 'src/domain/auth/strategies/jwt-refresh.strategy';
 import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
 import { SecretsModule } from 'src/domain/secrets/secrets.module';
-import { ProvidersModule } from 'src/domain/users/providers.module';
 import { UsersModule } from 'src/domain/users/users.module';
 import { SesModule } from 'src/services/aws/ses.module';
 @Module({
   imports: [
     UsersModule,
-    ProvidersModule,
     PassportModule,
     SecretsModule,
     LedgersModule,

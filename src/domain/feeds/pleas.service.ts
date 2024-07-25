@@ -23,7 +23,6 @@ import { FriendStatus, LedgerType } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Feed } from 'src/domain/feeds/entities/feed.entity';
 
 @Injectable()
 export class PleasService {
@@ -95,7 +94,8 @@ export class PleasService {
           feedId: dto.feedId,
         },
       });
-      if (oldPlea) { // connection already exists
+      if (oldPlea) {
+        // connection already exists
         throw new BadRequestException(`precondition exists`);
       }
 
@@ -145,7 +145,7 @@ export class PleasService {
   //? READ
   //? ----------------------------------------------------------------------- //
 
-  // OTP 비밀번호 리스트
+  // Plea 리스트
   async findAll(query: PaginateQuery): Promise<Paginated<Plea>> {
     const config: PaginateConfig<Plea> = {
       sortableColumns: ['id'],
@@ -159,6 +159,7 @@ export class PleasService {
     return await paginate(query, this.repository, config);
   }
 
+  // Plea 상세보기
   async findById(id: number, relations: string[] = []): Promise<Plea> {
     try {
       return relations.length > 0

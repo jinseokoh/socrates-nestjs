@@ -21,7 +21,7 @@ import { PleasService } from 'src/domain/feeds/pleas.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
-@Controller('users')
+@Controller('pleas')
 export class PleasController {
   constructor(private readonly pleasService: PleasService) {}
 
@@ -29,7 +29,7 @@ export class PleasController {
   //? CREATE
   //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: 'attach To Plea pivot' })
+  @ApiOperation({ description: 'Plea 생성' })
   @Post()
   async create(@Body() dto: CreatePleaDto): Promise<Plea> {
     return await this.pleasService.create(dto);
@@ -45,12 +45,6 @@ export class PleasController {
   async findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Plea>> {
     return await this.pleasService.findAll(query);
   }
-
-  // @ApiOperation({ description: 'Pleas' })
-  // @Get()
-  // async getByUserId(userId: number): Promise<<Plea[]>> {
-  //   return await this.pleasService.getByUserId(userId);
-  // }
 
   @ApiOperation({ description: 'Plea 상세보기' })
   @Get(':id')

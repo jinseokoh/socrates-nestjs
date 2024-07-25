@@ -11,9 +11,7 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { DataSource } from 'typeorm';
-import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm/repository/Repository';
 import { Flag } from 'src/domain/users/entities/flag.entity';
@@ -30,7 +28,6 @@ export class FlagUserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @Inject(ConfigService) private configService: ConfigService, // global
-    @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');

@@ -18,9 +18,9 @@ import { UserPleasService } from 'src/domain/users/user-pleas.service';
 export class UserPleasController {
   constructor(private readonly userPleasService: UserPleasService) {}
 
-  //--------------------------------------------------------------------------//
+  // ------------------------------------------------------------------------ //
   // Read
-  //--------------------------------------------------------------------------//
+  // ------------------------------------------------------------------------ //
 
   @ApiOperation({
     description: '내가 모든 사용자에게 받은 요청 리스트 grouped by user',
@@ -43,32 +43,32 @@ export class UserPleasController {
   }
 
   @ApiOperation({ description: '내가 이 사용자에게 받은 요청 리스트' })
-  @Get(':userId/pleas-from/:otherId')
+  @Get(':userId/pleas-from/:recipientId')
   async getMyReceivedPleasFromThisUser(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('otherId', ParseIntPipe) otherId: number,
+    @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<Plea[]> {
     return await this.userPleasService.getMyReceivedPleasFromThisUser(
       userId,
-      otherId,
+      recipientId,
     );
   }
 
   @ApiOperation({ description: '내가 이 사용자에게 보낸 요청 리스트' })
-  @Get(':userId/pleas-to/:otherId')
+  @Get(':userId/pleas-to/:recipientId')
   async getMySentPleasToThisUser(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('userId', ParseIntPipe) otherId: number,
+    @Param('userId', ParseIntPipe) recipientId: number,
   ): Promise<Plea[]> {
     return await this.userPleasService.getMySentPleasToThisUser(
       userId,
-      otherId,
+      recipientId,
     );
   }
 
-  //--------------------------------------------------------------------------//
+  // ------------------------------------------------------------------------ //
   // Delete
-  //--------------------------------------------------------------------------//
+  // ------------------------------------------------------------------------ //
 
   @ApiOperation({ description: '요청들 삭제' })
   @Delete(':userId/pleas/:recipientId')

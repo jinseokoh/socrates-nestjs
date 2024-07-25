@@ -77,7 +77,7 @@ export class UserFriendshipController {
     };
   }
 
-  //--------------------------------------------------------------------------//
+  // ------------------------------------------------------------------------ //
 
   @ApiOperation({ description: '받은 친구신청 리스트 (paginated)' })
   @PaginateQueryOptions()
@@ -111,7 +111,7 @@ export class UserFriendshipController {
     return this.userFriendsService.getMyFriendships(userId, query);
   }
 
-  //--------------------------------------------------------------------------//
+  // ------------------------------------------------------------------------ //
 
   @ApiOperation({ description: '친구관계 ID 리스트 (all)' })
   @Get(':userId/friendship-ids')

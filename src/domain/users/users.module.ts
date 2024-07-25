@@ -16,6 +16,7 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
+import { Provider } from 'src/domain/users/entities/provider.entity';
 import { Secret } from 'src/domain/secrets/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { FeedLink } from 'src/domain/feeds/entities/feed_link.entity';
@@ -41,6 +42,8 @@ import { FeedsService } from 'src/domain/feeds/feeds.service';
 import { FlagFeedService } from 'src/domain/users/flag_feed.service';
 import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
 import { FlagUserService } from 'src/domain/users/flag_user.service';
+import { ProfilesService } from 'src/domain/users/profiles.service';
+import { ProvidersService } from 'src/domain/users/providers.service';
 import { UserCategoriesService } from 'src/domain/users/user-categories.service';
 import { UserFeedsService } from 'src/domain/users/user-feeds.service';
 import { UserFriendsService } from 'src/domain/users/user-friends.service';
@@ -85,6 +88,7 @@ import { Language } from 'src/domain/languages/entities/language.entity';
       Plea,
       Poll,
       Profile,
+      Provider,
       Secret,
       User,
     ]),
@@ -99,7 +103,7 @@ import { Language } from 'src/domain/languages/entities/language.entity';
     S3Module,
     FcmModule,
   ],
-  exports: [UsersService],
+  exports: [UsersService, ProvidersService], // being used in auth.module.ts
   providers: [
     BookmarkUserFeedService,
     BookmarkUserMeetupService,
@@ -108,6 +112,8 @@ import { Language } from 'src/domain/languages/entities/language.entity';
     FlagFeedService,
     FlagMeetupService,
     FlagUserService,
+    ProfilesService,
+    ProvidersService,
     UserCategoriesService,
     UserFeedsService,
     UserFriendsService,

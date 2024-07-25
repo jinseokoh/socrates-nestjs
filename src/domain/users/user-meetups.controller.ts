@@ -6,7 +6,6 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
@@ -15,12 +14,8 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { AnyData } from 'src/common/types';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Join } from 'src/domain/meetups/entities/join.entity';
 import { SkipThrottle } from '@nestjs/throttler';
-import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
-import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
-import { UsersService } from 'src/domain/users/users.service';
 import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
@@ -33,7 +28,6 @@ export class UserMeetupsController {
     private readonly userMeetupsService: UserMeetupsService,
     private readonly flagsService: FlagMeetupService,
     private readonly bookmarksService: BookmarkUserMeetupService,
-    private readonly usersService: UsersService,
   ) {}
 
   //? ----------------------------------------------------------------------- //

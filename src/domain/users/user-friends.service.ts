@@ -322,7 +322,7 @@ export class UserFriendsService {
     }
   }
 
-  //--------------------------------------------------------------------------//
+  // ------------------------------------------------------------------------ //
 
   // 받은 친구신청 리스트 (paginated)
   async getFriendshipsReceived(
@@ -403,7 +403,7 @@ export class UserFriendsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  //--------------------------------------------------------------------------//
+  // ------------------------------------------------------------------------ //
 
   // 친구관계 ID 리스트 (all)
   async getFriendshipIds(userId: number): Promise<AnyData> {
