@@ -27,9 +27,9 @@ export class UserUsersController {
     private readonly bookmarksService: BookmarkUserUserService,
   ) {}
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? 내가 북마크(BookmarkUserUser)한 Users
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'User 북마크 생성' })
   @Post(':userId/userbookmarks/:recipientId')
@@ -83,9 +83,9 @@ export class UserUsersController {
     return await this.bookmarksService.loadBookmarkedUserIds(userId);
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? 내가 신고(Flag)한 Users
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'User 신고 생성' })
   @Post(':userId/userflags/:recipientId')

@@ -27,9 +27,9 @@ import { User } from 'src/domain/users/entities/user.entity';
 export class UserFriendshipController {
   constructor(private readonly userFriendsService: UserFriendsService) {}
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? Friendship Pivot
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '친구신청 생성' })
   @PaginateQueryOptions()

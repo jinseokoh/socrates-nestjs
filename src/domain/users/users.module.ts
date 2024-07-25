@@ -51,7 +51,7 @@ import { UserJoinsService } from 'src/domain/users/user-joins.service';
 import { UserLanguagesService } from 'src/domain/users/user-languages.service';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 import { UserPleasService } from 'src/domain/users/user-pleas.service';
-import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
+import { UserLedgersService } from 'src/domain/users/user-ledgers.service';
 import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { UsersService } from 'src/domain/users/users.service';
 
@@ -63,6 +63,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
 import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
+import { Interest } from 'src/domain/users/entities/interest.entity';
+import { Language } from 'src/domain/languages/entities/language.entity';
 
 @Module({
   imports: [
@@ -76,7 +78,9 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
       Flag,
       Friendship,
       Hate,
+      Interest,
       Join,
+      Language,
       LanguageSkill,
       Ledger,
       Meetup,
@@ -116,7 +120,7 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
     UserMeetupsService,
     UserNotificationListener,
     UserPleasService,
-    UsersLedgerService,
+    UserLedgersService,
     UsersPleaService,
     UsersService,
     LanguageSkillSubscriber,

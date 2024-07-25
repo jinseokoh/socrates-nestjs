@@ -4,25 +4,23 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Post,
-  Put,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
-import { UsersLedgerService } from 'src/domain/users/users-ledger.service';
+import { UserLedgersService } from 'src/domain/users/user-ledgers.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UserLedgersController {
-  constructor(private readonly usersService: UsersLedgerService) {}
+  constructor(private readonly usersService: UserLedgersService) {}
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? Create
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   // @ApiOperation({ description: '나의 관심사 리스트에 추가' })
   // @Post(':userId/categories')
@@ -33,9 +31,9 @@ export class UserLedgersController {
   //   return new Ledger();
   // }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? READ
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '나의 ledger 리스트' })
   @Get(':userId/ledgers')
@@ -46,9 +44,9 @@ export class UserLedgersController {
     return await this.usersService.getUserLedgers(userId, query);
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? Delete
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   // @ApiOperation({ description: '나의 관심사 리스트에서 삭제' })
   // @PaginateQueryOptions()

@@ -7,20 +7,16 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { Cache } from 'cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Repository } from 'typeorm/repository/Repository';
-import { User } from 'src/domain/users/entities/user.entity';
 
 @Injectable()
-export class UsersLedgerService {
+export class UserLedgersService {
   private readonly env: any;
-  private readonly logger = new Logger(UsersLedgerService.name);
+  private readonly logger = new Logger(UserLedgersService.name);
 
   constructor(
-    @InjectRepository(User)
-    private readonly repository: Repository<User>,
     @InjectRepository(Ledger)
     private readonly ledgerRepository: Repository<Ledger>,
     @Inject(ConfigService) private configService: ConfigService, // global
@@ -28,9 +24,9 @@ export class UsersLedgerService {
     this.env = this.configService.get('nodeEnv');
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? Ledgers
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   async getUserLedgers(
     userId: number,

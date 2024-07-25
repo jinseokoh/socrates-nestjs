@@ -14,9 +14,9 @@ import { CategoriesService } from 'src/domain/categories/categories.service';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? READ
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'return all trees' })
   @Get('')
@@ -30,9 +30,9 @@ export class CategoriesController {
     return await this.categoriesService.findBySlug(slug);
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? SEED
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'seed categories' })
   @Post('seed')

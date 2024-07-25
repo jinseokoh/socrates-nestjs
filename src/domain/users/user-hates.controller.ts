@@ -22,9 +22,9 @@ import { User } from 'src/domain/users/entities/user.entity';
 export class UserHatesController {
   constructor(private readonly userHatesService: UserHatesService) {}
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? 내가 차단(Hate)한 Users
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '사용자 차단 추가' })
   @Post(':userId/hates/:recipientId')

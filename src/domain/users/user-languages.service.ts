@@ -1,9 +1,10 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
-import { Repository } from 'typeorm/repository/Repository';
+import { In, Repository } from 'typeorm';
 import { User } from 'src/domain/users/entities/user.entity';
+import { Language } from 'src/domain/languages/entities/language.entity';
 
 @Injectable()
 export class UserLanguagesService {
@@ -12,7 +13,9 @@ export class UserLanguagesService {
 
   constructor(
     @InjectRepository(User)
-    private readonly repository: Repository<User>,
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Language)
+    private readonly languageRepository: Repository<Language>,
     @InjectRepository(LanguageSkill)
     private readonly languageSkillRepository: Repository<LanguageSkill>,
     @Inject(ConfigService) private configService: ConfigService, // global
@@ -20,13 +23,12 @@ export class UserLanguagesService {
     this.env = this.configService.get('nodeEnv');
   }
 
-  //?-------------------------------------------------------------------------//
-  //? 언어 LanguageSkills
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
+  //? 언어 (languages) 리스트
+  //? ----------------------------------------------------------------------- //
 
-  // 사용자 언어 리스트
-  async getLanguageSkills(userId: number): Promise<Array<LanguageSkill>> {
-    const user = await this.repository.findOneOrFail({
+  async getLanguages(userId: number): Promise<Array<LanguageSkill>> {
+    const user = await this.userRepository.findOneOrFail({
       where: {
         id: userId,
       },
@@ -36,32 +38,123 @@ export class UserLanguagesService {
     return user.languageSkills;
   }
 
-  // 나의 언어 리스트 UPSERT
-  async upsertLanguageSkills(
+  //? ----------------------------------------------------------------------- //
+  //? 관심사 Sync w/ Ids (기존정보 사라짐)
+  //? ----------------------------------------------------------------------- //
+
+  async syncLanguagesWithIds(
     userId: number,
-    items: Array<LanguageSkill>,
-  ): Promise<Array<LanguageSkill>> {
-    await this.repository.manager.query(
-      'DELETE FROM `language_skill` WHERE userId = ?',
-      [userId],
+    ids: number[],
+  ): Promise<LanguageSkill[]> {
+    await this._wipeOutLanguageSkills(userId);
+    await Promise.all(
+      ids.map(async (v: number) => {
+        await this.languageRepository.manager.query(
+          'INSERT IGNORE INTO `interest` (userId, categoryId) VALUES (?, ?)',
+          [userId, v],
+        );
+      }),
     );
-
-    await this.languageSkillRepository.upsert(items, [`userId`, `languageId`]);
-
-    return await this.getLanguageSkills(userId);
+    return await this.getLanguages(userId);
   }
 
-  // 나의 언어 리스트에서 삭제
+  //? ----------------------------------------------------------------------- //
+  //? 관심사 Sync w/ Slugs (기존정보 사라짐)
+  //? ----------------------------------------------------------------------- //
+
+  async syncLanguagesWithSlugs(
+    userId: number,
+    slugs: string[],
+  ): Promise<LanguageSkill[]> {
+    await this._wipeOutLanguageSkills(userId);
+    const languages = await this.languageRepository.findBy({
+      slug: In(slugs),
+    });
+    const slugIds = languages.map((v) => v.id);
+    await Promise.all(
+      slugIds.map(async (v: number) => {
+        await this.languageRepository.manager.query(
+          'INSERT IGNORE INTO `language_skill` (userId, languageId) VALUES (?, ?)',
+          [userId, v],
+        );
+      }),
+    );
+
+    return await this.getLanguages(userId);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? 관심사 Sync w/ LanguageSkills (기존정보 사라짐)
+  //? ----------------------------------------------------------------------- //
+
+  async syncLanguagesWithEntities(
+    userId: number,
+    entities: LanguageSkill[],
+  ): Promise<LanguageSkill[]> {
+    await this._wipeOutLanguageSkills(userId);
+    await this.languageSkillRepository.upsert(entities, [
+      `userId`,
+      `languageId`,
+    ]);
+
+    return await this.getLanguages(userId);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? 언어 Upsert w/ Skill
+  //? ----------------------------------------------------------------------- //
+
+  async upsertLanguageWithSkill(
+    userId: number,
+    slug: string,
+    skill: number,
+  ): Promise<LanguageSkill[]> {
+    try {
+      const language = await this.languageRepository.findOneBy({
+        slug: slug,
+      });
+      if (language !== null) {
+        await this.languageSkillRepository.manager.query(
+          'INSERT IGNORE INTO `language_skill` \
+    (userId, languageId, skill) VALUES (?, ?, ?) \
+    ON DUPLICATE KEY UPDATE \
+    userId = VALUES(`userId`), \
+    languageId = VALUES(`languageId`), \
+    skill = VALUES(`skill`)',
+          [userId, language.id, skill],
+        );
+      }
+
+      return await this.getLanguages(userId);
+    } catch (e) {
+      throw new NotFoundException('language not found');
+    }
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? 언어 삭제
+  //? ----------------------------------------------------------------------- //
+
   async removeLanguages(
     userId: number,
     ids: number[],
   ): Promise<Array<LanguageSkill>> {
-    // const user = await this.findById(id, ['categories']);
-    await this.repository.manager.query(
+    const { affectedRows } = await this.languageRepository.manager.query(
       'DELETE FROM `language_skill` WHERE userId = ? AND languageId IN (?)',
       [userId, ids],
     );
 
-    return await this.getLanguageSkills(userId);
+    return await this.getLanguages(userId);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? privates
+  //? ----------------------------------------------------------------------- //
+
+  async _wipeOutLanguageSkills(userId: number): Promise<void> {
+    await this.languageRepository.manager.query(
+      'DELETE FROM `language_skill` WHERE userId = ?',
+      [userId],
+    );
   }
 }

@@ -28,9 +28,9 @@ export class InquiryCommentsService {
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
   ) {}
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? CREATE
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   async create(dto: CreateInquiryCommentDto): Promise<InquiryComment> {
     // creation
@@ -47,9 +47,9 @@ export class InquiryCommentsService {
     return opinionWithUser;
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? READ
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   async findAll(query: PaginateQuery): Promise<Paginated<InquiryComment>> {
     const queryBuilder = this.repository
@@ -128,9 +128,9 @@ export class InquiryCommentsService {
     return await this.repository.findOne(params);
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? UPDATE
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   async update(id: number, dto: UpdateInquiryCommentDto): Promise<InquiryComment> {
     const opinion = await this.repository.preload({ id, ...dto });
@@ -140,9 +140,9 @@ export class InquiryCommentsService {
     return await this.repository.save(opinion);
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? DELETE
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   async softRemove(id: number): Promise<InquiryComment> {
     const opinion = await this.findById(id);

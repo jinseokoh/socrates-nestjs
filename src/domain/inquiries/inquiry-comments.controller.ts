@@ -27,9 +27,9 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 export class InquiryInquiryCommentsController {
   constructor(private readonly opinionsService: InquiryCommentsService) {}
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? CREATE
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '댓글 등록' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
@@ -46,9 +46,9 @@ export class InquiryInquiryCommentsController {
     });
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? READ
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':inquiryId/opinions')
@@ -78,9 +78,9 @@ export class InquiryInquiryCommentsController {
     return await this.opinionsService.findAllById(inquiryId, opinionId, query);
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? UPDATE
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '댓글 수정' })
   @Patch(':inquiryId/opinions/:opinionId')
@@ -91,9 +91,9 @@ export class InquiryInquiryCommentsController {
     return await this.opinionsService.update(id, dto);
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? DELETE
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '관리자) 댓글 soft 삭제' })
   @Delete(':inquiryId/opinions/:opinionId')

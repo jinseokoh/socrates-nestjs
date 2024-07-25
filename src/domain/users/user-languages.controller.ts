@@ -7,14 +7,14 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
-  Put,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { LanguageSkillDto } from 'src/domain/users/dto/language-skill.dto';
+import { SyncLanguageDto } from 'src/domain/users/dto/sync-language.dto';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { UserLanguagesService } from 'src/domain/users/user-languages.service';
 
@@ -22,42 +22,81 @@ import { UserLanguagesService } from 'src/domain/users/user-languages.service';
 @SkipThrottle()
 @Controller('users')
 export class UserLanguagesController {
-  constructor(private readonly usersService: UserLanguagesService) {}
+  constructor(private readonly userLanguagesService: UserLanguagesService) {}
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? Create
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: '나의 관심사 리스트에 추가' })
+  @ApiOperation({ description: '나의 언어 리스트에 추가' })
   @Post(':userId/languages')
-  async addLanguageSkills(
+  async syncLanguagesWithIds(
     @Param('userId') userId: number,
-    @Body() dto: LanguageSkillDto,
+    @Body() dto: SyncLanguageDto,
   ): Promise<Array<LanguageSkill>> {
-    try {
-      return await this.usersService.upsertLanguageSkills(userId, dto.items);
-    } catch (e) {
-      throw new BadRequestException();
+    if (dto.ids) {
+      try {
+        return await this.userLanguagesService.syncLanguagesWithIds(
+          userId,
+          dto.ids,
+        );
+      } catch (e) {
+        throw new BadRequestException();
+      }
+    }
+    if (dto.slugs) {
+      try {
+        return await this.userLanguagesService.syncLanguagesWithSlugs(
+          userId,
+          dto.slugs,
+        );
+      } catch (e) {
+        throw new BadRequestException();
+      }
+    }
+    if (dto.entities) {
+      try {
+        return await this.userLanguagesService.syncLanguagesWithEntities(
+          userId,
+          dto.entities,
+        );
+      } catch (e) {
+        throw new BadRequestException();
+      }
     }
   }
 
-  //?-------------------------------------------------------------------------//
-  //? READ
-  //?-------------------------------------------------------------------------//
+  @ApiOperation({ description: '나의 언어 리스트에 추가' })
+  @Patch(':userId/languages/:slug')
+  async addLanguageSkills(
+    @Param('userId') userId: number,
+    @Param('slug') slug: string,
+    @Body('skill') skill: number | null,
+  ): Promise<Array<LanguageSkill>> {
+    return await this.userLanguagesService.upsertLanguageWithSkill(
+      userId,
+      slug,
+      skill,
+    );
+  }
 
-  @ApiOperation({ description: '나의 관심사 리스트' })
+  //? ----------------------------------------------------------------------- //
+  //? READ
+  //? ----------------------------------------------------------------------- //
+
+  @ApiOperation({ description: '나의 언어 리스트' })
   @Get(':userId/languages')
   async getLanguages(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Array<LanguageSkill>> {
-    return await this.usersService.getLanguageSkills(userId);
+    return await this.userLanguagesService.getLanguages(userId);
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? Delete
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: '나의 관심사 리스트에서 삭제' })
+  @ApiOperation({ description: '나의 언어 리스트에서 삭제' })
   @PaginateQueryOptions()
   @Delete(':userId/languages')
   async delete(
@@ -65,7 +104,7 @@ export class UserLanguagesController {
     @Body('ids') ids: number[],
   ): Promise<Array<LanguageSkill>> {
     try {
-      return await this.usersService.removeLanguages(userId, ids);
+      return await this.userLanguagesService.removeLanguages(userId, ids);
     } catch (e) {
       throw new BadRequestException();
     }

@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import 'moment-timezone';
 import { In } from 'typeorm';
@@ -20,24 +15,25 @@ export class UserCategoriesService {
 
   constructor(
     @InjectRepository(User)
-    private readonly repository: Repository<User>,
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Interest)
+    private readonly interestRepository: Repository<Interest>,
     @Inject(ConfigService)
     private configService: ConfigService, // global
   ) {
     this.env = this.configService.get('nodeEnv');
   }
 
-  //?-------------------------------------------------------------------------//
-  //? 관심사 Categories
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
+  //? 관심사 (categories) 리스트
+  //? ----------------------------------------------------------------------- //
 
-  // 사용자 관심사 리스트
-  async getCategories(id: number): Promise<Array<Interest>> {
-    const user = await this.repository.findOneOrFail({
+  async getCategories(userId: number): Promise<Interest[]> {
+    const user = await this.userRepository.findOneOrFail({
       where: {
-        id: id,
+        id: userId,
       },
       relations: ['categoriesInterested', 'categoriesInterested.category'],
     });
@@ -45,110 +41,102 @@ export class UserCategoriesService {
     return user.categoriesInterested;
   }
 
-  // 나의 관심사 리스트에 추가 (w/ ids)
-  async syncCategoriesWithIds(
-    id: number,
-    ids: number[],
-  ): Promise<Array<Interest>> {
-    // 1. delete only removed ones
-    const user = await this.repository.findOneOrFail({
-      where: {
-        id: id,
-      },
-      relations: ['categoriesInterested'],
-    });
-    const previousIds = user.categoriesInterested.map((v) => v.categoryId);
-    const removedIds = previousIds.filter((v) => !ids.includes(v));
-    if (removedIds.length > 0) {
-      await this.repository.manager.query(
-        'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
-        [id, removedIds],
-      );
-    }
+  //? ----------------------------------------------------------------------- //
+  //? 관심사 Sync w/ Ids (기존정보 사라짐)
+  //? ----------------------------------------------------------------------- //
 
-    // 2. upsert newly added ones
+  async syncCategoriesWithIds(
+    userId: number,
+    ids: number[],
+  ): Promise<Interest[]> {
+    await this._wipeOutInterests(userId);
     await Promise.all(
       ids.map(async (v: number) => {
-        await this.repository.manager.query(
+        await this.interestRepository.manager.query(
           'INSERT IGNORE INTO `interest` (userId, categoryId) VALUES (?, ?)',
-          [id, v],
+          [userId, v],
         );
       }),
     );
-    return await this.getCategories(id);
+    return await this.getCategories(userId);
   }
 
-  // 나의 관심사 리스트에 추가 (w/ slugs)
+  //? ----------------------------------------------------------------------- //
+  //? 관심사 Sync w/ Slugs (기존정보 사라짐)
+  //? ----------------------------------------------------------------------- //
+
   async syncCategoriesWithSlugs(
-    id: number,
+    userId: number,
     slugs: string[],
-  ): Promise<Array<Interest>> {
-    // preparation to extract categoryIds
+  ): Promise<Interest[]> {
+    await this._wipeOutInterests(userId);
     const categories = await this.categoryRepository.findBy({
       slug: In(slugs),
     });
-    const newIds = categories.map((v) => v.id);
-
-    // 1. delete only removed ones
-    const user = await this.repository.findOneOrFail({
-      where: {
-        id: id,
-      },
-      relations: ['categoriesInterested'],
-    });
-    const previousIds = user.categoriesInterested.map((v) => v.categoryId);
-    const removedIds = previousIds.filter((v) => !newIds.includes(v));
-    if (removedIds.length > 0) {
-      await this.repository.manager.query(
-        'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
-        [id, removedIds],
-      );
-    }
-    // 2. upsert newly added ones
+    const slugIds = categories.map((v) => v.id);
     await Promise.all(
-      categories.map(async (v: Category) => {
-        await this.repository.manager.query(
+      slugIds.map(async (v: number) => {
+        await this.interestRepository.manager.query(
           'INSERT IGNORE INTO `interest` (userId, categoryId) VALUES (?, ?)',
-          [id, v.id],
+          [userId, v],
         );
       }),
     );
-    return await this.getCategories(id);
+    return await this.getCategories(userId);
   }
 
-  // 나의 관심사 리스트 UPSERT
+  //? ----------------------------------------------------------------------- //
+  //? 관심사 Upsert w/ Skill
+  //? ----------------------------------------------------------------------- //
+
   async upsertCategoryWithSkill(
-    id: number,
+    userId: number,
     slug: string,
     skill: number,
-  ): Promise<Array<Interest>> {
+  ): Promise<Interest[]> {
     try {
       const category = await this.categoryRepository.findOneBy({
         slug: slug,
       });
       if (category !== null) {
-        await this.repository.manager.query(
+        await this.interestRepository.manager.query(
           'INSERT IGNORE INTO `interest` \
     (userId, categoryId, skill) VALUES (?, ?, ?) \
     ON DUPLICATE KEY UPDATE \
     userId = VALUES(`userId`), \
     categoryId = VALUES(`categoryId`), \
     skill = VALUES(`skill`)',
-          [id, category.id, skill],
+          [userId, category.id, skill],
         );
       }
-      return await this.getCategories(id);
+
+      return await this.getCategories(userId);
     } catch (e) {
-      throw new BadRequestException('category not found');
+      throw new NotFoundException('category not found');
     }
   }
 
-  // 나의 관심사 리스트에서 삭제
-  async removeCategories(id: number, ids: number[]): Promise<Array<Interest>> {
-    const { affectedRows } = await this.repository.manager.query(
+  //? ----------------------------------------------------------------------- //
+  //? 관심사 삭제
+  //? ----------------------------------------------------------------------- //
+
+  async removeCategories(userId: number, ids: number[]): Promise<Interest[]> {
+    const { affectedRows } = await this.userRepository.manager.query(
       'DELETE FROM `interest` WHERE userId = ? AND categoryId IN (?)',
-      [id, ids],
+      [userId, ids],
     );
-    return await this.getCategories(id);
+
+    return await this.getCategories(userId);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? privates
+  //? ----------------------------------------------------------------------- //
+
+  async _wipeOutInterests(userId: number): Promise<void> {
+    await this.interestRepository.manager.query(
+      'DELETE FROM `intetest` WHERE userId = ?',
+      [userId],
+    );
   }
 }

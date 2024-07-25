@@ -28,11 +28,9 @@ import { Category } from 'src/domain/categories/entities/category.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { ConfigService } from '@nestjs/config';
-import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
 import { FcmService } from 'src/services/fcm/fcm.service';
-import { Interest } from 'src/domain/users/entities/interest.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
@@ -76,18 +74,18 @@ export class UsersService {
     this.env = this.configService.get('nodeEnv');
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? CREATE
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   // User 생성
   async create(dto: CreateUserDto): Promise<User> {
     return await this.repository.save(this.repository.create(dto));
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? READ
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   // User 리스트 (paginated)
   async findAll(query: PaginateQuery): Promise<Paginated<User>> {
@@ -147,9 +145,9 @@ export class UsersService {
     return await this.repository.findOne(params);
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? UPDATE
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   // User 갱신
   async update(id: number, dto: UpdateUserDto): Promise<User> {
@@ -289,9 +287,9 @@ export class UsersService {
     }
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? DELETE
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   async softRemove(id: number): Promise<User> {
     const user = await this.findById(id);
@@ -512,9 +510,9 @@ reason = VALUES(`reason`)',
     );
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? UPLOAD
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   //! @deprecated
   //! compression 은 client side 에서 실행
@@ -543,9 +541,9 @@ reason = VALUES(`reason`)',
     };
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? cache bust
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   async cacheBust(): Promise<void> {
     try {
@@ -555,9 +553,9 @@ reason = VALUES(`reason`)',
     }
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? OTP
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   // 본인인증 OTP SMS 발송
   // 전화번호/이메일 확인 후 OTP 전송
@@ -689,9 +687,9 @@ ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), otp=VALUES(otp), updatedAt=(CONVERT
     }
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? Some Extra shit
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   // todo refactor) this responsibility belongs to Profile. (priority: low)
   async increasePayCount(id: number): Promise<void> {

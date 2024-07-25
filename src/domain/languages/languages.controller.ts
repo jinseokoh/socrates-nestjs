@@ -14,9 +14,9 @@ import { LanguagesService } from 'src/domain/languages/languages.service';
 export class LanguagesController {
   constructor(private readonly languagesService: LanguagesService) {}
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? READ
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'return all trees' })
   @Get('')
@@ -30,9 +30,9 @@ export class LanguagesController {
     return await this.languagesService.findBySlug(slug);
   }
 
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
   //? SEED
-  //?-------------------------------------------------------------------------//
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'seed languages' })
   @Post('seed')
