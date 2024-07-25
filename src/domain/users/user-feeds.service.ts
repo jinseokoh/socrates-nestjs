@@ -1,13 +1,11 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { CreatePleaDto } from 'src/domain/feeds/dto/create-plea.dto';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   FilterOperator,
   paginate,
@@ -27,8 +25,6 @@ export class UserFeedsService {
     @InjectRepository(Plea)
     private readonly pleaRepository: Repository<Plea>,
     @Inject(ConfigService) private configService: ConfigService, // global
-    private eventEmitter: EventEmitter2,
-    private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
   }

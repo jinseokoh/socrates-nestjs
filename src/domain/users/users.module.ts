@@ -17,23 +17,9 @@ import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
-import { Secret } from 'src/domain/secrets/entities/secret.entity';
+import { Secret } from 'src/domain/users/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { FeedLink } from 'src/domain/feeds/entities/feed_link.entity';
-
-import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
-import { UserFeedsController } from 'src/domain/users/user-feeds.controller';
-import { UserFriendshipController } from 'src/domain/users/user-friends.controller';
-import { UserHatesController } from 'src/domain/users/user-hates.controller';
-import { UserImpressionsController } from 'src/domain/users/user-impressions.controller';
-import { UserJoinsController } from 'src/domain/users/user-joins.controller';
-import { UserLanguagesController } from 'src/domain/users/user-languages.controller';
-import { UserLedgersController } from 'src/domain/users/user-ledgers.controller';
-import { UserMeetupsController } from 'src/domain/users/user-meetups.controller';
-import { UserPleasController } from 'src/domain/users/user-pleas.controller';
-import { UsersController } from 'src/domain/users/users.controller';
-import { UserSmsController } from 'src/domain/users/user-sms.controller';
-import { UserUsersController } from 'src/domain/users/user-users.controller';
 
 import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
@@ -53,8 +39,23 @@ import { UserJoinsService } from 'src/domain/users/user-joins.service';
 import { UserLanguagesService } from 'src/domain/users/user-languages.service';
 import { UserLedgersService } from 'src/domain/users/user-ledgers.service';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
+import { UserOtpsService } from 'src/domain/users/user-otps.service';
 import { UserPleasService } from 'src/domain/users/user-pleas.service';
 import { UsersService } from 'src/domain/users/users.service';
+
+import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
+import { UserFeedsController } from 'src/domain/users/user-feeds.controller';
+import { UserFriendshipController } from 'src/domain/users/user-friends.controller';
+import { UserHatesController } from 'src/domain/users/user-hates.controller';
+import { UserImpressionsController } from 'src/domain/users/user-impressions.controller';
+import { UserJoinsController } from 'src/domain/users/user-joins.controller';
+import { UserLanguagesController } from 'src/domain/users/user-languages.controller';
+import { UserLedgersController } from 'src/domain/users/user-ledgers.controller';
+import { UserMeetupsController } from 'src/domain/users/user-meetups.controller';
+import { UserOtpsController } from 'src/domain/users/user-otps.controller';
+import { UserPleasController } from 'src/domain/users/user-pleas.controller';
+import { UserUsersController } from 'src/domain/users/user-users.controller';
+import { UsersController } from 'src/domain/users/users.controller';
 
 import { S3Module } from 'src/services/aws/s3.module';
 import { AlarmsModule } from 'src/domain/alarms/alarms.module';
@@ -123,6 +124,7 @@ import { Language } from 'src/domain/languages/entities/language.entity';
     UserLanguagesService,
     UserMeetupsService,
     UserNotificationListener,
+    UserOtpsService,
     UserPleasService,
     UserLedgersService,
     UsersService,
@@ -130,7 +132,6 @@ import { Language } from 'src/domain/languages/entities/language.entity';
     UserSubscriber,
   ],
   controllers: [
-    // UserFcmController, 미사용 comment out
     UserCategoriesController,
     UserFeedsController,
     UserFriendshipController,
@@ -140,10 +141,10 @@ import { Language } from 'src/domain/languages/entities/language.entity';
     UserLanguagesController,
     UserLedgersController,
     UserMeetupsController,
+    UserOtpsController,
     UserPleasController,
     UsersController,
     UsersController,
-    UserSmsController,
     UserUsersController,
   ],
 })

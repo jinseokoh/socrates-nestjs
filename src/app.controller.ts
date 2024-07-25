@@ -19,6 +19,13 @@ export class AppController {
     return { version };
   }
 
+  @Public()
+  @Get('/bust')
+  async bust(): Promise<string> {
+    await this.appService.cacheBust();
+    return `busted cache store`;
+  }
+
   // @EventPattern('RealTime')
   // async handleRealTimeEvent(data: Record<string, unknown>) {
   //   console.log(data, '<~ redis pubsub subscriber');

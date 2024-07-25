@@ -9,9 +9,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import * as random from 'randomstring';
 import * as moment from 'moment';
 import 'moment-timezone';
-import * as random from 'randomstring';
 import {
   FilterOperator,
   PaginateConfig,
@@ -19,28 +19,20 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { LedgerType } from 'src/common/enums';
 import { SignedUrl } from 'src/common/types';
 import { DataSource, FindOneOptions, In } from 'typeorm';
-import { Cache } from 'cache-manager';
-import { Category } from 'src/domain/categories/entities/category.entity';
 import { ChangePasswordDto } from 'src/domain/users/dto/change-password.dto';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from 'src/domain/users/dto/create-user.dto';
 import { DeleteUserDto } from 'src/domain/users/dto/delete-user.dto';
-import { FcmService } from 'src/services/fcm/fcm.service';
-import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { randomImageName, randomName } from 'src/helpers/random-filename';
 import { Repository } from 'typeorm/repository/Repository';
 import { S3Service } from 'src/services/aws/s3.service';
-import { Secret } from 'src/domain/secrets/entities/secret.entity';
-import { SesService } from 'src/services/aws/ses.service';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
-import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { UpdateProfileDto } from 'src/domain/users/dto/update-profile.dto';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -57,18 +49,8 @@ export class UsersService {
     private readonly repository: Repository<User>,
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
-    @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>,
-    @InjectRepository(LanguageSkill)
-    private readonly languageSkillRepository: Repository<LanguageSkill>,
-    @InjectRepository(Secret)
-    private readonly secretRepository: Repository<Secret>,
     @Inject(ConfigService) private configService: ConfigService, // global
-    @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
-    @Inject(SmsClient) private readonly smsClient: SmsClient, // naver
-    private readonly sesService: SesService,
     private readonly s3Service: S3Service,
-    private readonly fcmService: FcmService,
     private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
@@ -125,15 +107,15 @@ export class UsersService {
     }
   }
 
-  // User 상세보기 (w/ id)
-  async findByUid(uid: string): Promise<User> {
+  // User 상세보기 (w/ providerId)
+  async findByProviderId(providerId: string): Promise<User> {
     try {
       return await this.repository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.profile', 'profile')
         .leftJoinAndSelect('user.providers', 'providers')
         .where('providers.providerName = "firebase"')
-        .andWhere('providers.providerId = :uid', { uid })
+        .andWhere('providers.providerId = :providerId', { providerId })
         .getOneOrFail();
     } catch (e) {
       throw new NotFoundException('user not found');
@@ -238,53 +220,6 @@ export class UsersService {
       ...dto,
     });
     return await this.profileRepository.save(profile);
-  }
-
-  //? 코인 구매
-  //! balance will be adjusted w/ ledger model event subscriber.
-  //! using transaction using query runner
-  async purchase(id: number, dto: PurchaseCoinDto): Promise<User> {
-    // create a new query runner
-    const queryRunner = this.dataSource.createQueryRunner();
-    // let newBalance = 0;
-    try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
-
-      const user = await queryRunner.manager.findOne(User, {
-        where: { id: id },
-        relations: [`profile`],
-      });
-      if (!user) {
-        throw new NotFoundException(`user not found`);
-      }
-      if (user?.isBanned) {
-        throw new UnprocessableEntityException(`a banned user`);
-      }
-
-      const newBalance = user.profile?.balance + dto.coins;
-      user.profile.balance = newBalance;
-
-      const ledger = new Ledger({
-        debit: dto.coins,
-        ledgerType: LedgerType.DEBIT_PURCHASE,
-        balance: newBalance,
-        note: `코인 구매 (앱)`,
-        userId: id,
-      });
-      await queryRunner.manager.save(ledger);
-
-      await queryRunner.manager.save(user);
-      // commit transaction now:
-      await queryRunner.commitTransaction();
-
-      return user;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
   }
 
   //? ----------------------------------------------------------------------- //
@@ -473,7 +408,10 @@ export class UsersService {
     );
   }
 
-  async _voidPersonalInformationAndUpsertWithdrawals(id: number, message: string): Promise<any> {
+  async _voidPersonalInformationAndUpsertWithdrawals(
+    id: number,
+    message: string,
+  ): Promise<any> {
     const user = await this.findById(id, ['providers']);
     const realname =
       user.realname && user.realname.length > 1
@@ -542,154 +480,55 @@ reason = VALUES(`reason`)',
   }
 
   //? ----------------------------------------------------------------------- //
-  //? cache bust
+  //? Payments
   //? ----------------------------------------------------------------------- //
 
-  async cacheBust(): Promise<void> {
+  //? 코인 구매
+  //! balance will be adjusted w/ ledger model event subscriber.
+  //! using transaction using query runner
+  async purchaseCoins(id: number, dto: PurchaseCoinDto): Promise<User> {
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    // let newBalance = 0;
     try {
-      await this.cacheManager.reset(); // cache busting
-    } catch (e) {
-      console.error(e);
-    }
-  }
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
 
-  //? ----------------------------------------------------------------------- //
-  //? OTP
-  //? ----------------------------------------------------------------------- //
-
-  // 본인인증 OTP SMS 발송
-  // 전화번호/이메일 확인 후 OTP 전송
-  async sendOtpForNonExistingUser(val: string, cache = false): Promise<void> {
-    const value = val.replace(/-/gi, '');
-    const user = val.includes('@')
-      ? await this.findByUniqueKey({ where: { email: val } })
-      : await this.findByUniqueKey({ where: { phone: value } });
-    if (user) {
-      throw new UnprocessableEntityException('already taken');
-    }
-
-    let otp = '';
-
-    // for app store submission test
-    if (value.startsWith('0101234') || value.startsWith('010-1234')) {
-      otp = cache
-        ? await this._upsertOtpUsingCache(value, '000000')
-        : await this._upsertOtpUsingDb(value, '000000');
-    } else {
-      otp = cache
-        ? await this._upsertOtpUsingCache(value)
-        : await this._upsertOtpUsingDb(value);
-    }
-
-    if (value.startsWith('0101234') || value.startsWith('010-1234')) {
-      // do not send any email or SMS
-    } else {
-      if (val.includes('@')) {
-        await this.sesService.sendOtpEmail(val, otp);
-      } else {
-        await this._sendSmsTo(value, otp);
-      }
-    }
-  }
-
-  // @deprecated. 기존회원 본인인증정보 수정) 전화번호/이메일 확인 후 OTP 전송
-  async sendOtpForExistingUser(val: string, cache = false): Promise<void> {
-    const phone = val.includes('@') ? null : val.replace(/-/gi, '');
-    const email = val.includes('@') ? val : null;
-    const where = val.includes('@') ? { email } : { phone };
-    const user = await this.findByUniqueKey({ where });
-    if (!user) {
-      throw new NotFoundException('user not found');
-    }
-    const otp = cache
-      ? await this._upsertOtpUsingCache(phone)
-      : await this._upsertOtpUsingDb(phone);
-
-    if (val.includes('@')) {
-      await this.sesService.sendOtpEmail(val, otp);
-    } else {
-      await this._sendSmsTo(phone, otp);
-    }
-  }
-
-  // OTP 검사
-  async checkOtp(
-    id: number, // userId
-    val: string,
-    otp: string,
-    cache: boolean,
-    dto: UpdateUserDto,
-  ): Promise<User> {
-    const key = val.replace(/-/gi, '');
-    if (cache) {
-      const cacheKey = this._getCacheKey(key);
-      const cachedOtp = await this.cacheManager.get(cacheKey);
-      if (!cachedOtp) {
-        throw new UnprocessableEntityException('otp expired');
-      } else if (cachedOtp !== otp) {
-        throw new UnprocessableEntityException('otp mismatched');
-      }
-    } else {
-      const secret = await this.secretRepository.findOne({
-        where: { key: key },
+      const user = await queryRunner.manager.findOne(User, {
+        where: { id: id },
+        relations: [`profile`],
       });
-
-      if (!secret) {
-        throw new UnprocessableEntityException('otp unavailable');
+      if (!user) {
+        throw new NotFoundException(`user not found`);
       }
-      const now = moment();
-      const expiredAt = moment(secret.updatedAt).add(3, 'minutes');
-
-      if (now.isAfter(expiredAt)) {
-        throw new UnprocessableEntityException(`otp expired`);
+      if (user?.isBanned) {
+        throw new UnprocessableEntityException(`a banned user`);
       }
-      if (secret.otp !== otp) {
-        throw new UnprocessableEntityException('otp mismatched');
-      }
-    }
 
-    const user = await this.repository.preload({ id, ...dto });
-    return await this.repository.save(user);
-  }
+      const newBalance = user.profile?.balance + dto.coins;
+      user.profile.balance = newBalance;
 
-  _getCacheKey(key: string): string {
-    return `${this.env}:user:${key}:key`;
-  }
-
-  async _upsertOtpUsingDb(key: string, otp = null): Promise<string> {
-    const pass = otp ? otp : random.generate({ length: 6, charset: 'numeric' });
-    await this.repository.manager.query(
-      "INSERT IGNORE INTO secret (`key`, otp) \
-VALUES (?, ?) \
-ON DUPLICATE KEY UPDATE `key`=VALUES(`key`), otp=VALUES(otp), updatedAt=(CONVERT_TZ(NOW(), 'UTC', 'Asia/Seoul'))",
-      [key, pass],
-    );
-    return pass;
-  }
-
-  async _upsertOtpUsingCache(key: string, otp = null): Promise<string> {
-    const pass = otp ? otp : random.generate({ length: 6, charset: 'numeric' });
-    const cacheKey = this._getCacheKey(key);
-    await this.cacheManager.set(cacheKey, pass, 60 * 10);
-    return pass;
-  }
-
-  async _sendSmsTo(phone: string, otp: string): Promise<any> {
-    const body = `[미소] 인증코드 ${otp}`;
-    try {
-      await this.smsClient.send({
-        to: phone,
-        content: body,
+      const ledger = new Ledger({
+        debit: dto.coins,
+        ledgerType: LedgerType.DEBIT_PURCHASE,
+        balance: newBalance,
+        note: `코인 구매 (앱)`,
+        userId: id,
       });
-    } catch (e) {
-      console.log(e);
-      throw new BadRequestException('nCloud smsClient error');
+      await queryRunner.manager.save(ledger);
+
+      await queryRunner.manager.save(user);
+      // commit transaction now:
+      await queryRunner.commitTransaction();
+
+      return user;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
   }
-
-  //? ----------------------------------------------------------------------- //
-  //? Some Extra shit
-  //? ----------------------------------------------------------------------- //
 
   // todo refactor) this responsibility belongs to Profile. (priority: low)
   async increasePayCount(id: number): Promise<void> {

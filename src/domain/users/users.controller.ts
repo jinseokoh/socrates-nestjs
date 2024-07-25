@@ -2,7 +2,6 @@ import { SignedUrlDto } from './dto/signed-url.dto';
 import {
   BadRequestException,
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -108,10 +107,8 @@ export class UsersController {
       'languageSkills',
       'languageSkills.language',
       'reportedByUsers',
-      // 'sentFriendships',
-      // 'receivedFriendships',
-      'connections',
-      'connections.poll',
+      'feeds',
+      'feeds.poll',
     ];
     return extra && extra.length > 0
       ? await this.usersService.findById(id, [...defaultRelations, ...extra])
@@ -122,7 +119,7 @@ export class UsersController {
   @Public()
   @Get(':uid/uid')
   async findUserByProviderId(@Param('uid') uid: string): Promise<User> {
-    return await this.usersService.findByUid(uid);
+    return await this.usersService.findByProviderId(uid);
   }
 
   @ApiOperation({ description: 'initial username' })
@@ -137,7 +134,7 @@ export class UsersController {
   //? UPDATE
   //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: 'User 갱신' })
+  @ApiOperation({ description: 'User 정보 갱신' })
   @Patch(':userId')
   async update(
     @Param('userId') userId: number,
@@ -146,7 +143,6 @@ export class UsersController {
     return await this.usersService.update(userId, dto);
   }
 
-  // A dedicated endpoint to update username.
   @ApiOperation({ description: 'User 닉네임 갱신' })
   @Patch(':userId/username')
   async changeUsername(
@@ -161,7 +157,6 @@ export class UsersController {
     return await this.usersService.changeUsername(userId, dto);
   }
 
-  // A dedicated endpoint to update password.
   @ApiOperation({ description: 'User 비밀번호 갱신' })
   @Patch(':userId/password')
   async changePassword(
@@ -204,7 +199,6 @@ export class UsersController {
   //? ----------------------------------------------------------------------- //
 
   //!@ depreacated
-  //! 미사용
   @ApiOperation({ description: 'User 프로필사진 갱신' })
   @UseInterceptors(FileInterceptor('file', multerOptions))
   @Post(':userId/avatar')
@@ -235,14 +229,6 @@ export class UsersController {
     @Param('userId') userId: number,
     @Body() dto: PurchaseCoinDto,
   ): Promise<User> {
-    return await this.usersService.purchase(userId, dto);
-  }
-
-  @ApiOperation({ description: 'Cache Bust' })
-  @Public()
-  @Post('bust')
-  async cacheBust(): Promise<any> {
-    await this.usersService.cacheBust();
-    return `busted cache store`;
+    return await this.usersService.purchaseCoins(userId, dto);
   }
 }

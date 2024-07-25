@@ -31,8 +31,8 @@ export class AuthService {
     private readonly providersService: ProvidersService,
     private readonly jwtService: JwtService,
 
-    @Inject(SlackService) private readonly slack: SlackService,
     // @Inject(AWS_SES_CONNECTION) private readonly ses: SesService,
+    @Inject(SlackService) private readonly slack: SlackService,
     @Inject(ConfigService) private configService: ConfigService,
   ) {
     this.env = this.configService.get('nodeEnv');

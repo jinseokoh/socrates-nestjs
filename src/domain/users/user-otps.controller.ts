@@ -15,37 +15,26 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { SmsClient } from '@nestjs-packages/ncp-sens';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { UsersService } from 'src/domain/users/users.service';
+import { Throttle } from '@nestjs/throttler';
 import { AnyData } from 'src/common/types';
 import { ThrottlerBehindProxyGuard } from 'src/common/guards/throttler-behind-proxy.guard';
-import { Throttle } from '@nestjs/throttler';
 import { UpdateUserDto } from 'src/domain/users/dto/update-user.dto';
+import { SendSmsDto } from 'src/domain/users/dto/send-sms.dto';
 import { User } from 'src/domain/users/entities/user.entity';
+import { UserOtpsService } from 'src/domain/users/user-otps.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
-export class UserSmsController {
+export class UserOtpsController {
   constructor(
-    private readonly usersService: UsersService,
+    private readonly userOtpsService: UserOtpsService,
     @Inject(SmsClient) private readonly smsClient: SmsClient,
   ) {}
 
   //? ----------------------------------------------------------------------- //
-  //? SMS 발송
+  //? 본인인증 OTP 발송 (1분에 최대 2번)
   //? ----------------------------------------------------------------------- //
 
-  //! @deprecated 미사용
-  // @ApiOperation({ description: 'user 에게 SMS 문자 발송' })
-  // @Post('test-sms')
-  // async sendSms(@Body() dto: SmsMessageDto): Promise<any> {
-  //   await this.smsClient.send({
-  //     to: dto.phone,
-  //     content: dto.body,
-  //   });
-  // }
-
-  // 본인인증 OTP SMS 발송
-  // rate limiting 적용
   @ApiOperation({ description: 'non-existing key(phone/email) OTP 발급' })
   @UseGuards(ThrottlerBehindProxyGuard)
   @Throttle({ default: { limit: 2, ttl: 60000 } })
@@ -53,9 +42,9 @@ export class UserSmsController {
   @Post(':key/otp')
   async validateEmailAndSendOtp(
     @Param('key') key: string,
-    @Query('cache') cache: string | undefined,
+    @Query('cache') cache: string | null | undefined,
   ): Promise<any> {
-    await this.usersService.sendOtpForNonExistingUser(key, !!cache);
+    await this.userOtpsService.sendOtpForNonExistingUser(key, !!cache);
     return { data: 'ok' };
   }
 
@@ -71,9 +60,9 @@ export class UserSmsController {
   @Post(':key/change')
   async sendOtpForExistingUser(
     @Param('key') key: string,
-    @Query('cache') cache: string | undefined,
+    @Query('cache') cache: string | null | undefined,
   ): Promise<AnyData> {
-    await this.usersService.sendOtpForExistingUser(key, !!cache);
+    await this.userOtpsService.sendOtpForExistingUser(key, !!cache);
     return { data: 'ok' };
   }
 
@@ -84,9 +73,19 @@ export class UserSmsController {
     @CurrentUserId() userId: number,
     @Param('key') key: string,
     @Param('otp') otp: string,
-    @Query('cache') cache: string | null,
+    @Query('cache') cache: string | null | undefined,
     @Body() dto: UpdateUserDto,
   ): Promise<User> {
-    return await this.usersService.checkOtp(userId, key, otp, !!cache, dto);
+    return await this.userOtpsService.checkOtp(userId, key, otp, !!cache, dto);
+  }
+
+  //! @deprecated 미사용
+  @ApiOperation({ description: 'user 에게 SMS 문자 발송' })
+  @Post('send-sms')
+  async sendSms(@Body() dto: SendSmsDto): Promise<void> {
+    await this.smsClient.send({
+      to: dto.phone,
+      content: dto.body,
+    });
   }
 }

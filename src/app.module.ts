@@ -28,7 +28,6 @@ import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
 import { LanguagesModule } from 'src/domain/languages/languages.module';
 import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
 import { MeetupsModule } from 'src/domain/meetups/meetups.module';
-import { SecretsModule } from 'src/domain/secrets/secrets.module';
 import { UsersModule } from 'src/domain/users/users.module';
 
 import { SlackModule } from 'nestjs-slack';
@@ -152,7 +151,6 @@ import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.
     LanguagesModule,
     LedgersModule,
     MeetupsModule,
-    SecretsModule,
     UsersModule,
   ],
   controllers: [AppController],

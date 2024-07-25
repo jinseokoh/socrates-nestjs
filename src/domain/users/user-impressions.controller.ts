@@ -11,8 +11,6 @@ import {
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
-import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
-import { AnyData } from 'src/common/types';
 import { CreateImpressionDto } from 'src/domain/users/dto/create-impression.dto';
 import { UserImpressionsService } from 'src/domain/users/user-impressions.service';
 

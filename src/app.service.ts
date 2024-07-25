@@ -1,13 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { ICounts } from 'src/common/interfaces';
 import { DataSource } from 'typeorm';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AppService {
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache, // global
     @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}
@@ -32,5 +35,17 @@ export class AppService {
       polls: +result[0].polls,
       feeds: +result[0].feeds,
     };
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? cache bust
+  //? ----------------------------------------------------------------------- //
+
+  async cacheBust(): Promise<void> {
+    try {
+      await this.cacheManager.reset(); // cache busting
+    } catch (e) {
+      console.error(e);
+    }
   }
 }

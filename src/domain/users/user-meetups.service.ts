@@ -8,10 +8,8 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { ConfigService } from '@nestjs/config';
-import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Repository } from 'typeorm/repository/Repository';
-import { User } from 'src/domain/users/entities/user.entity';
 
 @Injectable()
 export class UserMeetupsService {
@@ -19,12 +17,8 @@ export class UserMeetupsService {
   private readonly logger = new Logger(UserMeetupsService.name);
 
   constructor(
-    @InjectRepository(User)
-    private readonly repository: Repository<User>,
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
-    @InjectRepository(Join)
-    private readonly joinRepository: Repository<Join>,
     @Inject(ConfigService) private configService: ConfigService, // global
   ) {
     this.env = this.configService.get('nodeEnv');

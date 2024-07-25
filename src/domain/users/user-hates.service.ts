@@ -11,7 +11,6 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Repository } from 'typeorm/repository/Repository';
@@ -28,14 +27,13 @@ export class UserHatesService {
     @InjectRepository(Hate)
     private readonly hateRepository: Repository<Hate>,
     @Inject(ConfigService) private configService: ConfigService, // global
-    private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
   }
 
-  //! ------------------------------------------------------------------------//
-  //! Hate Pivot (차단)
-  //! ------------------------------------------------------------------------//
+  //? ------------------------------------------------------------------------//
+  //? Hate Pivot (차단)
+  //? ------------------------------------------------------------------------//
 
   // 사용자 차단 추가
   async createHate(
