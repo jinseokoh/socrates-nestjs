@@ -29,7 +29,6 @@ import { UserJoinsController } from 'src/domain/users/user-joins.controller';
 import { UserLanguagesController } from 'src/domain/users/user-languages.controller';
 import { UserLedgersController } from 'src/domain/users/user-ledgers.controller';
 import { UserMeetupsController } from 'src/domain/users/user-meetups.controller';
-import { UserPleaController } from 'src/domain/users/user-plea.controller';
 import { UserPleasController } from 'src/domain/users/user-pleas.controller';
 import { UsersController } from 'src/domain/users/users.controller';
 import { UserSmsController } from 'src/domain/users/user-sms.controller';
@@ -49,10 +48,9 @@ import { UserHatesService } from 'src/domain/users/user-hates.service';
 import { UserImpressionsService } from 'src/domain/users/user-impressions.service';
 import { UserJoinsService } from 'src/domain/users/user-joins.service';
 import { UserLanguagesService } from 'src/domain/users/user-languages.service';
+import { UserLedgersService } from 'src/domain/users/user-ledgers.service';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 import { UserPleasService } from 'src/domain/users/user-pleas.service';
-import { UserLedgersService } from 'src/domain/users/user-ledgers.service';
-import { UsersPleaService } from 'src/domain/users/users-plea.service';
 import { UsersService } from 'src/domain/users/users.service';
 
 import { S3Module } from 'src/services/aws/s3.module';
@@ -121,7 +119,6 @@ import { Language } from 'src/domain/languages/entities/language.entity';
     UserNotificationListener,
     UserPleasService,
     UserLedgersService,
-    UsersPleaService,
     UsersService,
     LanguageSkillSubscriber,
     UserSubscriber,
@@ -137,7 +134,6 @@ import { Language } from 'src/domain/languages/entities/language.entity';
     UserLanguagesController,
     UserLedgersController,
     UserMeetupsController,
-    UserPleaController,
     UserPleasController,
     UsersController,
     UsersController,
