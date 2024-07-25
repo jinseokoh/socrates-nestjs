@@ -69,9 +69,6 @@ export class InquiryComment {
   // data structure ref)
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
-  @OneToMany(() => InquiryComment, (opinion) => opinion.parent)
-  children: InquiryComment[];
-
   @ManyToOne(
     () => InquiryComment,
     (InquiryComment) => InquiryComment.children,
@@ -81,6 +78,9 @@ export class InquiryComment {
   )
   @JoinColumn({ name: 'parentId' })
   parent: InquiryComment;
+
+  @OneToMany(() => InquiryComment, (opinion) => opinion.parent)
+  children: InquiryComment[];
 
   //??--------------------------------------------------------------------------*/
   //?? constructor

@@ -90,7 +90,7 @@ export class Feed {
   public feedLinks: FeedLink[];
 
   @OneToMany(() => FeedComment, (comment) => comment.feed)
-  comments: FeedComment[];
+  public comments: FeedComment[];
 
   @OneToMany(() => Plea, (plea) => plea.feed)
   public pleas: Plea[];
@@ -106,14 +106,6 @@ export class Feed {
 
   @ManyToOne(() => User, (user) => user.feeds)
   public user: User;
-
-  //**--------------------------------------------------------------------------*/
-  //** many-to-many (belongsToMany)
-
-  // //! 이 정보는 meetup 이 삭제되더라도 지우지 않고 유지 하기로
-  // @ManyToMany(() => Career, (career) => career.meetups)
-  // @JoinTable({ name: 'meetup_career' }) // owning side
-  // careers: Career[];
 
   //?-------------------------------------------------------------------------?/
   //? constructor

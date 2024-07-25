@@ -35,40 +35,52 @@ export class Inquiry {
   images: string[] | null;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'view count' })
+  viewCount: number;
+  
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'comment count' })
+  commentCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'bookmark count' })
+  bookmarkCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'like count' })
   likeCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'view count' })
-  viewCount: number;
+  @ApiProperty({ description: 'flag count' })
+  flagCount: number;
 
   @CreateDateColumn()
+  @ApiProperty({ description: 'createdAt' })
   createdAt: Date;
 
   @UpdateDateColumn()
+  @ApiProperty({ description: 'updatedAt' })
   updatedAt: Date;
 
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
-
-  @Column({ type: 'int', unsigned: true, nullable: true })
-  userId: number | null; // to make it available to Repository.
-
-  @ManyToOne(() => User, (user) => user.inquiries, {
-    onDelete: 'SET NULL',
-  })
-  user: User;
-
   //*-------------------------------------------------------------------------*/
   //* 1-to-many hasMany
 
-  @OneToMany(() => InquiryComment, (inquiryComment) => inquiryComment.inquiry, {
+  @OneToMany(() => InquiryComment, (comment) => comment.inquiry, {
     // cascade: ['insert', 'update'],
   })
-  inquiryComments: InquiryComment[];
+  comments: InquiryComment[];
+
+  //**--------------------------------------------------------------------------*/
+  //** many-to-1 belongsTo
+
+  @Column({ type: 'int', unsigned: true })
+  userId: number; // to make it available to Repository.
+
+  @ManyToOne(() => User, (user) => user.inquiries)
+  user: User;
 
   //??--------------------------------------------------------------------------*/
   //?? constructor
