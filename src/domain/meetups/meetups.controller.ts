@@ -68,8 +68,8 @@ export class MeetupsController {
   @Get(':id/rooms')
   async fetchRoomsByMeetupId(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<Room[]> {
-    return await this.meetupsService.fetchRoomsByMeetupId(id);
+  ): Promise<Room> {
+    return await this.meetupsService.fetchRoomByMeetupId(id);
   }
 
   @ApiOperation({ description: 'Meetup 상세보기' })

@@ -28,8 +28,8 @@ import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 @Controller('chats')
 export class MessagesController {
   constructor(
-    private readonly messagesService: MessagesService,
     private readonly roomsService: RoomsService,
+    private readonly messagesService: MessagesService,
   ) {}
 
   //? ----------------------------------------------------------------------- //
@@ -45,11 +45,11 @@ export class MessagesController {
   ): Promise<IMessage> {
     if (createMessageDto.messageType === MessageType.CUSTOM) {
       const dt = moment.parseZone(createMessageDto.appointment.dateTime);
-      await this.roomsService.update({
-        meetupId: meetupId,
-        userId: userId,
-        appointedAt: dt.toDate(),
-      });
+      // await this.roomsService.update({
+      //   meetupId: meetupId,
+      //   userId: userId,
+      //   appointedAt: dt.toDate(),
+      // });
     }
     return await this.messagesService.create(createMessageDto);
   }

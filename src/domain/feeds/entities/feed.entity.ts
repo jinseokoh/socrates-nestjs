@@ -81,7 +81,7 @@ export class Feed {
   @OneToOne(() => Poll, (poll) => poll.feed, {
     cascade: ['insert', 'update'],
   })
-  poll: Poll;
+  poll?: Poll | null;
 
   //* ----------------------------------------------------------------------- */
   //* 1-to-many (hasMany)

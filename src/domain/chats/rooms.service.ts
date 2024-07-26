@@ -15,9 +15,8 @@ import {
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { CreateRoomDto } from 'src/domain/chats/dto/create-room.dto';
 import { UpdateRoomDto } from 'src/domain/chats/dto/update-room.dto';
-import { LedgerType } from 'src/common/enums';
+import { LedgerType, PartyType } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
-import { ChangeRoomIsPaidDto } from 'src/domain/chats/dto/change-room-is-paid.dto';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { DataSource, Repository } from 'typeorm';
 
@@ -27,7 +26,7 @@ export class RoomsService {
 
   constructor(
     @InjectRepository(Room)
-    private readonly repository: Repository<Room>,
+    private readonly roomRepository: Repository<Room>,
     private dataSource: DataSource, // for transaction
   ) {}
 
@@ -36,7 +35,7 @@ export class RoomsService {
   //? ----------------------------------------------------------------------- //
 
   async create(dto: CreateRoomDto): Promise<Room> {
-    return await this.repository.save(this.repository.create(dto));
+    return await this.roomRepository.save(this.roomRepository.create(dto));
   }
 
   //? ----------------------------------------------------------------------- //
@@ -47,13 +46,10 @@ export class RoomsService {
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Room>> {
-    const queryBuilder = this.repository
+    const queryBuilder = this.roomRepository
       .createQueryBuilder('room')
-      .innerJoinAndSelect('room.user', 'user')
-      .innerJoinAndSelect('room.meetup', 'meetup')
-      .leftJoinAndSelect('meetup.venue', 'venue')
-      .leftJoinAndSelect('meetup.rooms', 'rooms')
-      .leftJoinAndSelect('rooms.user', 'participant')
+      .innerJoinAndSelect('room.participants', 'participant')
+      .leftJoinAndSelect('participant.user', 'user')
       .where('room.userId = :userId', { userId });
     // andWhere('room.isBanned', false)
 
@@ -69,19 +65,15 @@ export class RoomsService {
     return await paginate<Room>(query, queryBuilder, config);
   }
 
-  async findOneByIds(
-    userId: number,
-    meetupId: number,
-    relations: string[] = [],
-  ): Promise<Room> {
+  async findById(id: number, relations: string[] = []): Promise<Room> {
     try {
       return relations.length > 0
-        ? await this.repository.findOneOrFail({
-            where: { userId, meetupId },
+        ? await this.roomRepository.findOneOrFail({
+            where: { id: id },
             relations,
           })
-        : await this.repository.findOneOrFail({
-            where: { userId, meetupId },
+        : await this.roomRepository.findOneOrFail({
+            where: { id: id },
           });
     } catch (e) {
       throw new NotFoundException('entity not found');
@@ -92,108 +84,87 @@ export class RoomsService {
   //? UPDATE
   //? ----------------------------------------------------------------------- //
 
-  async update(dto: UpdateRoomDto): Promise<Room> {
-    const room = await this.findOneByIds(dto.userId, dto.meetupId);
+  async update(id: number, dto: UpdateRoomDto): Promise<Room> {
+    const room = await this.roomRepository.preload({ id, ...dto });
     if (!room) {
       throw new NotFoundException(`entity not found`);
     }
-    if (dto.hasOwnProperty('isPaid')) {
-      room.isPaid = dto.isPaid;
-    }
-    if (dto.hasOwnProperty('isEndedd')) {
-      room.isEnded = dto.isEnded;
-    }
-    if (dto.hasOwnProperty('isBanned')) {
-      room.isBanned = dto.isBanned;
-    }
-    if (dto.hasOwnProperty('lastMessageId')) {
-      room.lastMessageId = dto.lastMessageId;
-    }
-    if (dto.hasOwnProperty('lastMessage')) {
-      room.lastMessage = dto.lastMessage;
-    }
-    if (dto.hasOwnProperty('appointedAt')) {
-      room.appointedAt = dto.appointedAt;
-    }
-    return await this.repository.save(room);
+    return await this.roomRepository.save(room);
   }
 
-  //? Room isPaid 값 갱신
-  //? 코인 비용 발생
-  //! balance will automatically be updated w/ Ledger model event subscriber.
-  //! do not try to update it manually. perform a transaction using query runner
-  async payRoomFee(dto: ChangeRoomIsPaidDto): Promise<Room> {
-    // create a new query runner
-    const queryRunner = this.dataSource.createQueryRunner();
+  // //? Participant 의 isPaid 값 갱신
+  // //? 코인 비용 발생
+  // //! balance will automatically be updated w/ Ledger model event subscriber.
+  // //! do not try to update it manually. perform a transaction using query runner
+  // async payRoomFee(
+  //   userId: number,
+  //   roomId: number,
+  //   cost: number,
+  // ): Promise<Room> {
+  //   // create a new query runner
+  //   const queryRunner = this.dataSource.createQueryRunner();
 
-    try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
+  //   try {
+  //     await queryRunner.connect();
+  //     await queryRunner.startTransaction();
 
-      const user = await queryRunner.manager.findOne(User, {
-        where: { id: dto.userId },
-        relations: [`profile`],
-      });
-      const room = await queryRunner.manager.findOne(Room, {
-        where: {
-          meetupId: dto.meetupId,
-          userId: dto.userId,
-        },
-      });
-      if (!user) {
-        throw new NotFoundException(`user not found`);
-      }
-      if (!room) {
-        throw new NotFoundException(`room not found`);
-      }
-      if (
-        user.profile?.balance === null ||
-        user.profile?.balance - dto.costToUpdate < 0
-      ) {
-        throw new BadRequestException(`insufficient balance`);
-      }
+  //     const user = await queryRunner.manager.findOne(User, {
+  //       where: { id: userId },
+  //       relations: [`profile`],
+  //     });
+  //     const room = await queryRunner.manager.findOne(Room, {
+  //       where: {
+  //         id: roomId,
+  //       },
+  //     });
+  //     if (!user) {
+  //       throw new NotFoundException(`user not found`);
+  //     }
+  //     if (!room) {
+  //       throw new NotFoundException(`room not found`);
+  //     }
+  //     if (user.profile?.balance === null || user.profile?.balance - cost < 0) {
+  //       throw new BadRequestException(`insufficient balance`);
+  //     }
 
-      const newBalance = user.profile?.balance - dto.costToUpdate;
-      user.profile.balance = newBalance;
+  //     const newBalance = user.profile?.balance - cost;
+  //     user.profile.balance = newBalance;
 
-      const ledger = new Ledger({
-        credit: dto.costToUpdate,
-        ledgerType: LedgerType.CREDIT_SPEND,
-        balance: newBalance,
-        note: `채팅방 입장료 (모임 #${dto.meetupId})`,
-        userId: dto.userId,
-      });
-      await queryRunner.manager.save(ledger);
-      room.isPaid = true;
-      room.user = user;
-      await queryRunner.manager.save(room);
-      // commit transaction now:
-      await queryRunner.commitTransaction();
+  //     const ledger = new Ledger({
+  //       credit: cost,
+  //       ledgerType: LedgerType.CREDIT_SPEND,
+  //       balance: newBalance,
+  //       note: `채팅방 입장료 (room #${roomId})`,
+  //       userId: userId,
+  //     });
+  //     await queryRunner.manager.save(ledger);
+  //     room.isPaid = true;
+  //     room.user = user;
+  //     await queryRunner.manager.save(room);
+  //     // commit transaction now:
+  //     await queryRunner.commitTransaction();
 
-      return room;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  //     return room;
+  //   } catch (error) {
+  //     await queryRunner.rollbackTransaction();
+  //     throw error;
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
   //? ----------------------------------------------------------------------- //
   //? DELETE
   //? ----------------------------------------------------------------------- //
 
-  async remove(id: number, userId: number): Promise<Room> {
+  async remove(id: number, userId: number): Promise<void> {
     try {
-      const room = await this.repository.findOneOrFail({
-        where: { id },
-      });
-      console.log(room);
-      if (room.userId == userId) {
-        //! as opposed to softRemove, remove drops id in response.
-        await this.repository.remove(room);
-        room.id = 0; // to prevent hydration error on a flutter client
-        return room;
+      const room = await this.findById(id, ['participants']);
+      const isHost = room.participants.some(
+        (v) => v.userId === userId && v.partyType === PartyType.HOST,
+      );
+      if (isHost) {
+        await this.roomRepository.remove(room);
       } else {
         throw new BadRequestException('doh! mind your id');
       }

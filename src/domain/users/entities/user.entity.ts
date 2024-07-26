@@ -21,7 +21,6 @@ import { Impression } from 'src/domain/users/entities/impression.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { InquiryComment } from 'src/domain/inquiries/entities/inquiry_comment.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
-import { Room } from 'src/domain/chats/entities/room.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
@@ -35,6 +34,7 @@ import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meet
 import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
 import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
 import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
+import { Participant } from 'src/domain/chats/entities/participant.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -147,30 +147,28 @@ export class User {
   polls: Poll[];
 
   @OneToMany(() => Flag, (flag) => flag.user)
-  public flags: Flag[];
+  flags: Flag[];
 
   @OneToMany(() => Meetup, (meetup) => meetup.user, {
     // cascade: ['insert', 'update'],
   })
   meetups: Meetup[];
 
-  @OneToMany(() => MeetupComment, (comment) => comment.user, {
-    // cascade: ['insert', 'update'],
-  })
-  meetupComments: MeetupComment[];
-
   @OneToMany(() => Feed, (feed) => feed.user, {
     // cascade: ['insert', 'update'],
   })
   feeds: Feed[];
 
-  @OneToMany(() => FeedComment, (comment) => comment.user)
-  public feedComments: FeedComment[];
-
   @OneToMany(() => Inquiry, (inquiry) => inquiry.user, {
     // cascade: ['insert', 'update'],
   })
   inquiries: Inquiry[];
+
+  @OneToMany(() => MeetupComment, (comment) => comment.user)
+  meetupComments: MeetupComment[];
+
+  @OneToMany(() => FeedComment, (comment) => comment.user)
+  public feedComments: FeedComment[];
 
   @OneToMany(() => InquiryComment, (comment) => comment.user)
   public inquiryComments: InquiryComment[];
@@ -212,8 +210,8 @@ export class User {
   @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.user)
   public languageSkills: LanguageSkill[];
 
-  @OneToMany(() => Room, (room) => room.user)
-  public rooms: Room[];
+  @OneToMany(() => Participant, (participant) => participant.user)
+  public participants: Participant[];
 
   // bookmarks -------------------------------------------------------------- //
 

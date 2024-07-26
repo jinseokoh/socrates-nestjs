@@ -253,13 +253,13 @@ export class MeetupsService {
   }
 
   // Meetup 리스트 w/ Pagination
-  async fetchRoomsByMeetupId(id: number): Promise<Room[]> {
+  async fetchRoomByMeetupId(id: number): Promise<Room> {
     const meetup = await this.meetupRepository.findOneOrFail({
       where: { id },
-      relations: ['rooms', 'rooms.user', 'rooms.user.profile'],
+      relations: ['room', 'room.participants', 'room.participants.profile'],
     });
 
-    return meetup.rooms;
+    return meetup.room;
   }
 
   // Meetup 상세보기

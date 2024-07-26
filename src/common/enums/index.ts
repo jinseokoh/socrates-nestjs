@@ -19,7 +19,6 @@ export * from './ledger-type';
 export * from './meetup-type';
 export * from './message-type';
 export * from './party-type';
-// export * from './payment-method'; // unused
 export * from './personality';
 export * from './question-type';
 export * from './rate';
@@ -27,6 +26,7 @@ export * from './region';
 export * from './religion';
 export * from './report';
 export * from './role';
+export * from './room-status';
 export * from './subcategory';
 export * from './time';
 export * from './user-status';

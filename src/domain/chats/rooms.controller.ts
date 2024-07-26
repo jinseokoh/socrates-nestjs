@@ -54,39 +54,47 @@ export class RoomsController {
     @CurrentUserId() userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Room>> {
-    console.log('------------------>>', userId, query);
     return await this.roomsService.findAllByUserId(userId, query);
   }
 
-  // load Rooms
+  @ApiOperation({ description: 'Room 상세보기' })
+  @Get(':id')
+  async getAuctionById(@Param('id') id: number): Promise<Room> {
+    return await this.roomsService.findById(id, [
+      'participants',
+      'participants.user',
+    ]);
+  }
 
   //? ----------------------------------------------------------------------- //
   //? UPDATE
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Room 갱신' })
-  @Patch()
-  async update(@Body() dto: UpdateRoomDto): Promise<Room> {
-    return await this.roomsService.update(dto);
+  @Patch(':id')
+  async update(
+    @Param('id') id: number,
+    @Body() dto: UpdateRoomDto,
+  ): Promise<Room> {
+    return await this.roomsService.update(id, dto);
   }
 
-  // A dedicated endpoint to update username.
-  @ApiOperation({ description: '입장료 지불' })
-  @Put()
-  async payRoomFee(@Body() dto: ChangeRoomIsPaidDto): Promise<Room> {
-    return await this.roomsService.payRoomFee(dto);
-  }
+  // @ApiOperation({ description: '입장료 지불' })
+  // @Put()
+  // async payRoomFee(@Body() dto: ChangeRoomIsPaidDto): Promise<Room> {
+  //   return await this.roomsService.payRoomFee(dto);
+  // }
 
   //? ----------------------------------------------------------------------- //
   //? DELETE
   //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: 'Room soft 삭제' })
+  @ApiOperation({ description: 'Room 삭제' })
   @Delete(':id')
   async remove(
     @CurrentUserId() userId: number,
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<Room> {
-    return await this.roomsService.remove(id, userId);
+  ): Promise<void> {
+    await this.roomsService.remove(id, userId);
   }
 }

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PartyType } from 'src/common/enums';
+import { RoomStatus } from 'src/common/enums';
+import { Participant } from 'src/domain/chats/entities/participant.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -8,36 +9,32 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
-  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-@Unique('user_id_meetup_id_key', ['userId', 'meetupId'])
 export class Room {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
-  @Column({ type: 'enum', enum: PartyType, default: PartyType.HOST })
-  @ApiProperty({ description: 'host or guest' })
-  partyType: PartyType;
+  @Column({ length: 80, nullable: true })
+  @ApiProperty({ description: 'title' })
+  title: string;
 
-  @Column({ default: false })
-  @ApiProperty({ description: 'is Paid?' })
-  isPaid: boolean;
+  @Column({ type: 'enum', enum: RoomStatus, default: RoomStatus.PENDING })
+  @ApiProperty({ description: 'status' })
+  roomStatus: RoomStatus;
 
-  @Column({ default: false })
-  @ApiProperty({ description: 'is Confirmed?' })
-  isConfirmed: boolean;
+  @Column({ type: 'tinyint', unsigned: true, default: 0 })
+  @ApiProperty({ description: '참여자 수' })
+  participantCount: number;
 
-  @Column({ default: false })
-  @ApiProperty({ description: 'is Ended?' })
-  isEnded: boolean;
-
-  @Column({ default: false })
-  @ApiProperty({ description: 'is Banned?' })
-  isBanned: boolean;
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: '신고 횟수' })
+  flagCount: number;
 
   @Column({ length: 36, nullable: true })
   @ApiProperty({
@@ -49,18 +46,26 @@ export class Room {
   @ApiProperty({ description: 'last message' })
   lastMessage: string | null;
 
-  @Column({ type: 'datetime', nullable: true })
-  @ApiProperty({ description: 'appointment' })
-  appointedAt: Date | null;
-
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ type: 'int', unsigned: true })
-  userId: number | null; // to make it available to Repository.
+  //**--------------------------------------------------------------------------*/
+  //** 1-to-1 hasOne
+
+  @OneToOne(() => Meetup, (meetup) => meetup.user)
+  meetup?: Meetup | null;
+
+  //**--------------------------------------------------------------------------*/
+  //** 1-to-many hasMany
+
+  @OneToMany(() => Participant, (participant) => participant.room)
+  participants: Participant[];
+
+  //**--------------------------------------------------------------------------*/
+  //** many-to-1 belongsTo
 
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
@@ -70,14 +75,10 @@ export class Room {
   @JoinColumn({ name: 'userId' })
   public user: User;
 
-  @Column({ type: 'int', unsigned: true })
-  public meetupId!: number;
+  //??--------------------------------------------------------------------------*/
+  //?? constructor
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.id, {
-    nullable: false,
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'meetupId' })
-  public meetup: Meetup;
+  constructor(partial: Partial<Room>) {
+    Object.assign(this, partial);
+  }
 }

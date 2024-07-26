@@ -24,6 +24,7 @@ import { UserNotificationEvent } from 'src/domain/users/events/user-notification
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DataSource } from 'typeorm';
 import { Room } from 'src/domain/chats/entities/room.entity';
+import { Participant } from 'src/domain/chats/entities/participant.entity';
 
 @Injectable()
 export class UserJoinsService {
@@ -193,7 +194,8 @@ export class UserJoinsService {
         this.eventEmitter.emit('user.notified', event);
         // notification with event listener ----------------------------------//
         if (chatOpen) {
-          meetup.rooms.map((v: Room) => {
+          meetup.room.participants.map((v: Participant) => {
+            // todo. need to check out this part later
             const event = new UserNotificationEvent();
             event.name = 'chatOpen';
             event.userId = v.user.id;

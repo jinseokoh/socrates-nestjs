@@ -17,10 +17,12 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -204,13 +206,17 @@ export class Meetup {
   venue?: Venue;
 
   //**--------------------------------------------------------------------------*/
+  //** 1-to-1 hasOne
+
+  @OneToOne(() => Room, (room) => room.meetup)
+  @JoinColumn({ name: 'roomId' })
+  room?: Room | null;
+
+  //**--------------------------------------------------------------------------*/
   //** many-to-many belongsToMany using one-to-many (hasMany)
 
   @OneToMany(() => MeetupComment, (meetupComment) => meetupComment.meetup)
   public meetupComments: MeetupComment[];
-
-  @OneToMany(() => Room, (room) => room.meetup)
-  public rooms: Room[];
 
   @OneToMany(() => Join, (join) => join.meetup)
   public joins: Join[];
