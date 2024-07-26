@@ -23,7 +23,6 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DataSource } from 'typeorm';
-import { Room } from 'src/domain/chats/entities/room.entity';
 import { Participant } from 'src/domain/chats/entities/participant.entity';
 
 @Injectable()

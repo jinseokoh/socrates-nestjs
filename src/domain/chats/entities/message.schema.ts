@@ -3,7 +3,7 @@ import { MessageType } from 'src/common/enums';
 
 export const MessageSchema = new Schema(
   {
-    meetupId: {
+    roomId: {
       type: Number,
       hashKey: true,
       required: true,
@@ -43,7 +43,7 @@ export const MessageSchema = new Schema(
       },
       required: false,
     },
-    appointment: {
+    game: {
       type: Object,
       schema: {
         dateTime: {
@@ -55,10 +55,6 @@ export const MessageSchema = new Schema(
           },
         },
         title: String,
-        image: String,
-        venueName: String,
-        venueAddress: String,
-        venueImage: String,
       },
     },
     expires: {
