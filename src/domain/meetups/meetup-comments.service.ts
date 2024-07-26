@@ -26,10 +26,10 @@ export class MeetupCommentsService {
   private readonly logger = new Logger(MeetupCommentsService.name);
 
   constructor(
-    @InjectRepository(MeetupComment)
-    private readonly repository: Repository<MeetupComment>,
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
+    @InjectRepository(MeetupComment)
+    private readonly meetupCommentRepository: Repository<MeetupComment>,
     @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     private readonly s3Service: S3Service,
     private eventEmitter: EventEmitter2,
@@ -41,8 +41,9 @@ export class MeetupCommentsService {
 
   async create(dto: CreateMeetupCommentDto): Promise<MeetupComment> {
     // creation
-    const comment = await this.repository.save(this.repository.create(dto));
-
+    const comment = await this.meetupCommentRepository.save(
+      this.meetupCommentRepository.create(dto),
+    );
     if (dto.sendNotification) {
       //? notify with event listener
       const record = await this.findById(comment.id, [
@@ -80,7 +81,7 @@ export class MeetupCommentsService {
     query: PaginateQuery,
     meetupId: number,
   ): Promise<Paginated<MeetupComment>> {
-    return paginate(query, this.repository, {
+    return paginate(query, this.meetupCommentRepository, {
       where: {
         meetupId: meetupId,
         parentId: IsNull(),
@@ -98,7 +99,7 @@ export class MeetupCommentsService {
     query: PaginateQuery,
     meetupId: number,
   ): Promise<Paginated<MeetupComment>> {
-    const queryBuilder = this.repository
+    const queryBuilder = this.meetupCommentRepository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
       .loadRelationCountAndMap('comment.replyCount', 'comment.children')
@@ -125,7 +126,7 @@ export class MeetupCommentsService {
     meetupId: number,
     commentId: number,
   ): Promise<Paginated<MeetupComment>> {
-    const queryBuilder = this.repository
+    const queryBuilder = this.meetupCommentRepository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
       .where('comment.meetupId = :meetupId', { meetupId })
@@ -148,11 +149,11 @@ export class MeetupCommentsService {
   async findById(id: number, relations: string[] = []): Promise<MeetupComment> {
     try {
       return relations.length > 0
-        ? await this.repository.findOneOrFail({
+        ? await this.meetupCommentRepository.findOneOrFail({
             where: { id },
             relations,
           })
-        : await this.repository.findOneOrFail({
+        : await this.meetupCommentRepository.findOneOrFail({
             where: { id },
           });
     } catch (e) {
@@ -162,7 +163,7 @@ export class MeetupCommentsService {
 
   // reserved. no use cases as of yet.
   async count(body: string): Promise<number> {
-    return await this.repository.countBy({
+    return await this.meetupCommentRepository.countBy({
       body: body,
     });
   }
@@ -175,12 +176,15 @@ export class MeetupCommentsService {
     dto: UpdateMeetupCommentDto,
     commentId: number,
   ): Promise<MeetupComment> {
-    const comment = await this.repository.preload({ id: commentId, ...dto });
+    const comment = await this.meetupCommentRepository.preload({
+      id: commentId,
+      ...dto,
+    });
     // user validation here might be a good option to be added
     if (!comment) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.repository.save(comment);
+    return await this.meetupCommentRepository.save(comment);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -190,7 +194,7 @@ export class MeetupCommentsService {
   async softRemove(id: number): Promise<MeetupComment> {
     try {
       const comment = await this.findById(id);
-      await this.repository.softRemove(comment);
+      await this.meetupCommentRepository.softRemove(comment);
       await this.meetupRepository.manager.query(
         `UPDATE meetup SET commentCount = commentCount - 1 WHERE id = ? AND commentCount > 0`,
         [comment.meetupId],
@@ -205,7 +209,7 @@ export class MeetupCommentsService {
   //! not being used.
   async remove(id: number): Promise<MeetupComment> {
     const comment = await this.findById(id);
-    return await this.repository.remove(comment);
+    return await this.meetupCommentRepository.remove(comment);
   }
 
   //? ----------------------------------------------------------------------- //

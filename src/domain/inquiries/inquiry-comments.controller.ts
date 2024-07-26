@@ -25,7 +25,9 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('inquiries')
 export class InquiryCommentsController {
-  constructor(private readonly inquiryCommentsService: InquiryCommentsService) {}
+  constructor(
+    private readonly inquiryCommentsService: InquiryCommentsService,
+  ) {}
 
   //? ----------------------------------------------------------------------- //
   //? CREATE

@@ -1,4 +1,4 @@
-import { IData } from "src/common/interfaces";
+import { IData } from 'src/common/interfaces';
 
 export class UserNotificationEvent {
   name:
@@ -13,6 +13,7 @@ export class UserNotificationEvent {
     | 'feedComment'
     | 'feedPlea'
     | 'feedPleaDenial'
+    | 'inquiryComment'
     | 'friendRequest'
     | 'friendRequestApproval'
     | 'friendRequestDenial'

@@ -24,10 +24,10 @@ export class FeedCommentsService {
   private readonly logger = new Logger(FeedCommentsService.name);
 
   constructor(
-    @InjectRepository(FeedComment)
-    private readonly repository: Repository<FeedComment>,
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
+    @InjectRepository(FeedComment)
+    private readonly feedCommentRepository: Repository<FeedComment>,
     // @Inject(SlackService) private readonly slack: SlackService,
     private readonly s3Service: S3Service,
     private eventEmitter: EventEmitter2,
@@ -39,7 +39,9 @@ export class FeedCommentsService {
 
   async create(dto: CreateFeedCommentDto): Promise<FeedComment> {
     // creation
-    const comment = await this.repository.save(this.repository.create(dto));
+    const comment = await this.feedCommentRepository.save(
+      this.feedCommentRepository.create(dto),
+    );
     if (dto.sendNotification) {
       //? notify with event listener
       const record = await this.findById(comment.id, [
@@ -77,7 +79,7 @@ export class FeedCommentsService {
     query: PaginateQuery,
     feedId: number,
   ): Promise<Paginated<FeedComment>> {
-    return paginate(query, this.repository, {
+    return paginate(query, this.feedCommentRepository, {
       where: {
         feedId: feedId,
         parentId: IsNull(),
@@ -95,7 +97,7 @@ export class FeedCommentsService {
     query: PaginateQuery,
     feedId: number,
   ): Promise<Paginated<FeedComment>> {
-    const queryBuilder = this.repository
+    const queryBuilder = this.feedCommentRepository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
       .loadRelationCountAndMap('comment.replyCount', 'comment.children')
@@ -122,7 +124,7 @@ export class FeedCommentsService {
     feedId: number,
     commentId: number,
   ): Promise<Paginated<FeedComment>> {
-    const queryBuilder = this.repository
+    const queryBuilder = this.feedCommentRepository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
       .where('comment.feedId = :feedId', { feedId })
@@ -144,11 +146,11 @@ export class FeedCommentsService {
   async findById(id: number, relations: string[] = []): Promise<FeedComment> {
     try {
       return relations.length > 0
-        ? await this.repository.findOneOrFail({
+        ? await this.feedCommentRepository.findOneOrFail({
             where: { id },
             relations,
           })
-        : await this.repository.findOneOrFail({
+        : await this.feedCommentRepository.findOneOrFail({
             where: { id },
           });
     } catch (e) {
@@ -164,12 +166,15 @@ export class FeedCommentsService {
     dto: UpdateFeedCommentDto,
     commentId: number,
   ): Promise<FeedComment> {
-    const comment = await this.repository.preload({ id: commentId, ...dto });
+    const comment = await this.feedCommentRepository.preload({
+      id: commentId,
+      ...dto,
+    });
     // user validation here might be a good option to be added
     if (!comment) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.repository.save(comment);
+    return await this.feedCommentRepository.save(comment);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -179,7 +184,7 @@ export class FeedCommentsService {
   async softRemove(id: number): Promise<FeedComment> {
     try {
       const comment = await this.findById(id);
-      await this.repository.softRemove(comment);
+      await this.feedCommentRepository.softRemove(comment);
       await this.feedRepository.manager.query(
         `UPDATE feed SET commentCount = commentCount - 1 WHERE id = ? AND commentCount > 0`,
         [comment.feedId],
@@ -194,7 +199,7 @@ export class FeedCommentsService {
   //! not being used.
   async remove(id: number): Promise<FeedComment> {
     const comment = await this.findById(id);
-    return await this.repository.remove(comment);
+    return await this.feedCommentRepository.remove(comment);
   }
 
   //! not being used) recursive tree 구조일 경우 사용.

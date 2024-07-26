@@ -23,10 +23,10 @@ export class ContentCommentsService {
   private readonly logger = new Logger(ContentCommentsService.name);
 
   constructor(
-    @InjectRepository(ContentComment)
-    private readonly repository: Repository<ContentComment>,
     @InjectRepository(Content)
     private readonly contentRepository: Repository<Content>,
+    @InjectRepository(ContentComment)
+    private readonly contentCommentRepository: Repository<ContentComment>,
     // @Inject(SlackService) private readonly slack: SlackService,
     private readonly s3Service: S3Service,
     private eventEmitter: EventEmitter2,
@@ -39,7 +39,9 @@ export class ContentCommentsService {
   // 작성자가 없으므로 notification 로직은 제외
   async create(dto: CreateContentCommentDto): Promise<ContentComment> {
     // creation
-    const comment = await this.repository.save(this.repository.create(dto));
+    const comment = await this.contentCommentRepository.save(
+      this.contentCommentRepository.create(dto),
+    );
     await this.contentRepository.increment(
       { id: dto.contentId },
       `commentCount`,
@@ -58,7 +60,7 @@ export class ContentCommentsService {
     query: PaginateQuery,
     contentId: number,
   ): Promise<Paginated<ContentComment>> {
-    return paginate(query, this.repository, {
+    return paginate(query, this.contentCommentRepository, {
       where: {
         contentId: contentId,
         parentId: IsNull(),
@@ -76,7 +78,7 @@ export class ContentCommentsService {
     query: PaginateQuery,
     contentId: number,
   ): Promise<Paginated<ContentComment>> {
-    const queryBuilder = this.repository
+    const queryBuilder = this.contentCommentRepository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
       .loadRelationCountAndMap('comment.replyCount', 'comment.children')
@@ -103,7 +105,7 @@ export class ContentCommentsService {
     contentId: number,
     commentId: number,
   ): Promise<Paginated<ContentComment>> {
-    const queryBuilder = this.repository
+    const queryBuilder = this.contentCommentRepository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
       .where('comment.contentId = :contentId', { contentId })
@@ -128,11 +130,11 @@ export class ContentCommentsService {
   ): Promise<ContentComment> {
     try {
       return relations.length > 0
-        ? await this.repository.findOneOrFail({
+        ? await this.contentCommentRepository.findOneOrFail({
             where: { id },
             relations,
           })
-        : await this.repository.findOneOrFail({
+        : await this.contentCommentRepository.findOneOrFail({
             where: { id },
           });
     } catch (e) {
@@ -148,12 +150,15 @@ export class ContentCommentsService {
     dto: UpdateContentCommentDto,
     commentId: number,
   ): Promise<ContentComment> {
-    const comment = await this.repository.preload({ id: commentId, ...dto });
+    const comment = await this.contentCommentRepository.preload({
+      id: commentId,
+      ...dto,
+    });
     // user validation here might be a good option to be added
     if (!comment) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.repository.save(comment);
+    return await this.contentCommentRepository.save(comment);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -163,7 +168,7 @@ export class ContentCommentsService {
   async softRemove(id: number): Promise<ContentComment> {
     try {
       const comment = await this.findById(id);
-      await this.repository.softRemove(comment);
+      await this.contentCommentRepository.softRemove(comment);
       await this.contentRepository.manager.query(
         `UPDATE content SET commentCount = commentCount - 1 WHERE id = ? AND commentCount > 0`,
         [comment.contentId],
@@ -178,7 +183,7 @@ export class ContentCommentsService {
   //! not being used.
   async remove(id: number): Promise<ContentComment> {
     const comment = await this.findById(id);
-    return await this.repository.remove(comment);
+    return await this.contentCommentRepository.remove(comment);
   }
 
   //! not being used) recursive tree 구조일 경우 사용.

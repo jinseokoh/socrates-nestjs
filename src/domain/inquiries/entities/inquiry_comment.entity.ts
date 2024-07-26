@@ -59,7 +59,7 @@ export class InquiryComment {
   @ManyToOne(() => User, (user) => user.inquiryComments, { cascade: true })
   user: User;
 
-  @ManyToOne(() => Inquiry, (inquiry) => inquiry.inquiryComments, {
+  @ManyToOne(() => Inquiry, (inquiry) => inquiry.comments, {
     cascade: true,
   })
   inquiry: Inquiry;
