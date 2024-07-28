@@ -82,7 +82,7 @@ export class UserJoinsService {
 
       // notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
-      event.name = 'meetupRequest';
+      event.name = 'meetup';
       event.userId = meetup.user.id;
       event.token = meetup.user.pushToken;
       event.options = meetup.user.profile?.options ?? {};
@@ -171,7 +171,7 @@ export class UserJoinsService {
         // notification with event listener ----------------------------------//
         const event = new UserNotificationEvent();
         if (joinType === JoinRequestType.REQUEST) {
-          event.name = 'meetupRequestApproval';
+          event.name = 'meetup';
           event.token = recipient.pushToken;
           event.options = recipient.profile?.options ?? {};
           event.body = `${meetup.title} 모임장이 나의 참가신청을 수락했습니다.`;
@@ -180,7 +180,7 @@ export class UserJoinsService {
             args: '',
           };
         } else {
-          event.name = 'meetupInviteApproval';
+          event.name = 'meetup';
           event.userId = recipient.id;
           event.token = recipient.pushToken;
           event.options = recipient.profile?.options ?? {};
@@ -196,7 +196,7 @@ export class UserJoinsService {
           meetup.room.participants.map((v: Participant) => {
             // todo. need to check out this part later
             const event = new UserNotificationEvent();
-            event.name = 'chatOpen';
+            event.name = 'chat';
             event.userId = v.user.id;
             event.token = v.user.pushToken;
             event.options = v.user.profile?.options ?? {};

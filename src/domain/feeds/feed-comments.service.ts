@@ -53,7 +53,7 @@ export class FeedCommentsService {
 
       if (record.feed.user.id != dto.userId) {
         const event = new UserNotificationEvent();
-        event.name = 'feedComment';
+        event.name = 'feed';
         event.userId = record.feed.user.id;
         event.token = record.feed.user.pushToken;
         event.options = record.feed.user.profile?.options ?? {};

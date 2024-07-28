@@ -85,7 +85,8 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   const port = configService.get<number>('appPort');
-  await app.listen(port, () => {
+  //! 안드로이드 폰 테스트시 '0.0.0.0' 을 추가
+  await app.listen(port, '0.0.0.0', () => {
     console.log(`running on ${port}`);
   });
 }

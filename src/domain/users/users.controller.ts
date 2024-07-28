@@ -90,7 +90,9 @@ export class UsersController {
       'categoriesInterested.category',
       'languageSkills',
       'languageSkills.language',
-      'reportedByUsers',
+      'flags',
+      'sentFriendships',
+      'receivedFriendships',
     ]);
   }
 
@@ -106,9 +108,8 @@ export class UsersController {
       'categoriesInterested.category',
       'languageSkills',
       'languageSkills.language',
-      'reportedByUsers',
+      'flags',
       'feeds',
-      'feeds.poll',
     ];
     return extra && extra.length > 0
       ? await this.usersService.findById(id, [...defaultRelations, ...extra])

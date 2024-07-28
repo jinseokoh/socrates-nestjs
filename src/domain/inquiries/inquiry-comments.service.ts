@@ -56,7 +56,7 @@ export class InquiryCommentsService {
 
       if (record.inquiry.user.id != dto.userId) {
         const event = new UserNotificationEvent();
-        event.name = 'inquiryComment';
+        event.name = 'inquiry';
         event.userId = record.inquiry.user.id;
         event.token = record.inquiry.user.pushToken;
         event.options = record.inquiry.user.profile?.options ?? {};

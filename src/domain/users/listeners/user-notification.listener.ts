@@ -36,7 +36,7 @@ export class UserNotificationListener {
     }
 
     // todo. 나머지 dynamodb 알림 record 생성
-    if (event.name == 'friendRequest') {
+    if (event.name === 'friend') {
       const alarmDto = new CreateAlarmDto();
       alarmDto.alarmType = AlarmType.ACTIVITY;
       alarmDto.userId = event.userId;
@@ -45,7 +45,7 @@ export class UserNotificationListener {
       await this.alarmsService.create(alarmDto);
     }
 
-    if (event.name == 'feedPleaDenial') {
+    if (event.name === 'feed') {
       const alarmDto = new CreateAlarmDto();
       alarmDto.alarmType = AlarmType.SETTING;
       alarmDto.userId = event.userId;
@@ -54,7 +54,7 @@ export class UserNotificationListener {
       await this.alarmsService.create(alarmDto);
     }
 
-    if (event.name == 'eventNotification') {
+    if (event.name == 'event') {
       const alarmDto = new CreateAlarmDto();
       alarmDto.alarmType = AlarmType.SETTING;
       alarmDto.userId = event.userId;

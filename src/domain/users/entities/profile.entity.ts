@@ -111,20 +111,14 @@ export class Profile {
   @BeforeInsert()
   setDefaults() {
     this.options = this.options || {
-      userBookmark: false, // 사용자 찜
-      meetupBookmark: false, // 모임 찜
-      meetupMeetupComment: false, // 모임 댓글
-      meetupRequest: false, // 모임신청
-      meetupRequestApproval: false, // 모임신청 승인
-      meetupInviteApproval: false, // 모임초대 승인
-      feedBookmark: false, // 발견 공감
-      feedFeedComment: false, // 발견 댓글
-      feedPlea: false, // 친구신청 발견글 요청
-      feedPleaDenial: false, // 친구신청 발견글 요청
-      friendRequest: false, // 친구 신청
-      friendRequestApproval: false, // 친구신청 승인
-      friendRequestDenial: false, // 친구신청 발견글 요청
-      eventNotification: false,
+      chat: false,
+      event: false,
+      feed: false,
+      friend: false,
+      inquiry: false,
+      meetup: false,
+      plea: false,
+      user: false,
     };
   }
 }

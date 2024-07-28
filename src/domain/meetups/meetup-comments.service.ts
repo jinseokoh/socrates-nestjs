@@ -55,7 +55,7 @@ export class MeetupCommentsService {
 
       if (record.meetup.user.id != dto.userId) {
         const event = new UserNotificationEvent();
-        event.name = 'meetupComment';
+        event.name = 'meetup';
         event.userId = record.meetup.user.id;
         event.token = record.meetup.user.pushToken;
         event.options = record.meetup.user.profile?.options ?? {};

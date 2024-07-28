@@ -18,11 +18,15 @@ export class Poll {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
+  @Column({ length: 16, nullable: false })
   @Column({ type: 'int', unsigned: true, default: null })
   userId: number | null; // to make it available to Repository.
 
-  @Column({ type: 'int', unsigned: true, default: null })
-  feedId: number | null; // to make it available to Repository.
+  @ApiProperty({ description: 'slug' })
+  slug: string;
+
+  // @Column({ type: 'int', unsigned: true, default: null })
+  // feedId: number | null; // to make it available to Repository.
 
   @Column({ length: 255, nullable: false })
   @ApiProperty({ description: 'question' })
@@ -62,9 +66,9 @@ export class Poll {
   @ManyToOne(() => User, (user) => user.polls, {})
   user: User | null;
 
-  @OneToOne(() => Feed, (feed) => feed.poll, {})
-  @JoinColumn()
-  feed: Feed | null;
+  // @OneToOne(() => Feed, (feed) => feed.poll, {})
+  // @JoinColumn()
+  // feed: Feed | null;
 
   //?-------------------------------------------------------------------------?/
   //? constructor

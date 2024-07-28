@@ -72,7 +72,7 @@ export class BookmarkUserMeetupService {
         });
         // todo. fine tune notifying logic to dedup the same id
         const event = new UserNotificationEvent();
-        event.name = 'meetupBookmark';
+        event.name = 'meetup';
         event.userId = meetup.user.id;
         event.token = meetup.user.pushToken;
         event.options = meetup.user.profile?.options ?? {};

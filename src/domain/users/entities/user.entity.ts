@@ -129,43 +129,40 @@ export class User {
   //* 1-to-many hasMany
 
   @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.user)
-  withdrawals: Withdrawal[];
+  public withdrawals: Withdrawal[];
 
   @OneToMany(() => Ledger, (ledger) => ledger.user, {
     // cascade: ['insert', 'update'],
   })
-  ledgers: Ledger[];
+  public ledgers: Ledger[];
 
   @OneToMany(() => Provider, (provider) => provider.user, {
     // cascade: ['insert', 'update'],
   })
-  providers: Provider[];
+  public providers: Provider[];
 
   @OneToMany(() => Poll, (poll) => poll.user, {
     // cascade: ['insert', 'update'],
   })
-  polls: Poll[];
-
-  @OneToMany(() => Flag, (flag) => flag.user)
-  flags: Flag[];
+  public polls: Poll[];
 
   @OneToMany(() => Meetup, (meetup) => meetup.user, {
     // cascade: ['insert', 'update'],
   })
-  meetups: Meetup[];
+  public meetups: Meetup[];
 
   @OneToMany(() => Feed, (feed) => feed.user, {
     // cascade: ['insert', 'update'],
   })
-  feeds: Feed[];
+  public feeds: Feed[];
 
   @OneToMany(() => Inquiry, (inquiry) => inquiry.user, {
     // cascade: ['insert', 'update'],
   })
-  inquiries: Inquiry[];
+  public inquiries: Inquiry[];
 
   @OneToMany(() => MeetupComment, (comment) => comment.user)
-  meetupComments: MeetupComment[];
+  public meetupComments: MeetupComment[];
 
   @OneToMany(() => FeedComment, (comment) => comment.user)
   public feedComments: FeedComment[];
@@ -226,6 +223,12 @@ export class User {
 
   @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.recipient)
   public bookmarkedByUsers: BookmarkUserUser[];
+
+  @OneToMany(() => Flag, (flag) => flag.user)
+  public flags: Flag[];
+
+  // @OneToMany(() => Flag, (flag) => flag.recipient)
+  // public flaggedByUsers: Flag[];
 
   //*-------------------------------------------------------------------------*/
   //* many-to-many belongsToMany

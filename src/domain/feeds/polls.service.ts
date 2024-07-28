@@ -36,20 +36,7 @@ export class PollsService {
 
   async create(dto: CreatePollDto): Promise<Poll> {
     try {
-      const factionId = ageToFactionId(dto.age);
-
-      const createPollDto = { ...dto };
-      delete createPollDto.age; // age 는 poll 생성때 필요없음.
-
-      const poll = await this.repository.save(
-        this.repository.create(createPollDto),
-      );
-
-      await this.repository.manager.query(
-        'INSERT IGNORE INTO `poll_faction` (pollId, factionId) VALUES (?, ?)',
-        [poll.id, factionId],
-      );
-
+      const poll = await this.repository.save(this.repository.create(dto));
       return poll;
     } catch (e) {
       throw new BadRequestException();

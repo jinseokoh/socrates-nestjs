@@ -69,7 +69,7 @@ export class BookmarkUserUserService {
         });
         // todo. fine tune notifying logic to dedup the same id
         const event = new UserNotificationEvent();
-        event.name = 'userBookmark';
+        event.name = 'user';
         event.userId = recipient.id;
         event.token = recipient.pushToken;
         event.options = recipient.profile?.options ?? {};

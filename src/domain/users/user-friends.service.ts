@@ -123,7 +123,7 @@ export class UserFriendsService {
 
       // notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
-      event.name = 'friendRequest';
+      event.name = 'friend';
       event.userId = recipient.id;
       event.token = recipient.pushToken;
       event.options = recipient.profile?.options ?? {};
@@ -213,7 +213,7 @@ export class UserFriendsService {
         status == FriendStatus.ACCEPTED
       ) {
         const event = new UserNotificationEvent();
-        event.name = 'friendRequestApproval';
+        event.name = 'friend';
         event.userId = friendship.user?.id;
         event.token = friendship.user?.pushToken;
         event.options = friendship.user?.profile?.options ?? {};
@@ -302,7 +302,7 @@ export class UserFriendsService {
 
       //? notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
-      event.name = 'friendRequestDenial';
+      event.name = 'friend';
       event.userId = userId;
       event.token = friendship.user.pushToken;
       event.options = friendship.user.profile?.options ?? {};

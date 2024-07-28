@@ -75,13 +75,13 @@ export class Feed {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  //* ----------------------------------------------------------------------- */
-  //* 1-to-1 hasOne
+  // //* ----------------------------------------------------------------------- */
+  // //* 1-to-1 hasOne
 
-  @OneToOne(() => Poll, (poll) => poll.feed, {
-    cascade: ['insert', 'update'],
-  })
-  poll?: Poll | null;
+  // @OneToOne(() => Poll, (poll) => poll.feed, {
+  //   cascade: ['insert', 'update'],
+  // })
+  // poll?: Poll | null;
 
   //* ----------------------------------------------------------------------- */
   //* 1-to-many (hasMany)
