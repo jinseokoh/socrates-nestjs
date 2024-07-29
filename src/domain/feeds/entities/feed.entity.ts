@@ -43,6 +43,14 @@ export class Feed {
   @IsArray()
   images: string[] | null;
 
+  @Column({ default: false })
+  @ApiProperty({ description: 'is anonymous' })
+  isAnonymous: boolean;
+
+  @Column({ default: false })
+  @ApiProperty({ description: 'is banned' })
+  isBanned: boolean;
+
   // like, comment, view, bookmark, flag count ------------------------------ //
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'views' })

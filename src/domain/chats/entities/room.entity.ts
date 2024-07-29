@@ -20,6 +20,10 @@ export class Room {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
+  @Column({ length: 16, nullable: false })
+  @ApiProperty({ description: 'slug' })
+  slug: string;
+
   @Column({ length: 80, nullable: true })
   @ApiProperty({ description: 'title' })
   title: string;

@@ -143,9 +143,8 @@ import { Language } from 'src/domain/languages/entities/language.entity';
     UserMeetupsController,
     UserOtpsController,
     UserPleasController,
-    UsersController,
-    UsersController,
     UserUsersController,
+    UsersController,
   ],
 })
 export class UsersModule {}

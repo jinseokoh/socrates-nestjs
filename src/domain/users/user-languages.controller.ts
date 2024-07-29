@@ -33,7 +33,7 @@ export class UserLanguagesController {
   async syncLanguagesWithIds(
     @Param('userId') userId: number,
     @Body() dto: SyncLanguageDto,
-  ): Promise<Array<LanguageSkill>> {
+  ): Promise<LanguageSkill[]> {
     if (dto.ids) {
       try {
         return await this.userLanguagesService.syncLanguagesWithIds(
@@ -72,7 +72,7 @@ export class UserLanguagesController {
     @Param('userId') userId: number,
     @Param('slug') slug: string,
     @Body('skill') skill: number | null,
-  ): Promise<Array<LanguageSkill>> {
+  ): Promise<LanguageSkill[]> {
     return await this.userLanguagesService.upsertLanguageWithSkill(
       userId,
       slug,
@@ -88,7 +88,7 @@ export class UserLanguagesController {
   @Get(':userId/languages')
   async getLanguages(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<Array<LanguageSkill>> {
+  ): Promise<LanguageSkill[]> {
     return await this.userLanguagesService.getLanguages(userId);
   }
 

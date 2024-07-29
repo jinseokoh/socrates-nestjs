@@ -36,7 +36,7 @@ export class UserCategoriesController {
   async syncCategoriesWithEitherIdsOrSlugs(
     @Param('userId') userId: number,
     @Body() dto: SyncCategoryDto,
-  ): Promise<Array<Interest>> {
+  ): Promise<Interest[]> {
     if (dto.ids) {
       try {
         return await this.userCategoriesService.syncCategoriesWithIds(
@@ -66,7 +66,7 @@ export class UserCategoriesController {
     @Param('userId') userId: number,
     @Param('slug') slug: string,
     @Body('skill') skill: number | null,
-  ): Promise<Array<Interest>> {
+  ): Promise<Interest[]> {
     return await this.userCategoriesService.upsertCategoryWithSkill(
       userId,
       slug,
@@ -82,7 +82,7 @@ export class UserCategoriesController {
   @Get(':userId/categories')
   async getCategories(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<Array<Interest>> {
+  ): Promise<Interest[]> {
     return await this.userCategoriesService.getCategories(userId);
   }
 
@@ -96,7 +96,7 @@ export class UserCategoriesController {
   async delete(
     @Param('userId') userId: number,
     @Body('ids') ids: number[],
-  ): Promise<Array<Interest>> {
+  ): Promise<Interest[]> {
     try {
       return await this.userCategoriesService.removeCategories(userId, ids);
     } catch (e) {

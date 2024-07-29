@@ -85,14 +85,13 @@ export class UsersController {
   async getMine(@CurrentUserId() id: number): Promise<User> {
     return await this.usersService.findById(id, [
       'profile',
-      //'providers',
       'categoriesInterested',
       'categoriesInterested.category',
       'languageSkills',
       'languageSkills.language',
-      'flags',
       'sentFriendships',
       'receivedFriendships',
+      'flags',
     ]);
   }
 
@@ -108,8 +107,9 @@ export class UsersController {
       'categoriesInterested.category',
       'languageSkills',
       'languageSkills.language',
+      'sentFriendships',
+      'receivedFriendships',
       'flags',
-      'feeds',
     ];
     return extra && extra.length > 0
       ? await this.usersService.findById(id, [...defaultRelations, ...extra])
@@ -220,7 +220,7 @@ export class UsersController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 코인 구매
+  //? 코인구매
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Coin 구매' })
