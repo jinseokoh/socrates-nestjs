@@ -12,13 +12,13 @@ export class Language {
   @Column({ type: 'int', unsigned: true, default: 0 })
   userCount: number;
 
-  //*-------------------------------------------------------------------------*/
+  //? ----------------------------------------------------------------------- //
   //* many-to-many belongsToMany using one-to-many
 
   @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.language)
   public usersSkilled: LanguageSkill[];
 
-  //?-------------------------------------------------------------------------?/
+  //? ----------------------------------------------------------------------- //
   //? constructor
 
   constructor(partial: Partial<Language>) {

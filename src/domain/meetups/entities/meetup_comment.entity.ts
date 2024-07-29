@@ -53,20 +53,20 @@ export class MeetupComment {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsTo
 
   @ManyToOne(() => User, (user) => user.meetupComments, { cascade: true })
   user: User;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsTo
 
   @ManyToOne(() => Meetup, (meetup) => meetup.meetupComments, { cascade: true })
   meetup: Meetup;
 
-  //**--------------------------------------------------------------------------*/
-  //** one to many (self recursive relations)
+  //? ----------------------------------------------------------------------- //
+  //? one to many (self recursive relations)
   // data structure ref)
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
@@ -79,8 +79,8 @@ export class MeetupComment {
   @OneToMany(() => MeetupComment, (thread) => thread.parent)
   children: MeetupComment[];
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<MeetupComment>) {
     Object.assign(this, partial);

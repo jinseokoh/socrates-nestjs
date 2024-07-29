@@ -35,6 +35,9 @@ import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.e
 import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
 import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
 import { Participant } from 'src/domain/chats/entities/participant.entity';
+import { Answer } from 'src/domain/icebreakers/entities/answer.entity';
+import { Question } from 'src/domain/icebreakers/entities/question.entity';
+import { AnswerComment } from 'src/domain/icebreakers/entities/answer_comment.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -117,16 +120,16 @@ export class User {
   @ApiProperty({ description: 'deletedAt' })
   deletedAt: Date | null;
 
-  //* ----------------------------------------------------------------------- */
-  //* 1-to-1 hasOne
+  //? ----------------------------------------------------------------------- //
+  //? 1-to-1 hasOne
 
   @OneToOne(() => Profile, (profile) => profile.user, {
     cascade: ['insert', 'update'],
   })
   profile: Profile;
 
-  //* ----------------------------------------------------------------------- */
-  //* 1-to-many hasMany
+  //? ----------------------------------------------------------------------- //
+  //? 1-to-many hasMany
 
   @OneToMany(() => Withdrawal, (withdrawal) => withdrawal.user)
   public withdrawals: Withdrawal[];
@@ -156,6 +159,16 @@ export class User {
   })
   public feeds: Feed[];
 
+  @OneToMany(() => Question, (question) => question.user, {
+    // cascade: ['insert', 'update'],
+  })
+  public questions: Question[];
+
+  @OneToMany(() => Answer, (answer) => answer.user, {
+    // cascade: ['insert', 'update'],
+  })
+  public answers: Answer[];
+
   @OneToMany(() => Inquiry, (inquiry) => inquiry.user, {
     // cascade: ['insert', 'update'],
   })
@@ -163,6 +176,9 @@ export class User {
 
   @OneToMany(() => MeetupComment, (comment) => comment.user)
   public meetupComments: MeetupComment[];
+
+  @OneToMany(() => AnswerComment, (comment) => comment.user)
+  public answerComments: AnswerComment[];
 
   @OneToMany(() => FeedComment, (comment) => comment.user)
   public feedComments: FeedComment[];
@@ -173,8 +189,8 @@ export class User {
   @OneToMany(() => ContentComment, (comment) => comment.user)
   public contentComments: ContentComment[];
 
-  //*-------------------------------------------------------------------------*/
-  //* many-to-many belongsToMany using one-to-many
+  //? ----------------------------------------------------------------------- //
+  //? many-to-many belongsToMany using one-to-many
 
   @OneToMany(() => Join, (join) => join.user)
   public sentJoins: Join[];
@@ -230,14 +246,14 @@ export class User {
   // @OneToMany(() => Flag, (flag) => flag.recipient)
   // public flaggedByUsers: Flag[];
 
-  //*-------------------------------------------------------------------------*/
+  //? ----------------------------------------------------------------------- //
   //* many-to-many belongsToMany
 
   // @ManyToMany(() => Region, (region) => region.meetups)
   // @JoinTable({ name: 'meetup_region' }) // owning side
   // regions: Region[];
 
-  //?-------------------------------------------------------------------------?/
+  //? ----------------------------------------------------------------------- //
   //? constructor
 
   constructor(partial: Partial<User>) {

@@ -52,8 +52,8 @@ export class Impression {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsTo
 
   @ManyToOne(() => User, (user) => user.sentImpressions, {
     nullable: false,
@@ -69,8 +69,8 @@ export class Impression {
   })
   public recipient: User;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<Impression>) {
     Object.assign(this, partial);

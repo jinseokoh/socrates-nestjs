@@ -182,8 +182,8 @@ export class Meetup {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 (belongsTo)
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 (belongsTo)
 
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
@@ -205,15 +205,15 @@ export class Meetup {
   })
   venue?: Venue;
 
-  //**--------------------------------------------------------------------------*/
-  //** 1-to-1 hasOne
+  //? ----------------------------------------------------------------------- //
+  //? 1-to-1 hasOne
 
   @OneToOne(() => Room, (room) => room.meetup)
   @JoinColumn({ name: 'roomId' })
   room?: Room | null;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-many belongsToMany using one-to-many (hasMany)
+  //? ----------------------------------------------------------------------- //
+  //? many-to-many belongsToMany using one-to-many (hasMany)
 
   @OneToMany(() => MeetupComment, (meetupComment) => meetupComment.meetup)
   public meetupComments: MeetupComment[];
@@ -224,8 +224,8 @@ export class Meetup {
   @OneToMany(() => BookmarkUserMeetup, (bookmark) => bookmark.meetup)
   public bookmarkedByUsers: BookmarkUserMeetup[];
 
-  //**------------------------------------------------------------------------*/
-  //** many-to-many (belongsToMany)
+  //? ----------------------------------------------------------------------- //
+  //? many-to-many (belongsToMany)
 
   //! 이 정보는 meetup 이 삭제되더라도 지우지 않고 유지 하기로
   @ManyToMany(() => Career, (career) => career.meetups)
@@ -237,7 +237,7 @@ export class Meetup {
   @JoinTable({ name: 'meetup_category' }) // owning side
   categories: Category[];
 
-  //?-------------------------------------------------------------------------*/
+  //? ----------------------------------------------------------------------- //
   //? constructor
 
   constructor(partial: Partial<Meetup>) {

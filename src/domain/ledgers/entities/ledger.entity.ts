@@ -42,8 +42,8 @@ export class Ledger {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsTo
 
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
@@ -53,8 +53,8 @@ export class Ledger {
   })
   user?: User;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<Ledger>) {
     Object.assign(this, partial);

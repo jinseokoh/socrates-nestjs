@@ -39,7 +39,7 @@ export class Flag {
   @ApiProperty({ description: 'createdAt' })
   createdAt: Date;
 
-  //? -------------------------------------------------------------------------/
+  //? ----------------------------------------------------------------------- //
   //? many-to-one belongsTo
 
   @ManyToOne(() => User, (user) => user.flags, {
@@ -49,8 +49,8 @@ export class Flag {
   })
   user?: User;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<Flag>) {
     Object.assign(this, partial);

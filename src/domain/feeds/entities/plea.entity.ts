@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
+import { Question } from 'src/domain/icebreakers/entities/question.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -51,7 +52,7 @@ export class Plea {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //? -------------------------------------------------------------------------/
+  //? ----------------------------------------------------------------------- //
   //? many-to-many belongsToMany using many-to-one
 
   @ManyToOne(() => User, (user) => user.id, {
@@ -70,15 +71,15 @@ export class Plea {
   @JoinColumn({ name: 'recipientId' })
   public recipient!: User;
 
-  @ManyToOne(() => Feed, (feed) => feed.id, {
+  @ManyToOne(() => Question, (question) => question.id, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'feedId' })
-  public feed: Feed;
+  public question: Question;
 
-  //? -------------------------------------------------------------------------/
+  //? ----------------------------------------------------------------------- //
   //? constructor
 
   constructor(partial: Partial<Plea>) {

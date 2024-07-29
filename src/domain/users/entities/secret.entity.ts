@@ -23,8 +23,8 @@ export class Secret {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<Secret>) {
     Object.assign(this, partial);

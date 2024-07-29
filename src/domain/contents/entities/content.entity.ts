@@ -56,8 +56,8 @@ export class Content {
   @OneToMany(() => ContentComment, (comment) => comment.content)
   comments: ContentComment[];
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<Content>) {
     Object.assign(this, partial);

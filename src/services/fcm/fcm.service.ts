@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator'
 import * as firebaseAdmin from 'firebase-admin';
 import { IData } from 'src/common/interfaces';
 
-//** reference) https://blog.logrocket.com/implement-in-app-notifications-nestjs-mysql-firebase/
+//? reference) https://blog.logrocket.com/implement-in-app-notifications-nestjs-mysql-firebase/
 @Injectable()
 export class FcmService {
   private readonly logger = new Logger(FcmService.name);

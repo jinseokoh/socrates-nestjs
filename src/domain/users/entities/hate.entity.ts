@@ -36,8 +36,8 @@ export class Hate {
   @ManyToOne(() => User, (user) => user.receivedBans)
   public recipient: User;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<Hate>) {
     Object.assign(this, partial);

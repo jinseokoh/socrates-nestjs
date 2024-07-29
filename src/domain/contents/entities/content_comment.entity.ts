@@ -53,8 +53,8 @@ export class ContentComment {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsTo
 
   @ManyToOne(() => User, (user) => user.contentComments, { cascade: true })
   user: User;
@@ -62,8 +62,8 @@ export class ContentComment {
   @ManyToOne(() => Content, (content) => content.comments, { cascade: true })
   content: Content;
 
-  //**--------------------------------------------------------------------------*/
-  //** one to many (self recursive relations)
+  //? ----------------------------------------------------------------------- //
+  //? one to many (self recursive relations)
   // data structure ref)
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
@@ -80,8 +80,8 @@ export class ContentComment {
   @OneToMany(() => ContentComment, (comment) => comment.parent)
   children: ContentComment[];
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<ContentComment>) {
     Object.assign(this, partial);

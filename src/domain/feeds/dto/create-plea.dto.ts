@@ -1,11 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreatePleaDto {
-  @ApiProperty({ description: 'id' })
-  @IsNumber()
-  @IsOptional()
-  id: number;
-
   @ApiProperty({ description: 'userId' })
   @IsNumber()
   @IsOptional()
@@ -20,11 +15,6 @@ export class CreatePleaDto {
   @IsNumber()
   @IsOptional()
   feedId: number;
-
-  @ApiProperty({ description: 'connectionId' })
-  @IsNumber()
-  @IsOptional()
-  connectionId?: number | null;
 
   @ApiProperty({ description: '요청시 사례 비용' })
   @IsNumber()

@@ -83,16 +83,16 @@ export class Feed {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  // //* ----------------------------------------------------------------------- */
-  // //* 1-to-1 hasOne
+  //? ----------------------------------------------------------------------- //
+  //? 1-to-1 hasOne
 
   // @OneToOne(() => Poll, (poll) => poll.feed, {
   //   cascade: ['insert', 'update'],
   // })
   // poll?: Poll | null;
 
-  //* ----------------------------------------------------------------------- */
-  //* 1-to-many (hasMany)
+  //? ----------------------------------------------------------------------- //
+  //? 1-to-many (hasMany)
 
   @OneToMany(() => FeedLink, (link) => link.feed)
   public feedLinks: FeedLink[];
@@ -100,14 +100,11 @@ export class Feed {
   @OneToMany(() => FeedComment, (comment) => comment.feed)
   public comments: FeedComment[];
 
-  @OneToMany(() => Plea, (plea) => plea.feed)
-  public pleas: Plea[];
-
   @OneToMany(() => BookmarkUserFeed, (bookmark) => bookmark.feed)
   public bookmarkedByUsers: BookmarkUserFeed[];
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 (belongsTo)
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 (belongsTo)
 
   @Column({ type: 'int', unsigned: true })
   public userId: number;
@@ -115,7 +112,7 @@ export class Feed {
   @ManyToOne(() => User, (user) => user.feeds)
   public user: User;
 
-  //?-------------------------------------------------------------------------?/
+  //? ----------------------------------------------------------------------- //
   //? constructor
 
   constructor(partial: Partial<Feed>) {

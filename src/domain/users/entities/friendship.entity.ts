@@ -56,7 +56,7 @@ export class Friendship {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //? -------------------------------------------------------------------------/
+  //? ----------------------------------------------------------------------- //
   //? many-to-many belongsToMany using many-to-one
 
   @ManyToOne(() => User, (user) => user.id, {
@@ -81,7 +81,7 @@ export class Friendship {
   @JoinColumn({ name: 'pleaId' })
   public plea: Plea;
 
-  //? -------------------------------------------------------------------------/
+  //? ----------------------------------------------------------------------- //
   //? constructor
 
   constructor(partial: Partial<Friendship>) {

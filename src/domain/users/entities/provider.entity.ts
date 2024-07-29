@@ -27,8 +27,8 @@ export class Provider {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsTo
 
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
@@ -38,8 +38,8 @@ export class Provider {
   })
   user: User;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<Provider>) {
     Object.assign(this, partial);

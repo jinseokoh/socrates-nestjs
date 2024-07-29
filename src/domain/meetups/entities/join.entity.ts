@@ -67,7 +67,7 @@ export class Join {
   @JoinColumn({ name: 'userId' })
   public user!: User;
 
-  //? -------------------------------------------------------------------------/
+  //? ----------------------------------------------------------------------- //
   //? many-to-many belongsToMany using many-to-one
 
   @ManyToOne(() => User, (user) => user.receivedJoins, {
@@ -86,7 +86,7 @@ export class Join {
   @JoinColumn({ name: 'meetupId' })
   public meetup!: Meetup;
 
-  //? -------------------------------------------------------------------------/
+  //? ----------------------------------------------------------------------- //
   //? constructor
 
   constructor(partial: Partial<Join>) {

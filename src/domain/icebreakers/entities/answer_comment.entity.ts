@@ -12,10 +12,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
+import { Answer } from 'src/domain/icebreakers/entities/answer.entity';
 
 @Entity()
-export class InquiryComment {
+export class AnswerComment {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
@@ -23,7 +23,7 @@ export class InquiryComment {
   userId: number; // to make it available to Repository.
 
   @Column({ type: 'int', unsigned: true })
-  inquiryId: number; // to make it available to Repository.
+  answerId: number; // to make it available to Repository.
 
   @Column({ type: 'int', unsigned: true, nullable: true })
   parentId: number | null;
@@ -56,36 +56,30 @@ export class InquiryComment {
   //? ----------------------------------------------------------------------- //
   //? many-to-1 belongsTo
 
-  @ManyToOne(() => User, (user) => user.inquiryComments, { cascade: true })
+  @ManyToOne(() => User, (user) => user.answerComments, { cascade: true })
   user: User;
 
-  @ManyToOne(() => Inquiry, (inquiry) => inquiry.comments, {
-    cascade: true,
-  })
-  inquiry: Inquiry;
+  @ManyToOne(() => Answer, (answer) => answer.comments, { cascade: true })
+  answer: Answer;
 
   //? ----------------------------------------------------------------------- //
   //? one to many (self recursive relations)
-  // data structure ref)
-  // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
+  //? data structure ref)
+  //? https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
-  @ManyToOne(
-    () => InquiryComment,
-    (InquiryComment) => InquiryComment.children,
-    {
-      onDelete: 'SET NULL',
-    },
-  )
+  @ManyToOne(() => AnswerComment, (AnswerComment) => AnswerComment.children, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'parentId' })
-  parent: InquiryComment;
+  parent: AnswerComment;
 
-  @OneToMany(() => InquiryComment, (opinion) => opinion.parent)
-  children: InquiryComment[];
+  @OneToMany(() => AnswerComment, (comment) => comment.parent)
+  children: AnswerComment[];
 
   //? ----------------------------------------------------------------------- //
   //? constructor
 
-  constructor(partial: Partial<InquiryComment>) {
+  constructor(partial: Partial<AnswerComment>) {
     Object.assign(this, partial);
   }
 }

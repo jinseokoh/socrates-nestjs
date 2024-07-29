@@ -33,8 +33,8 @@ export class Banner {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<Banner>) {
     Object.assign(this, partial);

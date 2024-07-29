@@ -70,7 +70,7 @@ export class UserPleasController {
   // Delete
   // ------------------------------------------------------------------------ //
 
-  @ApiOperation({ description: '요청들 삭제' })
+  @ApiOperation({ description: '내가 이 사용자에게 보낸 요청들 일괄 삭제' })
   @Delete(':userId/pleas/:recipientId')
   async deletePleas(
     @Param('userId', ParseIntPipe) userId: number,

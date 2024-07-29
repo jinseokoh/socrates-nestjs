@@ -65,7 +65,7 @@ export class Inquiry {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  //*-------------------------------------------------------------------------*/
+  //? ----------------------------------------------------------------------- //
   //* 1-to-many hasMany
 
   @OneToMany(() => InquiryComment, (comment) => comment.inquiry, {
@@ -73,8 +73,8 @@ export class Inquiry {
   })
   comments: InquiryComment[];
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsTo
 
   @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository.
@@ -82,8 +82,8 @@ export class Inquiry {
   @ManyToOne(() => User, (user) => user.inquiries)
   user: User;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<Inquiry>) {
     Object.assign(this, partial);

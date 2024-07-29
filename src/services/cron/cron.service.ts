@@ -15,8 +15,8 @@ export class CronService {
     @Inject(RABBITMQ_CLIENT) private readonly rabbitClient: ClientProxy,
   ) {}
 
-  //**--------------------------------------------------------------------------*/
-  //** EVERY 5 MINTUES
+  //? ----------------------------------------------------------------------- //
+  //? EVERY 5 MINTUES
   @Cron(CronExpression.EVERY_5_MINUTES)
   async handleTenSeconds() {
     await this.redisClient.emit('RealTime', {
@@ -26,8 +26,8 @@ export class CronService {
     this.logger.debug(`cron every 5 mins @${new Date().toLocaleString()}`);
   }
 
-  //**--------------------------------------------------------------------------*/
-  //** EVERY MINUTE
+  //? ----------------------------------------------------------------------- //
+  //? EVERY MINUTE
   @Cron(CronExpression.EVERY_MINUTE)
   async handleEveryMinute() {
     this.logger.debug('cron every minute');

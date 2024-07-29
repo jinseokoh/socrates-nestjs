@@ -34,8 +34,8 @@ export class Withdrawal {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsTo
 
   @ManyToOne(() => User, (user) => user.withdrawals, {
     onDelete: 'CASCADE',
@@ -43,8 +43,8 @@ export class Withdrawal {
   @JoinColumn()
   user?: User;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<Withdrawal>) {
     Object.assign(this, partial);

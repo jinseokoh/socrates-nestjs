@@ -54,14 +54,14 @@ export class Poll {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // //*-------------------------------------------------------------------------*/
+  // //? ----------------------------------------------------------------------- //
   // //* many-to-many belongsToMany using one-to-many
 
   // @OneToMany(() => Feed, (feed) => feed.poll)
   // public feeds: Feed[];
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsTo
 
   @ManyToOne(() => User, (user) => user.polls, {})
   user: User | null;
@@ -70,7 +70,7 @@ export class Poll {
   // @JoinColumn()
   // feed: Feed | null;
 
-  //?-------------------------------------------------------------------------?/
+  //? ----------------------------------------------------------------------- //
   //? constructor
 
   constructor(partial: Partial<Poll>) {

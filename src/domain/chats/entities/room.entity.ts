@@ -56,20 +56,20 @@ export class Room {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //**--------------------------------------------------------------------------*/
-  //** 1-to-1 hasOne
+  //? ----------------------------------------------------------------------- //
+  //? 1-to-1 hasOne
 
   @OneToOne(() => Meetup, (meetup) => meetup.user)
   meetup?: Meetup | null;
 
-  //**--------------------------------------------------------------------------*/
-  //** 1-to-many hasMany
+  //? ----------------------------------------------------------------------- //
+  //? 1-to-many hasMany
 
   @OneToMany(() => Participant, (participant) => participant.room)
   participants: Participant[];
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsTo
 
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
@@ -79,8 +79,8 @@ export class Room {
   @JoinColumn({ name: 'userId' })
   public user: User;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<Room>) {
     Object.assign(this, partial);

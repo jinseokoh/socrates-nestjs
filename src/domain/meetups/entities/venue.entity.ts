@@ -54,8 +54,8 @@ export class Venue {
   @ApiProperty({ description: '네이버 장소ID, 방구석은 `home${userId}`' })
   providerId: string;
 
-  //**------------------------------------------------------------------------*/
-  //** many-to-1 belongsToMany
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsToMany
 
   // it's not worth maintaining this relationship after all.
   // @Column({ type: 'uuid', length: 36 })
@@ -66,13 +66,13 @@ export class Venue {
   // })
   // user: User;
 
-  //**------------------------------------------------------------------------*/
-  //** 1-to-many hasMany
+  //? ----------------------------------------------------------------------- //
+  //? 1-to-many hasMany
 
   @OneToMany(() => Meetup, (meetup) => meetup.venue)
   meetups: Meetup[];
 
-  //?-------------------------------------------------------------------------*/
+  //? ----------------------------------------------------------------------- //
   //? constructor
 
   constructor(partial: Partial<Venue>) {

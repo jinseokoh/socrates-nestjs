@@ -53,8 +53,8 @@ export class FeedComment {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  //**--------------------------------------------------------------------------*/
-  //** many-to-1 belongsTo
+  //? ----------------------------------------------------------------------- //
+  //? many-to-1 belongsTo
 
   @ManyToOne(() => User, (user) => user.feedComments, { cascade: true })
   user: User;
@@ -62,8 +62,8 @@ export class FeedComment {
   @ManyToOne(() => Feed, (feed) => feed.comments, { cascade: true })
   feed: Feed;
 
-  //**--------------------------------------------------------------------------*/
-  //** one to many (self recursive relations)
+  //? ----------------------------------------------------------------------- //
+  //? one to many (self recursive relations)
   // data structure ref)
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
@@ -76,8 +76,8 @@ export class FeedComment {
   @OneToMany(() => FeedComment, (comment) => comment.parent)
   children: FeedComment[];
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<FeedComment>) {
     Object.assign(this, partial);

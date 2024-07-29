@@ -29,13 +29,13 @@ export class Category {
   @TreeParent()
   parent: Category;
 
-  //*-------------------------------------------------------------------------*/
+  //? ----------------------------------------------------------------------- //
   //* many-to-many belongsToMany using one-to-many
 
   @OneToMany(() => Interest, (interest) => interest.category)
   public usersInterested: Interest[];
 
-  //*-------------------------------------------------------------------------*/
+  //? ----------------------------------------------------------------------- //
   //* many-to-many belongsToMany
 
   @ManyToMany(() => Meetup, (meetup) => meetup.categories)
@@ -44,7 +44,7 @@ export class Category {
   // used to have this many to many relationship.
   // @ManyToMany(() => User, (user) => user.categories)
   // users: User[];
-  //?-------------------------------------------------------------------------?/
+  //? ----------------------------------------------------------------------- //
   //? constructor
 
   constructor(partial: Partial<Category>) {

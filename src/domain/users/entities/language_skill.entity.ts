@@ -35,8 +35,8 @@ export class LanguageSkill {
   })
   public language?: Language | null;
 
-  //??--------------------------------------------------------------------------*/
-  //?? constructor
+  //? ----------------------------------------------------------------------- //
+  //? constructor
 
   constructor(partial: Partial<LanguageSkill>) {
     Object.assign(this, partial);

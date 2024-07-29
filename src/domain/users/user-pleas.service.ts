@@ -13,9 +13,9 @@ export class UserPleasService {
     private readonly pleaRepository: Repository<Plea>,
   ) {}
 
-  // ------------------------------------------------------------------------ //
-  // Read
-  // ------------------------------------------------------------------------ //
+  //? ----------------------------------------------------------------------- //
+  //? Read
+  //? ----------------------------------------------------------------------- //
 
   async findByIds(userId: number, recipientId: number): Promise<Plea[]> {
     try {
@@ -97,10 +97,11 @@ export class UserPleasService {
   // Delete
   // ------------------------------------------------------------------------ //
 
+  // todo. delete at once. don't run in loop.
   async deletePleas(userId: number, recipientId: number): Promise<void> {
     const pleas = await this.findByIds(userId, recipientId);
     await Promise.all(
-      pleas.map(async (v: Plea) => await this.pleaRepository.softDelete(v.id)),
+      pleas.map(async (v: Plea) => await this.pleaRepository.delete(v.id)),
     );
   }
 
