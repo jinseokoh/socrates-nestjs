@@ -19,6 +19,7 @@ import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
 import { UserJoinsService } from 'src/domain/users/user-joins.service';
 import { UserCategoriesService } from 'src/domain/users/user-categories.service';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -29,17 +30,17 @@ export class UserJoinsController {
     private readonly userCategoriesService: UserCategoriesService,
   ) {}
 
-  @ApiOperation({ description: '모임신청 리스트에 추가' })
+  @ApiOperation({ description: '모임신청 생성' })
   @PaginateQueryOptions()
   @Post(':userId/joins/:recipientId/meetups/:meetupId')
-  async attachToJoinPivot(
+  async createJoin(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() dto: CreateJoinDto, // optional message, and skill
-  ): Promise<AnyData> {
+  ): Promise<void> {
     // 모임신청 생성
-    const meetup = await this.userJoinsService.attachToJoinPivot(
+    const meetup = await this.userJoinsService.createJoin(
       userId,
       recipientId,
       meetupId,
@@ -51,9 +52,6 @@ export class UserJoinsController {
       meetup.subCategory,
       dto.skill,
     );
-    return {
-      data: 'ok',
-    };
   }
 
   @ApiOperation({ description: '모임신청 수락/거부' })
@@ -64,7 +62,7 @@ export class UserJoinsController {
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
     @Body() dto: AcceptOrDenyDto,
-  ): Promise<AnyData> {
+  ): Promise<void> {
     await this.userJoinsService.updateJoinToAcceptOrDeny(
       userId,
       recipientId,
@@ -72,23 +70,20 @@ export class UserJoinsController {
       dto.status,
       dto.joinType,
     );
-    return {
-      data: 'ok',
-    };
   }
 
   @ApiOperation({ description: '내가 신청(request)한 모임 리스트 (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/meetups-requested')
-  async getMeetupsRequested(
+  @Get(':userId/requestedmeetups')
+  async listMeetupsRequested(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Join>> {
-    return await this.userJoinsService.getMeetupsRequested(userId, query);
+  ): Promise<Paginated<Meetup>> {
+    return await this.userJoinsService.listMeetupsRequested(userId, query);
   }
 
   @ApiOperation({ description: '내가 신청한 모임ID 리스트 (all)' })
-  @Get(':userId/meetupids-requested')
+  @Get(':userId/requestedmeetupids')
   async getMeetupIdsToJoin(@Param('userId') userId: number): Promise<AnyData> {
     const data = await this.userJoinsService.getMeetupIdsRequested(userId);
     return { data };

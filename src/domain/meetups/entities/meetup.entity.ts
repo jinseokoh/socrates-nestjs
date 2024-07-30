@@ -160,9 +160,9 @@ export class Meetup {
   @ApiProperty({ description: '게스트가 모두 결정되었는지 여부' })
   isFull: boolean;
 
-  @Column({ default: false })
-  @ApiProperty({ description: '신고 여부' })
-  isFlagged: boolean;
+  // @Column({ default: false })
+  // @ApiProperty({ description: '신고 여부' })
+  // isFlagged: boolean;
 
   @Column({ type: 'datetime', nullable: true })
   @ApiProperty({ description: 'expiration' })

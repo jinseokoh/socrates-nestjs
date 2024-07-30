@@ -9,7 +9,6 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -60,29 +59,17 @@ export class QuestionsController {
   @Public()
   @ApiOperation({ description: 'load active questions' })
   @Get('active')
-  async getActives(
-    @Query('age') age: number | undefined,
-  ): Promise<Array<Question>> {
-    return await this.questionsService.getActives(age);
-  }
-
-  @Public()
-  @ApiOperation({ description: 'load inactive questions' })
-  @Get('inactive')
-  async getInactives(
-    @Query('age') age: number | undefined,
-  ): Promise<Array<Question>> {
-    return await this.questionsService.getInactives(age);
+  async loadAll(): Promise<Array<Question>> {
+    return await this.questionsService.loadAll();
   }
 
   @Public()
   @ApiOperation({ description: 'load active questions by slug' })
-  @Get('active/:slug')
-  async getActivesBySlug(
-    @Param('slug') slug: string,
-    @Query('age') age: number | undefined,
+  @Get('active/:category')
+  async loadAllByCategory(
+    @Param('category') category: string,
   ): Promise<Array<Question>> {
-    return await this.questionsService.getActivesBySlug(slug, age);
+    return await this.questionsService.loadAllByCategory(category);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -96,18 +83,6 @@ export class QuestionsController {
     @Body() dto: UpdateQuestionDto,
   ): Promise<any> {
     return await this.questionsService.update(id, dto);
-  }
-
-  @ApiOperation({ description: 'Question 갱신' })
-  @Patch(':id/up')
-  async thumbsUp(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    return await this.questionsService.thumbsUp(id);
-  }
-
-  @ApiOperation({ description: 'Question 갱신' })
-  @Patch(':id/down')
-  async thumbsDown(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    return await this.questionsService.thumbsDown(id);
   }
 
   //? ----------------------------------------------------------------------- //

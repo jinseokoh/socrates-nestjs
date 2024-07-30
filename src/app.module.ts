@@ -39,6 +39,7 @@ import { AppController } from 'src/app.controller';
 import { AppService } from 'src/app.service';
 import { DuplicateEntryErrorInterceptor } from 'src/common/interceptors/duplicate-entry-error.interceptor';
 import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.filter';
+import { IcebreakersModule } from 'src/domain/icebreakers/icebreakers.module';
 // import { CustomLogger } from 'src/helpers/custom-logger';
 @Module({
   imports: [
@@ -147,6 +148,7 @@ import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.
     ChatsModule,
     ContentsModule,
     FeedsModule,
+    IcebreakersModule,
     InquiriesModule,
     LanguagesModule,
     LedgersModule,

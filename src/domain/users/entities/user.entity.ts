@@ -35,9 +35,7 @@ import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.e
 import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
 import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
 import { Participant } from 'src/domain/chats/entities/participant.entity';
-import { Answer } from 'src/domain/icebreakers/entities/answer.entity';
 import { Question } from 'src/domain/icebreakers/entities/question.entity';
-import { AnswerComment } from 'src/domain/icebreakers/entities/answer_comment.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -164,11 +162,6 @@ export class User {
   })
   public questions: Question[];
 
-  @OneToMany(() => Answer, (answer) => answer.user, {
-    // cascade: ['insert', 'update'],
-  })
-  public answers: Answer[];
-
   @OneToMany(() => Inquiry, (inquiry) => inquiry.user, {
     // cascade: ['insert', 'update'],
   })
@@ -176,9 +169,6 @@ export class User {
 
   @OneToMany(() => MeetupComment, (comment) => comment.user)
   public meetupComments: MeetupComment[];
-
-  @OneToMany(() => AnswerComment, (comment) => comment.user)
-  public answerComments: AnswerComment[];
 
   @OneToMany(() => FeedComment, (comment) => comment.user)
   public feedComments: FeedComment[];

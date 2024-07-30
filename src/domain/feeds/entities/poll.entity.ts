@@ -1,13 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -19,11 +16,11 @@ export class Poll {
   id: number;
 
   @Column({ length: 16, nullable: false })
-  @Column({ type: 'int', unsigned: true, default: null })
-  userId: number | null; // to make it available to Repository.
-
   @ApiProperty({ description: 'slug' })
   slug: string;
+
+  @Column({ type: 'int', unsigned: true, default: null })
+  userId: number | null; // to make it available to Repository.
 
   // @Column({ type: 'int', unsigned: true, default: null })
   // feedId: number | null; // to make it available to Repository.

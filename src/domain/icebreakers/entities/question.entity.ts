@@ -1,21 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { QuestionType, TargetGender } from 'src/common/enums';
-import { Answer } from 'src/domain/icebreakers/entities/answer.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { IsArray } from 'class-validator';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
 
 @Entity()
 export class Question {
@@ -23,59 +16,22 @@ export class Question {
   id: number;
 
   @Column({ length: 16, nullable: false })
-  slug: string;
-
-  @Column({ length: 16, nullable: true })
-  help: string | null;
+  category: string;
 
   @Column({ length: 255, nullable: false })
-  @ApiProperty({ description: 'question' })
-  question: string;
-
-  @Column({
-    type: 'enum',
-    enum: QuestionType,
-    default: QuestionType.SHORT_ANSWER,
-    nullable: true,
-  })
-  @ApiProperty({ description: 'questionType' })
-  questionType: QuestionType;
-
-  @Column('json', { nullable: true })
-  @ApiProperty({ description: 'options' })
-  @IsArray()
-  options: string[] | null;
+  @ApiProperty({ description: 'body' })
+  body: string;
 
   @Column({ default: false })
-  @ApiProperty({ description: 'whether or not allow multiple answers' })
-  allowMultiple: boolean;
-
-  @Column('json', { nullable: true })
-  @ApiProperty({ description: 'options' })
-  aggregatedChoices: { [key: string]: number };
+  @ApiProperty({ description: 'is anonymous' })
+  isAnonymous: boolean;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   answerCount: number;
 
-  @Column({ default: false })
-  @ApiProperty({ description: 'isActive' })
-  isActive: boolean;
-
-  // @Column({ type: 'enum', enum: TargetGender, default: TargetGender.ALL })
-  // @ApiProperty({ description: 'gender looking for' })
-  // targetGender: TargetGender;
-
-  // @Column({ type: 'tinyint', unsigned: true, default: 18 })
-  // targetMinAge: number;
-
-  // @Column({ type: 'tinyint', unsigned: true, default: 66 })
-  // targetMaxAge: number;
-
   @Column({ type: 'int', unsigned: true, default: 0 })
-  up: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  down: number;
+  @ApiProperty({ description: 'flag count' })
+  flagCount: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -89,11 +45,8 @@ export class Question {
   //? ----------------------------------------------------------------------- //
   //? many-to-many (belongsToMany) using 1-to-many (hasMany)
 
-  @OneToMany(() => Answer, (answer) => answer.question)
-  public answers: Answer[];
-
-  @OneToMany(() => Plea, (plea) => plea.question)
-  public pleas: Plea[];
+  // @OneToMany(() => Answer, (answer) => answer.question)
+  // public answers: Answer[];
 
   //? ----------------------------------------------------------------------- //
   //? many-to-1 (belongsTo)

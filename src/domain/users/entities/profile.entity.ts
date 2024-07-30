@@ -3,6 +3,7 @@ import { IsArray } from 'class-validator';
 import { BaseCareer } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
+  AfterLoad,
   BeforeInsert,
   Column,
   CreateDateColumn,
@@ -106,10 +107,16 @@ export class Profile {
   }
 
   //? ------------------------------------------------------------------------- */
-  //? program tically set a default using TypeORM hook
+  //? programatically set a default using TypeORM hook
+
+  @AfterLoad()
+  setNullToEmptyArray() {
+    this.images = this.images || [];
+    this.fyis = this.fyis || [];
+  }
 
   @BeforeInsert()
-  setDefaults() {
+  setDefaultOptions() {
     this.options = this.options || {
       chat: false,
       event: false,

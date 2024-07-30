@@ -71,13 +71,13 @@ export class Plea {
   @JoinColumn({ name: 'recipientId' })
   public recipient!: User;
 
-  @ManyToOne(() => Question, (question) => question.id, {
+  @ManyToOne(() => Feed, (feed) => feed.id, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'feedId' })
-  public question: Question;
+  public feed: Feed;
 
   //? ----------------------------------------------------------------------- //
   //? constructor

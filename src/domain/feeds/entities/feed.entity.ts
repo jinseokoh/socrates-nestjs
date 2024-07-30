@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Poll } from 'src/domain/feeds/entities/poll.entity';
 import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
@@ -9,15 +8,13 @@ import {
   Entity,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { IsArray } from 'class-validator';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { FeedLink } from 'src/domain/feeds/entities/feed_link.entity';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
-import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Plea } from 'src/domain/feeds/entities/plea.entity';
 
 // a user can like meetup
 // https://github.com/typeorm/typeorm/issues/4653
@@ -30,7 +27,7 @@ export class Feed {
   @ApiProperty({ description: 'slug' })
   slug: string;
 
-  @Column({ length: 64, nullable: true })
+  @Column({ length: 40, nullable: true })
   @ApiProperty({ description: '제목' })
   title: string | null;
 
@@ -47,9 +44,15 @@ export class Feed {
   @ApiProperty({ description: 'is anonymous' })
   isAnonymous: boolean;
 
-  @Column({ default: false })
-  @ApiProperty({ description: 'is banned' })
-  isBanned: boolean;
+  // @Column({ type: 'enum', enum: TargetGender, default: TargetGender.ALL })
+  // @ApiProperty({ description: 'gender looking for' })
+  // targetGender: TargetGender;
+
+  // @Column({ type: 'tinyint', unsigned: true, default: 18 })
+  // targetMinAge: number;
+
+  // @Column({ type: 'tinyint', unsigned: true, default: 66 })
+  // targetMaxAge: number;
 
   // like, comment, view, bookmark, flag count ------------------------------ //
   @Column({ type: 'int', unsigned: true, default: 0 })
@@ -99,6 +102,9 @@ export class Feed {
 
   @OneToMany(() => FeedComment, (comment) => comment.feed)
   public comments: FeedComment[];
+
+  @OneToMany(() => Plea, (plea) => plea.feed)
+  public pleas: Plea[];
 
   @OneToMany(() => BookmarkUserFeed, (bookmark) => bookmark.feed)
   public bookmarkedByUsers: BookmarkUserFeed[];
