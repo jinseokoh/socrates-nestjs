@@ -76,15 +76,24 @@ export class UserJoinsService {
 
     try {
       await this.userRepository.manager.query(
-        'INSERT IGNORE INTO `join` (userId, recipientId, meetupId, message, skill, joinType) VALUES (?, ?, ?, ?, ?, ?) \
+        'INSERT IGNORE INTO `join` (userId, recipientId, meetupId, message, skill, joinType, status) VALUES (?, ?, ?, ?, ?, ?, ?) \
   ON DUPLICATE KEY UPDATE \
   userId = VALUES(`userId`), \
   recipientId = VALUES(`recipientId`), \
   meetupId = VALUES(`meetupId`), \
   message = VALUES(`message`), \
   skill = VALUES(`skill`), \
-  joinType = VALUES(`joinType`)',
-        [userId, recipientId, meetupId, dto.message, dto.skill, joinType],
+  joinType = VALUES(`joinType`), \
+  status = VALUES(`status`)',
+        [
+          userId,
+          recipientId,
+          meetupId,
+          dto.message,
+          dto.skill,
+          joinType,
+          JoinStatus.PENDING,
+        ],
       );
 
       // notification with event listener ------------------------------------//
