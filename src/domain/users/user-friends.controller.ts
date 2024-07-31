@@ -14,7 +14,6 @@ import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
-import { AnyData } from 'src/common/types';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto';
 import { UserFriendsService } from 'src/domain/users/user-friends.service';
@@ -73,45 +72,50 @@ export class UserFriendshipController {
 
   // ------------------------------------------------------------------------ //
 
-  @ApiOperation({ description: '보낸 친구신청 리스트 (paginated)' })
+  @ApiOperation({ description: '내가 친구신청 보낸 Friendships (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/sentfriendships')
-  async getFriendshipsSent(
+  async listFriendshipsSent(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
-    return await this.userFriendsService.getFriendshipsSent(userId, query);
+    return await this.userFriendsService.listFriendshipsSent(userId, query);
   }
 
-  @ApiOperation({ description: '받은 친구신청 리스트 (paginated)' })
+  @ApiOperation({ description: '내가 친구신청 받은 Friendships (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/receivedfriendships')
-  async getFriendshipsReceived(
+  async listFriendshipsReceived(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
-    return await this.userFriendsService.getFriendshipsReceived(userId, query);
+    return await this.userFriendsService.listFriendshipsReceived(userId, query);
   }
 
-  @ApiOperation({
-    description: '내친구 리스트를 위한, 친구 Users (paginated)',
-  })
+  @ApiOperation({ description: '현재 친구관계인 Users (paginated)' })
   @Get(':userId/friends')
-  async getMyFriends(
+  async listMyFriends(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<User>> {
-    return this.userFriendsService.getMyFriends(userId, query);
+    return this.userFriendsService.listMyFriends(userId, query);
   }
 
-  // ------------------------------------------------------------------------ //
-
-  @ApiOperation({ description: '친구관계 ID 리스트 (all)' })
-  @Get(':userId/friendship-ids')
-  async getFriendshipIds(
+  @ApiOperation({ description: '현재 친구관계인 UserIds (all)' })
+  @Get(':userId/friendids')
+  async loadFriendUserIds(
     @Param('userId') userId: number,
     // @Query('status') status: string | undefined,
-  ): Promise<AnyData> {
-    return this.userFriendsService.getFriendshipIds(userId);
+  ): Promise<number[]> {
+    return this.userFriendsService.loadFriendUserIds(userId);
+  }
+
+  @ApiOperation({ description: 'pending 친구관계인 UserIds (all)' })
+  @Get(':userId/pendingfriendids')
+  async loadPendingFriendshipUserIds(
+    @Param('userId') userId: number,
+    // @Query('status') status: string | undefined,
+  ): Promise<number[]> {
+    return this.userFriendsService.loadPendingFriendUserIds(userId);
   }
 }

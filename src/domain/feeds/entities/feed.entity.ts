@@ -35,6 +35,12 @@ export class Feed {
   @ApiProperty({ description: 'feed 내용' })
   body: string;
 
+  @Column({ length: 32, nullable: false })
+  entityType: string;
+
+  @Column({ type: 'int', unsigned: false })
+  entityId: number;
+
   @Column('json', { nullable: true })
   @ApiProperty({ description: '이미지' })
   @IsArray()

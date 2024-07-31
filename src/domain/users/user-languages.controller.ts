@@ -58,7 +58,9 @@ export class UserLanguagesController {
       try {
         return await this.userLanguagesService.syncLanguagesWithEntities(
           userId,
-          dto.entities,
+          dto.entities.map((v) => {
+            return { ...v, userId: userId };
+          }),
         );
       } catch (e) {
         throw new BadRequestException();

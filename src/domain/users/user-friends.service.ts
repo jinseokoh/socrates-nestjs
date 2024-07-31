@@ -321,9 +321,11 @@ export class UserFriendsService {
     }
   }
 
-  // 내가 친구신청 보낸 Users (paginated)
+  // ------------------------------------------------------------------------ //
+
+  //? 내가 친구신청 보낸 Friendships (paginated)
   //? message 때문에 Friendship 으로 보내야 한다.
-  async getFriendshipsSent(
+  async listFriendshipsSent(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
@@ -336,7 +338,6 @@ export class UserFriendsService {
         userId: userId,
         status: Not(FriendStatus.ACCEPTED),
       });
-
     const config: PaginateConfig<Friendship> = {
       sortableColumns: ['createdAt'],
       defaultLimit: 20,
@@ -349,9 +350,9 @@ export class UserFriendsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내가 친구신청 받은 Users (paginated)
+  //? 내가 친구신청 받은 Friendships (paginated)
   //? message 때문에 Friendship 으로 보내야 한다.
-  async getFriendshipsReceived(
+  async listFriendshipsReceived(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
@@ -364,7 +365,6 @@ export class UserFriendsService {
         recipientId: userId,
         status: Not(FriendStatus.ACCEPTED),
       });
-
     const config: PaginateConfig<Friendship> = {
       sortableColumns: ['createdAt'],
       defaultLimit: 20,
@@ -377,8 +377,8 @@ export class UserFriendsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내친구 리스트를 위한, 받거나 보낸 친구신청 리스트 (paginated)
-  async getMyFriends(
+  // 현재 친구관계인 Users (paginated)
+  async listMyFriends(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<User>> {
@@ -392,7 +392,6 @@ export class UserFriendsService {
         '(friendship.userId = :userId AND user.id = friendship.recipientId) OR (friendship.recipientId = :userId AND user.id = friendship.userId)',
         { userId },
       );
-
     const config: PaginateConfig<User> = {
       sortableColumns: ['createdAt'],
       defaultLimit: 20,
@@ -405,35 +404,53 @@ export class UserFriendsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // ------------------------------------------------------------------------ //
+  // 현재 친구관계인 UserIds (all)
+  async loadFriendUserIds(userId: number): Promise<number[]> {
+    const query = `
+      SELECT DISTINCT
+        CASE
+          WHEN friendship.userId = ? THEN friendship.recipientId
+          ELSE friendship.userId
+        END AS friendId
+      FROM
+        friendship
+      WHERE
+        friendship.status = 'accepted' AND (
+          friendship.userId = ? OR
+          friendship.recipientId = ?
+        );
+    `;
+    const items = await this.userRepository.manager.query(query, [
+      userId,
+      userId,
+      userId,
+    ]);
 
-  // 친구관계 ID 리스트 (all)
-  async getFriendshipIds(userId: number): Promise<AnyData> {
-    const rows = await this.userRepository.manager.query(
-      'SELECT status, userId, recipientId \
-      FROM `friendship` \
-      WHERE userId = ? OR recipientId = ?',
-      [userId, userId],
-    );
+    return items.map(({ friendId }) => +friendId);
+  }
 
-    const pendingIds = rows
-      .filter((v: any) => v.status !== 'accepted')
-      .map((v: any) => {
-        return v.userId === userId ? v.recipientId : v.userId;
-      });
+  // pending 친구관계인 UserIds (all)
+  async loadPendingFriendUserIds(userId: number): Promise<number[]> {
+    const query = `
+      SELECT DISTINCT
+        CASE
+          WHEN friendship.userId = ? THEN friendship.recipientId
+          ELSE friendship.userId
+        END AS friendId
+      FROM
+        friendship
+      WHERE
+        friendship.status = 'pending' AND (
+          friendship.userId = ? OR
+          friendship.recipientId = ?
+        );
+    `;
+    const items = await this.userRepository.manager.query(query, [
+      userId,
+      userId,
+      userId,
+    ]);
 
-    const friendIds = rows
-      .filter((v: any) => v.status === 'accepted')
-      .map((v: any) => {
-        return v.userId === userId ? v.recipientId : v.userId;
-      });
-
-    // todo. remove dups
-    return {
-      data: {
-        pendingIds,
-        friendIds,
-      },
-    };
+    return items.map(({ friendId }) => +friendId);
   }
 }

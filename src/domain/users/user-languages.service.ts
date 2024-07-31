@@ -5,6 +5,7 @@ import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { In, Repository } from 'typeorm';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Language } from 'src/domain/languages/entities/language.entity';
+import { LanguageSkillWithoutId } from 'src/domain/users/dto/sync-language.dto';
 
 @Injectable()
 export class UserLanguagesService {
@@ -39,7 +40,7 @@ export class UserLanguagesService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 관심사 Sync w/ Ids (기존정보 사라짐)
+  //? 관심사 Sync w/ Ids (기존정보 사라짐) skill 기본 값 0 으로 저장
   //? ----------------------------------------------------------------------- //
 
   async syncLanguagesWithIds(
@@ -50,7 +51,7 @@ export class UserLanguagesService {
     await Promise.all(
       ids.map(async (v: number) => {
         await this.languageRepository.manager.query(
-          'INSERT IGNORE INTO `interest` (userId, categoryId) VALUES (?, ?)',
+          'INSERT IGNORE INTO `language_skill` (userId, languageId) VALUES (?, ?)',
           [userId, v],
         );
       }),
@@ -59,7 +60,7 @@ export class UserLanguagesService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 관심사 Sync w/ Slugs (기존정보 사라짐)
+  //? 언어 Sync w/ Slugs (기존정보 사라짐) skill 기본 값 0 으로 저장
   //? ----------------------------------------------------------------------- //
 
   async syncLanguagesWithSlugs(
@@ -84,12 +85,12 @@ export class UserLanguagesService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 관심사 Sync w/ LanguageSkills (기존정보 사라짐)
+  //? 언어 Sync w/ LanguageSkills (기존정보 사라짐)
   //? ----------------------------------------------------------------------- //
 
   async syncLanguagesWithEntities(
     userId: number,
-    entities: LanguageSkill[],
+    entities: LanguageSkillWithoutId[],
   ): Promise<LanguageSkill[]> {
     await this._wipeOutLanguageSkills(userId);
     await this.languageSkillRepository.upsert(entities, [

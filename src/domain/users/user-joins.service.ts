@@ -300,6 +300,6 @@ WHERE `joinType` = ? AND `user`.id = ?',
       [JoinRequestType.INVITATION, userId],
     );
 
-    return items.map(({ meetupId }) => meetupId);
+    return items.map(({ meetupId }) => +meetupId);
   }
 }

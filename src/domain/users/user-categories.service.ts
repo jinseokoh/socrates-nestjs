@@ -135,7 +135,7 @@ export class UserCategoriesService {
 
   async _wipeOutInterests(userId: number): Promise<void> {
     await this.interestRepository.manager.query(
-      'DELETE FROM `intetest` WHERE userId = ?',
+      'DELETE FROM `interest` WHERE userId = ?',
       [userId],
     );
   }

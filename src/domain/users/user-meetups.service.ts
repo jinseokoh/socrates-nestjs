@@ -37,8 +37,8 @@ export class UserMeetupsService {
       .createQueryBuilder('meetup')
       .leftJoinAndSelect('meetup.venue', 'venue')
       .leftJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('meetup.rooms', 'rooms')
-      .leftJoinAndSelect('rooms.user', 'participant')
+      .leftJoinAndSelect('meetup.room', 'room')
+      .leftJoinAndSelect('room.participants', 'participants')
       .where('meetup.userId = :userId', {
         userId,
       });
