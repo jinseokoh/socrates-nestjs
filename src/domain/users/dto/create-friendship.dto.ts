@@ -19,10 +19,10 @@ export class CreateFriendshipDto {
   @IsOptional()
   recipientId: number;
 
-  @ApiProperty({ description: 'request 보내는 origin' })
-  @IsNotEmpty()
-  @IsString()
-  friendRequestType: string;
+  // @ApiProperty({ description: 'request 보내는 origin' })
+  // @IsNotEmpty()
+  // @IsString()
+  // friendRequestType: string;
 
   @ApiProperty({ description: '친구신청시 보내는 글' })
   @IsNotEmpty()
@@ -37,7 +37,6 @@ export class CreateFriendshipDto {
   @ApiProperty({
     description: 'status',
     default: FriendStatus.PENDING,
-    required: true,
   })
   @IsEnum(FriendStatus)
   @IsOptional()

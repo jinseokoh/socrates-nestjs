@@ -24,12 +24,12 @@ export class Impression {
   recipientId: number;
 
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
-  @ApiProperty({ description: '😀 적절한 😡 부적절한' })
-  appropriateness: number;
-
-  @Column({ type: 'tinyint', unsigned: true, default: 1 })
   @ApiProperty({ description: '😀 긍정적 😱 부정적' })
   attitude: number;
+
+  @Column({ type: 'tinyint', unsigned: true, default: 1 })
+  @ApiProperty({ description: '😀 적절한 😡 부적절한' })
+  compliance: number;
 
   @Column({ type: 'tinyint', unsigned: true, default: 1 })
   @ApiProperty({ description: '🥰 관심 🥱 무관심' })

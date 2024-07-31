@@ -28,21 +28,16 @@ export class UserImpressionsController {
 
   @ApiOperation({ description: '첫인상 평가 데이터 추가' })
   @Post(':userId/impressions/:recipientId')
-  async create(
+  async createUserImpression(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body() dto: CreateImpressionDto,
   ): Promise<any> {
-    console.log(dto);
-    try {
-      return await this.userImpressionsService.upsertImpression({
-        ...dto,
-        userId,
-        recipientId,
-      });
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    return await this.userImpressionsService.upsertImpression({
+      ...dto,
+      userId,
+      recipientId,
+    });
   }
 
   //? ----------------------------------------------------------------------- //
@@ -51,9 +46,9 @@ export class UserImpressionsController {
 
   @ApiOperation({ description: '첫인상 평가 데이터' })
   @Get(':userId/impressions')
-  async getUserImpressionsById(
+  async getUserImpressionAverage(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
-    return await this.userImpressionsService.getImpressionAverageById(userId);
+    return await this.userImpressionsService.getUserImpressionAverage(userId);
   }
 }

@@ -28,9 +28,9 @@ export class UserJoinsController {
     private readonly userCategoriesService: UserCategoriesService,
   ) {}
 
-  @ApiOperation({ description: '모임신청 생성' })
+  @ApiOperation({ description: '모임신청/초대 생성' })
   @PaginateQueryOptions()
-  @Post(':userId/joins/:recipientId/meetups/:meetupId')
+  @Post(':userId/meetups/:meetupId')
   async createJoin(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
@@ -52,9 +52,9 @@ export class UserJoinsController {
     );
   }
 
-  @ApiOperation({ description: '모임신청 수락/거부' })
+  @ApiOperation({ description: '모임신청/초대 수락/거부' })
   @PaginateQueryOptions()
-  @Patch(':userId/joins/:recipientId/meetups/:meetupId')
+  @Patch(':userId/joins/:joinId')
   async updateJoinToAcceptOrDeny(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
@@ -66,7 +66,6 @@ export class UserJoinsController {
       recipientId,
       meetupId,
       dto.status,
-      dto.joinType,
     );
   }
 

@@ -4,6 +4,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import 'moment-timezone';
@@ -19,7 +20,7 @@ export class UserImpressionsService {
 
   constructor(
     @InjectRepository(User)
-    private readonly repository: Repository<User>,
+    private readonly userRepository: Repository<User>,
     @Inject(ConfigService) private configService: ConfigService, // global
   ) {
     this.env = this.configService.get('nodeEnv');
@@ -31,19 +32,19 @@ export class UserImpressionsService {
 
   async upsertImpression(dto: CreateImpressionDto): Promise<any> {
     try {
-      await this.repository.manager.query(
+      await this.userRepository.manager.query(
         'INSERT IGNORE INTO `impression` \
-  (attitude, empathy, humor, appropriateness, manner, userId, recipientId) VALUES (?, ?, ?, ?, ?, ?, ?) \
+  (attitude, empathy, humor, compliance, manner, userId, recipientId) VALUES (?, ?, ?, ?, ?, ?, ?) \
   ON DUPLICATE KEY UPDATE \
-  appropriateness = VALUES(`appropriateness`), \
   attitude = VALUES(`attitude`), \
+  compliance = VALUES(`compliance`), \
   empathy = VALUES(`empathy`), \
   humor = VALUES(`humor`), \
   manner = VALUES(`manner`), \
   userId = VALUES(`userId`), \
   recipientId = VALUES(`recipientId`)',
         [
-          dto.appropriateness,
+          dto.compliance,
           dto.attitude,
           dto.empathy,
           dto.humor,
@@ -52,54 +53,62 @@ export class UserImpressionsService {
           dto.recipientId, // 평가받는 사용자
         ],
       );
-      const user = await this.repository.findOneOrFail({
+      const user = await this.userRepository.findOneOrFail({
         where: { id: dto.recipientId },
         relations: ['receivedImpressions'],
       });
       if (user.receivedImpressions && user.receivedImpressions.length > 1) {
-        const average = await this.getImpressionAverageById(dto.recipientId);
-        // todo. save it to profile model.
-        // const dto = new UpdateProfileDto();
-        // dto.impressions = impressions;
-        // await this.usersService.updateProfile(id, dto);
-        return average;
+        return await this.getUserImpressionAverage(dto.recipientId);
       }
       return {
-        appropriateness: dto.appropriateness,
+        compliance: dto.compliance,
         attitude: dto.attitude,
         empathy: dto.empathy,
         humor: dto.humor,
         manner: dto.manner,
       };
-    } catch (e) {
-      this.logger.log('[🖥️]', e);
-      throw new BadRequestException();
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`user not found`);
+      } else {
+        throw new BadRequestException();
+      }
     }
   }
 
   // 첫인상 평균 보기 (w/ id)
-  async getImpressionAverageById(recipientId: number): Promise<any> {
+  async getUserImpressionAverage(userId: number): Promise<any> {
     try {
-      const [row] = await this.repository.manager.query(
-        'SELECT \
-AVG(appropriateness) AS appropriateness, \
+      const user = await this.userRepository.findOneOrFail({
+        where: { id: userId },
+        relations: ['receivedImpressions'],
+      });
+      if (user.receivedImpressions && user.receivedImpressions.length > 1) {
+        const [row] = await this.userRepository.manager.query(
+          'SELECT \
 AVG(attitude) AS attitude, \
+AVG(compliance) AS compliance, \
 AVG(empathy) AS empathy, \
 AVG(humor) AS humor, \
 AVG(manner) AS manner \
 FROM impression GROUP BY recipientId HAVING recipientId = ?',
-        [recipientId],
-      );
-      return {
-        appropriateness: +(+row['appropriateness']).toFixed(1),
-        attitude: +(+row['attitude']).toFixed(1),
-        empathy: +(+row['empathy']).toFixed(1),
-        humor: +(+row['humor']).toFixed(1),
-        manner: +(+row['manner']).toFixed(1),
-      };
-    } catch (e) {
-      this.logger.log('[🖥️]', e);
-      throw new NotFoundException();
+          [userId],
+        );
+        return {
+          attitude: Math.round(+row['attitude']),
+          compliance: Math.round(+row['compliance']),
+          empathy: Math.round(+row['empathy']),
+          humor: Math.round(+row['humor']),
+          manner: Math.round(+row['manner']),
+        };
+      }
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`user not found`);
+      } else {
+        throw new BadRequestException();
+      }
     }
+    throw new UnprocessableEntityException();
   }
 }

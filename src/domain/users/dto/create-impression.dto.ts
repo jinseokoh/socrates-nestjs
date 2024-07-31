@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateImpressionDto {
-  @ApiProperty({ description: 'appropriateness', default: 0 })
-  @IsNumber()
-  appropriateness: number;
-
   @ApiProperty({ description: 'attitude', default: 0 })
   @IsNumber()
   attitude: number;
+
+  @ApiProperty({ description: 'compliance', default: 0 })
+  @IsNumber()
+  compliance: number;
 
   @ApiProperty({ description: 'empathy', default: 0 })
   @IsNumber()

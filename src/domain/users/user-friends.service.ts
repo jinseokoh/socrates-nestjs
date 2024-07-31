@@ -15,8 +15,7 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { LedgerType, FriendStatus } from 'src/common/enums';
-import { AnyData } from 'src/common/types';
-import { DataSource, Not } from 'typeorm';
+import { DataSource, EntityNotFoundError, Not } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
@@ -27,6 +26,7 @@ import { Plea } from 'src/domain/feeds/entities/plea.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 
+// todo. 동작되도록 만들었으나, plea 관련 로직은 변경 필요.
 @Injectable()
 export class UserFriendsService {
   private readonly env: any;
@@ -52,6 +52,7 @@ export class UserFriendsService {
   //! - profile's balance will be adjusted w/ ledger model event subscriber.
   //! - for hated(blocked) users, a client needs to take care of 'em instead of server.
   async createFriendship(dto: CreateFriendshipDto): Promise<User> {
+    this.logger.log(dto);
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -110,14 +111,8 @@ export class UserFriendsService {
       }
       await queryRunner.manager.query(
         'INSERT IGNORE INTO `friendship` \
-        (userId, recipientId, pleaId, friendRequestType, message) VALUES (?, ?, ?, ?, ?)',
-        [
-          dto.userId,
-          dto.recipientId,
-          dto.pleaId,
-          dto.friendRequestType,
-          dto.message,
-        ],
+        (userId, recipientId, pleaId, message) VALUES (?, ?, ?, ?)',
+        [dto.userId, dto.recipientId, dto.pleaId, dto.message],
       );
       await queryRunner.commitTransaction();
 
@@ -228,7 +223,12 @@ export class UserFriendsService {
       this.eventEmitter.emit('user.notified', event);
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw error;
+      if (error.name === 'EntityNotFoundError') {
+        //! TypeORM의 EntityNotFoundError 감지
+        throw new NotFoundException(`entity not found`);
+      } else {
+        throw error;
+      }
     } finally {
       await queryRunner.release();
     }
@@ -315,7 +315,12 @@ export class UserFriendsService {
       }
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw error;
+      if (error.name === 'EntityNotFoundError') {
+        //! TypeORM의 EntityNotFoundError 감지
+        throw new NotFoundException(`entity not found`);
+      } else {
+        throw error;
+      }
     } finally {
       await queryRunner.release();
     }
