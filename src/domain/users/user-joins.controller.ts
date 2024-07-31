@@ -11,9 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { AnyData } from 'src/common/types';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
-import { Join } from 'src/domain/meetups/entities/join.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
 import { AcceptOrDenyDto } from 'src/domain/users/dto/accept-or-deny.dto';
@@ -84,35 +82,29 @@ export class UserJoinsController {
 
   @ApiOperation({ description: '내가 신청한 모임ID 리스트 (all)' })
   @Get(':userId/requestedmeetupids')
-  async getMeetupIdsToJoin(@Param('userId') userId: number): Promise<AnyData> {
-    const data = await this.userJoinsService.getMeetupIdsRequested(userId);
-    return { data };
+  async loadMeetupIdsRequested(
+    @Param('userId') userId: number,
+  ): Promise<number[]> {
+    return await this.userJoinsService.loadMeetupIdsRequested(userId);
   }
 
   @ApiOperation({
     description: '내가 초대(invitation)받은 모임 리스트 (paginated)',
   })
   @PaginateQueryOptions()
-  @Get(':userId/meetups-invited')
-  async getMeetupsInvited(
+  @Get(':userId/invitedmeetups')
+  async listMeetupsInvited(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Join>> {
-    const { data, meta, links } = await this.userJoinsService.getMeetupsInvited(
-      userId,
-      query,
-    );
-
-    return {
-      data: data,
-      meta: meta,
-      links: links,
-    }; // as Paginated<Join>;
+  ): Promise<Paginated<Meetup>> {
+    return await this.userJoinsService.listMeetupsInvited(userId, query);
   }
 
   @ApiOperation({ description: '나를 초대한 모임ID 리스트 (all)' })
-  @Get(':userId/meetupids-invited')
-  async getMeetupIdsInvited(@Param('userId') userId: number): Promise<AnyData> {
-    return await this.userJoinsService.getMeetupIdsInvited(userId);
+  @Get(':userId/invitedmeetupids')
+  async loadMeetupIdsInvited(
+    @Param('userId') userId: number,
+  ): Promise<number[]> {
+    return await this.userJoinsService.loadMeetupIdsInvited(userId);
   }
 }

@@ -28,21 +28,25 @@ export class UserHatesController {
 
   @ApiOperation({ description: '사용자 차단 추가' })
   @Post(':userId/hates/:recipientId')
-  async createHate(
+  async createUserHate(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body('message') message: string | null,
   ): Promise<Hate> {
-    return await this.userHatesService.createHate(userId, recipientId, message);
+    return await this.userHatesService.createUserHate(
+      userId,
+      recipientId,
+      message,
+    );
   }
 
   @ApiOperation({ description: '사용자 차단 삭제' })
   @Delete(':userId/hates/:recipientId')
-  async deleteHate(
+  async deleteUserHate(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
-  ): Promise<any> {
-    return await this.userHatesService.deleteHate(userId, recipientId);
+  ): Promise<void> {
+    await this.userHatesService.deleteUserHate(userId, recipientId);
   }
 
   @ApiOperation({ description: '사용자 차단 여부' })
@@ -58,17 +62,19 @@ export class UserHatesController {
 
   @ApiOperation({ description: '내가 차단한 Users (paginated)' })
   @Get(':userId/hatedusers')
-  async findBlockedUsers(
+  async listUsersBlockedByMe(
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<User>> {
-    return this.userHatesService.findBlockedUsers(userId, query);
+    return this.userHatesService.listUsersBlockedByMe(userId, query);
   }
 
   @ApiOperation({ description: '내가 차단한 Users (all)' })
   @Get(':userId/hatedusers/all')
-  async loadBlockedUsers(@Param('userId') userId: number): Promise<User[]> {
-    return this.userHatesService.loadBlockedUsers(userId);
+  async loadAllUsersBlockedByMe(
+    @Param('userId') userId: number,
+  ): Promise<User[]> {
+    return this.userHatesService.loadAllUsersBlockedByMe(userId);
   }
 
   @ApiOperation({

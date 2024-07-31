@@ -49,7 +49,7 @@ export class Join {
   @ApiProperty({ description: 'invitation|request' })
   joinType: JoinRequestType;
 
-  @Column({ type: 'enum', enum: JoinStatus, nullable: true })
+  @Column({ type: 'enum', enum: JoinStatus, default: JoinStatus.PENDING })
   @ApiProperty({ description: 'pending|accepted|denied' })
   status: JoinStatus;
 

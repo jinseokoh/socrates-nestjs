@@ -34,7 +34,7 @@ export class UserFriendsService {
 
   constructor(
     @InjectRepository(User)
-    private readonly repository: Repository<User>,
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Friendship)
     private readonly friendshipRepository: Repository<Friendship>,
     @Inject(ConfigService) private configService: ConfigService, // global
@@ -130,7 +130,6 @@ export class UserFriendsService {
       event.body = `${user.username}님으로부터 친구신청을 받았습니다. ${dto.message}`;
       event.data = {
         page: 'activities/requests',
-        args: 'tab:7',
       };
       this.eventEmitter.emit('user.notified', event);
 
@@ -148,96 +147,9 @@ export class UserFriendsService {
   }
 
   // -------------------------------------------------------------------------//
-  // Update
-  // -------------------------------------------------------------------------//
-
-  //! 친구신청 수락 (using transaction)
-  //! profile balance will be adjusted w/ ledger model event subscriber.
-  async updateFriendshipWithStatus(
-    userId: number,
-    recipientId: number,
-    status: FriendStatus,
-  ): Promise<void> {
-    // create a new query runner
-    const queryRunner = this.dataSource.createQueryRunner();
-
-    try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
-
-      // validation ----------------------------------------------------------//
-      const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
-        where: {
-          userId: userId,
-          recipientId: recipientId,
-        },
-        relations: ['user', 'user.profile', 'recipient', 'plea'],
-      });
-
-      if (
-        friendship.plea &&
-        friendship.plea.feedId &&
-        status === FriendStatus.ACCEPTED
-      ) {
-        //? plea.reward 를 friendship user (== plea recipient; 작성자) 에게 지급
-        const newBalance =
-          friendship.user.profile?.balance + friendship.plea.reward;
-        const ledger = new Ledger({
-          debit: friendship.plea.reward,
-          ledgerType: LedgerType.DEBIT_REWARD,
-          balance: newBalance,
-          note: `요청 사례금 (발송#${friendship.recipientId},수신#${friendship.userId})`,
-          userId: friendship.user.id,
-        });
-        await queryRunner.manager.save(ledger);
-        // soft delete the plea
-        // await this.repository.manager.query(
-        //   'UPDATE `plea` SET deletedAt = NOW() WHERE id = ?',
-        //   [friendship.plea.id],
-        // );
-        await queryRunner.manager
-          .getRepository(Plea)
-          .softDelete(friendship.plea.id);
-      }
-
-      await this.repository.manager.query(
-        'UPDATE `friendship` SET status = ? WHERE userId = ? AND recipientId = ?',
-        [status, userId, recipientId],
-      );
-
-      await queryRunner.commitTransaction();
-
-      // notification with event listener ------------------------------------//
-      if (
-        friendship.status == FriendStatus.PENDING &&
-        status == FriendStatus.ACCEPTED
-      ) {
-        const event = new UserNotificationEvent();
-        event.name = 'friend';
-        event.userId = friendship.user?.id;
-        event.token = friendship.user?.pushToken;
-        event.options = friendship.user?.profile?.options ?? {};
-        event.body = friendship.plea
-          ? `요청한 ${friendship.recipient.username}님이 친구관계를 맺었습니다. (${friendship.plea.reward}코인수령 완료)`
-          : `${friendship.recipient.username}님이 신청을 수락하여 친구관계를 맺었습니다.`;
-        event.data = {
-          page: `settings/friends`,
-          args: 'load:plea',
-        };
-        this.eventEmitter.emit('user.notified', event);
-      }
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
-  }
-
-  // -------------------------------------------------------------------------//
   // Delete
   // -------------------------------------------------------------------------//
-
+  // todo. need to rewrite the logic completely. no plea at all?
   //! 친구신청 삭제 (using transaction)
   //! profile balance will be adjusted w/ ledger model event subscriber.
   // 시나리오
@@ -322,36 +234,95 @@ export class UserFriendsService {
     }
   }
 
-  // ------------------------------------------------------------------------ //
-
-  // 받은 친구신청 리스트 (paginated)
-  async getFriendshipsReceived(
+  // -------------------------------------------------------------------------//
+  // Update
+  // -------------------------------------------------------------------------//
+  // todo. need to rewrite the logic completely. no plea at all?
+  //! 친구신청 수락 (using transaction)
+  //! profile balance will be adjusted w/ ledger model event subscriber.
+  async updateFriendshipWithStatus(
     userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Friendship>> {
-    const queryBuilder = this.friendshipRepository
-      .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.user', 'user')
-      .innerJoinAndSelect('user.profile', 'profile')
-      .innerJoinAndSelect('friendship.recipient', 'recipient')
-      .where({
-        recipientId: userId,
-        status: Not(FriendStatus.ACCEPTED),
+    recipientId: number,
+    status: FriendStatus,
+  ): Promise<void> {
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      // validation ----------------------------------------------------------//
+      const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
+        where: {
+          userId: userId,
+          recipientId: recipientId,
+        },
+        relations: ['user', 'user.profile', 'recipient', 'plea'],
       });
 
-    const config: PaginateConfig<Friendship> = {
-      sortableColumns: ['createdAt'],
-      defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
-      filterableColumns: {
-        status: [FilterOperator.EQ],
-      },
-    };
+      if (
+        friendship.plea &&
+        friendship.plea.feedId &&
+        status === FriendStatus.ACCEPTED
+      ) {
+        //? plea.reward 를 friendship user (== plea recipient; 작성자) 에게 지급
+        const newBalance =
+          friendship.user.profile?.balance + friendship.plea.reward;
+        const ledger = new Ledger({
+          debit: friendship.plea.reward,
+          ledgerType: LedgerType.DEBIT_REWARD,
+          balance: newBalance,
+          note: `요청 사례금 (발송#${friendship.recipientId},수신#${friendship.userId})`,
+          userId: friendship.user.id,
+        });
+        await queryRunner.manager.save(ledger);
+        // soft delete the plea
+        // await this.userRepository.manager.query(
+        //   'UPDATE `plea` SET deletedAt = NOW() WHERE id = ?',
+        //   [friendship.plea.id],
+        // );
+        await queryRunner.manager
+          .getRepository(Plea)
+          .softDelete(friendship.plea.id);
+      }
 
-    return await paginate(query, queryBuilder, config);
+      await this.userRepository.manager.query(
+        'UPDATE `friendship` SET status = ? WHERE userId = ? AND recipientId = ?',
+        [status, userId, recipientId],
+      );
+
+      await queryRunner.commitTransaction();
+
+      // notification with event listener ------------------------------------//
+      if (
+        friendship.status == FriendStatus.PENDING &&
+        status == FriendStatus.ACCEPTED
+      ) {
+        const event = new UserNotificationEvent();
+        event.name = 'friend';
+        event.userId = friendship.user?.id;
+        event.token = friendship.user?.pushToken;
+        event.options = friendship.user?.profile?.options ?? {};
+        event.body = friendship.plea
+          ? `요청한 ${friendship.recipient.username}님이 친구관계를 맺었습니다. (${friendship.plea.reward}코인수령 완료)`
+          : `${friendship.recipient.username}님이 신청을 수락하여 친구관계를 맺었습니다.`;
+        event.data = {
+          page: `settings/friends`,
+          args: 'load:plea',
+        };
+        this.eventEmitter.emit('user.notified', event);
+      }
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  // 보낸 친구신청 리스트 (paginated)
+  // 내가 친구신청 보낸 Users (paginated)
+  //? message 때문에 Friendship 으로 보내야 한다.
   async getFriendshipsSent(
     userId: number,
     query: PaginateQuery,
@@ -378,20 +349,51 @@ export class UserFriendsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내친구 리스트를 위한, 받거나 보낸 친구신청 리스트 (paginated)
-  async getMyFriendships(
+  // 내가 친구신청 받은 Users (paginated)
+  //? message 때문에 Friendship 으로 보내야 한다.
+  async getFriendshipsReceived(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<Friendship>> {
     const queryBuilder = this.friendshipRepository
       .createQueryBuilder('friendship')
       .innerJoinAndSelect('friendship.user', 'user')
-      .innerJoinAndSelect('user.profile', 'sprofile')
       .innerJoinAndSelect('friendship.recipient', 'recipient')
-      .innerJoinAndSelect('recipient.profile', 'rprofile')
-      .where([{ userId: userId }, { recipientId: userId }]);
+      .innerJoinAndSelect('user.profile', 'profile')
+      .where({
+        recipientId: userId,
+        status: Not(FriendStatus.ACCEPTED),
+      });
 
     const config: PaginateConfig<Friendship> = {
+      sortableColumns: ['createdAt'],
+      defaultLimit: 20,
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {
+        status: [FilterOperator.EQ],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내친구 리스트를 위한, 받거나 보낸 친구신청 리스트 (paginated)
+  async getMyFriends(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<User>> {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .innerJoin(Friendship, 'friendship', 'friendship.status = :status', {
+        status: FriendStatus.ACCEPTED,
+      })
+      .innerJoinAndSelect('user.profile', 'profile')
+      .where(
+        '(friendship.userId = :userId AND user.id = friendship.recipientId) OR (friendship.recipientId = :userId AND user.id = friendship.userId)',
+        { userId },
+      );
+
+    const config: PaginateConfig<User> = {
       sortableColumns: ['createdAt'],
       defaultLimit: 20,
       defaultSortBy: [['createdAt', 'DESC']],
@@ -407,7 +409,7 @@ export class UserFriendsService {
 
   // 친구관계 ID 리스트 (all)
   async getFriendshipIds(userId: number): Promise<AnyData> {
-    const rows = await this.repository.manager.query(
+    const rows = await this.userRepository.manager.query(
       'SELECT status, userId, recipientId \
       FROM `friendship` \
       WHERE userId = ? OR recipientId = ?',

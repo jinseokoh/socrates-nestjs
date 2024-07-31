@@ -36,7 +36,7 @@ export class UserHatesService {
   //? ----------------------------------------------------------------------- //
 
   // 사용자 차단 추가
-  async createHate(
+  async createUserHate(
     userId: number,
     recipientId: number,
     message: string | null,
@@ -56,13 +56,13 @@ export class UserHatesService {
   }
 
   // 사용자 차단 삭제
-  async deleteHate(userId: number, recipientId: number): Promise<any> {
+  async deleteUserHate(userId: number, recipientId: number): Promise<void> {
     try {
       const { affectedRows } = await this.hateRepository.manager.query(
         'DELETE FROM `hate` WHERE userId = ? AND recipientId = ?',
         [userId, recipientId],
       );
-      return { data: affectedRows };
+      // return { data: affectedRows };
     } catch (error) {
       throw error;
     }
@@ -84,7 +84,7 @@ export class UserHatesService {
   }
 
   // 내가 차단한 Users (paginated)
-  async findBlockedUsers(
+  async listUsersBlockedByMe(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<User>> {
@@ -106,10 +106,10 @@ export class UserHatesService {
   }
 
   // 내가 차단한 Users (all)
-  async loadBlockedUsers(userId: number): Promise<User[]> {
-    const queryBuilder = this.userRepository.createQueryBuilder('user');
-    return await queryBuilder
-      .innerJoinAndSelect(Hate, 'hate', 'hate.recipientId = user.id')
+  async loadAllUsersBlockedByMe(userId: number): Promise<User[]> {
+    return await this.userRepository
+      .createQueryBuilder('user')
+      .innerJoinAndSelect(Hate, 'hate', 'hate.recipient = user.id')
       .addSelect(['user.*'])
       .where('hate.userId = :userId', { userId })
       .getMany();

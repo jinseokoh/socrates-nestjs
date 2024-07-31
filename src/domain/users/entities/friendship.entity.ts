@@ -36,14 +36,6 @@ export class Friendship {
 
   @Column({
     type: 'enum',
-    enum: FriendRequestType,
-    default: FriendRequestType.DISCLOSED,
-  })
-  @ApiProperty({ description: 'anonymous|disclosed' })
-  friendRequestType: FriendRequestType;
-
-  @Column({
-    type: 'enum',
     enum: FriendStatus,
     default: FriendStatus.PENDING,
   })
