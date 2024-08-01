@@ -16,7 +16,7 @@ import { UserLedgersService } from 'src/domain/users/user-ledgers.service';
 @SkipThrottle()
 @Controller('users')
 export class UserLedgersController {
-  constructor(private readonly usersService: UserLedgersService) {}
+  constructor(private readonly userLegdersService: UserLedgersService) {}
 
   //? ----------------------------------------------------------------------- //
   //? Create
@@ -37,11 +37,11 @@ export class UserLedgersController {
 
   @ApiOperation({ description: '나의 ledger 리스트' })
   @Get(':userId/ledgers')
-  async getLedgers(
+  async listUserLedger(
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<Ledger>> {
-    return await this.usersService.getUserLedgers(userId, query);
+    return await this.userLegdersService.list(userId, query);
   }
 
   //? ----------------------------------------------------------------------- //

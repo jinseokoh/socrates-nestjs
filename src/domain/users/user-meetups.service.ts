@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -10,6 +10,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Repository } from 'typeorm/repository/Repository';
+import { User } from 'src/domain/users/entities/user.entity';
+import { Join } from 'src/domain/meetups/entities/join.entity';
 
 @Injectable()
 export class UserMeetupsService {
@@ -58,6 +60,41 @@ export class UserMeetupsService {
     };
 
     return await paginate(query, queryBuilder, config);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? 참가신청한 모든 사용자 리스트
+  //? ----------------------------------------------------------------------- //
+
+  // 이 모임에 신청한 Join 리스트 (message 를 볼 수 있어야 하므로)
+  async loadAllJoiners(meetupId: number): Promise<Join[]> {
+    try {
+      const meetup = await this.meetupRepository.findOneOrFail({
+        where: {
+          id: meetupId,
+        },
+        relations: ['joins', 'joins.user', 'joins.recipient'],
+      });
+      return meetup.joins.filter((v) => v.recipient.id === meetup.userId);
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  // 이 모임에 초대한 Join 리스트 (message 를 볼 수 있어야 하므로)
+  async loadAllInvitees(meetupId: number): Promise<Join[]> {
+    try {
+      const meetup = await this.meetupRepository.findOneOrFail({
+        where: {
+          id: meetupId,
+        },
+        relations: ['joins', 'joins.user', 'joins.recipient'],
+      });
+
+      return meetup.joins.filter((v) => v.user.id === meetup.userId);
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
   }
 
   // 내가 만든 Meetup 리스트 (all)

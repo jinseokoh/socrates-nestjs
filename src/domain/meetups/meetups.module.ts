@@ -19,6 +19,7 @@ import { MeetupCommentsService } from 'src/domain/meetups/meetup-comments.servic
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
+import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -42,6 +43,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
     FlagMeetupService,
     MeetupsService,
     MeetupCommentsService,
+    UserMeetupsService,
   ],
   controllers: [
     MeetupsController,

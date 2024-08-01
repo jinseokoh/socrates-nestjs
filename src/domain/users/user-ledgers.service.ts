@@ -28,10 +28,7 @@ export class UserLedgersService {
   //? Ledgers
   //? ----------------------------------------------------------------------- //
 
-  async getUserLedgers(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Ledger>> {
+  async list(userId: number, query: PaginateQuery): Promise<Paginated<Ledger>> {
     const queryBuilder = this.ledgerRepository
       .createQueryBuilder('ledger')
       .innerJoinAndSelect('ledger.user', 'user')

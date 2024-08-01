@@ -3,7 +3,6 @@ import {
   Inject,
   Injectable,
   Logger,
-  NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -24,6 +23,7 @@ import { UserNotificationEvent } from 'src/domain/users/events/user-notification
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DataSource } from 'typeorm';
 import { Participant } from 'src/domain/chats/entities/participant.entity';
+import { Category } from 'src/domain/categories/entities/category.entity';
 
 @Injectable()
 export class UserJoinsService {
@@ -31,12 +31,12 @@ export class UserJoinsService {
   private readonly logger = new Logger(UserJoinsService.name);
 
   constructor(
-    @InjectRepository(Join)
-    private readonly joinRepository: Repository<Join>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
@@ -45,22 +45,16 @@ export class UserJoinsService {
   }
 
   //? 모임신청/초대 생성 (생성 갯수제한 없도록 수정함.)
-  async createJoin(
-    userId: number,
-    recipientId: number,
-    meetupId: number,
-    dto: CreateJoinDto,
-  ): Promise<Meetup> {
+  async createJoin(userId: number, dto: CreateJoinDto): Promise<Meetup> {
     const meetup = await this.meetupRepository.findOneOrFail({
-      where: { id: meetupId },
+      where: { id: dto.meetupId },
       relations: ['joins', 'user', 'user.profile'],
     });
     //! joinType 은 semantic 에 맞게 자동설정.
     const joinType =
-      meetup.userId == recipientId
-        ? JoinRequestType.REQUEST
-        : JoinRequestType.INVITATION;
-
+      meetup.userId == userId
+        ? JoinRequestType.INVITATION
+        : JoinRequestType.REQUEST;
     try {
       await this.userRepository.manager.query(
         'INSERT IGNORE INTO `join` \
@@ -72,8 +66,31 @@ export class UserJoinsService {
   message = VALUES(`message`), \
   skill = VALUES(`skill`), \
   joinType = VALUES(`joinType`)',
-        [userId, recipientId, meetupId, dto.message, dto.skill, joinType],
+        [
+          userId,
+          dto.recipientId,
+          dto.meetupId,
+          dto.message,
+          dto.skill, //! could be null when host invites guest members
+          joinType,
+        ],
       );
+
+      if (joinType === JoinRequestType.REQUEST) {
+        // user's interests 추가
+        const category = await this.categoryRepository.findOneBy({
+          slug: meetup.subCategory,
+        });
+        await this.userRepository.manager.query(
+          'INSERT IGNORE INTO `interest` \
+    (userId, categoryId, skill) VALUES (?, ?, ?) \
+    ON DUPLICATE KEY UPDATE \
+    userId = VALUES(`userId`), \
+    categoryId = VALUES(`categoryId`), \
+    skill = VALUES(`skill`)',
+          [userId, category.id, dto.skill],
+        );
+      }
 
       // notification with event listener ------------------------------------//
       const event = new UserNotificationEvent();
@@ -83,7 +100,7 @@ export class UserJoinsService {
       event.options = meetup.user.profile?.options ?? {};
       event.body = `${meetup.title} 모임에 누군가 참가신청을 했습니다.`;
       event.data = {
-        page: `meetups/${meetupId}`,
+        page: `meetups/${meetup.id}`,
       };
       this.eventEmitter.emit('user.notified', event);
 
@@ -97,8 +114,7 @@ export class UserJoinsService {
   // todo. need to populate room and participants automatically.
   async updateJoinToAcceptOrDeny(
     userId: number,
-    recipientId: number,
-    meetupId: number,
+    joinId: number,
     status: JoinStatus,
   ): Promise<void> {
     // create a new query runner
@@ -107,19 +123,23 @@ export class UserJoinsService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
 
-      const meetup = await queryRunner.manager.findOneOrFail(Meetup, {
-        where: [{ id: meetupId }],
+      const join = await queryRunner.manager.findOneOrFail(Join, {
+        where: { id: joinId },
+        relations: [`meetup`],
       });
-      //! joinType 은 semantic 에 맞게 자동설정.
-      const joinType =
-        meetup.userId == recipientId
-          ? JoinRequestType.REQUEST
-          : JoinRequestType.INVITATION;
-
       await queryRunner.manager.query(
-        'UPDATE `join` SET status = ? WHERE userId = ? AND recipientId = ? AND meetupId = ?',
-        [status, userId, recipientId, meetupId],
+        'UPDATE `join` SET status = ? WHERE joinId = ?',
+        [status, joinId],
       );
+
+      if (
+        join.meetup.userId === userId &&
+        join.joinType === JoinRequestType.INVITATION
+      ) {
+        this.logger.log(`[🖥️] host`);
+      } else {
+        this.logger.log(`[🖥️] guest`);
+      }
 
       //? 채팅방 참가자 (room participants) 레코드 생성
       // if (status === JoinStatus.ACCEPTED) {
@@ -251,7 +271,7 @@ export class UserJoinsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  //? 내가 신청한 모임ID 리스트 (all)
+  //? 내가 신청(request)한 모임ID 리스트 (all)
   async loadMeetupIdsRequested(userId: number): Promise<number[]> {
     const items = await this.userRepository.manager.query(
       'SELECT meetupId FROM `join` \
@@ -264,7 +284,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
     return items.map(({ meetupId }) => meetupId);
   }
 
-  //? 내가 초대(invitation)받은 모임 리스트 (paginated)
+  //? 나를 초대(invitation)한 모임 리스트 (paginated)
   async listMeetupsInvited(
     userId: number,
     query: PaginateQuery,
@@ -290,7 +310,7 @@ WHERE `joinType` = ? AND `user`.id = ?',
     return await paginate(query, queryBuilder, config);
   }
 
-  //? 나를 초대한 모임ID 리스트 (all)
+  //? 나를 초대(invitation)한 모임ID 리스트 (all)
   async loadMeetupIdsInvited(userId: number): Promise<number[]> {
     const items = await this.userRepository.manager.query(
       'SELECT meetupId FROM `join` \

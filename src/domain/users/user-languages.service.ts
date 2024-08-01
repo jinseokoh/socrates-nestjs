@@ -28,7 +28,7 @@ export class UserLanguagesService {
   //? 언어 (languages) 리스트
   //? ----------------------------------------------------------------------- //
 
-  async getLanguages(userId: number): Promise<Array<LanguageSkill>> {
+  async loadMyLanguages(userId: number): Promise<LanguageSkill[]> {
     const user = await this.userRepository.findOneOrFail({
       where: {
         id: userId,
@@ -56,7 +56,7 @@ export class UserLanguagesService {
         );
       }),
     );
-    return await this.getLanguages(userId);
+    return await this.loadMyLanguages(userId);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -81,7 +81,7 @@ export class UserLanguagesService {
       }),
     );
 
-    return await this.getLanguages(userId);
+    return await this.loadMyLanguages(userId);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -98,7 +98,7 @@ export class UserLanguagesService {
       `languageId`,
     ]);
 
-    return await this.getLanguages(userId);
+    return await this.loadMyLanguages(userId);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -126,7 +126,7 @@ export class UserLanguagesService {
         );
       }
 
-      return await this.getLanguages(userId);
+      return await this.loadMyLanguages(userId);
     } catch (e) {
       throw new NotFoundException('language not found');
     }
@@ -145,7 +145,7 @@ export class UserLanguagesService {
       [userId, ids],
     );
 
-    return await this.getLanguages(userId);
+    return await this.loadMyLanguages(userId);
   }
 
   //? ----------------------------------------------------------------------- //

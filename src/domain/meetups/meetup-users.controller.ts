@@ -7,43 +7,39 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { AnyData } from 'src/common/types';
-import { MeetupsService } from 'src/domain/meetups/meetups.service';
+import { Join } from 'src/domain/meetups/entities/join.entity';
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 import { User } from 'src/domain/users/entities/user.entity';
 import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
+import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
 export class MeetupUsersController {
   constructor(
-    private readonly meetupsService: MeetupsService,
+    private readonly userMeetupsService: UserMeetupsService,
     private readonly bookmarksService: BookmarkUserMeetupService,
     private readonly flagMeetupService: FlagMeetupService,
   ) {}
 
-  //! ----------------------------------------------------------------------- //
-  //! 참가신청 리스트
-  //! ----------------------------------------------------------------------- //
+  //? ----------------------------------------------------------------------- //
+  //? 참가 신청/초대 (Join) 리스트
+  //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: '이 모임에 신청한 사용자 리스트 (최대30명)' })
-  @Get(':id/joiners')
-  async getAllJoiners(@Param('id', ParseIntPipe) id: number): Promise<AnyData> {
-    const users = await this.meetupsService.getAllJoiners(id);
-    return {
-      data: users,
-    };
+  @ApiOperation({ description: '이 모임에 신청한 사용자 리스트' })
+  @Get(':meetupId/requesters')
+  async loadAllJoiners(
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+  ): Promise<Join[]> {
+    return await this.userMeetupsService.loadAllJoiners(meetupId);
   }
 
-  @ApiOperation({ description: '이 모임에 초대한 사용자 리스트 (최대30명)' })
-  @Get(':id/invitees')
+  @ApiOperation({ description: '이 모임에 초대한 사용자 리스트' })
+  @Get(':meetupId/invitees')
   async getAllInvitees(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<AnyData> {
-    const users = await this.meetupsService.getAllInvitees(id);
-    return {
-      data: users,
-    };
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+  ): Promise<Join[]> {
+    return await this.userMeetupsService.loadAllInvitees(meetupId);
   }
 
   //? ----------------------------------------------------------------------- //

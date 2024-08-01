@@ -40,7 +40,7 @@ export class UserOtpsController {
   @Throttle({ default: { limit: 2, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post(':key/otp')
-  async validateEmailAndSendOtp(
+  async sendOtpForNonExistingUser(
     @Param('key') key: string,
     @Query('cache') cache: string | null | undefined,
   ): Promise<any> {
@@ -79,7 +79,7 @@ export class UserOtpsController {
     return await this.userOtpsService.checkOtp(userId, key, otp, !!cache, dto);
   }
 
-  //! @deprecated 미사용
+  //! @deprecated 미사용 (테스트 용으로 남겨 둠)
   @ApiOperation({ description: 'user 에게 SMS 문자 발송' })
   @Post('send-sms')
   async sendSms(@Body() dto: SendSmsDto): Promise<void> {

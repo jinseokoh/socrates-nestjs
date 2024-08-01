@@ -30,7 +30,7 @@ export class UserLanguagesController {
 
   @ApiOperation({ description: '나의 언어 리스트에 추가' })
   @Post(':userId/languages')
-  async syncLanguagesWithIds(
+  async syncLanguageSkills(
     @Param('userId') userId: number,
     @Body() dto: SyncLanguageDto,
   ): Promise<LanguageSkill[]> {
@@ -70,7 +70,7 @@ export class UserLanguagesController {
 
   @ApiOperation({ description: '나의 언어 리스트에 추가' })
   @Patch(':userId/languages/:slug')
-  async addLanguageSkills(
+  async addLanguageSkill(
     @Param('userId') userId: number,
     @Param('slug') slug: string,
     @Body('skill') skill: number | null,
@@ -88,10 +88,10 @@ export class UserLanguagesController {
 
   @ApiOperation({ description: '나의 언어 리스트' })
   @Get(':userId/languages')
-  async getLanguages(
+  async loadMyLanguages(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<LanguageSkill[]> {
-    return await this.userLanguagesService.getLanguages(userId);
+    return await this.userLanguagesService.loadMyLanguages(userId);
   }
 
   //? ----------------------------------------------------------------------- //

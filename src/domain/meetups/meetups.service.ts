@@ -369,41 +369,4 @@ export class MeetupsService {
       image: `https://cdn.mesoapp.kr/${path}`,
     };
   }
-
-  //? ----------------------------------------------------------------------- //
-  //? 참가신청한 모든 사용자 리스트
-  //? ----------------------------------------------------------------------- //
-
-  async getAllJoiners(id: number): Promise<any> {
-    try {
-      const meetup = await this.meetupRepository.findOneOrFail({
-        where: {
-          id: id,
-        },
-        relations: ['joins', 'joins.user', 'joins.recipient'],
-      });
-      return meetup.joins
-        .filter((v) => v.recipient.id === meetup.userId)
-        .map((v) => v.user);
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
-  }
-
-  async getAllInvitees(id: number): Promise<any> {
-    try {
-      const meetup = await this.meetupRepository.findOneOrFail({
-        where: {
-          id: id,
-        },
-        relations: ['joins', 'joins.user', 'joins.recipient'],
-      });
-
-      return meetup.joins
-        .filter((v) => v.user.id === meetup.userId)
-        .map((v) => v.recipient);
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
-  }
 }
