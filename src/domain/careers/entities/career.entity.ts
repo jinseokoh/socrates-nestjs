@@ -27,9 +27,7 @@ export class Career {
   @TreeParent()
   parent: Career;
 
-  //? ----------------------------------------------------------------------- //
-  //? many-to-many belongsToMany
-
-  @ManyToMany(() => Meetup, (meetup) => meetup.careers)
-  meetups: Meetup[];
+  // many-to-many belongsToMany
+  // @ManyToMany(() => Meetup, (meetup) => meetup.careers)
+  // meetups: Meetup[];
 }

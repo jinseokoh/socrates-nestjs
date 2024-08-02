@@ -35,7 +35,7 @@ export class BookmarkUserFeed {
   })
   public user: User;
 
-  @ManyToOne(() => Feed, (feed) => feed.bookmarkedByUsers, {
+  @ManyToOne(() => Feed, (feed) => feed.bookmarks, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',

@@ -1,4 +1,5 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
@@ -7,20 +8,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { MeetupUsersService } from 'src/domain/meetups/meetup-users.service';
 import { Join } from 'src/domain/meetups/entities/join.entity';
-import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 import { User } from 'src/domain/users/entities/user.entity';
-import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
-import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('meetups')
 export class MeetupUsersController {
-  constructor(
-    private readonly userMeetupsService: UserMeetupsService,
-    private readonly bookmarksService: BookmarkUserMeetupService,
-    private readonly flagMeetupService: FlagMeetupService,
-  ) {}
+  constructor(private readonly meetupUsersService: MeetupUsersService) {}
 
   //? ----------------------------------------------------------------------- //
   //? 참가 신청/초대 (Join) 리스트
@@ -31,15 +26,15 @@ export class MeetupUsersController {
   async loadAllJoiners(
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<Join[]> {
-    return await this.userMeetupsService.loadAllJoiners(meetupId);
+    return await this.meetupUsersService.loadAllJoiners(meetupId);
   }
 
   @ApiOperation({ description: '이 모임에 초대한 사용자 리스트' })
   @Get(':meetupId/invitees')
-  async getAllInvitees(
+  async loadAllInvitees(
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<Join[]> {
-    return await this.userMeetupsService.loadAllInvitees(meetupId);
+    return await this.meetupUsersService.loadAllInvitees(meetupId);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -47,19 +42,19 @@ export class MeetupUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '이 모임을 북마크/찜한 모든 Users' })
-  @Get(':meetupId/bookmarkingusers')
-  async loadBookmarkingUsers(
+  @Get(':meetupId/bookmarkers')
+  async loadBookmarkers(
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<User[]> {
-    return await this.bookmarksService.loadBookmarkingUsers(meetupId);
+    return await this.meetupUsersService.loadBookmarkers(meetupId);
   }
 
   @ApiOperation({ description: '이 모임을 북마크/찜한 모든 UserIds' })
-  @Get(':meetupId/bookmarkinguserids')
-  async loadBookmarkingUserIds(
+  @Get(':meetupId/bookmarkerids')
+  async loadBookmarkerIds(
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<number[]> {
-    return await this.bookmarksService.loadBookmarkingUserIds(meetupId);
+    return await this.meetupUsersService.loadBookmarkerIds(meetupId);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -67,18 +62,18 @@ export class MeetupUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '이 모임을 신고한 모든 Users (all)' })
-  @Get(':meetupId/flaggingusers')
+  @Get(':meetupId/flaggers')
   async loadFlaggingUsers(
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<User[]> {
-    return await this.flagMeetupService.loadMeetupFlaggingUsers(meetupId);
+    return await this.meetupUsersService.loadMeetupFlaggingUsers(meetupId);
   }
 
-  @ApiOperation({ description: '이 모임을 신고한 모든 Users (all)' })
-  @Get(':meetupId/flagginguserids')
+  @ApiOperation({ description: '이 모임을 신고한 모든 UserIds (all)' })
+  @Get(':meetupId/flaggerids')
   async loadFlaggingUserIds(
     @Param('meetupId', ParseIntPipe) meetupId: number,
   ): Promise<number[]> {
-    return await this.flagMeetupService.loadMeetupFlaggingUserIds(meetupId);
+    return await this.meetupUsersService.loadMeetupFlaggingUserIds(meetupId);
   }
 }

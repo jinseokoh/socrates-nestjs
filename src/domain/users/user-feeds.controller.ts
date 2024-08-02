@@ -1,12 +1,9 @@
 import {
-  Body,
   ClassSerializerInterceptor,
   Controller,
-  Delete,
   Get,
   Param,
   ParseIntPipe,
-  Post,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -14,21 +11,13 @@ import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-optio
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { SkipThrottle } from '@nestjs/throttler';
-import { FlagFeedService } from 'src/domain/users/flag_feed.service';
-import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
-import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
-import { AnyData } from 'src/common/types';
 import { UserFeedsService } from 'src/domain/users/user-feeds.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UserFeedsController {
-  constructor(
-    private readonly userFeedsService: UserFeedsService,
-    private readonly flagsService: FlagFeedService,
-    private readonly bookmarksService: BookmarkUserFeedService,
-  ) {}
+  constructor(private readonly userFeedsService: UserFeedsService) {}
 
   //? ----------------------------------------------------------------------- //
   //? 내가 만든 Feeds
@@ -64,40 +53,6 @@ export class UserFeedsController {
   //? 내가 북마크(BookmarkUserFeed)한 Feeds
   //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: 'Feed 북마크 생성' })
-  @Post(':userId/feedbookmarks/:feedId')
-  async createFeedBookmark(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
-    @Body('message') message: string | null,
-  ): Promise<BookmarkUserFeed> {
-    return await this.bookmarksService.createFeedBookmark(
-      userId,
-      feedId,
-      message,
-    );
-  }
-
-  @ApiOperation({ description: 'Feed 북마크 삭제' })
-  @Delete(':userId/feedbookmarks/:feedId')
-  async deleteFeedBookmark(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
-  ): Promise<any> {
-    return await this.bookmarksService.deleteFeedBookmark(userId, feedId);
-  }
-
-  @ApiOperation({ description: 'Feed 북마크 여부' })
-  @Get(':userId/feedbookmarks/:feedId')
-  async isFeedBookmarked(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
-  ): Promise<AnyData> {
-    return {
-      data: await this.bookmarksService.isFeedBookmarked(userId, feedId),
-    };
-  }
-
   @ApiOperation({ description: '내가 북마크한 Feeds (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/bookmarkedfeeds')
@@ -105,7 +60,7 @@ export class UserFeedsController {
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
   ): Promise<Paginated<Feed>> {
-    return await this.bookmarksService.findBookmarkedFeeds(query, userId);
+    return await this.userFeedsService.findBookmarkedFeeds(query, userId);
   }
 
   @ApiOperation({ description: '내가 북마크한 Feeds (all)' })
@@ -113,7 +68,7 @@ export class UserFeedsController {
   async loadBookmarkedFeeds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Feed[]> {
-    return await this.bookmarksService.loadBookmarkedFeeds(userId);
+    return await this.userFeedsService.loadBookmarkedFeeds(userId);
   }
 
   @ApiOperation({ description: '내가 북마크한 FeedIds' })
@@ -121,42 +76,12 @@ export class UserFeedsController {
   async loadBookmarkedFeedIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
-    return await this.bookmarksService.loadBookmarkedFeedIds(userId);
+    return await this.userFeedsService.loadBookmarkedFeedIds(userId);
   }
 
   //? ----------------------------------------------------------------------- //
   //? 내가 신고한 Feeds
   //? ----------------------------------------------------------------------- //
-
-  @ApiOperation({ description: 'Feed 신고 생성' })
-  @Post(':userId/feedflags/:feedId')
-  async createFeedFlag(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
-    @Body('message') message: string | null,
-  ): Promise<any> {
-    return await this.flagsService.createFeedFlag(userId, feedId, message);
-  }
-
-  @ApiOperation({ description: 'Feed 신고 삭제' })
-  @Delete(':userId/feedflags/:feedId')
-  async deleteFeedFlag(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
-  ): Promise<any> {
-    return await this.flagsService.deleteFeedFlag(userId, feedId);
-  }
-
-  @ApiOperation({ description: 'Feed 신고 여부' })
-  @Get(':userId/feedflags/:feedId')
-  async isFeedFlagged(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('feedId', ParseIntPipe) feedId: number,
-  ): Promise<AnyData> {
-    return {
-      data: await this.flagsService.isFeedFlagged(userId, feedId),
-    };
-  }
 
   @ApiOperation({ description: '내가 신고한 Feeds (paginated)' })
   @PaginateQueryOptions()
@@ -165,7 +90,7 @@ export class UserFeedsController {
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
   ): Promise<Paginated<Feed>> {
-    return await this.flagsService.findFlaggedFeeds(query, userId);
+    return await this.userFeedsService.findFlaggedFeeds(query, userId);
   }
 
   @ApiOperation({ description: '내가 신고한 모든 Feeds (all)' })
@@ -173,7 +98,7 @@ export class UserFeedsController {
   async loadFlaggedFeeds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Feed[]> {
-    return await this.flagsService.loadFlaggedFeeds(userId);
+    return await this.userFeedsService.loadFlaggedFeeds(userId);
   }
 
   @ApiOperation({ description: '내가 신고한 모든 FeedIds' })
@@ -181,6 +106,6 @@ export class UserFeedsController {
   async loadFlaggedFeedIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
-    return await this.flagsService.loadFlaggedFeedIds(userId);
+    return await this.userFeedsService.loadFlaggedFeedIds(userId);
   }
 }

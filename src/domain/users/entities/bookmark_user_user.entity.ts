@@ -27,14 +27,14 @@ export class BookmarkUserUser {
   @Column({ length: 80, nullable: true })
   message: string | null;
 
-  @ManyToOne(() => User, (user) => user.userBookmarks, {
+  @ManyToOne(() => User, (user) => user.followings, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   public user: User;
 
-  @ManyToOne(() => User, (user) => user.bookmarkedByUsers, {
+  @ManyToOne(() => User, (user) => user.followers, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',

@@ -14,15 +14,14 @@ import {
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { DataSource, Repository } from 'typeorm';
 import { CreateFeedDto } from 'src/domain/feeds/dto/create-feed.dto';
-import { Poll } from 'src/domain/feeds/entities/poll.entity';
+import { Poll } from 'src/domain/icebreakers/entities/poll.entity';
 import { S3Service } from 'src/services/aws/s3.service';
 import { UpdateFeedDto } from 'src/domain/feeds/dto/update-feed.dto';
 import { randomImageName } from 'src/helpers/random-filename';
 import { SignedUrl } from 'src/common/types';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
+import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { FeedLink } from 'src/domain/feeds/entities/feed_link.entity';
 
 @Injectable()
 export class FeedsService {
@@ -33,12 +32,9 @@ export class FeedsService {
     private readonly feedRepository: Repository<Feed>,
     @InjectRepository(Poll)
     private readonly pollRepository: Repository<Poll>,
-    @InjectRepository(Plea)
-    private readonly pleaRepository: Repository<Plea>,
-    @InjectRepository(FeedLink)
-    private readonly feedLinkRepository: Repository<FeedLink>,
     private eventEmitter: EventEmitter2,
     private readonly s3Service: S3Service,
+    private dataSource: DataSource, // for transaction
   ) {}
 
   //? ----------------------------------------------------------------------- //
@@ -46,31 +42,46 @@ export class FeedsService {
   //? ----------------------------------------------------------------------- //
 
   async create(dto: CreateFeedDto): Promise<Feed> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
     try {
-      const feed = await this.feedRepository.save(
-        this.feedRepository.create(dto),
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const poll = dto.poll
+        ? await queryRunner.manager.getRepository(Poll).save(
+            new Poll({
+              slug: dto.poll.slug,
+              question: dto.poll.question,
+              options: dto.poll.options,
+              isMultiple: dto.poll.isMultiple,
+              userId: dto.userId,
+            }),
+          )
+        : null;
+      const feed = await queryRunner.manager.getRepository(Feed).save(
+        new Feed({
+          slug: dto.slug,
+          title: dto.title,
+          body: dto.body,
+          images: dto.images,
+          isAnonymous: dto.isAnonymous,
+          userId: dto.userId,
+          polls: [poll],
+        }),
       );
-      if (dto.linkedFeedIds && dto.linkedFeedIds.length > 0) {
-        await Promise.all(
-          dto.linkedFeedIds.map(async (v: number) => {
-            const feedLink = this.feedLinkRepository.create({
-              feed: { id: feed.id },
-              entityType: `feed`,
-              entityId: v,
-            });
-            return await this.feedLinkRepository.save(feedLink);
-          }),
-        );
-      }
       return feed;
-    } catch (e) {
-      console.log(e);
-      throw new BadRequestException();
+    } catch (error) {
+      console.error(error);
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
   }
 
   //? ----------------------------------------------------------------------- //
-  //? READ
+  //? Read
   //? ----------------------------------------------------------------------- //
 
   // 전체 feed 리스트 (paginated)
@@ -109,7 +120,7 @@ export class FeedsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPDATE
+  //? Update
   //? ----------------------------------------------------------------------- //
 
   async update(id: number, dto: UpdateFeedDto): Promise<Feed> {
@@ -130,7 +141,7 @@ export class FeedsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? DELETE
+  //? Delete
   //? ----------------------------------------------------------------------- //
 
   async softRemove(id: number): Promise<Feed> {
@@ -144,7 +155,7 @@ export class FeedsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPLOAD
+  //? Upload
   //? ----------------------------------------------------------------------- //
 
   // S3 직접 업로드를 위한 signedUrl 리턴

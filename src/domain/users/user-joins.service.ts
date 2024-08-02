@@ -13,17 +13,16 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { JoinRequestType, JoinStatus } from 'src/common/enums';
-import { ConfigService } from '@nestjs/config';
-import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
+import { Category } from 'src/domain/categories/entities/category.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CreateJoinDto } from 'src/domain/users/dto/create-join.dto';
+import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
-import { Participant } from 'src/domain/chats/entities/participant.entity';
-import { Category } from 'src/domain/categories/entities/category.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UserJoinsService {
@@ -38,24 +37,28 @@ export class UserJoinsService {
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     @Inject(ConfigService) private configService: ConfigService, // global
-    private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
+    private eventEmitter: EventEmitter2,
   ) {
     this.env = this.configService.get('nodeEnv');
   }
 
+  //? ----------------------------------------------------------------------- //
+  //? 참가 신청/초대 (Join) 생성
+  //? ----------------------------------------------------------------------- //
+
   //? 모임신청/초대 생성 (생성 갯수제한 없도록 수정함.)
-  async createJoin(userId: number, dto: CreateJoinDto): Promise<Meetup> {
-    const meetup = await this.meetupRepository.findOneOrFail({
-      where: { id: dto.meetupId },
-      relations: ['joins', 'user', 'user.profile'],
-    });
-    //! joinType 은 semantic 에 맞게 자동설정.
-    const joinType =
-      meetup.userId == userId
-        ? JoinRequestType.INVITATION
-        : JoinRequestType.REQUEST;
+  async createJoin(dto: CreateJoinDto): Promise<Meetup> {
     try {
+      const meetup = await this.meetupRepository.findOneOrFail({
+        where: { id: dto.meetupId },
+        relations: ['joins', 'user', 'user.profile'],
+      });
+      //! joinType 은 semantic 에 맞게 자동설정.
+      const joinType =
+        meetup.userId == dto.userId
+          ? JoinRequestType.INVITATION
+          : JoinRequestType.REQUEST;
       await this.userRepository.manager.query(
         'INSERT IGNORE INTO `join` \
   (userId, recipientId, meetupId, message, skill, joinType) VALUES (?, ?, ?, ?, ?, ?) \
@@ -67,13 +70,17 @@ export class UserJoinsService {
   skill = VALUES(`skill`), \
   joinType = VALUES(`joinType`)',
         [
-          userId,
+          dto.userId,
           dto.recipientId,
           dto.meetupId,
           dto.message,
           dto.skill, //! could be null when host invites guest members
           joinType,
         ],
+      );
+      await this.meetupRepository.query(
+        'UPDATE `meetup` SET joinCount = joinCount + 1 WHERE id = ?',
+        [dto.meetupId],
       );
 
       if (joinType === JoinRequestType.REQUEST) {
@@ -88,7 +95,7 @@ export class UserJoinsService {
     userId = VALUES(`userId`), \
     categoryId = VALUES(`categoryId`), \
     skill = VALUES(`skill`)',
-          [userId, category.id, dto.skill],
+          [dto.userId, category.id, dto.skill],
         );
       }
 
@@ -105,8 +112,13 @@ export class UserJoinsService {
       this.eventEmitter.emit('user.notified', event);
 
       return meetup;
-    } catch (e) {
-      throw new BadRequestException('database has gone crazy.');
+    } catch (error) {
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`entity not found`);
+      } else {
+        this.logger.error(`[💀] ${error.toString()}`);
+        throw new BadRequestException();
+      }
     }
   }
 
@@ -238,12 +250,17 @@ export class UserJoinsService {
         //! TypeORM의 EntityNotFoundError 감지
         throw new NotFoundException(`entity not found`);
       } else {
-        throw error;
+        this.logger.error(`[💀] ${error.toString()}`);
+        throw new BadRequestException();
       }
     } finally {
       await queryRunner.release();
     }
   }
+
+  //? ----------------------------------------------------------------------- //
+  //? 참가 신청/초대 (Join) 리스트
+  //? ----------------------------------------------------------------------- //
 
   //? 내가 신청(request)한 모임 리스트 (paginated)
   async listMeetupsRequested(

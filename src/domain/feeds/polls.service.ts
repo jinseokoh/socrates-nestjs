@@ -15,8 +15,7 @@ import {
 } from 'nestjs-paginate';
 import { CreatePollDto } from 'src/domain/feeds/dto/create-poll.dto';
 import { UpdatePollDto } from 'src/domain/feeds/dto/update-poll.dto';
-import { Poll } from 'src/domain/feeds/entities/poll.entity';
-import { ageToFactionId } from 'src/helpers/age-to-faction';
+import { Poll } from 'src/domain/icebreakers/entities/poll.entity';
 import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
@@ -36,8 +35,7 @@ export class PollsService {
 
   async create(dto: CreatePollDto): Promise<Poll> {
     try {
-      const poll = await this.repository.save(this.repository.create(dto));
-      return poll;
+      return await this.repository.save(this.repository.create(dto));
     } catch (e) {
       throw new BadRequestException();
     }

@@ -15,18 +15,18 @@ import {
 
 import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { InquiryComment } from 'src/domain/inquiries/entities/inquiry_comment.entity';
-import { InquiryCommentsService } from 'src/domain/inquiries/inquiry-comments.service';
-import { CreateInquiryCommentDto } from 'src/domain/inquiries/dto/create-inquiry_comment.dto';
-import { UpdateInquiryCommentDto } from 'src/domain/inquiries/dto/update-inquiry_comment.dto';
+import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
+import { ContentCommentUsersService } from 'src/domain/contents/content_comment-users.service';
+import { CreateContentCommentDto } from 'src/domain/contents/dto/create-content_comment.dto';
+import { UpdateContentCommentDto } from 'src/domain/contents/dto/update-content_comment.dto';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('inquiries')
-export class InquiryCommentsController {
+@Controller('contents')
+export class ContentCommentUsersController {
   constructor(
-    private readonly inquiryCommentsService: InquiryCommentsService,
+    private readonly contentCommentUsersService: ContentCommentUsersService,
   ) {}
 
   //? ----------------------------------------------------------------------- //
@@ -35,36 +35,36 @@ export class InquiryCommentsController {
 
   @ApiOperation({ description: '댓글 생성' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':inquiryId/comments')
-  async createInquiryComment(
+  @Post(':contentId/comments')
+  async createContentComment(
     @CurrentUserId() userId: number,
-    @Param('inquiryId', ParseIntPipe) inquiryId: number,
-    @Body() dto: CreateInquiryCommentDto,
+    @Param('contentId', ParseIntPipe) contentId: number,
+    @Body() dto: CreateContentCommentDto,
   ): Promise<any> {
-    return await this.inquiryCommentsService.create({
+    return await this.contentCommentUsersService.create({
       ...dto,
       userId,
-      inquiryId,
+      contentId,
       sendNotification: dto.sendNotification ?? false,
     });
   }
 
   @ApiOperation({ description: '답글 생성' })
   @UsePipes(new ValidationPipe({ skipMissingProperties: true }))
-  @Post(':inquiryId/comments/:commentId')
-  async createinquiryCommentReply(
+  @Post(':contentId/comments/:commentId')
+  async createContentCommentReply(
     @CurrentUserId() userId: number,
-    @Param('inquiryId', ParseIntPipe) inquiryId: number,
+    @Param('contentId', ParseIntPipe) contentId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
-    @Body() dto: CreateInquiryCommentDto,
+    @Body() dto: CreateContentCommentDto,
   ): Promise<any> {
-    const comment = await this.inquiryCommentsService.findById(commentId);
+    const comment = await this.contentCommentUsersService.findById(commentId);
     const parentId = comment.parentId ? comment.parentId : commentId;
 
-    return await this.inquiryCommentsService.create({
+    return await this.contentCommentUsersService.create({
       ...dto,
       userId,
-      inquiryId,
+      contentId,
       parentId,
       sendNotification: dto.sendNotification ?? false,
     });
@@ -75,36 +75,37 @@ export class InquiryCommentsController {
   //? ----------------------------------------------------------------------- //
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':inquiryId/comments')
+  @Get(':contentId/comments')
   async findAllInTraditionalStyle(
-    @Param('inquiryId', ParseIntPipe) inquiryId: number,
+    @Param('contentId', ParseIntPipe) contentId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<InquiryComment>> {
-    const result = await this.inquiryCommentsService.findAllInTraditionalStyle(
-      query,
-      inquiryId,
-    );
+  ): Promise<Paginated<ContentComment>> {
+    const result =
+      await this.contentCommentUsersService.findAllInTraditionalStyle(
+        query,
+        contentId,
+      );
 
     return result;
     // recursive tree 인 경우.
     // return {
     //   ...result,
     //   data: result.data.map((comment) =>
-    //     this.inquiryCommentsService.buildInquiryCommentTree(comment),
+    //     this.contentCommentUsersService.buildContentCommentTree(comment),
     //   ),
     // };
   }
 
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':inquiryId/comments_counts')
+  @Get(':contentId/comments_counts')
   async findAllInYoutubeStyle(
-    @Param('inquiryId', ParseIntPipe) inquiryId: number,
+    @Param('contentId', ParseIntPipe) contentId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<InquiryComment>> {
-    const result = await this.inquiryCommentsService.findAllInYoutubeStyle(
+  ): Promise<Paginated<ContentComment>> {
+    const result = await this.contentCommentUsersService.findAllInYoutubeStyle(
       query,
-      inquiryId,
+      contentId,
     );
 
     return result;
@@ -113,15 +114,15 @@ export class InquiryCommentsController {
   //? 답글 리스트, 최상단 부모는 리턴되지 않음.
   @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':inquiryId/comments/:commentId')
+  @Get(':contentId/comments/:commentId')
   async findAllRepliesById(
-    @Param('inquiryId', ParseIntPipe) inquiryId: number,
+    @Param('contentId', ParseIntPipe) contentId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<InquiryComment>> {
-    return await this.inquiryCommentsService.findAllRepliesById(
+  ): Promise<Paginated<ContentComment>> {
+    return await this.contentCommentUsersService.findAllRepliesById(
       query,
-      inquiryId,
+      contentId,
       commentId,
     );
   }
@@ -131,25 +132,25 @@ export class InquiryCommentsController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '댓글 수정' })
-  @Patch(':inquiryId/comments/:commentId')
+  @Patch(':contentId/comments/:commentId')
   async update(
-    @Param('inquiryId') inquiryId: number,
-    @Param('commentId') commentId: number,
-    @Body() dto: UpdateInquiryCommentDto,
-  ): Promise<InquiryComment> {
-    return await this.inquiryCommentsService.update(dto, commentId);
+    @Param('contentId', ParseIntPipe) contentId: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
+    @Body() dto: UpdateContentCommentDto,
+  ): Promise<ContentComment> {
+    return await this.contentCommentUsersService.update(commentId, dto);
   }
 
   //? ----------------------------------------------------------------------- //
   //? DELETE
   //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: '관리자) 댓글 soft 삭제' })
-  @Delete(':inquiryId/comments/:commentId')
+  @ApiOperation({ description: '댓글 soft 삭제' })
+  @Delete(':contentId/comments/:commentId')
   async remove(
-    @Param('inquiryId', ParseIntPipe) inquiryId: number,
-    @Param('commentId') commentId: number,
-  ): Promise<InquiryComment> {
-    return await this.inquiryCommentsService.softRemove(commentId);
+    @Param('contentId', ParseIntPipe) contentId: number,
+    @Param('commentId', ParseIntPipe) commentId: number,
+  ): Promise<ContentComment> {
+    return await this.contentCommentUsersService.softRemove(commentId);
   }
 }

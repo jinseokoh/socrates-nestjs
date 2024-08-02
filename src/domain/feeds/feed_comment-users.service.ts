@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -9,32 +14,33 @@ import {
 } from 'nestjs-paginate';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
-import { IsNull, Repository } from 'typeorm';
-import { CreateFeedCommentDto } from 'src/domain/feeds/dto/create-feed_comment.dto';
-import { UpdateFeedCommentDto } from 'src/domain/feeds/dto/update-feed_comment.dto';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { randomImageName } from 'src/helpers/random-filename';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 import { SignedUrl } from 'src/common/types';
 import { S3Service } from 'src/services/aws/s3.service';
+import { Flag } from 'src/domain/users/entities/flag.entity';
+import { CreateFeedCommentDto } from 'src/domain/feeds/dto/create-feed_comment.dto';
+import { UpdateFeedCommentDto } from 'src/domain/feeds/dto/update-feed_comment.dto';
 
 @Injectable()
-export class FeedCommentsService {
-  private readonly logger = new Logger(FeedCommentsService.name);
+export class FeedCommentUsersService {
+  private readonly logger = new Logger(FeedCommentUsersService.name);
 
   constructor(
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
     @InjectRepository(FeedComment)
     private readonly feedCommentRepository: Repository<FeedComment>,
-    // @Inject(SlackService) private readonly slack: SlackService,
     private readonly s3Service: S3Service,
     private eventEmitter: EventEmitter2,
+    private dataSource: DataSource, // for transaction
   ) {}
 
   //? ----------------------------------------------------------------------- //
-  //? CREATE
+  //? Feed 댓글 생성
   //? ----------------------------------------------------------------------- //
 
   async create(dto: CreateFeedCommentDto): Promise<FeedComment> {
@@ -57,7 +63,7 @@ export class FeedCommentsService {
         event.userId = record.feed.user.id;
         event.token = record.feed.user.pushToken;
         event.options = record.feed.user.profile?.options ?? {};
-        event.body = `내 피드에 누군가 댓글을 남겼습니다.`;
+        event.body = `${record.feed.title} 피드에 새로운 댓글이 있습니다.`;
         event.data = {
           page: `feeds/${dto.feedId}`,
         };
@@ -71,7 +77,7 @@ export class FeedCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? READ
+  //? Feed 댓글 리스트
   //? ----------------------------------------------------------------------- //
 
   //? comments w/ replies (children)
@@ -118,7 +124,7 @@ export class FeedCommentsService {
     return await paginate<FeedComment>(query, queryBuilder, config);
   }
 
-  // 답글 리스트
+  //? 답글 리스트, 최상단 부모는 리턴되지 않음.
   async findAllRepliesById(
     query: PaginateQuery,
     feedId: number,
@@ -158,13 +164,20 @@ export class FeedCommentsService {
     }
   }
 
+  // reserved. no use cases as of yet.
+  async count(body: string): Promise<number> {
+    return await this.feedCommentRepository.countBy({
+      body: body,
+    });
+  }
+
   //? ----------------------------------------------------------------------- //
-  //? UPDATE
+  //? Feed 댓글 update
   //? ----------------------------------------------------------------------- //
 
   async update(
-    dto: UpdateFeedCommentDto,
     commentId: number,
+    dto: UpdateFeedCommentDto,
   ): Promise<FeedComment> {
     const comment = await this.feedCommentRepository.preload({
       id: commentId,
@@ -178,7 +191,7 @@ export class FeedCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? DELETE
+  //? Feed 댓글 delete
   //? ----------------------------------------------------------------------- //
 
   async softRemove(id: number): Promise<FeedComment> {
@@ -213,13 +226,86 @@ export class FeedCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPLOAD
+  //? Feed 댓글 Flag
+  //? ----------------------------------------------------------------------- //
+
+  async createFeedCommentFlag(
+    userId: number,
+    feedId: number,
+    commentId: number,
+    message: string,
+  ): Promise<Flag> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const flag = await queryRunner.manager.save(
+        queryRunner.manager.getRepository(Flag).create({
+          userId,
+          entityType: 'feed_comment',
+          entityId: commentId,
+          message,
+        }),
+      );
+      await queryRunner.manager.query(
+        'UPDATE `feed_comment` SET flagCount = flagCount + 1 WHERE id = ?',
+        [commentId],
+      );
+      await queryRunner.commitTransaction();
+      return flag;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async deleteFeedCommentFlag(userId: number, commentId: number): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const { affectedRows } = await queryRunner.manager.query(
+        'DELETE FROM `flag` where userId = ? AND entityType = ? AND entityId = ?',
+        [userId, `feed_comment`, commentId],
+      );
+      if (affectedRows > 0) {
+        await queryRunner.manager.query(
+          'UPDATE `feed_comment` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
+          [commentId],
+        );
+      }
+      return { data: affectedRows };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? Upload
   //? ----------------------------------------------------------------------- //
 
   // S3 직접 업로드를 위한 signedUrl 리턴
-  async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
-    const fileUri = randomImageName(dto.name ?? 'comment', dto.mimeType);
-    const path = `${process.env.NODE_ENV}/comments/${userId}/${fileUri}`;
+  async getSignedUrl(
+    userId: number,
+    feedId: number,
+    dto: SignedUrlDto,
+  ): Promise<SignedUrl> {
+    const fileUri = randomImageName(
+      dto.name ?? `feed_${feedId}_comment`,
+      dto.mimeType,
+    );
+    const path = `${process.env.NODE_ENV}/feed_comments/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
     return {

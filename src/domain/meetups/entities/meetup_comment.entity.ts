@@ -62,7 +62,7 @@ export class MeetupComment {
   //? ----------------------------------------------------------------------- //
   //? many-to-1 belongsTo
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.meetupComments, { cascade: true })
+  @ManyToOne(() => Meetup, (meetup) => meetup.comments, { cascade: true })
   meetup: Meetup;
 
   //? ----------------------------------------------------------------------- //

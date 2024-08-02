@@ -1,68 +1,73 @@
 import {
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
+  Post,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
-import { FeedsService } from 'src/domain/feeds/feeds.service';
-import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
+import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
+import { FeedUsersService } from 'src/domain/feeds/feed-users.service';
+import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { FlagFeedService } from 'src/domain/users/flag_feed.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('feeds')
 export class FeedUsersController {
-  constructor(
-    private readonly feedsService: FeedsService,
-    private readonly bookmarksService: BookmarkUserFeedService,
-    private readonly flagFeedService: FlagFeedService,
-  ) {}
+  constructor(private readonly feedUsersService: FeedUsersService) {}
 
   //? ----------------------------------------------------------------------- //
-  //? 요청 (Plea) 리스트
+  //? 북마크/찜(BookmarkUserFeed) 생성
   //? ----------------------------------------------------------------------- //
 
-  // @ApiOperation({ description: '이 모임에 신청한 사용자 리스트 (최대30명)' })
-  // @Get(':id/joiners')
-  // async getAllJoiners(@Param('id', ParseIntPipe) id: number): Promise<AnyData> {
-  //   const users = await this.feedsService.getAllJoiners(id);
-  //   return {
-  //     data: users,
-  //   };
-  // }
+  @ApiOperation({ description: 'Feed 북마크/찜 생성' })
+  @Post(':feedId/bookmark')
+  async createFeedBookmark(
+    @CurrentUserId() userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+  ): Promise<BookmarkUserFeed> {
+    return await this.feedUsersService.createFeedBookmark(userId, feedId);
+  }
 
-  // @ApiOperation({ description: '이 모임에 초대한 사용자 리스트 (최대30명)' })
-  // @Get(':id/invitees')
-  // async getAllInvitees(
-  //   @Param('id', ParseIntPipe) id: number,
-  // ): Promise<AnyData> {
-  //   const users = await this.feedsService.getAllInvitees(id);
-  //   return {
-  //     data: users,
-  //   };
-  // }
+  @ApiOperation({ description: 'Feed 북마크/찜 삭제' })
+  @Delete(':feedId/bookmark')
+  async deleteFeedBookmark(
+    @CurrentUserId() userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+  ): Promise<any> {
+    return await this.feedUsersService.deleteFeedBookmark(userId, feedId);
+  }
+
+  @ApiOperation({ description: 'Feed 북마크/찜 여부' })
+  @Get(':feedId/bookmark')
+  async isFeedBookmarked(
+    @CurrentUserId() userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+  ): Promise<boolean> {
+    return await this.feedUsersService.isFeedBookmarked(userId, feedId);
+  }
 
   //? ----------------------------------------------------------------------- //
   //? 북마크 (BookmarkUserFeed) 리스트
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '이 Feed 를 북마크한 모든 Users' })
-  @Get(':feedId/bookmarkingusers')
+  @Get(':feedId/bookmarkers')
   async loadBookmarkingUsers(
     @Param('feedId', ParseIntPipe) feedId: number,
   ): Promise<User[]> {
-    return await this.bookmarksService.loadBookmarkingUsers(feedId);
+    return await this.feedUsersService.loadBookmarkingUsers(feedId);
   }
 
   @ApiOperation({ description: '이 Feed 를 북마크한 모든 UserIds' })
-  @Get(':feedId/bookmarkinguserids')
+  @Get(':feedId/bookmarkerids')
   async loadBookmarkingUserIds(
     @Param('feedId', ParseIntPipe) feedId: number,
   ): Promise<number[]> {
-    return await this.bookmarksService.loadBookmarkingUserIds(feedId);
+    return await this.feedUsersService.loadBookmarkingUserIds(feedId);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -70,18 +75,18 @@ export class FeedUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '이 모임을 신고한 모든 Users (all)' })
-  @Get(':feedId/flaggingusers')
+  @Get(':feedId/flaggers')
   async loadFlaggingUsers(
     @Param('feedId', ParseIntPipe) feedId: number,
   ): Promise<User[]> {
-    return await this.flagFeedService.loadFeedFlaggingUsers(feedId);
+    return await this.feedUsersService.loadFeedFlaggingUsers(feedId);
   }
 
   @ApiOperation({ description: '이 모임을 신고한 모든 Users (all)' })
-  @Get(':feedId/flagginguserids')
+  @Get(':feedId/flaggerids')
   async loadFlaggingUserIds(
     @Param('feedId', ParseIntPipe) feedId: number,
   ): Promise<number[]> {
-    return await this.flagFeedService.loadFeedFlaggingUserIds(feedId);
+    return await this.feedUsersService.loadFeedFlaggingUserIds(feedId);
   }
 }

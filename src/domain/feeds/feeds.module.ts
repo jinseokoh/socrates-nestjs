@@ -3,24 +3,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
-import { FeedLink } from 'src/domain/feeds/entities/feed_link.entity';
 import { FeedsService } from 'src/domain/feeds/feeds.service';
 import { Flag } from 'src/domain/users/entities/flag.entity';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
-import { Poll } from 'src/domain/feeds/entities/poll.entity';
+import { Poll } from 'src/domain/icebreakers/entities/poll.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
-import { FeedCommentsController } from 'src/domain/feeds/feed-comments.controller';
-import { FeedCommentsService } from 'src/domain/feeds/feed-comments.service';
+import { FeedCommentUsersController } from 'src/domain/feeds/feed_comment-users.controller';
+import { FeedCommentUsersService } from 'src/domain/feeds/feed_comment-users.service';
 import { FlagFeedService } from 'src/domain/users/flag_feed.service';
-import { PleasService } from 'src/domain/feeds/pleas.service';
 import { PollsService } from 'src/domain/feeds/polls.service';
 import { FeedsController } from 'src/domain/feeds/feeds.controller';
 import { FeedUsersController } from 'src/domain/feeds/feed-users.controller';
-import { PleasController } from 'src/domain/feeds/pleas.controller';
 import { PollsController } from 'src/domain/feeds/polls.controller';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
+import { FeedUsersService } from 'src/domain/feeds/feed-users.service';
 
 @Module({
   imports: [
@@ -28,9 +25,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
       BookmarkUserFeed,
       FeedComment,
       Feed,
-      FeedLink,
       Flag,
-      Plea,
       Poll,
       User,
     ]),
@@ -40,17 +35,16 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
   // exports: [FeedsService],
   providers: [
     BookmarkUserFeedService,
-    FeedCommentsService,
     FeedsService,
+    FeedUsersService,
+    FeedCommentUsersService,
     FlagFeedService,
-    PleasService,
     PollsService,
   ],
   controllers: [
-    FeedCommentsController,
     FeedsController,
+    FeedCommentUsersController,
     FeedUsersController,
-    PleasController,
     PollsController,
   ],
 })

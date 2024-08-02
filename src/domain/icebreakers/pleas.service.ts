@@ -13,9 +13,9 @@ import {
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
-import { CreatePleaDto } from 'src/domain/feeds/dto/create-plea.dto';
-import { UpdatePleaDto } from 'src/domain/feeds/dto/update-plea.dto';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
+import { CreatePleaDto } from 'src/domain/icebreakers/dto/create-plea.dto';
+import { UpdatePleaDto } from 'src/domain/icebreakers/dto/update-plea.dto';
+import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
@@ -257,4 +257,27 @@ export class PleasService {
       await queryRunner.release();
     }
   }
+
+  // todo. move it to the right directory
+  // // 발견요청 리스트에 추가
+  // async attachToPleaPivot(dto: CreatePleaDto): Promise<Plea> {
+  //   const plea = await this.pleaRepository.save(
+  //     this.pleaRepository.create(dto),
+  //   );
+
+  //   return plea;
+  // }
+
+  // async getUniqueUsersPleaded(userId: number): Promise<User[]> {
+  //   const items = await this.pleaRepository
+  //     .createQueryBuilder('plea')
+  //     .innerJoinAndSelect('plea.user', 'user')
+  //     .where({
+  //       recipientId: userId,
+  //     })
+  //     .groupBy('plea.userId')
+  //     .getMany();
+
+  //   return items.map((v) => v.user);
+  // }
 }

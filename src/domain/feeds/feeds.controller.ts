@@ -3,6 +3,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -45,7 +46,7 @@ export class FeedsController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? READ
+  //? Read
   //? ----------------------------------------------------------------------- //
 
   @Public()
@@ -69,10 +70,10 @@ export class FeedsController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPDATE
+  //? Update
   //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: '발견글 수정' })
+  @ApiOperation({ description: '발견글 갱신' })
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -82,7 +83,17 @@ export class FeedsController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPLOAD
+  //? Delete
+  //? ----------------------------------------------------------------------- //
+
+  @ApiOperation({ description: 'Meetup soft 삭제' })
+  @Delete(':id')
+  async softRemove(@Param('id', ParseIntPipe) id: number): Promise<Feed> {
+    return await this.feedsService.softRemove(id);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? Upload
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })

@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
-import { ContentType } from 'src/common/enums';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateContentDto {
+  @ApiProperty({ description: 'slug' })
+  @IsString()
+  slug: string;
+
   @ApiProperty({ description: '제목' })
   @IsString()
   title: string;
@@ -13,19 +15,22 @@ export class CreateContentDto {
   body?: string | null;
 
   @ApiProperty({ description: '이미지', required: false })
-  @IsString()
+  @IsArray()
   @IsOptional()
-  image?: string | null;
+  images: string[] | null;
 
-  @ApiProperty({
-    description: '분류',
-    default: ContentType.ANNOUNCEMENTS,
-  })
-  @IsEnum(ContentType)
-  contentType: ContentType;
-
-  @ApiProperty({ description: '공개여부', default: false })
-  @IsBoolean()
+  @ApiProperty({ description: 'comment count' })
+  @IsNumber()
   @IsOptional()
-  isPublished?: boolean;
+  viewCount: number | null;
+
+  @ApiProperty({ description: 'comment count' })
+  @IsNumber()
+  @IsOptional()
+  commentCount: number | null;
+
+  @ApiProperty({ description: 'like count' })
+  @IsNumber()
+  @IsOptional()
+  likeCount: number | null;
 }

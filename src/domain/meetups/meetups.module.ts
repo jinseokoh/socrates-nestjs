@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { Career } from 'src/domain/careers/entities/career.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
@@ -10,16 +11,14 @@ import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity
 import { User } from 'src/domain/users/entities/user.entity';
 import { Venue } from 'src/domain/meetups/entities/venue.entity';
 import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
-import { MeetupUsersController } from 'src/domain/meetups/meetup-users.controller';
-import { MeetupsController } from 'src/domain/meetups/meetups.controller';
-import { MeetupCommentsController } from 'src/domain/meetups/meetup-comments.controller';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
-import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
-import { MeetupCommentsService } from 'src/domain/meetups/meetup-comments.service';
-import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
+import { MeetupUsersService } from 'src/domain/meetups/meetup-users.service';
+import { MeetupCommentUsersService } from 'src/domain/meetups/meetup_comment-users.service';
+import { MeetupsController } from 'src/domain/meetups/meetups.controller';
+import { MeetupUsersController } from 'src/domain/meetups/meetup-users.controller';
+import { MeetupCommentUsersController } from 'src/domain/meetups/meetup_comment-users.controller';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
-import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -38,17 +37,11 @@ import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
     S3Module,
   ],
   // exports: [MeetupsService], // we need this for what?
-  providers: [
-    BookmarkUserMeetupService,
-    FlagMeetupService,
-    MeetupsService,
-    MeetupCommentsService,
-    UserMeetupsService,
-  ],
+  providers: [MeetupsService, MeetupUsersService, MeetupCommentUsersService],
   controllers: [
     MeetupsController,
-    MeetupCommentsController,
     MeetupUsersController,
+    MeetupCommentUsersController,
   ],
 })
 export class MeetupsModule {}

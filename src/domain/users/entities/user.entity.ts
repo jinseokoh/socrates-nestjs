@@ -24,10 +24,10 @@ import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
-import { Poll } from 'src/domain/feeds/entities/poll.entity';
+import { Poll } from 'src/domain/icebreakers/entities/poll.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
+import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
 import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
@@ -225,10 +225,10 @@ export class User {
   public meetupBookmarks: BookmarkUserMeetup[];
 
   @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.user)
-  public userBookmarks: BookmarkUserUser[];
+  public followings: BookmarkUserUser[];
 
   @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.recipient)
-  public bookmarkedByUsers: BookmarkUserUser[];
+  public followers: BookmarkUserUser[];
 
   @OneToMany(() => Flag, (flag) => flag.user)
   public flags: Flag[];

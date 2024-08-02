@@ -39,6 +39,11 @@ export class CreateFeedCommentDto {
   @IsOptional()
   feedId: number;
 
+  @ApiProperty({ description: 'meetup comment 아이디' })
+  @IsNumber()
+  @IsOptional()
+  commentId: number | null;
+
   @ApiProperty({ description: '상위 댓글 아이디', required: false })
   @IsNumber()
   @IsOptional()

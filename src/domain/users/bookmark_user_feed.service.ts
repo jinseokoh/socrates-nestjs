@@ -5,12 +5,6 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  PaginateConfig,
-  PaginateQuery,
-  Paginated,
-  paginate,
-} from 'nestjs-paginate';
 import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm/repository/Repository';
@@ -113,85 +107,5 @@ export class BookmarkUserFeedService {
     const { count } = row;
 
     return +count === 1;
-  }
-
-  // 내가 북마크한 feed 리스트 (paginated)
-  async findBookmarkedFeeds(
-    query: PaginateQuery,
-    userId: number,
-  ): Promise<Paginated<Feed>> {
-    const queryBuilder = this.feedRepository
-      .createQueryBuilder('feed')
-      .innerJoinAndSelect(
-        BookmarkUserFeed,
-        'bookmark_user_feed',
-        'bookmark_user_feed.feedId = feed.id',
-      )
-      .innerJoinAndSelect('feed.user', 'user')
-      .where('bookmark_user_feed.userId = :userId', { userId });
-
-    const config: PaginateConfig<Feed> = {
-      sortableColumns: ['id'],
-      searchableColumns: ['body'],
-      defaultLimit: 20,
-      defaultSortBy: [['id', 'DESC']],
-      filterableColumns: {},
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // 내가 북마크한 모든 feeds
-  async loadBookmarkedFeeds(userId: number): Promise<Feed[]> {
-    const queryBuilder = this.feedRepository.createQueryBuilder('feed');
-    return await queryBuilder
-      .innerJoinAndSelect(
-        BookmarkUserFeed,
-        'bookmark_user_feed',
-        'bookmark_user_feed.feedId = feed.id',
-      )
-      .addSelect(['feed.*'])
-      .where('bookmark_user_feed.userId = :userId', { userId })
-      .getMany();
-  }
-
-  // 내가 북마크한 모든 feedIds
-  async loadBookmarkedFeedIds(userId: number): Promise<number[]> {
-    const rows = await this.bookmarkUserFeedRepository.manager.query(
-      'SELECT feedId FROM `bookmark_user_feed` \
-      WHERE bookmark_user_feed.userId = ?',
-      [userId],
-    );
-
-    return rows.map((v: any) => v.feedId);
-  }
-
-  //? 새롭게 추가 -----------------------------------------------------------------//
-
-  // Feed 를 북마크한 Users
-  async loadBookmarkingUsers(feedId: number): Promise<User[]> {
-    const queryBuilder = this.userRepository.createQueryBuilder('user');
-    return await queryBuilder
-      .innerJoinAndSelect(
-        BookmarkUserFeed,
-        'bookmark_user_feed',
-        'bookmark_user_feed.userId = user.id',
-      )
-      .addSelect(['user.*'])
-      .where('bookmark_user_feed.feedId = :feedId', {
-        feedId,
-      })
-      .getMany();
-  }
-
-  // Feed 를 북마크한 UserIds
-  async loadBookmarkingUserIds(feedId: number): Promise<number[]> {
-    const rows = await this.bookmarkUserFeedRepository.manager.query(
-      'SELECT userId FROM `bookmark_user_feed` \
-      WHERE bookmark_user_feed.feedId = ?',
-      [feedId],
-    );
-
-    return rows.map((v: any) => v.userId);
   }
 }

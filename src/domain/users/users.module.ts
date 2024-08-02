@@ -13,13 +13,12 @@ import { Join } from 'src/domain/meetups/entities/join.entity';
 import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
-import { Poll } from 'src/domain/feeds/entities/poll.entity';
+import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
+import { Poll } from 'src/domain/icebreakers/entities/poll.entity';
 import { Profile } from 'src/domain/users/entities/profile.entity';
 import { Provider } from 'src/domain/users/entities/provider.entity';
 import { Secret } from 'src/domain/users/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { FeedLink } from 'src/domain/feeds/entities/feed_link.entity';
 
 import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
@@ -76,7 +75,6 @@ import { Language } from 'src/domain/languages/entities/language.entity';
       BookmarkUserUser,
       Category,
       Feed,
-      FeedLink,
       Flag,
       Friendship,
       Hate,

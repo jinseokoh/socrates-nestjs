@@ -1,4 +1,9 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -7,37 +12,35 @@ import {
   Paginated,
   paginate,
 } from 'nestjs-paginate';
-import { CreateInquiryCommentDto } from 'src/domain/inquiries/dto/create-inquiry_comment.dto';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { InquiryComment } from 'src/domain/inquiries/entities/inquiry_comment.entity';
-import { FindOneOptions, IsNull, Repository } from 'typeorm';
-import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
-import { ClientProxy } from '@nestjs/microservices';
+import { DataSource, FindOneOptions, IsNull, Repository } from 'typeorm';
+import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
+import { randomImageName } from 'src/helpers/random-filename';
+import { SignedUrl } from 'src/common/types';
+import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
+import { CreateInquiryCommentDto } from 'src/domain/inquiries/dto/create-inquiry_comment.dto';
 import { UpdateInquiryCommentDto } from 'src/domain/inquiries/dto/update-inquiry_comment.dto';
 import { S3Service } from 'src/services/aws/s3.service';
-import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-
-import { randomImageName } from 'src/helpers/random-filename';
-import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
-import { SignedUrl } from 'src/common/types';
+import { Flag } from 'src/domain/users/entities/flag.entity';
 
 @Injectable()
-export class InquiryCommentsService {
-  private readonly logger = new Logger(InquiryCommentsService.name);
+export class InquiryCommentUsersService {
+  private readonly logger = new Logger(InquiryCommentUsersService.name);
 
   constructor(
     @InjectRepository(Inquiry)
     private readonly inquiryRepository: Repository<Inquiry>,
     @InjectRepository(InquiryComment)
     private readonly inquiryCommentRepository: Repository<InquiryComment>,
-    @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     private readonly s3Service: S3Service,
     private eventEmitter: EventEmitter2,
+    private dataSource: DataSource, // for transaction
   ) {}
 
   //? ----------------------------------------------------------------------- //
-  //? CREATE
+  //? inquiry 댓글 생성
   //? ----------------------------------------------------------------------- //
 
   async create(dto: CreateInquiryCommentDto): Promise<InquiryComment> {
@@ -60,7 +63,7 @@ export class InquiryCommentsService {
         event.userId = record.inquiry.user.id;
         event.token = record.inquiry.user.pushToken;
         event.options = record.inquiry.user.profile?.options ?? {};
-        event.body = `내 피드에 누군가 댓글을 남겼습니다.`;
+        event.body = `${record.inquiry.title} 질의에 새로운 댓글이 있습니다.`;
         event.data = {
           page: `inquiries/${dto.inquiryId}`,
         };
@@ -74,10 +77,10 @@ export class InquiryCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? READ
+  //? inquiry 댓글 리스트
   //? ----------------------------------------------------------------------- //
 
-  //? comments w/ replies (children)
+  //? 댓글 리스트 w/ Pagination (children)
   async findAllInTraditionalStyle(
     query: PaginateQuery,
     inquiryId: number,
@@ -95,7 +98,7 @@ export class InquiryCommentsService {
     // return await paginate<InquiryComment>(query, queryBuilder, config);
   }
 
-  //? comments w/ replyCount
+  //? 댓글 리스트 w/ Pagination
   async findAllInYoutubeStyle(
     query: PaginateQuery,
     inquiryId: number,
@@ -121,7 +124,7 @@ export class InquiryCommentsService {
     return await paginate<InquiryComment>(query, queryBuilder, config);
   }
 
-  // 답글 리스트
+  //? 답글 리스트, 최상단 부모는 리턴되지 않음.
   async findAllRepliesById(
     query: PaginateQuery,
     inquiryId: number,
@@ -140,13 +143,13 @@ export class InquiryCommentsService {
       defaultSortBy: [['id', 'ASC']],
       filterableColumns: {
         isFlagged: [FilterOperator.EQ],
-        // userId: [FilterOperator.EQ, FilterOperator.IN],
       },
     };
 
     return await paginate<InquiryComment>(query, queryBuilder, config);
   }
 
+  // required when checking if the comment exists
   async findById(
     id: number,
     relations: string[] = [],
@@ -172,15 +175,15 @@ export class InquiryCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPDATE
+  //? inquiry 댓글 update
   //? ----------------------------------------------------------------------- //
 
   async update(
+    commentId: number,
     dto: UpdateInquiryCommentDto,
-    inquiryId: number,
   ): Promise<InquiryComment> {
     const comment = await this.inquiryCommentRepository.preload({
-      id: inquiryId,
+      id: commentId,
       ...dto,
     });
     // user validation here might be a good option to be added
@@ -191,7 +194,7 @@ export class InquiryCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? DELETE
+  //? inquiry 댓글 delete
   //? ----------------------------------------------------------------------- //
 
   async softRemove(id: number): Promise<InquiryComment> {
@@ -216,13 +219,89 @@ export class InquiryCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
+  //? inquiry 댓글 Flag
+  //? ----------------------------------------------------------------------- //
+
+  async createInquiryCommentFlag(
+    userId: number,
+    inquiryId: number,
+    commentId: number,
+    message: string,
+  ): Promise<Flag> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const flag = await queryRunner.manager.save(
+        queryRunner.manager.getRepository(Flag).create({
+          userId,
+          entityType: 'inquiry_comment',
+          entityId: commentId,
+          message,
+        }),
+      );
+      await queryRunner.manager.query(
+        'UPDATE `inquiry_comment` SET flagCount = flagCount + 1 WHERE id = ?',
+        [commentId],
+      );
+      await queryRunner.commitTransaction();
+      return flag;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async deleteInquiryCommentFlag(
+    userId: number,
+    commentId: number,
+  ): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const { affectedRows } = await queryRunner.manager.query(
+        'DELETE FROM `flag` where userId = ? AND entityType = ? AND entityId = ?',
+        [userId, `inquiry_comment`, commentId],
+      );
+      if (affectedRows > 0) {
+        await queryRunner.manager.query(
+          'UPDATE `inquiry_comment` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
+          [commentId],
+        );
+      }
+      return { data: affectedRows };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  //? ----------------------------------------------------------------------- //
   //? UPLOAD
   //? ----------------------------------------------------------------------- //
 
   // S3 직접 업로드를 위한 signedUrl 리턴
-  async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
-    const fileUri = randomImageName(dto.name ?? 'comment', dto.mimeType);
-    const path = `${process.env.NODE_ENV}/comments/${userId}/${fileUri}`;
+  async getSignedUrl(
+    userId: number,
+    inquiryId: number,
+    dto: SignedUrlDto,
+  ): Promise<SignedUrl> {
+    const fileUri = randomImageName(
+      dto.name ?? `inquiry_${inquiryId}_comment`,
+      dto.mimeType,
+    );
+    const path = `${process.env.NODE_ENV}/inquiry_comments/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
     return {

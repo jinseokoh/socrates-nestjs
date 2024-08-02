@@ -14,10 +14,10 @@ import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { CreatePleaDto } from 'src/domain/feeds/dto/create-plea.dto';
-import { UpdatePleaDto } from 'src/domain/feeds/dto/update-plea.dto';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
-import { PleasService } from 'src/domain/feeds/pleas.service';
+import { CreatePleaDto } from 'src/domain/icebreakers/dto/create-plea.dto';
+import { UpdatePleaDto } from 'src/domain/icebreakers/dto/update-plea.dto';
+import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
+import { PleasService } from 'src/domain/icebreakers/pleas.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()

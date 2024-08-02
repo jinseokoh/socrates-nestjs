@@ -1,5 +1,9 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
@@ -8,35 +12,35 @@ import {
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
-import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
-import { SignedUrl } from 'src/common/types';
-import { CreateMeetupCommentDto } from 'src/domain/meetups/dto/create-meetup_comment.dto';
-import { UpdateMeetupCommentDto } from 'src/domain/meetups/dto/update-meetup_comment.dto';
+import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { randomImageName } from 'src/helpers/random-filename';
-import { S3Service } from 'src/services/aws/s3.service';
-import { IsNull, Repository } from 'typeorm';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { DataSource, IsNull, Repository } from 'typeorm';
+import { SignedUrl } from 'src/common/types';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
+import { CreateMeetupCommentDto } from 'src/domain/meetups/dto/create-meetup_comment.dto';
+import { UpdateMeetupCommentDto } from 'src/domain/meetups/dto/update-meetup_comment.dto';
+import { S3Service } from 'src/services/aws/s3.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
-export class MeetupCommentsService {
-  private readonly logger = new Logger(MeetupCommentsService.name);
+export class MeetupCommentUsersService {
+  private readonly logger = new Logger(MeetupCommentUsersService.name);
 
   constructor(
     @InjectRepository(Meetup)
     private readonly meetupRepository: Repository<Meetup>,
     @InjectRepository(MeetupComment)
     private readonly meetupCommentRepository: Repository<MeetupComment>,
-    @Inject(REDIS_PUBSUB_CLIENT) private readonly redisClient: ClientProxy,
     private readonly s3Service: S3Service,
     private eventEmitter: EventEmitter2,
+    private dataSource: DataSource, // for transaction
   ) {}
 
   //? ----------------------------------------------------------------------- //
-  //? CREATE
+  //? 모임 댓글 생성
   //? ----------------------------------------------------------------------- //
 
   async create(dto: CreateMeetupCommentDto): Promise<MeetupComment> {
@@ -59,7 +63,7 @@ export class MeetupCommentsService {
         event.userId = record.meetup.user.id;
         event.token = record.meetup.user.pushToken;
         event.options = record.meetup.user.profile?.options ?? {};
-        event.body = `${record.meetup.title} 모임에 누군가 댓글을 달았습니다.`;
+        event.body = `${record.meetup.title} 모임에 새로운 댓글이 있습니다.`;
         event.data = {
           page: `meetups/${dto.meetupId}`,
         };
@@ -73,10 +77,10 @@ export class MeetupCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? READ
+  //? 모임 댓글 리스트
   //? ----------------------------------------------------------------------- //
 
-  //? comments w/ replies (children)
+  //? 댓글 리스트 w/ Pagination (children)
   async findAllInTraditionalStyle(
     query: PaginateQuery,
     meetupId: number,
@@ -94,7 +98,7 @@ export class MeetupCommentsService {
     // return await paginate<FeedComment>(query, queryBuilder, config);
   }
 
-  //? comments w/ replyCount
+  //? 댓글 리스트 w/ Pagination
   async findAllInYoutubeStyle(
     query: PaginateQuery,
     meetupId: number,
@@ -120,7 +124,7 @@ export class MeetupCommentsService {
     return await paginate<MeetupComment>(query, queryBuilder, config);
   }
 
-  // 답글 리스트
+  //? 답글 리스트, 최상단 부모는 리턴되지 않음.
   async findAllRepliesById(
     query: PaginateQuery,
     meetupId: number,
@@ -169,12 +173,12 @@ export class MeetupCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPDATE
+  //? 모임 댓글 update
   //? ----------------------------------------------------------------------- //
 
   async update(
-    dto: UpdateMeetupCommentDto,
     commentId: number,
+    dto: UpdateMeetupCommentDto,
   ): Promise<MeetupComment> {
     const comment = await this.meetupCommentRepository.preload({
       id: commentId,
@@ -188,7 +192,7 @@ export class MeetupCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? DELETE
+  //? 모임 댓글 delete
   //? ----------------------------------------------------------------------- //
 
   async softRemove(id: number): Promise<MeetupComment> {
@@ -213,13 +217,89 @@ export class MeetupCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPLOAD
+  //? 모임 댓글 Flag
+  //? ----------------------------------------------------------------------- //
+
+  async createMeetupCommentFlag(
+    userId: number,
+    meetupId: number,
+    commentId: number,
+    message: string,
+  ): Promise<Flag> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const flag = await queryRunner.manager.save(
+        queryRunner.manager.getRepository(Flag).create({
+          userId,
+          entityType: 'meetup_comment',
+          entityId: commentId,
+          message,
+        }),
+      );
+      await queryRunner.manager.query(
+        'UPDATE `meetup_comment` SET flagCount = flagCount + 1 WHERE id = ?',
+        [commentId],
+      );
+      await queryRunner.commitTransaction();
+      return flag;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async deleteMeetupCommentFlag(
+    userId: number,
+    commentId: number,
+  ): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const { affectedRows } = await queryRunner.manager.query(
+        'DELETE FROM `flag` where userId = ? AND entityType = ? AND entityId = ?',
+        [userId, `meetup_comment`, commentId],
+      );
+      if (affectedRows > 0) {
+        await queryRunner.manager.query(
+          'UPDATE `meetup_comment` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
+          [commentId],
+        );
+      }
+      return { data: affectedRows };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? Upload
   //? ----------------------------------------------------------------------- //
 
   // S3 직접 업로드를 위한 signedUrl 리턴
-  async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
-    const fileUri = randomImageName(dto.name ?? 'comment', dto.mimeType);
-    const path = `${process.env.NODE_ENV}/comments/${userId}/${fileUri}`;
+  async getSignedUrl(
+    userId: number,
+    meetupId: number,
+    dto: SignedUrlDto,
+  ): Promise<SignedUrl> {
+    const fileUri = randomImageName(
+      dto.name ?? `meetup_${meetupId}_comment`,
+      dto.mimeType,
+    );
+    const path = `${process.env.NODE_ENV}/meetup_comments/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
     return {

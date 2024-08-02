@@ -45,20 +45,18 @@ export class InquiriesController {
   @ApiOperation({ description: '질문 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get()
-  async getInquries(
-    @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<Inquiry>> {
-    console.log(query);
+  async findAll(@Paginate() query: PaginateQuery): Promise<Paginated<Inquiry>> {
     return await this.inquiriesService.findAll(query);
   }
 
-  //! not being used anymore
   @ApiOperation({ description: '질문 상세보기 w/ Pagination' })
   @Get(':id')
-  async getInquiryCommentsById(@Param('id') inquiryId: number): Promise<Inquiry> {
+  async getInquiryCommentsById(
+    @Param('id') inquiryId: number,
+  ): Promise<Inquiry> {
     return await this.inquiriesService.findById(inquiryId, [
       'user',
-      'opinions',
+      'comments',
     ]);
   }
 

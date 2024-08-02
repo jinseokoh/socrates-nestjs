@@ -19,7 +19,7 @@ import { Repository } from 'typeorm';
 export class InquiriesService {
   constructor(
     @InjectRepository(Inquiry)
-    private readonly repository: Repository<Inquiry>,
+    private readonly inquiryRepository: Repository<Inquiry>,
     @InjectRepository(InquiryComment)
     private readonly opinionRepository: Repository<InquiryComment>,
     private readonly s3Service: S3Service,
@@ -30,30 +30,9 @@ export class InquiriesService {
   //? ----------------------------------------------------------------------- //
 
   async create(dto: CreateInquiryDto): Promise<Inquiry> {
-    const entity = this.repository.create(dto);
-    const inquiry = await this.repository.save(entity);
-
-    if (dto.targetEntity) {
-      if (dto.targetEntity.model === 'user') {
-        await this.repository.manager.query(
-          '`inquiry_user` (inquiryId, userId) VALUES (?, ?)',
-          [inquiry.id, dto.targetEntity.id],
-        );
-      }
-      if (dto.targetEntity.model === 'meetup') {
-        await this.repository.manager.query(
-          '`inquiry_meetup` (inquiryId, meetupId) VALUES (?, ?)',
-          [inquiry.id, dto.targetEntity.id],
-        );
-      }
-      if (dto.targetEntity.model === 'connection') {
-        await this.repository.manager.query(
-          '`inquiry_connection` (inquiryId, connectionId) VALUES (?, ?)',
-          [inquiry.id, dto.targetEntity.id],
-        );
-      }
-    }
-
+    const inquiry = await this.inquiryRepository.save(
+      this.inquiryRepository.create(dto),
+    );
     return inquiry;
   }
 
@@ -62,14 +41,8 @@ export class InquiriesService {
   //? ----------------------------------------------------------------------- //
 
   async findAll(query: PaginateQuery): Promise<Paginated<Inquiry>> {
-    return await paginate(query, this.repository, {
-      relations: [
-        'user',
-        'opinions',
-        'flaggedUsers',
-        'flaggedMeetups',
-        'flaggedConnections',
-      ], // can be removed.
+    return await paginate(query, this.inquiryRepository, {
+      relations: ['user', 'comments'], // can be removed.
       sortableColumns: ['id'],
       searchableColumns: ['title'],
       defaultSortBy: [['id', 'DESC']],
@@ -83,11 +56,11 @@ export class InquiriesService {
   async findById(id: number, relations: string[] = []): Promise<Inquiry> {
     try {
       return relations.length > 0
-        ? await this.repository.findOneOrFail({
+        ? await this.inquiryRepository.findOneOrFail({
             where: { id },
             relations,
           })
-        : await this.repository.findOneOrFail({
+        : await this.inquiryRepository.findOneOrFail({
             where: { id },
           });
     } catch (e) {
@@ -96,7 +69,7 @@ export class InquiriesService {
   }
 
   async count(title: string): Promise<number> {
-    return await this.repository.countBy({
+    return await this.inquiryRepository.countBy({
       title: title,
     });
   }
@@ -106,11 +79,11 @@ export class InquiriesService {
   //? ----------------------------------------------------------------------- //
 
   async update(id: number, dto: UpdateInquiryDto): Promise<Inquiry> {
-    const question = await this.repository.preload({ id, ...dto });
+    const question = await this.inquiryRepository.preload({ id, ...dto });
     if (!question) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.repository.save(question);
+    return await this.inquiryRepository.save(question);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -119,12 +92,12 @@ export class InquiriesService {
 
   async softRemove(id: number): Promise<Inquiry> {
     const question = await this.findById(id);
-    return await this.repository.softRemove(question);
+    return await this.inquiryRepository.softRemove(question);
   }
 
   async remove(id: number): Promise<Inquiry> {
     const question = await this.findById(id);
-    return await this.repository.remove(question);
+    return await this.inquiryRepository.remove(question);
   }
 
   //? ----------------------------------------------------------------------- //

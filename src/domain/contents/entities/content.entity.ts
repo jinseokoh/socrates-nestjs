@@ -12,8 +12,17 @@ import {
 } from 'typeorm';
 @Entity()
 export class Content {
-  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
+  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
+
+  // @Column({ type: 'int', unsigned: true })
+  // userId: number; // to make it available to Repository.
+
+  // @Column({ length: 32, nullable: true })
+  // entityType: string | null;
+
+  // @Column({ type: 'int', unsigned: true, nullable: true })
+  // entityId: number | null;
 
   @Column({ length: 16, nullable: false })
   slug: string;
@@ -30,16 +39,24 @@ export class Content {
   images: string[] | null;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'views' })
+  @ApiProperty({ description: 'views count' })
   viewCount: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'likes' })
-  likeCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'comment count' })
   commentCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'like count' })
+  likeCount: number;
+
+  // @Column({ type: 'int', unsigned: true, default: 0 })
+  // @ApiProperty({ description: 'bookmark count' })
+  // bookmarkCount: number;
+
+  // @Column({ type: 'int', unsigned: true, default: 0 })
+  // @ApiProperty({ description: 'flag count' })
+  // flagCount: number;
 
   @CreateDateColumn()
   createdAt: Date;

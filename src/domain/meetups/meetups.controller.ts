@@ -24,7 +24,6 @@ import { CreateMeetupDto } from 'src/domain/meetups/dto/create-meetup.dto';
 import { UpdateMeetupDto } from 'src/domain/meetups/dto/update-meetup.dto';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
-import { Room } from 'src/domain/chats/entities/room.entity';
 import { multerOptions } from 'src/helpers/multer-options';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 
@@ -34,7 +33,7 @@ export class MeetupsController {
   constructor(private readonly meetupsService: MeetupsService) {}
 
   //? ----------------------------------------------------------------------- //
-  //? CREATE
+  //? Create
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Meetup 생성' })
@@ -53,7 +52,7 @@ export class MeetupsController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? READ
+  //? Read
   //? ----------------------------------------------------------------------- //
 
   @Public()
@@ -64,40 +63,36 @@ export class MeetupsController {
     return await this.meetupsService.findAll(query);
   }
 
-  @ApiOperation({ description: 'Meetup room 정보보기' })
-  @Get(':id/rooms')
-  async fetchRoomsByMeetupId(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<Room> {
-    return await this.meetupsService.fetchRoomByMeetupId(id);
-  }
+  // @ApiOperation({ description: 'Meetup room 정보보기' })
+  // @Get(':id/rooms')
+  // async fetchRoomsByMeetupId(
+  //   @Param('id', ParseIntPipe) id: number,
+  // ): Promise<Room> {
+  //   return await this.meetupsService.fetchRoomByMeetupId(id);
+  // }
 
   @ApiOperation({ description: 'Meetup 상세보기' })
   @Get(':id')
-  async findById(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
-    return await this.meetupsService.findById(id, [
-      'venue',
+  async getById(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
+    return await this.meetupsService.getById(id, [
       'user',
       'user.profile',
-      'careers',
-      'categories',
-      'threads',
-      'threads.user',
-      'userBookmark',
-      'userBookmark.user',
-      'userBookmark.user.profile',
-      'userReports',
-      // 'rooms',
+      'venue',
+      // 'room',
+      // 'room.participants',
+      'comments',
+      'comments.user',
+      'bookmarks',
+      'bookmarks.user',
+      // 'flags',
       'joins',
-      'joins.askingUser',
-      'joins.askingUser.profile',
-      'joins.askedUser',
-      'joins.askedUser.profile',
+      'joins.user',
+      'joins.recipient',
     ]);
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPDATE
+  //? Update
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Meetup 갱신' })
@@ -110,7 +105,7 @@ export class MeetupsController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? DELETE
+  //? Delete
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Meetup soft 삭제' })
@@ -120,7 +115,7 @@ export class MeetupsController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPLOAD
+  //? Upload
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '단일 이미지 저장후 URL (string) 리턴' })
@@ -142,6 +137,10 @@ export class MeetupsController {
   ): Promise<AnyData> {
     return await this.meetupsService.uploadImages(id, files);
   }
+
+  //? ----------------------------------------------------------------------- //
+  //? S3 Upload
+  //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
   @Post('upload-url')

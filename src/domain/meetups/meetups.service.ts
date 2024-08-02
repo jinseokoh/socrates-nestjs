@@ -49,16 +49,14 @@ export class MeetupsService {
   ) {}
 
   //? ----------------------------------------------------------------------- //
-  //? CREATE
+  //? Create
   //? ----------------------------------------------------------------------- //
 
   //! 모임 생성 (using transaction)
   //! profile's balance will be adjusted w/ ledger model event subscriber.
   async create(dto: CreateMeetupDto): Promise<Meetup> {
-    // create a new query runner
-    console.log(dto);
     const queryRunner = this.dataSource.createQueryRunner();
-    const cost = dto.hasQa ? 1 : 0;
+    const cost = 0; // used to be 1 or 0 depending on hasQa
 
     try {
       await queryRunner.connect();
@@ -101,23 +99,21 @@ export class MeetupsService {
         venue = await queryRunner.manager.save(v);
       }
 
-      const careers = await queryRunner.manager.getRepository(Career).find({
-        where: { slug: In(dto.targetCareers) },
-      });
-
       const category = await queryRunner.manager
         .getRepository(Category)
         .findOne({
           where: { slug: dto.subCategory },
         });
 
-      const ancestors = await queryRunner.manager
-        .getTreeRepository(Category)
-        .findAncestors(category);
-
-      const categories = ancestors
-        .filter((v: Category) => v.depth > 0) // remove root
-        .map((v: Category) => v);
+      // const careers = await queryRunner.manager.getRepository(Career).find({
+      //   where: { slug: In(dto.targetCareers) },
+      // });
+      // const ancestors = await queryRunner.manager
+      //   .getTreeRepository(Category)
+      //   .findAncestors(category);
+      // const categories = ancestors
+      //   .filter((v: Category) => v.depth > 0) // remove root
+      //   .map((v: Category) => v);
 
       //? 저장할 엔티티 생성
       const newMeetup = new Meetup({
@@ -126,24 +122,20 @@ export class MeetupsService {
         title: dto.title,
         description: dto.description,
         images: dto.images,
+        day: dto.day,
+        times: dto.times,
         targetGender: dto.targetGender,
         targetMinAge: dto.targetMinAge,
         targetMaxAge: dto.targetMaxAge,
-        targetCareers: dto.targetCareers,
+        region: dto.region,
+        expenses: dto.expenses,
+        amount: dto.amount,
         skill: dto.skill,
         max: dto.max,
-        day: dto.day,
-        times: dto.times,
-        amount: dto.amount,
-        expenses: dto.expenses,
-        region: dto.region,
         patron: dto.patron,
-        hasQa: dto.hasQa,
         expiredAt: dto.expiredAt,
         user: user,
         venue: venue,
-        careers: careers,
-        categories: categories,
       });
       newMeetup.user = user;
 
@@ -216,7 +208,7 @@ export class MeetupsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? READ
+  //? Read
   //? ----------------------------------------------------------------------- //
 
   // Meetup 리스트 w/ Pagination
@@ -230,7 +222,7 @@ export class MeetupsService {
     const config: PaginateConfig<Meetup> = {
       relations: {
         user: { profile: true },
-        careers: true, // needed for filtering
+        // careers: true, // needed for filtering
       },
       sortableColumns: ['id'],
       searchableColumns: ['title'],
@@ -252,29 +244,19 @@ export class MeetupsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // Meetup 리스트 w/ Pagination
-  async fetchRoomByMeetupId(id: number): Promise<Room> {
-    const meetup = await this.meetupRepository.findOneOrFail({
-      where: { id },
-      relations: ['room', 'room.participants', 'room.participants.profile'],
-    });
-
-    return meetup.room;
-  }
-
   // Meetup 상세보기
-  async findById(id: number, relations: string[] = []): Promise<Meetup> {
+  async getById(id: number, relations: string[] = []): Promise<Meetup> {
     try {
       await this.increaseViewCount(id);
       return relations.length > 0
         ? await this.meetupRepository.findOneOrFail({
             where: { id },
             relations,
-            order: {
-              meetupComments: {
-                id: 'DESC',
-              },
-            },
+            // order: {
+            //   comments: {
+            //     id: 'DESC',
+            //   },
+            // },
           })
         : await this.meetupRepository.findOneOrFail({
             where: { id },
@@ -284,8 +266,18 @@ export class MeetupsService {
     }
   }
 
+  // Meetup 리스트 w/ Pagination
+  async getRoomInfo(id: number): Promise<Room> {
+    const meetup = await this.meetupRepository.findOneOrFail({
+      where: { id },
+      relations: ['room', 'room.participants', 'room.participants.profile'],
+    });
+
+    return meetup.room;
+  }
+
   //? ----------------------------------------------------------------------- //
-  //? UPDATE
+  //? Update
   //? ----------------------------------------------------------------------- //
 
   async update(id: number, dto: UpdateMeetupDto): Promise<Meetup> {
@@ -306,21 +298,21 @@ export class MeetupsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? DELETE
+  //? Delete
   //? ----------------------------------------------------------------------- //
 
   async softRemove(id: number): Promise<Meetup> {
-    const meetup = await this.findById(id);
+    const meetup = await this.getById(id);
     return await this.meetupRepository.softRemove(meetup);
   }
 
   async remove(id: number): Promise<Meetup> {
-    const meetup = await this.findById(id);
+    const meetup = await this.getById(id);
     return await this.meetupRepository.remove(meetup);
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPLOAD
+  //? Upload
   //? ----------------------------------------------------------------------- //
 
   // 단일 이미지 저장후 URL (string) 리턴

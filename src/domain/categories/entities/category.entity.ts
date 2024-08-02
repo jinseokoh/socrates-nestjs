@@ -30,20 +30,17 @@ export class Category {
   parent: Category;
 
   //? ----------------------------------------------------------------------- //
-  //* many-to-many belongsToMany using one-to-many
+  //? many-to-many belongsToMany using one-to-many
 
   @OneToMany(() => Interest, (interest) => interest.category)
   public usersInterested: Interest[];
 
-  //? ----------------------------------------------------------------------- //
-  //* many-to-many belongsToMany
-
-  @ManyToMany(() => Meetup, (meetup) => meetup.categories)
-  meetups: Meetup[];
-
-  // used to have this many to many relationship.
+  // many-to-many belongsToMany
+  // @ManyToMany(() => Meetup, (meetup) => meetup.categories)
+  // meetups: Meetup[];
   // @ManyToMany(() => User, (user) => user.categories)
   // users: User[];
+
   //? ----------------------------------------------------------------------- //
   //? constructor
 

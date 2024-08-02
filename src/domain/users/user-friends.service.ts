@@ -22,7 +22,7 @@ import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
+import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 
@@ -51,7 +51,10 @@ export class UserFriendsService {
   //! 친구신청 생성 (using transaction)
   //! - profile's balance will be adjusted w/ ledger model event subscriber.
   //! - for hated(blocked) users, a client needs to take care of 'em instead of server.
-  async createFriendship(dto: CreateFriendshipDto): Promise<User> {
+  async createFriendship(dto: CreateFriendshipDto): Promise<{
+    pendingIds: number[];
+    friendIds: number[];
+  }> {
     this.logger.log(dto);
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
@@ -79,7 +82,7 @@ export class UserFriendsService {
       // validation ----------------------------------------------------------//
       const user = await queryRunner.manager.findOneOrFail(User, {
         where: { id: dto.userId },
-        relations: [`profile`],
+        relations: ['profile', 'sentFriendships', 'receivedFriendships'],
       });
       if (user?.isBanned) {
         throw new UnprocessableEntityException(`a banned user`);
@@ -111,8 +114,8 @@ export class UserFriendsService {
       }
       await queryRunner.manager.query(
         'INSERT IGNORE INTO `friendship` \
-        (userId, recipientId, pleaId, message) VALUES (?, ?, ?, ?)',
-        [dto.userId, dto.recipientId, dto.pleaId, dto.message],
+        (userId, recipientId, message) VALUES (?, ?, ?)',
+        [dto.userId, dto.recipientId, dto.message],
       );
       await queryRunner.commitTransaction();
 
@@ -124,11 +127,31 @@ export class UserFriendsService {
       event.options = recipient.profile?.options ?? {};
       event.body = `${user.username}님으로부터 친구신청을 받았습니다. ${dto.message}`;
       event.data = {
-        page: 'activities/requests',
+        page: 'activities/requests', //! mypage/friendrequests
       };
       this.eventEmitter.emit('user.notified', event);
 
-      return user;
+      const sentPendingIds = [...user.sentFriendships]
+        .filter((v) => v.status !== 'accepted')
+        .map((v) => v.recipientId);
+      const receievedPendingIds = [...user.receivedFriendships]
+        .filter((v) => v.status !== 'accepted')
+        .map((v) => v.userId);
+      const sentFriendIds = [...user.sentFriendships]
+        .filter((v) => v.status === 'accepted')
+        .map((v) => v.recipientId);
+      const receievedFriendIds = [...user.receivedFriendships]
+        .filter((v) => v.status === 'accepted')
+        .map((v) => v.userId);
+
+      return {
+        pendingIds: Array.from(
+          new Set([...sentPendingIds, ...receievedPendingIds, dto.recipientId]),
+        ),
+        friendIds: Array.from(
+          new Set([...sentFriendIds, ...receievedFriendIds]),
+        ),
+      };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       if (error.name === 'EntityNotFoundError') {
@@ -172,33 +195,27 @@ export class UserFriendsService {
           userId: userId,
           recipientId: recipientId,
         },
-        relations: [
-          'user',
-          'user.profile',
-          'recipient',
-          'recipient.profile',
-          'plea',
-        ],
+        relations: ['user', 'user.profile', 'recipient', 'recipient.profile'],
       });
 
       // 요청으로 보낸 친구신청인 경우
-      if (friendship.plea && friendship.plea.feedId !== null) {
-        const newBalance =
-          friendship.recipient.profile?.balance + friendship.plea.reward - 1;
+      // if (friendship.plea && friendship.plea.feedId !== null) {
+      //   const newBalance =
+      //     friendship.recipient.profile?.balance + friendship.plea.reward - 1;
 
-        const ledger = new Ledger({
-          debit: friendship.plea.reward - 1,
-          ledgerType: LedgerType.DEBIT_REFUND,
-          balance: newBalance,
-          note: `요청중지 사례금 환불 (발송#${friendship.recipientId},수신#${friendship.userId})`,
-          userId: recipientId,
-        });
-        await queryRunner.manager.save(ledger);
-        // soft delete the plea
-        await queryRunner.manager
-          .getRepository(Plea)
-          .softDelete(friendship.plea.id);
-      }
+      //   const ledger = new Ledger({
+      //     debit: friendship.plea.reward - 1,
+      //     ledgerType: LedgerType.DEBIT_REFUND,
+      //     balance: newBalance,
+      //     note: `요청중지 사례금 환불 (발송#${friendship.recipientId},수신#${friendship.userId})`,
+      //     userId: recipientId,
+      //   });
+      //   await queryRunner.manager.save(ledger);
+      //   // soft delete the plea
+      //   await queryRunner.manager
+      //     .getRepository(Plea)
+      //     .softDelete(friendship.plea.id);
+      // }
 
       await queryRunner.manager.query(
         'DELETE FROM `friendship` WHERE userId = ? AND recipientId = ?',
@@ -206,21 +223,6 @@ export class UserFriendsService {
       );
 
       await queryRunner.commitTransaction();
-
-      //? notification with event listener ------------------------------------//
-      const event = new UserNotificationEvent();
-      event.name = 'friend';
-      event.userId = userId;
-      event.token = friendship.user.pushToken;
-      event.options = friendship.user.profile?.options ?? {};
-      event.body = friendship.plea
-        ? `발견글 작성요청한 ${friendship.recipient.username}님이 나와의 친구관계를 유보했습니다.`
-        : `${friendship.recipient.username}님이 나와의 친구관계를 유보했습니다.`;
-      event.data = {
-        page: `settings/friends`,
-        args: 'load/plea',
-      };
-      this.eventEmitter.emit('user.notified', event);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       if (error.name === 'EntityNotFoundError') {
@@ -238,81 +240,47 @@ export class UserFriendsService {
   // Update
   // -------------------------------------------------------------------------//
   // todo. need to rewrite the logic completely. no plea at all?
-  //! 친구신청 수락 (using transaction)
+  //! 친구신청 수락 or 거부 (using transaction)
   //! profile balance will be adjusted w/ ledger model event subscriber.
   async updateFriendshipWithStatus(
+    currentUserId: number,
     userId: number,
     recipientId: number,
     status: FriendStatus,
-  ): Promise<void> {
+  ): Promise<any> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
-
       // validation ----------------------------------------------------------//
-      const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
-        where: {
-          userId: userId,
-          recipientId: recipientId,
-        },
-        relations: ['user', 'user.profile', 'recipient', 'plea'],
+      const friendship = await queryRunner.manager.findOne(Friendship, {
+        where: { userId: userId, recipientId: recipientId },
+        relations: ['user', 'user.profile', 'recipient'],
       });
 
-      if (
-        friendship.plea &&
-        friendship.plea.feedId &&
-        status === FriendStatus.ACCEPTED
-      ) {
-        //? plea.reward 를 friendship user (== plea recipient; 작성자) 에게 지급
-        const newBalance =
-          friendship.user.profile?.balance + friendship.plea.reward;
-        const ledger = new Ledger({
-          debit: friendship.plea.reward,
-          ledgerType: LedgerType.DEBIT_REWARD,
-          balance: newBalance,
-          note: `요청 사례금 (발송#${friendship.recipientId},수신#${friendship.userId})`,
-          userId: friendship.user.id,
-        });
-        await queryRunner.manager.save(ledger);
-        // soft delete the plea
-        // await this.userRepository.manager.query(
-        //   'UPDATE `plea` SET deletedAt = NOW() WHERE id = ?',
-        //   [friendship.plea.id],
-        // );
-        await queryRunner.manager
-          .getRepository(Plea)
-          .softDelete(friendship.plea.id);
+      console.log('friendship', friendship);
+      if (friendship) {
+        await queryRunner.manager.query(
+          'UPDATE `friendship` SET status = ? WHERE userId = ? AND recipientId = ?',
+          [status, userId, recipientId],
+        );
       }
-
-      await this.userRepository.manager.query(
-        'UPDATE `friendship` SET status = ? WHERE userId = ? AND recipientId = ?',
-        [status, userId, recipientId],
-      );
-
-      await queryRunner.commitTransaction();
-
-      // notification with event listener ------------------------------------//
-      if (
-        friendship.status == FriendStatus.PENDING &&
-        status == FriendStatus.ACCEPTED
-      ) {
+      if (friendship && status == FriendStatus.ACCEPTED) {
         const event = new UserNotificationEvent();
         event.name = 'friend';
         event.userId = friendship.user?.id;
         event.token = friendship.user?.pushToken;
         event.options = friendship.user?.profile?.options ?? {};
-        event.body = friendship.plea
-          ? `요청한 ${friendship.recipient.username}님이 친구관계를 맺었습니다. (${friendship.plea.reward}코인수령 완료)`
-          : `${friendship.recipient.username}님이 신청을 수락하여 친구관계를 맺었습니다.`;
+        event.body = `${friendship.recipient.username}님이 신청을 수락하여 친구관계를 맺었습니다.`;
         event.data = {
-          page: `settings/friends`,
-          args: 'load:plea',
+          page: `mypage/friends`,
         };
         this.eventEmitter.emit('user.notified', event);
       }
+      await queryRunner.commitTransaction();
+      return this.loadFriendships(currentUserId);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       if (error.name === 'EntityNotFoundError') {
@@ -407,6 +375,29 @@ export class UserFriendsService {
     };
 
     return await paginate(query, queryBuilder, config);
+  }
+
+  // 현재 친구관계인 UserIds (all)
+  async loadFriendships(userId: number): Promise<{
+    pendingIds: number[];
+    friendIds: number[];
+  }> {
+    const items = await this.friendshipRepository.find({
+      where: [{ userId: userId }, { recipientId: userId }],
+    });
+
+    const pendingIds = [...items]
+      .filter((v) => v.status !== 'accepted')
+      .map((v) => (v.userId === userId ? v.recipientId : v.userId));
+    const friendIds = [...items]
+      .filter((v) => v.status === 'accepted')
+      .map((v) => (v.userId === userId ? v.recipientId : v.userId));
+
+    // return the deduped result
+    return {
+      pendingIds: Array.from(new Set(pendingIds)),
+      friendIds: Array.from(new Set(friendIds)),
+    };
   }
 
   // 현재 친구관계인 UserIds (all)

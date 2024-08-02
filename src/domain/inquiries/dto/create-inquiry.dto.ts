@@ -1,27 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsEnum,
-  IsNumber,
-  IsObject,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { InquiryType } from 'src/common/enums/inquiry-type';
-import { ITargetEntity } from 'src/domain/inquiries/entities/target-entity.interface';
+import { Type } from 'class-transformer';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateInquiryDto {
-  @ApiProperty({ description: 'TargetEntity', required: false })
-  @IsObject()
+  @ApiProperty({ description: '사용자 아이디' })
+  @IsNumber()
   @IsOptional()
-  targetEntity?: ITargetEntity;
+  userId: number | null;
 
-  @ApiProperty({
-    description: '질문유형',
-    default: InquiryType.GENERAL,
-  })
-  @IsEnum(InquiryType)
-  inquiryType?: InquiryType = InquiryType.GENERAL;
+  @ApiProperty({ description: 'entity type', required: false })
+  @IsString()
+  @IsOptional()
+  entityType?: string;
+
+  @ApiProperty({ description: 'entity id', required: false })
+  @IsNumber()
+  @IsOptional()
+  entityId?: number;
 
   @ApiProperty({ description: '질문' })
   @IsString()
@@ -38,8 +33,18 @@ export class CreateInquiryDto {
   @IsOptional()
   images: string[];
 
-  @ApiProperty({ description: '사용자 아이디' })
+  @ApiProperty({ description: 'comment count' })
   @IsNumber()
   @IsOptional()
-  userId: number | null;
+  viewCount: number | null;
+
+  @ApiProperty({ description: 'comment count' })
+  @IsNumber()
+  @IsOptional()
+  commentCount: number | null;
+
+  @ApiProperty({ description: 'like count' })
+  @IsNumber()
+  @IsOptional()
+  likeCount: number | null;
 }

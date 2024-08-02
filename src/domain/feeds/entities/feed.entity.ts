@@ -6,15 +6,16 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { IsArray } from 'class-validator';
-import { FeedLink } from 'src/domain/feeds/entities/feed_link.entity';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
+import { Poll } from 'src/domain/icebreakers/entities/poll.entity';
 
 // a user can like meetup
 // https://github.com/typeorm/typeorm/issues/4653
@@ -23,23 +24,20 @@ export class Feed {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
+  @Column({ type: 'int', unsigned: true })
+  public userId: number;
+
   @Column({ length: 16, nullable: false })
   @ApiProperty({ description: 'slug' })
   slug: string;
 
-  @Column({ length: 40, nullable: true })
+  @Column({ length: 80, nullable: true })
   @ApiProperty({ description: '제목' })
   title: string | null;
 
   @Column({ type: 'text', nullable: false })
   @ApiProperty({ description: 'feed 내용' })
   body: string;
-
-  @Column({ length: 32, nullable: false })
-  entityType: string;
-
-  @Column({ type: 'int', unsigned: false })
-  entityId: number;
 
   @Column('json', { nullable: true })
   @ApiProperty({ description: '이미지' })
@@ -70,12 +68,12 @@ export class Feed {
   commentCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'bookmark count' })
-  bookmarkCount: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'likes' })
   likeCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'bookmark count' })
+  bookmarkCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'flag count' })
@@ -93,36 +91,26 @@ export class Feed {
   deletedAt: Date | null;
 
   //? ----------------------------------------------------------------------- //
-  //? 1-to-1 hasOne
+  //? many-to-1 (belongsTo)
 
-  // @OneToOne(() => Poll, (poll) => poll.feed, {
-  //   cascade: ['insert', 'update'],
-  // })
-  // poll?: Poll | null;
+  @ManyToOne(() => User, (user) => user.feeds)
+  public user: User;
 
   //? ----------------------------------------------------------------------- //
-  //? 1-to-many (hasMany)
-
-  @OneToMany(() => FeedLink, (link) => link.feed)
-  public feedLinks: FeedLink[];
+  //? many-to-many belongsToMany using one-to-many (hasMany)
 
   @OneToMany(() => FeedComment, (comment) => comment.feed)
   public comments: FeedComment[];
 
-  @OneToMany(() => Plea, (plea) => plea.feed)
-  public pleas: Plea[];
-
   @OneToMany(() => BookmarkUserFeed, (bookmark) => bookmark.feed)
-  public bookmarkedByUsers: BookmarkUserFeed[];
+  public bookmarks: BookmarkUserFeed[];
 
   //? ----------------------------------------------------------------------- //
-  //? many-to-1 (belongsTo)
+  //? many-to-many (belongsToMany)
 
-  @Column({ type: 'int', unsigned: true })
-  public userId: number;
-
-  @ManyToOne(() => User, (user) => user.feeds)
-  public user: User;
+  @ManyToMany(() => Poll, (poll) => poll.feeds)
+  @JoinTable({ name: 'feed_poll' }) // owning side
+  polls?: Poll[];
 
   //? ----------------------------------------------------------------------- //
   //? constructor

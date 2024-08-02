@@ -109,6 +109,8 @@ export class UsersController {
       'languageSkills.language',
       'sentFriendships',
       'receivedFriendships',
+      'followings',
+      'followers',
       'flags',
     ];
     return extra && extra.length > 0

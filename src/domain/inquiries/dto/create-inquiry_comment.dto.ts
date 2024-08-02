@@ -34,10 +34,15 @@ export class CreateInquiryCommentDto {
   @IsOptional()
   userId: number;
 
-  @ApiProperty({ description: '관련 Inquiry 아이디' })
+  @ApiProperty({ description: 'inquiry 아이디' })
   @IsNumber()
   @IsOptional()
   inquiryId: number;
+
+  @ApiProperty({ description: 'inquiry comment 아이디' })
+  @IsNumber()
+  @IsOptional()
+  commentId: number | null;
 
   @ApiProperty({ description: '상위 댓글 아이디', required: false })
   @IsNumber()

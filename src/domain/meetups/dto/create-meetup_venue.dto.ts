@@ -2,10 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { IsNumber, IsString } from 'class-validator';
 export class CreateVenueDto {
-  @ApiProperty({ description: '이미지 url' })
-  @IsString()
-  image: string | null;
-
   @ApiProperty({ description: '장소명', required: true })
   @IsString()
   name: string;
@@ -13,6 +9,10 @@ export class CreateVenueDto {
   @ApiProperty({ description: '주소', required: true })
   @IsString()
   address: string;
+
+  @ApiProperty({ description: '이미지 url' })
+  @IsString()
+  image: string | null;
 
   @ApiProperty({ description: 'hashtags' })
   @IsString()

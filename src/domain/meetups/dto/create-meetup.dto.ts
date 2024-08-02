@@ -33,11 +33,6 @@ export class CreateMeetupDto {
   @IsEnum(SubCategory)
   subCategory: SubCategory;
 
-  @ApiProperty({ description: '기술/레벨', required: true })
-  @Type(() => Number)
-  @IsNumber()
-  skill: number;
-
   @ApiProperty({ description: '제목', required: true })
   @IsString()
   title: string;
@@ -49,6 +44,15 @@ export class CreateMeetupDto {
   @ApiProperty({ description: '이미지들 (string[])', required: true })
   @IsArray()
   images: string[];
+
+  @ApiProperty({ description: '원하는 요일', default: Day.ANYDAY })
+  @IsEnum(Day)
+  day: Day;
+
+  @ApiProperty({ description: '원하는 시간대', default: [] })
+  @IsArray()
+  @IsOptional()
+  times: Time[];
 
   @ApiProperty({ description: '상대 성별', default: TargetGender.ALL })
   @IsEnum(TargetGender)
@@ -65,83 +69,73 @@ export class CreateMeetupDto {
   @IsOptional()
   targetMaxAge: number;
 
-  @ApiProperty({ description: '상대방 careers', default: ['all'] })
-  @IsArray()
-  @IsOptional()
-  targetCareers: TargetCareerType[];
-
-  @ApiProperty({ description: 'CreateVenueDto' })
-  @ValidateNested()
-  @Type(() => CreateVenueDto)
-  venue: CreateVenueDto;
-
   @ApiProperty({ description: 'region', default: Region.SEOUL })
   @IsEnum(Region)
   region: Region;
-
-  @ApiProperty({ description: '장소에 대한 경험치', required: true })
-  @Type(() => Number)
-  @IsNumber()
-  patron: number;
-
-  @ApiProperty({ description: 'max 인원', required: true })
-  @Type(() => Number)
-  @IsNumber()
-  max: number;
-
-  @ApiProperty({ description: '비용', required: true })
-  @Type(() => Number)
-  @IsNumber()
-  amount: number;
 
   @ApiProperty({ description: '비용 details', default: [] })
   @IsArray()
   @IsOptional()
   expenses: Expense[];
 
-  @ApiProperty({ description: '원하는 요일', default: Day.ANYDAY })
-  @IsEnum(Day)
-  day: Day;
-
-  @ApiProperty({ description: '원하는 시간대', default: [] })
-  @IsArray()
-  @IsOptional()
-  times: Time[];
-
-  @ApiProperty({ description: 'like count', default: 0 })
+  @ApiProperty({ description: '비용', required: true })
+  @Type(() => Number)
   @IsNumber()
-  @IsOptional()
-  joinCount: number;
+  amount: number;
 
-  @ApiProperty({ description: 'like count', default: 0 })
+  @ApiProperty({ description: '기술/레벨', required: true })
+  @Type(() => Number)
   @IsNumber()
-  @IsOptional()
-  likeCount: number;
+  skill: number;
 
-  @ApiProperty({ description: 'report count', default: 0 })
+  @ApiProperty({ description: 'max 인원', required: true })
+  @Type(() => Number)
   @IsNumber()
-  @IsOptional()
-  reportCount: number;
+  max: number;
+
+  @ApiProperty({ description: '장소에 대한 경험치', required: true })
+  @Type(() => Number)
+  @IsNumber()
+  patron: number;
+
+  // ------------------------------------------------------------------------ //
 
   @ApiProperty({ description: 'view count', default: 0 })
   @IsNumber()
   @IsOptional()
   viewCount: number;
 
-  @ApiProperty({ description: '게시판 여부', default: false })
-  @IsBoolean()
+  @ApiProperty({ description: 'comment count', default: 0 })
+  @IsNumber()
   @IsOptional()
-  hasQa: boolean;
+  commentCount: number;
+
+  @ApiProperty({ description: 'like count', default: 0 })
+  @IsNumber()
+  @IsOptional()
+  likeCount: number;
+
+  @ApiProperty({ description: 'bookmark count', default: 0 })
+  @IsNumber()
+  @IsOptional()
+  bookmarkCount: number;
+
+  @ApiProperty({ description: 'flag count', default: 0 })
+  @IsNumber()
+  @IsOptional()
+  flagCount: number;
+
+  @ApiProperty({ description: 'join count', default: 0 })
+  @IsNumber()
+  @IsOptional()
+  joinCount: number;
+
+  // ------------------------------------------------------------------------ //
 
   @ApiProperty({ description: '빈자리 여부', default: false })
   @IsBoolean()
   @IsOptional()
   isFull: boolean;
-
-  @ApiProperty({ description: '신고여부', default: false })
-  @IsBoolean()
-  @IsOptional()
-  isFlagged: boolean;
 
   @ApiProperty({ description: '종료시각' })
   @Type(() => Date)
@@ -170,6 +164,11 @@ export class CreateMeetupDto {
   @IsNumber()
   @IsOptional()
   userId?: number;
+
+  @ApiProperty({ description: 'CreateVenueDto' })
+  @ValidateNested()
+  @Type(() => CreateVenueDto)
+  venue: CreateVenueDto;
 
   // @ApiProperty({ description: 'Venue 아이디' })
   // @IsString()

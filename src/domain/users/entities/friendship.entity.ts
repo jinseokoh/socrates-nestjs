@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { FriendRequestType, FriendStatus } from 'src/common/enums';
-import { Plea } from 'src/domain/feeds/entities/plea.entity';
+import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -26,9 +26,6 @@ export class Friendship {
 
   @Column({ type: 'int', unsigned: true })
   recipientId: number; // to make it available to Repository.
-
-  @Column({ type: 'int', unsigned: true, default: null })
-  pleaId: number | null; // to make it available to Repository.
 
   @Column({ length: 80, nullable: true })
   @ApiProperty({ description: 'message' })
@@ -67,11 +64,11 @@ export class Friendship {
   @JoinColumn({ name: 'recipientId' })
   public recipient!: User;
 
-  @OneToOne(() => Plea, (plea) => plea.id, {
-    nullable: true,
-  })
-  @JoinColumn({ name: 'pleaId' })
-  public plea: Plea;
+  // @OneToOne(() => Plea, (plea) => plea.id, {
+  //   nullable: true,
+  // })
+  // @JoinColumn({ name: 'pleaId' })
+  // public plea: Plea;
 
   //? ----------------------------------------------------------------------- //
   //? constructor

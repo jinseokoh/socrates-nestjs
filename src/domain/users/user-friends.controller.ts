@@ -19,6 +19,7 @@ import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto'
 import { UserFriendsService } from 'src/domain/users/user-friends.service';
 import { FriendStatus } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
+import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -37,7 +38,10 @@ export class UserFriendshipController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body() dto: CreateFriendshipDto,
-  ): Promise<User> {
+  ): Promise<{
+    pendingIds: number[];
+    friendIds: number[];
+  }> {
     return await this.userFriendsService.createFriendship({
       ...dto,
       userId,
@@ -59,11 +63,13 @@ export class UserFriendshipController {
   @PaginateQueryOptions()
   @Patch(':userId/friendships/:recipientId')
   async updateFriendshipWithStatus(
+    @CurrentUserId() currentUserId: number,
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body('status') status: FriendStatus,
-  ): Promise<void> {
-    await this.userFriendsService.updateFriendshipWithStatus(
+  ): Promise<any> {
+    return await this.userFriendsService.updateFriendshipWithStatus(
+      currentUserId,
       userId,
       recipientId,
       status,
@@ -102,19 +108,24 @@ export class UserFriendshipController {
   }
 
   @ApiOperation({ description: '현재 친구관계인 UserIds (all)' })
+  @Get(':userId/friendships')
+  async loadFriendships(@Param('userId') userId: number): Promise<{
+    pendingIds: number[];
+    friendIds: number[];
+  }> {
+    return this.userFriendsService.loadFriendships(userId);
+  }
+
+  @ApiOperation({ description: '현재 친구관계인 UserIds (all)' })
   @Get(':userId/friendids')
-  async loadFriendUserIds(
-    @Param('userId') userId: number,
-    // @Query('status') status: string | undefined,
-  ): Promise<number[]> {
+  async loadFriendUserIds(@Param('userId') userId: number): Promise<number[]> {
     return this.userFriendsService.loadFriendUserIds(userId);
   }
 
   @ApiOperation({ description: 'pending 친구관계인 UserIds (all)' })
-  @Get(':userId/pendingfriendids')
+  @Get(':userId/pendingids')
   async loadPendingFriendshipUserIds(
     @Param('userId') userId: number,
-    // @Query('status') status: string | undefined,
   ): Promise<number[]> {
     return this.userFriendsService.loadPendingFriendUserIds(userId);
   }

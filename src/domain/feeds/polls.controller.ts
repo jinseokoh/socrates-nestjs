@@ -18,7 +18,7 @@ import { Public } from 'src/common/decorators/public.decorator';
 import { PollsService } from 'src/domain/feeds/polls.service';
 import { CreatePollDto } from 'src/domain/feeds/dto/create-poll.dto';
 import { UpdatePollDto } from 'src/domain/feeds/dto/update-poll.dto';
-import { Poll } from 'src/domain/feeds/entities/poll.entity';
+import { Poll } from 'src/domain/icebreakers/entities/poll.entity';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 
 @UseInterceptors(ClassSerializerInterceptor)

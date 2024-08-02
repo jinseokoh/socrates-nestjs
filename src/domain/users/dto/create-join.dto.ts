@@ -4,7 +4,13 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateJoinDto {
   @ApiProperty({ description: 'meetupId' })
   @IsNumber()
+  @IsOptional()
   meetupId: number;
+
+  @ApiProperty({ description: 'userId' })
+  @IsNumber()
+  @IsOptional()
+  userId: number;
 
   @ApiProperty({ description: 'recipientId' })
   @IsNumber()

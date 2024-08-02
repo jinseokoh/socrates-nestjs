@@ -19,15 +19,14 @@ import { SignedUrl } from 'src/common/types';
 import { S3Service } from 'src/services/aws/s3.service';
 
 @Injectable()
-export class ContentCommentsService {
-  private readonly logger = new Logger(ContentCommentsService.name);
+export class ContentCommentUsersService {
+  private readonly logger = new Logger(ContentCommentUsersService.name);
 
   constructor(
     @InjectRepository(Content)
     private readonly contentRepository: Repository<Content>,
     @InjectRepository(ContentComment)
     private readonly contentCommentRepository: Repository<ContentComment>,
-    // @Inject(SlackService) private readonly slack: SlackService,
     private readonly s3Service: S3Service,
     private eventEmitter: EventEmitter2,
   ) {}
@@ -143,12 +142,12 @@ export class ContentCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? UPDATE
+  //? content 댓글 update
   //? ----------------------------------------------------------------------- //
 
   async update(
-    dto: UpdateContentCommentDto,
     commentId: number,
+    dto: UpdateContentCommentDto,
   ): Promise<ContentComment> {
     const comment = await this.contentCommentRepository.preload({
       id: commentId,
@@ -162,7 +161,7 @@ export class ContentCommentsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? DELETE
+  //? content 댓글 delete
   //? ----------------------------------------------------------------------- //
 
   async softRemove(id: number): Promise<ContentComment> {
@@ -201,9 +200,16 @@ export class ContentCommentsService {
   //? ----------------------------------------------------------------------- //
 
   // S3 직접 업로드를 위한 signedUrl 리턴
-  async getSignedUrl(userId: number, dto: SignedUrlDto): Promise<SignedUrl> {
-    const fileUri = randomImageName(dto.name ?? 'comment', dto.mimeType);
-    const path = `${process.env.NODE_ENV}/comments/${userId}/${fileUri}`;
+  async getSignedUrl(
+    userId: number,
+    contentId: number,
+    dto: SignedUrlDto,
+  ): Promise<SignedUrl> {
+    const fileUri = randomImageName(
+      dto.name ?? `content_${contentId}_comment`,
+      dto.mimeType,
+    );
+    const path = `${process.env.NODE_ENV}/content_comments/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
     return {

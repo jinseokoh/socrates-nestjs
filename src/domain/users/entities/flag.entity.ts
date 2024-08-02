@@ -21,12 +21,12 @@ export class Flag {
   id: number;
 
   @Column({ type: 'int', unsigned: true })
-  userId: number; // to make it available to Repository.
+  userId: number; // to make it available to Repository
 
   @Column({ length: 32, nullable: false })
   entityType: string;
 
-  @Column({ type: 'int', unsigned: false })
+  @Column({ type: 'int', unsigned: true })
   entityId: number;
 
   @Column({ length: 80, nullable: true })
