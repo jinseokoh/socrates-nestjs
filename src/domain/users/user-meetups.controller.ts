@@ -67,12 +67,12 @@ export class UserMeetupsController {
     return await this.userMeetupsService.createMeetupBookmark(userId, meetupId);
   }
 
-  @ApiOperation({ description: 'Meetup 북마크/찜 생성' })
+  @ApiOperation({ description: 'Meetup 북마크/찜 삭제' })
   @Delete(':userId/bookmarkedmeetups/:meetupId')
   async deleteMeetupBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
-  ): Promise<BookmarkUserMeetup> {
+  ): Promise<any> {
     return await this.userMeetupsService.deleteMeetupBookmark(userId, meetupId);
   }
 

@@ -33,15 +33,12 @@ export class UserFriendshipController {
 
   @ApiOperation({ description: '친구신청 생성' })
   @PaginateQueryOptions()
-  @Post(':userId/friendships/:recipientId')
+  @Post(':userId/friendships')
   async createFriendship(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body() dto: CreateFriendshipDto,
-  ): Promise<{
-    pendingIds: number[];
-    friendIds: number[];
-  }> {
+  ): Promise<Friendship> {
     return await this.userFriendsService.createFriendship({
       ...dto,
       userId,
@@ -51,29 +48,22 @@ export class UserFriendshipController {
 
   @ApiOperation({ description: '친구신청 삭제' })
   @PaginateQueryOptions()
-  @Delete(':userId/friendships/:recipientId')
+  @Delete(':userId/friendships/:id')
   async deleteFriendship(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('recipientId', ParseIntPipe) recipientId: number,
-  ): Promise<void> {
-    await this.userFriendsService.deleteFriendship(userId, recipientId);
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<any> {
+    await this.userFriendsService.deleteFriendship(userId, id);
   }
 
   @ApiOperation({ description: '친구신청 수락' })
   @PaginateQueryOptions()
-  @Patch(':userId/friendships/:recipientId')
-  async updateFriendshipWithStatus(
-    @CurrentUserId() currentUserId: number,
+  @Patch(':userId/friendships/:id')
+  async acceptFriendship(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('recipientId', ParseIntPipe) recipientId: number,
-    @Body('status') status: FriendStatus,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<any> {
-    return await this.userFriendsService.updateFriendshipWithStatus(
-      currentUserId,
-      userId,
-      recipientId,
-      status,
-    );
+    return await this.userFriendsService.acceptFriendship(userId, id);
   }
 
   // ------------------------------------------------------------------------ //
