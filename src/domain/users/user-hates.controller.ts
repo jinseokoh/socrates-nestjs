@@ -1,5 +1,4 @@
 import {
-  Body,
   ClassSerializerInterceptor,
   Controller,
   Delete,
@@ -31,13 +30,8 @@ export class UserHatesController {
   async createUserHate(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
-    @Body('message') message: string | null,
   ): Promise<Hate> {
-    return await this.userHatesService.createUserHate(
-      userId,
-      recipientId,
-      message,
-    );
+    return await this.userHatesService.createUserHate(userId, recipientId);
   }
 
   @ApiOperation({ description: '사용자 차단 삭제' })
@@ -45,19 +39,8 @@ export class UserHatesController {
   async deleteUserHate(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
-  ): Promise<void> {
-    await this.userHatesService.deleteUserHate(userId, recipientId);
-  }
-
-  @ApiOperation({ description: '사용자 차단 여부' })
-  @Get(':userId/hates/:recipientId')
-  async isHated(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('recipientId', ParseIntPipe) recipientId: number,
-  ): Promise<any> {
-    return {
-      data: await this.userHatesService.isHated(userId, recipientId),
-    };
+  ): Promise<Hate> {
+    return await this.userHatesService.deleteUserHate(userId, recipientId);
   }
 
   @ApiOperation({ description: '내가 차단한 Users (paginated)' })
@@ -66,24 +49,25 @@ export class UserHatesController {
     @Param('userId') userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<User>> {
-    return this.userHatesService.listUsersBlockedByMe(userId, query);
+    return this.userHatesService.listBlockedUsers(userId, query);
   }
 
+  //! do we even need this?
   @ApiOperation({ description: '내가 차단한 Users (all)' })
   @Get(':userId/hatedusers/all')
   async loadAllUsersBlockedByMe(
     @Param('userId') userId: number,
   ): Promise<User[]> {
-    return this.userHatesService.loadAllUsersBlockedByMe(userId);
+    return this.userHatesService.loadBlockedUsers(userId);
   }
 
   @ApiOperation({
     description: '내가 차단했거나 나를 차단한 UserIds (all)',
   })
   @Get(':userId/hateduserids')
-  async loadUserIdsEitherHatingOrBeingHated(
+  async loadBlockedUserIdsInEitherWay(
     @Param('userId') userId: number,
   ): Promise<number[]> {
-    return this.userHatesService.loadUserIdsEitherHatingOrBeingHated(userId);
+    return this.userHatesService.loadBlockedUserIdsInEitherWay(userId);
   }
 }

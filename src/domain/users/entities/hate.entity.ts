@@ -24,9 +24,6 @@ export class Hate {
   @Column({ type: 'int', unsigned: true })
   recipientId: number;
 
-  @Column({ length: 80, nullable: true })
-  message: string | null;
-
   @CreateDateColumn()
   createdAt: Date;
 

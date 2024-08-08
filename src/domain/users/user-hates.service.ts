@@ -2,6 +2,7 @@ import {
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,6 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
+import { CreateHateDto } from 'src/domain/users/dto/create-hate.dto';
 
 @Injectable()
 export class UserHatesService {
@@ -36,14 +38,10 @@ export class UserHatesService {
   //? ----------------------------------------------------------------------- //
 
   // 사용자 차단 추가
-  async createUserHate(
-    userId: number,
-    recipientId: number,
-    message: string | null,
-  ): Promise<Hate> {
+  async createUserHate(userId: number, recipientId: number): Promise<Hate> {
     try {
       const hate = await this.hateRepository.save(
-        this.hateRepository.create({ userId, recipientId, message }),
+        this.hateRepository.create({ userId, recipientId }),
       );
       return hate;
     } catch (error) {
@@ -56,19 +54,28 @@ export class UserHatesService {
   }
 
   // 사용자 차단 삭제
-  async deleteUserHate(userId: number, recipientId: number): Promise<void> {
+  async deleteUserHate(userId: number, recipientId: number): Promise<Hate> {
     try {
+      // validation ----------------------------------------------------------//
+      const hate = await this.hateRepository.findOneByOrFail({
+        userId,
+        recipientId,
+      });
       const { affectedRows } = await this.hateRepository.manager.query(
         'DELETE FROM `hate` WHERE userId = ? AND recipientId = ?',
         [userId, recipientId],
       );
-      // return { data: affectedRows };
+      return hate;
     } catch (error) {
-      throw error;
+      if (error.name === 'EntityNotFoundError') {
+        throw new NotFoundException(`user not found`);
+      } else {
+        throw error;
+      }
     }
   }
 
-  // 사용자 차단 여부
+  //! not being used. 사용자 차단 여부
   async isHated(userId: number, recipientId: number): Promise<boolean> {
     try {
       const [row] = await this.hateRepository.manager.query(
@@ -84,7 +91,7 @@ export class UserHatesService {
   }
 
   // 내가 차단한 Users (paginated)
-  async listUsersBlockedByMe(
+  async listBlockedUsers(
     userId: number,
     query: PaginateQuery,
   ): Promise<Paginated<User>> {
@@ -105,8 +112,8 @@ export class UserHatesService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내가 차단한 Users (all)
-  async loadAllUsersBlockedByMe(userId: number): Promise<User[]> {
+  //! do we even need this?
+  async loadBlockedUsers(userId: number): Promise<User[]> {
     return await this.userRepository
       .createQueryBuilder('user')
       .innerJoinAndSelect(Hate, 'hate', 'hate.recipient = user.id')
@@ -116,7 +123,7 @@ export class UserHatesService {
   }
 
   // 내가 차단하거나 나를 차단한 UserIds (all)
-  async loadUserIdsEitherHatingOrBeingHated(userId: number): Promise<number[]> {
+  async loadBlockedUserIdsInEitherWay(userId: number): Promise<number[]> {
     const rows: { userId: number; recipientId: number }[] =
       await this.userRepository.manager.query(
         'SELECT userId, recipientId FROM `hate` WHERE userId = ? OR recipientId = ?',

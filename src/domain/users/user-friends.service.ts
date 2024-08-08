@@ -15,14 +15,13 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { LedgerType, FriendStatus } from 'src/common/enums';
-import { DataSource, EntityNotFoundError, Not } from 'typeorm';
+import { DataSource, Not } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { CreateFriendshipDto } from 'src/domain/users/dto/create-friendship.dto';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { User } from 'src/domain/users/entities/user.entity';
-import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 
@@ -148,8 +147,8 @@ export class UserFriendsService {
   // -------------------------------------------------------------------------//
   // Delete
   // -------------------------------------------------------------------------//
-  //! 친구신청 삭제 (using transaction) 반대는 수락
-  async deleteFriendship(userId: number, id: number): Promise<any> {
+  //? 친구신청 삭제 (using transaction) 반대는 수락
+  async deleteFriendship(userId: number, id: number): Promise<Friendship> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -161,24 +160,21 @@ export class UserFriendsService {
       const friendship = await queryRunner.manager.findOne(Friendship, {
         where: { id: id },
       });
+      if (!friendship) {
+        throw new NotFoundException(`entity not found`);
+      }
       if (friendship.userId !== userId && friendship.recipientId !== userId) {
         throw new UnprocessableEntityException('mind your id');
       }
-
       const { affectedRows } = await queryRunner.manager.query(
         'DELETE FROM `friendship` WHERE id = ?',
         [id],
       );
       await queryRunner.commitTransaction();
-      return { data: affectedRows };
+      return friendship;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      if (error.name === 'EntityNotFoundError') {
-        //! TypeORM의 EntityNotFoundError 감지
-        throw new NotFoundException(`entity not found`);
-      } else {
-        throw error;
-      }
+      throw error;
     } finally {
       await queryRunner.release();
     }
@@ -187,7 +183,7 @@ export class UserFriendsService {
   // -------------------------------------------------------------------------//
   // Update
   // -------------------------------------------------------------------------//
-  //! 친구신청 수락 (using transaction) 반대는 삭제
+  //? 친구신청 수락 (using transaction) 반대는 삭제
   async acceptFriendship(userId: number, id: number): Promise<Friendship> {
     // create a new query runner
     const queryRunner = this.dataSource.createQueryRunner();
@@ -197,7 +193,7 @@ export class UserFriendsService {
       await queryRunner.startTransaction();
 
       // validation ----------------------------------------------------------//
-      const friendship = await queryRunner.manager.findOne(Friendship, {
+      const friendship = await queryRunner.manager.findOneOrFail(Friendship, {
         where: { id: id },
         relations: ['user', 'user.profile', 'recipient'],
       });
@@ -205,24 +201,26 @@ export class UserFriendsService {
       if (friendship.recipientId !== userId) {
         throw new UnprocessableEntityException('mind your id');
       }
-
-      if (friendship) {
-        await queryRunner.manager.query(
-          'UPDATE `friendship` SET status = ? WHERE id = ?',
-          [FriendStatus.ACCEPTED, id],
-        );
-
-        const event = new UserNotificationEvent();
-        event.name = 'friend';
-        event.userId = friendship.user?.id;
-        event.token = friendship.user?.pushToken;
-        event.options = friendship.user?.profile?.options ?? {};
-        event.body = `${friendship.recipient.username}님이 신청을 수락하여 친구관계를 맺었습니다.`;
-        event.data = {
-          page: `mypage/friends`,
-        };
-        this.eventEmitter.emit('user.notified', event);
+      if (friendship.status === FriendStatus.ACCEPTED) {
+        throw new UnprocessableEntityException(`relationship exists`);
       }
+
+      await queryRunner.manager.query(
+        'UPDATE `friendship` SET status = ? WHERE id = ?',
+        [FriendStatus.ACCEPTED, id],
+      );
+
+      const event = new UserNotificationEvent();
+      event.name = 'friend';
+      event.userId = friendship.user?.id;
+      event.token = friendship.user?.pushToken;
+      event.options = friendship.user?.profile?.options ?? {};
+      event.body = `${friendship.recipient.username}님이 신청을 수락하여 친구관계를 맺었습니다.`;
+      event.data = {
+        page: `mypage/friends`,
+      };
+      this.eventEmitter.emit('user.notified', event);
+
       await queryRunner.commitTransaction();
 
       delete friendship.user;
@@ -243,90 +241,7 @@ export class UserFriendsService {
     }
   }
 
-  // ------------------------------------------------------------------------ //
-
-  //? 내가 친구신청 보낸 Friendships (paginated)
-  //? message 때문에 Friendship 으로 보내야 한다.
-  async listFriendshipsSent(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Friendship>> {
-    const queryBuilder = this.friendshipRepository
-      .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.user', 'user')
-      .innerJoinAndSelect('friendship.recipient', 'recipient')
-      .innerJoinAndSelect('recipient.profile', 'profile')
-      .where({
-        userId: userId,
-        status: Not(FriendStatus.ACCEPTED),
-      });
-    const config: PaginateConfig<Friendship> = {
-      sortableColumns: ['createdAt'],
-      defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
-      filterableColumns: {
-        status: [FilterOperator.EQ],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  //? 내가 친구신청 받은 Friendships (paginated)
-  //? message 때문에 Friendship 으로 보내야 한다.
-  async listFriendshipsReceived(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<Friendship>> {
-    const queryBuilder = this.friendshipRepository
-      .createQueryBuilder('friendship')
-      .innerJoinAndSelect('friendship.user', 'user')
-      .innerJoinAndSelect('friendship.recipient', 'recipient')
-      .innerJoinAndSelect('user.profile', 'profile')
-      .where({
-        recipientId: userId,
-        status: Not(FriendStatus.ACCEPTED),
-      });
-    const config: PaginateConfig<Friendship> = {
-      sortableColumns: ['createdAt'],
-      defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
-      filterableColumns: {
-        status: [FilterOperator.EQ],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // 현재 친구관계인 Users (paginated)
-  async listMyFriends(
-    userId: number,
-    query: PaginateQuery,
-  ): Promise<Paginated<User>> {
-    const queryBuilder = this.userRepository
-      .createQueryBuilder('user')
-      .innerJoin(Friendship, 'friendship', 'friendship.status = :status', {
-        status: FriendStatus.ACCEPTED,
-      })
-      .innerJoinAndSelect('user.profile', 'profile')
-      .where(
-        '(friendship.userId = :userId AND user.id = friendship.recipientId) OR (friendship.recipientId = :userId AND user.id = friendship.userId)',
-        { userId },
-      );
-    const config: PaginateConfig<User> = {
-      sortableColumns: ['createdAt'],
-      defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
-      filterableColumns: {
-        status: [FilterOperator.EQ],
-      },
-    };
-
-    return await paginate(query, queryBuilder, config);
-  }
-
-  // 현재 친구관계인 UserIds (all)
+  // 현재 FriendIds 와 PendingIds 같이 (all)
   async loadFriendships(userId: number): Promise<{
     pendingIds: number[];
     friendIds: number[];
@@ -397,5 +312,86 @@ export class UserFriendsService {
     ]);
 
     return items.map(({ friendId }) => +friendId);
+  }
+
+  // ------------------------------------------------------------------------ //
+
+  //? 내가 보낸 친구신청 Friendships (paginated)
+  //? message 때문에 Friendship 으로 보내야 한다.
+  async listSentFriendships(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Friendship>> {
+    const queryBuilder = this.friendshipRepository
+      .createQueryBuilder('friendship')
+      .innerJoinAndSelect('friendship.user', 'user')
+      .innerJoinAndSelect('friendship.recipient', 'recipient')
+      .innerJoinAndSelect('recipient.profile', 'profile')
+      .where({
+        userId: userId,
+        status: Not(FriendStatus.ACCEPTED),
+      });
+    const config: PaginateConfig<Friendship> = {
+      sortableColumns: ['createdAt'],
+      defaultLimit: 20,
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {
+        status: [FilterOperator.EQ],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  //? 내가 받은 친구신청 Friendships (paginated)
+  //? message 때문에 Friendship 으로 보내야 한다.
+  async listReceivedFriendships(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Friendship>> {
+    const queryBuilder = this.friendshipRepository
+      .createQueryBuilder('friendship')
+      .innerJoinAndSelect('friendship.user', 'user')
+      .innerJoinAndSelect('friendship.recipient', 'recipient')
+      .innerJoinAndSelect('user.profile', 'profile')
+      .where({
+        recipientId: userId,
+        status: Not(FriendStatus.ACCEPTED),
+      });
+    const config: PaginateConfig<Friendship> = {
+      sortableColumns: ['createdAt'],
+      defaultLimit: 20,
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {
+        status: [FilterOperator.EQ],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  //? 현재 친구관계인 Users (paginated)
+  async listMyFriends(
+    userId: number,
+    query: PaginateQuery,
+  ): Promise<Paginated<Friendship>> {
+    const queryBuilder = this.friendshipRepository
+      .createQueryBuilder('friendship')
+      .innerJoinAndSelect('friendship.user', 'user')
+      .innerJoinAndSelect('friendship.recipient', 'recipient')
+      .where(
+        'status = :status AND (userId = :userId OR recipientId = :userId)',
+        { status: FriendStatus.ACCEPTED, userId },
+      );
+    const config: PaginateConfig<Friendship> = {
+      sortableColumns: ['createdAt'],
+      defaultLimit: 20,
+      defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {
+        status: [FilterOperator.EQ],
+      },
+    };
+
+    return await paginate(query, queryBuilder, config);
   }
 }

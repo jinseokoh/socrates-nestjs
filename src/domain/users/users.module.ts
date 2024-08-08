@@ -22,11 +22,9 @@ import { User } from 'src/domain/users/entities/user.entity';
 
 import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
 import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
-import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
 import { FeedsService } from 'src/domain/feeds/feeds.service';
 import { FlagFeedService } from 'src/domain/users/flag_feed.service';
 import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
-import { FlagUserService } from 'src/domain/users/flag_user.service';
 import { ProfilesService } from 'src/domain/users/profiles.service';
 import { ProvidersService } from 'src/domain/users/providers.service';
 import { UserCategoriesService } from 'src/domain/users/user-categories.service';
@@ -66,6 +64,7 @@ import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-s
 import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { Language } from 'src/domain/languages/entities/language.entity';
+import { UserUsersService } from 'src/domain/users/user-users.service';
 
 @Module({
   imports: [
@@ -106,11 +105,9 @@ import { Language } from 'src/domain/languages/entities/language.entity';
   providers: [
     BookmarkUserFeedService,
     BookmarkUserMeetupService,
-    BookmarkUserUserService,
     FeedsService,
     FlagFeedService,
     FlagMeetupService,
-    FlagUserService,
     ProfilesService,
     ProvidersService,
     UserCategoriesService,
@@ -125,6 +122,7 @@ import { Language } from 'src/domain/languages/entities/language.entity';
     UserOtpsService,
     UserPleasService,
     UserLedgersService,
+    UserUsersService,
     UsersService,
     LanguageSkillSubscriber,
     UserSubscriber,

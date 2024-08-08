@@ -19,17 +19,20 @@ import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.e
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { User } from 'src/domain/users/entities/user.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Flag } from 'src/domain/users/entities/flag.entity';
 
 @Injectable()
-export class BookmarkUserUserService {
+export class UserUsersService {
   private readonly env: any;
-  private readonly logger = new Logger(BookmarkUserUserService.name);
+  private readonly logger = new Logger(UserUsersService.name);
 
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(BookmarkUserUser)
     private readonly bookmarkUserUserRepository: Repository<BookmarkUserUser>,
+    @InjectRepository(Flag)
+    private readonly flagRepository: Repository<Flag>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
@@ -216,5 +219,162 @@ export class BookmarkUserUserService {
     );
 
     return rows.map((v: any) => v.userId);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? Flags
+  //? ----------------------------------------------------------------------- //
+
+  // User 신고 생성
+  // 가능하다면, user flagCount 증가
+  async createUserFlag(
+    userId: number,
+    recipientId: number,
+    message: string | null,
+  ): Promise<Flag> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const flag = await queryRunner.manager.save(
+        queryRunner.manager.getRepository(Flag).create({
+          userId,
+          entityType: 'user',
+          entityId: recipientId,
+          message,
+        }),
+      );
+      await queryRunner.manager.query(
+        'UPDATE `profile` SET flagCount = flagCount + 1 WHERE userId = ?',
+        [recipientId],
+      );
+      await queryRunner.commitTransaction();
+      return flag;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // User 신고 제거
+  // 가능하다면, user flagCount 감소
+  async deleteUserFlag(userId: number, recipientId: number): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const { affectedRows } = await queryRunner.manager.query(
+        'DELETE FROM `flag` where userId = ? AND entityType = ? AND entityId = ?',
+        [userId, `user`, recipientId],
+      );
+      if (affectedRows > 0) {
+        await queryRunner.manager.query(
+          'UPDATE `profile` SET flagCount = flagCount - 1 WHERE userId = ? AND flagCount > 0',
+          [recipientId],
+        );
+      }
+      return { data: affectedRows };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // User 신고 여부
+  async isUserFlagged(userId: number, recipientId: number): Promise<boolean> {
+    const [row] = await this.flagRepository.manager.query(
+      'SELECT COUNT(*) AS count FROM `flag` \
+      WHERE userId = ? AND entityType = ? AND entityId = ?',
+      [userId, `user`, recipientId],
+    );
+    const { count } = row;
+
+    return +count === 1;
+  }
+
+  // 내가 신고한 Users (paginated)
+  async findFlaggedUsers(
+    query: PaginateQuery,
+    userId: number,
+  ): Promise<Paginated<User>> {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .innerJoin(Flag, 'flag', 'flag.entityId = user.id')
+      .where('flag.userId = :userId', { userId })
+      .andWhere('flag.entityType = :entityType', { entityType: 'user' });
+
+    const config: PaginateConfig<User> = {
+      sortableColumns: ['id'],
+      searchableColumns: ['username'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내가 신고한 모든 Users
+  async loadFlaggedUsers(userId: number): Promise<User[]> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    return await queryBuilder
+      .innerJoinAndSelect(
+        Flag,
+        'flag',
+        'flag.entityId = user.id AND flag.entityType = :entityType',
+        { entityType: 'user' },
+      )
+      .addSelect(['user.*'])
+      .where('flag.userId = :userId', { userId })
+      .getMany();
+  }
+
+  // 내가 신고한 모든 UserIds
+  async loadFlaggedUserIds(userId: number): Promise<number[]> {
+    const rows = await this.flagRepository.manager.query(
+      'SELECT entityId FROM `flag` \
+      WHERE flag.userId = ? AND flag.entityType = ?',
+      [userId, 'user'],
+    );
+
+    return rows.map((v: any) => v.entityId);
+  }
+
+  //? 새롭게 추가 -----------------------------------------------------------------//
+
+  // 나를 신고한 모든 Users
+  async loadUserFlaggingUsers(userId: number): Promise<User[]> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    return await queryBuilder
+      .innerJoinAndSelect(
+        Flag,
+        'flag',
+        'flag.entityId = user.id AND flag.entityType = :entityType',
+        { entityType: 'user' },
+      )
+      .addSelect(['user.*'])
+      .where('flag.userId = :userId', { userId })
+      .getMany();
+  }
+
+  // 나를 신고한 모든 UserIds
+  async loadUserFlaggingUserIds(userId: number): Promise<number[]> {
+    const rows = await this.flagRepository.manager.query(
+      'SELECT entityId FROM `flag` \
+      WHERE flag.userId = ? AND flag.entityType = ?',
+      [userId, 'user'],
+    );
+
+    return rows.map((v: any) => v.entityId);
   }
 }

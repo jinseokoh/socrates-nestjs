@@ -13,19 +13,16 @@ import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { AnyData } from 'src/common/types';
-import { BookmarkUserUserService } from 'src/domain/users/bookmark_user_user.service';
-import { FlagUserService } from 'src/domain/users/flag_user.service';
 import { User } from 'src/domain/users/entities/user.entity';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
+import { UserUsersService } from 'src/domain/users/user-users.service';
+import { Flag } from 'src/domain/users/entities/flag.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UserUsersController {
-  constructor(
-    private readonly flagsService: FlagUserService,
-    private readonly bookmarksService: BookmarkUserUserService,
-  ) {}
+  constructor(private readonly userUsersService: UserUsersService) {}
 
   //? ----------------------------------------------------------------------- //
   //? 내가 북마크(BookmarkUserUser)한 Users
@@ -37,7 +34,7 @@ export class UserUsersController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<any> {
-    return await this.bookmarksService.createUserBookmark(userId, recipientId);
+    return await this.userUsersService.createUserBookmark(userId, recipientId);
   }
 
   @ApiOperation({ description: 'User 북마크 삭제' })
@@ -46,7 +43,7 @@ export class UserUsersController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<AnyData> {
-    return await this.bookmarksService.deleteUserBookmark(userId, recipientId);
+    return await this.userUsersService.deleteUserBookmark(userId, recipientId);
   }
 
   @ApiOperation({ description: 'User 북마크 여부' })
@@ -55,7 +52,7 @@ export class UserUsersController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<AnyData> {
-    return this.bookmarksService.isUserBookmarked(userId, recipientId);
+    return this.userUsersService.isUserBookmarked(userId, recipientId);
   }
 
   @ApiOperation({ description: '내가 북마크한/follow중인 Users (paginated)' })
@@ -64,7 +61,7 @@ export class UserUsersController {
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<User>> {
-    return await this.bookmarksService.findBookmarkedUsers(query, userId);
+    return await this.userUsersService.findBookmarkedUsers(query, userId);
   }
 
   @ApiOperation({ description: '내가 북마크한/follow중인 Users (all)' })
@@ -72,7 +69,7 @@ export class UserUsersController {
   async loadBookmarkedUsers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<User[]> {
-    return await this.bookmarksService.loadBookmarkedUsers(userId);
+    return await this.userUsersService.loadBookmarkedUsers(userId);
   }
 
   @ApiOperation({ description: '내가 북마크한/follow중인 UserIds (all)' })
@@ -80,7 +77,7 @@ export class UserUsersController {
   async loadBookmarkedUserIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
-    return await this.bookmarksService.loadBookmarkedUserIds(userId);
+    return await this.userUsersService.loadBookmarkedUserIds(userId);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -93,8 +90,12 @@ export class UserUsersController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
     @Body('message') message: string | null,
-  ): Promise<any> {
-    return await this.flagsService.createUserFlag(userId, recipientId, message);
+  ): Promise<Flag> {
+    return await this.userUsersService.createUserFlag(
+      userId,
+      recipientId,
+      message,
+    );
   }
 
   @ApiOperation({ description: 'User 신고 삭제' })
@@ -103,7 +104,7 @@ export class UserUsersController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<any> {
-    return await this.flagsService.deleteUserFlag(userId, recipientId);
+    return await this.userUsersService.deleteUserFlag(userId, recipientId);
   }
 
   @ApiOperation({ description: 'User 신고 여부' })
@@ -113,7 +114,7 @@ export class UserUsersController {
     @Param('recipientId', ParseIntPipe) recipientId: number,
   ): Promise<AnyData> {
     return {
-      data: await this.flagsService.isUserFlagged(userId, recipientId),
+      data: await this.userUsersService.isUserFlagged(userId, recipientId),
     };
   }
 
@@ -124,7 +125,7 @@ export class UserUsersController {
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
   ): Promise<Paginated<User>> {
-    return await this.flagsService.findFlaggedUsers(query, userId);
+    return await this.userUsersService.findFlaggedUsers(query, userId);
   }
 
   @ApiOperation({ description: '내가 신고한 모든 Users (all)' })
@@ -132,7 +133,7 @@ export class UserUsersController {
   async loadFlaggedUsers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<User[]> {
-    return await this.flagsService.loadFlaggedUsers(userId);
+    return await this.userUsersService.loadFlaggedUsers(userId);
   }
 
   @ApiOperation({ description: '내가 신고한 모든 UserIds' })
@@ -140,7 +141,7 @@ export class UserUsersController {
   async loadFlaggedUserIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
-    return await this.flagsService.loadFlaggedUserIds(userId);
+    return await this.userUsersService.loadFlaggedUserIds(userId);
   }
 
   @ApiOperation({ description: '나를 신고한 모든 Users (all)' })
@@ -148,7 +149,7 @@ export class UserUsersController {
   async loadFlaggingUsers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<User[]> {
-    return await this.flagsService.loadUserFlaggingUsers(userId);
+    return await this.userUsersService.loadUserFlaggingUsers(userId);
   }
 
   @ApiOperation({ description: '나를 신고한 모든 UserIds' })
@@ -156,6 +157,6 @@ export class UserUsersController {
   async loadFlaggingUserIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
-    return await this.flagsService.loadUserFlaggingUserIds(userId);
+    return await this.userUsersService.loadUserFlaggingUserIds(userId);
   }
 }
