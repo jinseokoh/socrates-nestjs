@@ -1,3 +1,4 @@
+import { Room } from 'src/domain/chats/entities/room.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { Gender, Role } from 'src/common/enums';
@@ -151,6 +152,11 @@ export class User {
     // cascade: ['insert', 'update'],
   })
   public meetups: Meetup[];
+
+  @OneToMany(() => Room, (room) => room.user, {
+    // cascade: ['insert', 'update'],
+  })
+  public rooms: Room[];
 
   @OneToMany(() => Feed, (feed) => feed.user, {
     // cascade: ['insert', 'update'],

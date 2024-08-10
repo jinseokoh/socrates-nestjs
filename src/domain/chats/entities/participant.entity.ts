@@ -4,26 +4,21 @@ import { Room } from 'src/domain/chats/entities/room.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Entity,
-  PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
   Column,
   UpdateDateColumn,
   CreateDateColumn,
+  PrimaryColumn,
 } from 'typeorm';
 
 @Entity()
 export class Participant {
-  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
-  id: number;
+  @PrimaryColumn({ type: 'int', unsigned: true })
+  public userId: number; // to make it available to Repository.
 
-  //? unsigned int 로 사용하기 위해 명시적인 정의가 필요.
-  @Column({ type: 'int', unsigned: true })
-  userId: number;
-
-  //? unsigned int 로 사용하기 위해 명시적인 정의가 필요.
-  @Column({ type: 'int', unsigned: true })
-  roomId: number;
+  @PrimaryColumn({ type: 'int', unsigned: true })
+  public roomId: number; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.participants)
   @JoinColumn({ name: 'userId' })

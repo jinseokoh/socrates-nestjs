@@ -22,7 +22,7 @@ import { Room } from 'src/domain/chats/entities/room.entity';
 import { RoomsService } from 'src/domain/chats/rooms.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('chats')
+@Controller('rooms')
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 
