@@ -60,8 +60,8 @@ export class FeedsController {
   //? the commenting out relations can be ignored to reduce the amount of response
   @ApiOperation({ description: 'Feed 상세보기' })
   @Get(':id')
-  async getFeedById(@Param('id') id: number): Promise<Feed> {
-    return await this.feedsService.findById(id, [
+  async getById(@Param('id') id: number): Promise<Feed> {
+    return await this.feedsService.getById(id, [
       'user',
       'poll',
       'feedLinks',

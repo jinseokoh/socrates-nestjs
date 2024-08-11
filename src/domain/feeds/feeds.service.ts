@@ -103,7 +103,7 @@ export class FeedsService {
   }
 
   // Feed 상세보기
-  async findById(id: number, relations: string[] = []): Promise<Feed> {
+  async getById(id: number, relations: string[] = []): Promise<Feed> {
     try {
       return relations.length > 0
         ? await this.feedRepository.findOneOrFail({
@@ -145,12 +145,12 @@ export class FeedsService {
   //? ----------------------------------------------------------------------- //
 
   async softRemove(id: number): Promise<Feed> {
-    const feed = await this.findById(id);
+    const feed = await this.getById(id);
     return await this.feedRepository.softRemove(feed);
   }
 
   async remove(id: number): Promise<Feed> {
-    const feed = await this.findById(id);
+    const feed = await this.getById(id);
     return await this.feedRepository.remove(feed);
   }
 

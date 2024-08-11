@@ -1,4 +1,9 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
@@ -13,6 +18,8 @@ import {
 } from 'nestjs-paginate';
 import { DataSource } from 'typeorm';
 import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UserFeedsService {
@@ -26,14 +33,15 @@ export class UserFeedsService {
     private readonly bookmarkUserFeedRepository: Repository<BookmarkUserFeed>,
     @InjectRepository(Flag)
     private readonly flagRepository: Repository<Flag>,
-    @Inject(ConfigService) private configService: ConfigService, // global
+    @Inject(ConfigService) private configService: ConfigService,
+    private eventEmitter: EventEmitter2,// global
     private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
   }
 
   //? ----------------------------------------------------------------------- //
-  //? My Feeds
+  //? 내가 만든 Feeds
   //? ----------------------------------------------------------------------- //
 
   // 내가 만든 feed 리스트 (paginated)
@@ -84,6 +92,101 @@ export class UserFeedsService {
       })
       .getMany();
     return items.map((v) => v.id);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? 북마크/찜(BookmarkUserFeed) 생성
+  //? ----------------------------------------------------------------------- //
+
+  async createFeedBookmark(
+    userId: number,
+    feedId: number,
+  ): Promise<BookmarkUserFeed> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const bookmark = await queryRunner.manager.save(
+        queryRunner.manager
+          .getRepository(BookmarkUserFeed)
+          .create({ userId, feedId }),
+      );
+      await queryRunner.manager.query(
+        'UPDATE `feed` SET bookmarkCount = bookmarkCount + 1 WHERE id = ?',
+        [feedId],
+      );
+
+      if (false) {
+        // notification with event listener ------------------------------------//
+        const feed = await queryRunner.manager.findOneOrFail(Feed, {
+          where: { id: feedId },
+          relations: [`user`, `user.profile`],
+        });
+        // todo. fine tune notifying logic to dedup the same id
+        const event = new UserNotificationEvent();
+        event.name = 'feed';
+        event.userId = feed.user.id;
+        event.token = feed.user.pushToken;
+        event.options = feed.user.profile?.options ?? {};
+        event.body = `${feed.title} 모임에 누군가 찜을 했습니다.`;
+        event.data = {
+          page: `feeds/${feedId}`,
+          args: '',
+        };
+        this.eventEmitter.emit('user.notified', event);
+      }
+
+      await queryRunner.commitTransaction();
+      return bookmark;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async deleteFeedBookmark(userId: number, feedId: number): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const { affectedRows } = await queryRunner.manager.query(
+        'DELETE FROM `bookmark_user_feed` WHERE userId = ? AND feedId = ?',
+        [userId, feedId],
+      );
+      if (affectedRows > 0) {
+        await queryRunner.manager.query(
+          'UPDATE `feed` SET bookmarkCount = bookmarkCount - 1 WHERE id = ? AND bookmarkCount > 0',
+          [feedId],
+        );
+      }
+      await queryRunner.commitTransaction();
+      return { data: affectedRows };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // Feed 북마크 여부
+  async isFeedBookmarked(userId: number, feedId: number): Promise<boolean> {
+    const [row] = await this.bookmarkUserFeedRepository.manager.query(
+      'SELECT COUNT(*) AS count FROM `bookmark_user_feed` \
+      WHERE userId = ? AND feedId = ?',
+      [userId, feedId],
+    );
+    const { count } = row;
+
+    return +count === 1;
   }
 
   //? ----------------------------------------------------------------------- //
@@ -139,6 +242,85 @@ export class UserFeedsService {
     );
 
     return rows.map((v: any) => v.feedId);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? Feed Flag 신고 생성
+  //? ----------------------------------------------------------------------- //
+
+  // Feed 신고 생성
+  async createFeedFlag(
+    userId: number,
+    feedId: number,
+    message: string,
+  ): Promise<Flag> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const flag = await queryRunner.manager.save(
+        queryRunner.manager.getRepository(Flag).create({
+          userId,
+          entityType: 'feed',
+          entityId: feedId,
+          message,
+        }),
+      );
+      await queryRunner.manager.query(
+        'UPDATE `feed` SET flagCount = flagCount + 1 WHERE id = ?',
+        [feedId],
+      );
+      await queryRunner.commitTransaction();
+      return flag;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // Feed 신고 제거
+  async deleteFeedFlag(userId: number, feedId: number): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const { affectedRows } = await queryRunner.manager.query(
+        'DELETE FROM `flag` where userId = ? AND entityType = ? AND entityId = ?',
+        [userId, `feed`, feedId],
+      );
+      if (affectedRows > 0) {
+        await queryRunner.manager.query(
+          'UPDATE `feed` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
+          [feedId],
+        );
+      }
+      return { data: affectedRows };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // Feed 신고 여부
+  async isFeedFlagged(userId: number, feedId: number): Promise<boolean> {
+    const [row] = await this.flagRepository.manager.query(
+      'SELECT COUNT(*) AS count FROM `flag` \
+      WHERE userId = ? AND entityType = ? AND entityId = ?',
+      [userId, `feed`, feedId],
+    );
+    const { count } = row;
+
+    return +count === 1;
   }
 
   //? ----------------------------------------------------------------------- //

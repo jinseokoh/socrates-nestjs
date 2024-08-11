@@ -1,9 +1,12 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
+  Post,
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
@@ -12,6 +15,8 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { UserFeedsService } from 'src/domain/users/user-feeds.service';
+import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import { Flag } from 'src/domain/users/entities/flag.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -50,6 +55,37 @@ export class UserFeedsController {
   }
 
   //? ----------------------------------------------------------------------- //
+  //? 북마크/찜(BookmarkUserFeed) 생성
+  //? ----------------------------------------------------------------------- //
+
+  @ApiOperation({ description: 'Feed 북마크/찜 생성' })
+  @Post(':userId/bookmarkedfeeds/:feedId')
+  async createFeedBookmark(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+  ): Promise<BookmarkUserFeed> {
+    return await this.userFeedsService.createFeedBookmark(userId, feedId);
+  }
+
+  @ApiOperation({ description: 'Feed 북마크/찜 삭제' })
+  @Delete(':userId/bookmarkedfeeds/:feedId')
+  async deleteFeedBookmark(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+  ): Promise<any> {
+    return await this.userFeedsService.deleteFeedBookmark(userId, feedId);
+  }
+
+  @ApiOperation({ description: 'Feed 북마크/찜 여부' })
+  @Get(':userId/bookmarkedfeeds/:feedId')
+  async isFeedBookmarked(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+  ): Promise<boolean> {
+    return await this.userFeedsService.isFeedBookmarked(userId, feedId);
+  }
+
+  //? ----------------------------------------------------------------------- //
   //? 내가 북마크(BookmarkUserFeed)한 Feeds
   //? ----------------------------------------------------------------------- //
 
@@ -77,6 +113,38 @@ export class UserFeedsController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
     return await this.userFeedsService.loadBookmarkedFeedIds(userId);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? Feed Flag 신고 생성
+  //? ----------------------------------------------------------------------- //
+
+  @ApiOperation({ description: 'Feed 신고 생성' })
+  @Post(':userId/flaggedfeeds/:feedId')
+  async createFeedFlag(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+    @Body('message') message: string | null,
+  ): Promise<Flag> {
+    return await this.userFeedsService.createFeedFlag(userId, feedId, message);
+  }
+
+  @ApiOperation({ description: 'Feed 신고 삭제' })
+  @Delete(':userId/flaggedfeeds/:feedId')
+  async deleteFeedFlag(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+  ): Promise<any> {
+    return await this.userFeedsService.deleteFeedFlag(userId, feedId);
+  }
+
+  @ApiOperation({ description: 'Feed 신고 여부' })
+  @Get(':userId/flaggedfeeds/:feedId')
+  async isFeedFlagged(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('feedId', ParseIntPipe) feedId: number,
+  ): Promise<boolean> {
+    return await this.userFeedsService.isFeedFlagged(userId, feedId);
   }
 
   //? ----------------------------------------------------------------------- //
