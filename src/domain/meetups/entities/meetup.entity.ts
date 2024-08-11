@@ -41,8 +41,8 @@ export class Meetup {
   @Column({ type: 'int', unsigned: true })
   venueId: number; // to make it available to Repository.
 
-  @Column({ type: 'int', unsigned: true })
-  roomId: number; // to make it available to Repository.
+  @Column({ type: 'int', unsigned: true, nullable: true })
+  roomId: number | null; // to make it available to Repository.
 
   @Column({ type: 'enum', enum: CategoryEnum, default: CategoryEnum.CHALLENGE })
   @ApiProperty({ description: 'category' })
@@ -112,10 +112,10 @@ export class Meetup {
   amount: number;
 
   @Column({ type: 'tinyint', unsigned: true, default: 2 })
-  @Column({ type: 'tinyint', unsigned: true, default: 2 })
   @ApiProperty({ description: 'skill level' })
   skill: number;
 
+  @Column({ type: 'tinyint', unsigned: true, default: 2 })
   @ApiProperty({ description: 'max # of participants' })
   max: number;
 
@@ -194,7 +194,7 @@ export class Meetup {
   //? 1-to-1 hasOne
 
   @OneToOne(() => Room, (room) => room.meetup)
-  // @JoinColumn({ name: 'roomId' })
+  @JoinColumn({ name: 'roomId' })
   room?: Room | null;
 
   //? ----------------------------------------------------------------------- //

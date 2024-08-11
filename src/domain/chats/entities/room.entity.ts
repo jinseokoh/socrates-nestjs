@@ -59,7 +59,7 @@ export class Room {
   //? ----------------------------------------------------------------------- //
   //? 1-to-1 hasOne
 
-  @OneToOne(() => Meetup, (meetup) => meetup.user)
+  @OneToOne(() => Meetup, (meetup) => meetup.room)
   meetup?: Meetup | null;
 
   //? ----------------------------------------------------------------------- //

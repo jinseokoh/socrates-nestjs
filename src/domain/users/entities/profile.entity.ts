@@ -109,11 +109,11 @@ export class Profile {
   //? ------------------------------------------------------------------------- */
   //? programatically set a default using TypeORM hook
 
-  @AfterLoad()
-  setNullToEmptyArray() {
-    this.images = this.images || [];
-    this.fyis = this.fyis || [];
-  }
+  // @AfterLoad()
+  // setNullToEmptyArray() {
+  //   this.images = this.images || [];
+  //   this.fyis = this.fyis || [];
+  // }
 
   @BeforeInsert()
   setDefaultOptions() {

@@ -76,10 +76,10 @@ export class UsersService {
       .leftJoinAndSelect('user.profile', 'profile');
 
     const config: PaginateConfig<User> = {
-      sortableColumns: ['id', 'username', 'email'],
+      sortableColumns: ['id', 'username', 'updatedAt'],
       searchableColumns: ['email', 'username'],
       defaultLimit: 20,
-      defaultSortBy: [['id', 'DESC']],
+      defaultSortBy: [['updatedAt', 'DESC']],
       filterableColumns: {
         role: [FilterOperator.EQ, FilterOperator.IN],
         isActive: [FilterOperator.EQ],

@@ -2,6 +2,7 @@ import { SignedUrlDto } from './dto/signed-url.dto';
 import {
   BadRequestException,
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -45,7 +46,7 @@ import { initialUsername } from 'src/helpers/random-username';
 import { PurchaseCoinDto } from 'src/domain/users/dto/purchase-coin.dto';
 
 //! to include excluded properties in the response
-// @UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UsersController {
