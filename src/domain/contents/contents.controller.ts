@@ -47,14 +47,14 @@ export class ContentsController {
 
   @ApiOperation({ description: '공지사항 상세보기' })
   @Get(':slug')
-  async getActiveContents(@Param('slug') slug: string): Promise<Content[]> {
-    return await this.contentsService.loadContentsBySlug(slug);
+  async getAll(@Param('slug') slug: string): Promise<Content[]> {
+    return await this.contentsService.getAll(slug);
   }
 
   @ApiOperation({ description: '공지사항 상세보기' })
   @Get(':id')
-  async findById(@Param('id') id: number): Promise<Content> {
-    return await this.contentsService.findById(id);
+  async getById(@Param('id') id: number): Promise<Content> {
+    return await this.contentsService.getById(id);
   }
 
   //? ----------------------------------------------------------------------- //

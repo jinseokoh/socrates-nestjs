@@ -46,7 +46,6 @@ import { initialUsername } from 'src/helpers/random-username';
 import { PurchaseCoinDto } from 'src/domain/users/dto/purchase-coin.dto';
 
 //! to include excluded properties in the response
-@UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
 @Controller('users')
 export class UsersController {
@@ -61,6 +60,7 @@ export class UsersController {
 
   @ApiOperation({ description: 'User 생성' })
   @Post()
+  @UseInterceptors(ClassSerializerInterceptor)
   async create(
     @Body(UniqueKeysPipe, HashPasswordPipe) dto: CreateUserDto,
   ): Promise<User> {
@@ -76,6 +76,7 @@ export class UsersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   @PaginateQueryOptions()
   @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
   async getUsers(@Paginate() query: PaginateQuery): Promise<Paginated<User>> {
     return this.usersService.findAll(query);
   }
@@ -98,6 +99,7 @@ export class UsersController {
 
   @ApiOperation({ description: 'User 상세보기' })
   @Get(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   async getUserById(
     @Param('id', ParseIntPipe) id: number,
     @Query('extra') extra: string[],
@@ -122,6 +124,7 @@ export class UsersController {
   @ApiOperation({ description: 'find user by providerId' })
   @Public()
   @Get(':uid/uid')
+  @UseInterceptors(ClassSerializerInterceptor)
   async findUserByProviderId(@Param('uid') uid: string): Promise<User> {
     return await this.usersService.findByProviderId(uid);
   }
@@ -191,6 +194,7 @@ export class UsersController {
 
   @ApiOperation({ description: 'User 탈퇴' })
   @Delete(':userId')
+  // @UseInterceptors(ClassSerializerInterceptor)
   async remove(
     @Param('userId') userId: number,
     @Body() dto: DeleteUserDto,

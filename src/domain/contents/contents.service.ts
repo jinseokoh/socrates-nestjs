@@ -32,7 +32,6 @@ export class ContentsService {
   //? READ
   //? ----------------------------------------------------------------------- //
 
-  // Content 리스트
   async findAll(query: PaginateQuery): Promise<Paginated<Content>> {
     const queryBuilder = this.contentRepository.createQueryBuilder('content');
 
@@ -50,8 +49,21 @@ export class ContentsService {
     return await paginate(query, queryBuilder, config);
   }
 
+  // Content 리스트 by Slug
+  async getAll(slug: string): Promise<Content[]> {
+    try {
+      return slug === 'all'
+        ? await this.contentRepository.find()
+        : await this.contentRepository.find({
+            where: { slug },
+          });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
   // 상세보기
-  async findById(id: number, relations: string[] = []): Promise<Content> {
+  async getById(id: number, relations: string[] = []): Promise<Content> {
     try {
       await this.increaseViewCount(id);
       return relations.length > 0
@@ -70,25 +82,6 @@ export class ContentsService {
   // Content 리스트
   async loadContents(): Promise<Content[]> {
     return await this.contentRepository.createQueryBuilder('content').getMany();
-  }
-
-  // Content 리스트 by Slug
-  async loadContentsBySlug(
-    slug: string,
-    relations: string[] = [],
-  ): Promise<Content[]> {
-    try {
-      return relations.length > 0
-        ? await this.contentRepository.find({
-            where: { slug },
-            relations,
-          })
-        : await this.contentRepository.find({
-            where: { slug },
-          });
-    } catch (e) {
-      throw new NotFoundException('entity not found');
-    }
   }
 
   // async count(title: string): Promise<number> {
@@ -137,7 +130,8 @@ export class ContentsService {
   //? ----------------------------------------------------------------------- //
 
   async remove(id: number): Promise<Content> {
-    const content = await this.findById(id);
-    return await this.contentRepository.softRemove(content);
+    const content = await this.getById(id);
+    await this.contentRepository.softRemove(content);
+    return content;
   }
 }

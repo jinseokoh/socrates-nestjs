@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
 import {
   Column,
@@ -33,10 +33,11 @@ export class Content {
   @Column({ type: 'text', nullable: false })
   body: string;
 
-  @Column('json', { nullable: true })
+  @Column({ length: 255, nullable: true })
   @ApiProperty({ description: '이미지' })
-  @IsArray()
-  images: string[] | null;
+  @IsString()
+  @IsOptional()
+  image: string | null;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'views count' })
