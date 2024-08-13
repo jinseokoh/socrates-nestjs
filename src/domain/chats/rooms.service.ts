@@ -18,15 +18,20 @@ import { UpdateRoomDto } from 'src/domain/chats/dto/update-room.dto';
 import { LedgerType, PartyType } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
+import { Participant } from 'src/domain/chats/entities/participant.entity';
 
 @Injectable()
 export class RoomsService {
   private readonly logger = new Logger(RoomsService.name);
 
   constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Room)
     private readonly roomRepository: Repository<Room>,
+    @InjectRepository(Participant)
+    private readonly participantRepository: Repository<Participant>,
     private dataSource: DataSource, // for transaction
   ) {}
 
@@ -35,7 +40,27 @@ export class RoomsService {
   //? ----------------------------------------------------------------------- //
 
   async create(dto: CreateRoomDto): Promise<Room> {
-    return await this.roomRepository.save(this.roomRepository.create(dto));
+    const users = await this.userRepository.find({
+      where: {
+        id: In(dto.participantIds),
+      },
+    });
+    const room = await this.roomRepository.save(
+      this.roomRepository.create({
+        slug: dto.slug,
+        title: `${users.map((v) => v.username).join(',')} 참가`,
+        participantCount: dto.participantIds.length,
+      }),
+    );
+    room.participants = dto.participantIds.map((id: number) => {
+      return this.participantRepository.create({
+        userId: id,
+        roomId: room.id,
+        partyType: dto.userId === id ? PartyType.HOST : PartyType.GUEST,
+      });
+    });
+    await this.roomRepository.save(room);
+    return room;
   }
 
   //? ----------------------------------------------------------------------- //

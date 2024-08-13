@@ -1,36 +1,39 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsBoolean,
+  IsArray,
   IsEnum,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
-import { PartyType, RoomStatus } from 'src/common/enums';
+import { RoomStatus } from 'src/common/enums';
 export class CreateRoomDto {
-  @ApiProperty({ description: '제목', required: false })
+  @ApiProperty({ description: '제목', required: true })
   @IsString()
-  @IsOptional()
-  title: string;
+  slug: string;
+
+  @ApiProperty({ description: 'cost', default: 0 })
+  @IsNumber()
+  cost: number;
+
+  @ApiProperty({ description: '참여자 userIds', default: false })
+  @IsArray()
+  participantIds: number[];
 
   @ApiProperty({
     description: 'room status',
-    default: PartyType.GUEST,
+    default: RoomStatus.PENDING,
   })
-  @IsEnum(PartyType)
-  roomStatus: RoomStatus;
-
-  @ApiProperty({ description: '참여자 수', default: false })
-  @IsNumber()
+  @IsEnum(RoomStatus)
   @IsOptional()
-  participantCount: number;
+  roomStatus: RoomStatus;
 
   @ApiProperty({ description: 'flag count', default: false })
   @IsNumber()
   @IsOptional()
   flagCount: number;
 
-  @ApiProperty({ description: 'last read message id', required: true })
+  @ApiProperty({ description: 'last read message id', required: false })
   @IsString()
   @IsOptional()
   lastMessageId: string | null;

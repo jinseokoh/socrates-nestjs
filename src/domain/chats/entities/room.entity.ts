@@ -7,8 +7,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -67,17 +65,6 @@ export class Room {
 
   @OneToMany(() => Participant, (participant) => participant.room)
   participants: Participant[];
-
-  //? ----------------------------------------------------------------------- //
-  //? many-to-1 belongsTo
-
-  @ManyToOne(() => User, (user) => user.id, {
-    nullable: false,
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'userId' })
-  public user: User;
 
   //? ----------------------------------------------------------------------- //
   //? constructor

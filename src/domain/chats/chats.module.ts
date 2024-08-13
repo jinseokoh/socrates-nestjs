@@ -11,11 +11,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { RoomSubscriber } from 'src/domain/chats/subscribers/room-subscriber';
 import { SocketIoGateway } from 'src/websockets/socketio.gateway';
+import { User } from 'src/domain/users/entities/user.entity';
+import { Participant } from 'src/domain/chats/entities/participant.entity';
 // import { MessagesGateway } from 'src/domain/chats/messages.gateway';
 // removed message gateway as we exploit SSE instead of websocket
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Room]),
+    TypeOrmModule.forFeature([User, Room, Participant]),
     DynamooseModule.forFeature([
       {
         name: 'Message',

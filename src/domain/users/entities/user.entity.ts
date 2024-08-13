@@ -153,11 +153,6 @@ export class User {
   })
   public meetups: Meetup[];
 
-  @OneToMany(() => Room, (room) => room.user, {
-    // cascade: ['insert', 'update'],
-  })
-  public rooms: Room[];
-
   @OneToMany(() => Feed, (feed) => feed.user, {
     // cascade: ['insert', 'update'],
   })
