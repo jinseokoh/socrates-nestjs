@@ -22,7 +22,7 @@ import { Impression } from 'src/domain/users/entities/impression.entity';
 import { Inquiry } from 'src/domain/inquiries/entities/inquiry.entity';
 import { InquiryComment } from 'src/domain/inquiries/entities/inquiry_comment.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
-import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
+import { Fluency } from 'src/domain/languages/entities/fluency.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { Poll } from 'src/domain/icebreakers/entities/poll.entity';
@@ -211,8 +211,8 @@ export class User {
   @OneToMany(() => Interest, (interest) => interest.user)
   public categoriesInterested: Interest[];
 
-  @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.user)
-  public languageSkills: LanguageSkill[];
+  @OneToMany(() => Fluency, (languageSkill) => languageSkill.user)
+  public languageSkills: Fluency[];
 
   @OneToMany(() => Participant, (participant) => participant.user)
   public participants: Participant[];

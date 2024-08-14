@@ -1,26 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Language } from 'src/domain/languages/entities/language.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  Unique,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryColumn, Unique } from 'typeorm';
 
 // a user can like meetup
 // https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-@Unique('user_id_language_id_key', ['userId', 'languageId'])
-export class LanguageSkill {
-  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
-  id: number;
-
-  @Column({ type: 'int', unsigned: true })
+export class Fluency {
+  @PrimaryColumn({ type: 'int', unsigned: true })
   public userId: number;
 
-  @Column({ type: 'int', unsigned: true })
+  @PrimaryColumn({ type: 'int', unsigned: true })
   public languageId: number;
 
   @Column({ type: 'tinyint', unsigned: true })
@@ -38,7 +28,7 @@ export class LanguageSkill {
   //? ----------------------------------------------------------------------- //
   //? constructor
 
-  constructor(partial: Partial<LanguageSkill>) {
+  constructor(partial: Partial<Fluency>) {
     Object.assign(this, partial);
   }
 }

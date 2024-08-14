@@ -15,7 +15,7 @@ import {
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { CreateRoomDto } from 'src/domain/chats/dto/create-room.dto';
 import { UpdateRoomDto } from 'src/domain/chats/dto/update-room.dto';
-import { LedgerType, PartyType } from 'src/common/enums';
+import { PartyType } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { DataSource, In, Repository } from 'typeorm';
@@ -40,19 +40,34 @@ export class RoomsService {
   //? ----------------------------------------------------------------------- //
 
   async create(dto: CreateRoomDto): Promise<Room> {
+    const sortedIds = [...dto.ids].sort((a, b) => a - b);
+    const slug = `${dto.prefix}-${sortedIds.join('-')}`;
     const users = await this.userRepository.find({
       where: {
-        id: In(dto.participantIds),
+        id: In(dto.ids),
       },
     });
+    const no = dto.ids.length;
     const room = await this.roomRepository.save(
       this.roomRepository.create({
-        slug: dto.slug,
-        title: `${users.map((v) => v.username).join(',')} 참가`,
-        participantCount: dto.participantIds.length,
+        slug: slug,
+        title: `사용자 ${no}인: ${users.map((v) => v.username).join(',')}`,
+        participantCount: no,
       }),
     );
-    room.participants = dto.participantIds.map((id: number) => {
+    //   await Promise.all(
+    //     dto.ids.map(async (id: number) => {
+    //       await this.participantRepository.manager.query(
+    //         'INSERT IGNORE INTO `participant` (userId, roomId, partyType) VALUES (?, ?, ?) \
+    // ON DUPLICATE KEY UPDATE \
+    // userId = VALUES(`userId`), \
+    // roomId = VALUES(`roomId`), \
+    // partyType = VALUES(`partyType`)',
+    //         [id, room.id, dto.userId === id ? PartyType.HOST : PartyType.GUEST],
+    //       );
+    //     }),
+    //   );
+    room.participants = dto.ids.map((id: number) => {
       return this.participantRepository.create({
         userId: id,
         roomId: room.id,
@@ -73,15 +88,21 @@ export class RoomsService {
   ): Promise<Paginated<Room>> {
     const queryBuilder = this.roomRepository
       .createQueryBuilder('room')
-      .innerJoinAndSelect('room.participants', 'participant')
-      .leftJoinAndSelect('participant.user', 'user')
-      .where('room.userId = :userId', { userId });
-    // andWhere('room.isBanned', false)
+      .innerJoinAndSelect(
+        Participant,
+        'participant',
+        'participant.roomId = room.id',
+      )
+      .addSelect(['room.*'])
+      .where('participant.userId = :userId', { userId });
+    // 아래처럼 모든 참여자의 정보를 추가할 수 있지만, simple solution 을 위해 생략함.
+    // .leftJoinAndSelect('room.participants', 'allParticipants')
+    // .leftJoinAndSelect('allParticipants.user', 'participantUser')
 
     const config: PaginateConfig<Room> = {
-      sortableColumns: ['createdAt'],
+      sortableColumns: ['id', 'updatedAt'],
       defaultLimit: 20,
-      defaultSortBy: [['createdAt', 'DESC']],
+      defaultSortBy: [['updatedAt', 'DESC']],
       filterableColumns: {
         isFlagged: [FilterOperator.EQ],
       },
@@ -100,6 +121,16 @@ export class RoomsService {
         : await this.roomRepository.findOneOrFail({
             where: { id: id },
           });
+    } catch (e) {
+      throw new NotFoundException('entity not found');
+    }
+  }
+
+  async findByParticipantIds(ids: number[]): Promise<Room> {
+    try {
+      return this.roomRepository.findOneOrFail({
+        where: [],
+      });
     } catch (e) {
       throw new NotFoundException('entity not found');
     }

@@ -1,4 +1,4 @@
-import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
+import { Fluency } from 'src/domain/languages/entities/fluency.entity';
 import {
   DataSource,
   EntitySubscriberInterface,
@@ -14,22 +14,22 @@ import { Language } from 'src/domain/languages/entities/language.entity';
 //? TypeORM level
 
 @EventSubscriber()
-export class LanguageSkillSubscriber
-  implements EntitySubscriberInterface<LanguageSkill>
+export class FluencySubscriber
+  implements EntitySubscriberInterface<Fluency>
 {
   constructor(dataSource: DataSource) {
     dataSource.subscribers.push(this);
   }
 
   listenTo(): any {
-    return LanguageSkill;
+    return Fluency;
   }
 
   //! https://github.com/typeorm/typeorm/issues/3563
   //! you need to use the same entityManager instance because of transactions.
   //! which means event.manager. not event.connection.manager.
-  async afterInsert(event: InsertEvent<LanguageSkill>) {
-    // console.log(`~~~~~ LanguageSkill model afterInsert subscriber triggered.`);
+  async afterInsert(event: InsertEvent<Fluency>) {
+    // console.log(`~~~~~ Fluency model afterInsert subscriber triggered.`);
     await event.manager
       .createQueryBuilder()
       .update(Language)

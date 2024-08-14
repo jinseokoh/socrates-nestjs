@@ -10,7 +10,7 @@ import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
-import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
+import { Fluency } from 'src/domain/languages/entities/fluency.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
@@ -21,7 +21,6 @@ import { Secret } from 'src/domain/users/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 
 import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
-import { BookmarkUserMeetupService } from 'src/domain/users/bookmark_user_meetup.service';
 import { FeedsService } from 'src/domain/feeds/feeds.service';
 import { FlagFeedService } from 'src/domain/users/flag_feed.service';
 import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
@@ -60,7 +59,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
 import { SesModule } from 'src/services/aws/ses.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
-import { LanguageSkillSubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
+import { FluencySubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
 import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { Language } from 'src/domain/languages/entities/language.entity';
@@ -80,7 +79,7 @@ import { UserUsersService } from 'src/domain/users/user-users.service';
       Interest,
       Join,
       Language,
-      LanguageSkill,
+      Fluency,
       Ledger,
       Meetup,
       Plea,
@@ -104,7 +103,6 @@ import { UserUsersService } from 'src/domain/users/user-users.service';
   exports: [UsersService, ProvidersService], // being used in auth.module.ts
   providers: [
     BookmarkUserFeedService,
-    BookmarkUserMeetupService,
     FeedsService,
     FlagFeedService,
     FlagMeetupService,
@@ -124,7 +122,7 @@ import { UserUsersService } from 'src/domain/users/user-users.service';
     UserLedgersService,
     UserUsersService,
     UsersService,
-    LanguageSkillSubscriber,
+    FluencySubscriber,
     UserSubscriber,
   ],
   controllers: [

@@ -1,11 +1,11 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
+import { Fluency } from 'src/domain/languages/entities/fluency.entity';
 import { In, Repository } from 'typeorm';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Language } from 'src/domain/languages/entities/language.entity';
-import { LanguageSkillWithoutId } from 'src/domain/users/dto/sync-language.dto';
+import { FluencyWithoutId } from 'src/domain/users/dto/sync-language.dto';
 
 @Injectable()
 export class UserLanguagesService {
@@ -17,8 +17,8 @@ export class UserLanguagesService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Language)
     private readonly languageRepository: Repository<Language>,
-    @InjectRepository(LanguageSkill)
-    private readonly languageSkillRepository: Repository<LanguageSkill>,
+    @InjectRepository(Fluency)
+    private readonly languageSkillRepository: Repository<Fluency>,
     @Inject(ConfigService) private configService: ConfigService, // global
   ) {
     this.env = this.configService.get('nodeEnv');
@@ -28,7 +28,7 @@ export class UserLanguagesService {
   //? 언어 (languages) 리스트
   //? ----------------------------------------------------------------------- //
 
-  async loadMyLanguages(userId: number): Promise<LanguageSkill[]> {
+  async loadMyLanguages(userId: number): Promise<Fluency[]> {
     const user = await this.userRepository.findOneOrFail({
       where: {
         id: userId,
@@ -46,8 +46,8 @@ export class UserLanguagesService {
   async syncLanguagesWithIds(
     userId: number,
     ids: number[],
-  ): Promise<LanguageSkill[]> {
-    await this._wipeOutLanguageSkills(userId);
+  ): Promise<Fluency[]> {
+    await this._wipeOutFluencys(userId);
     await Promise.all(
       ids.map(async (v: number) => {
         await this.languageRepository.manager.query(
@@ -66,8 +66,8 @@ export class UserLanguagesService {
   async syncLanguagesWithSlugs(
     userId: number,
     slugs: string[],
-  ): Promise<LanguageSkill[]> {
-    await this._wipeOutLanguageSkills(userId);
+  ): Promise<Fluency[]> {
+    await this._wipeOutFluencys(userId);
     const languages = await this.languageRepository.findBy({
       slug: In(slugs),
     });
@@ -85,14 +85,14 @@ export class UserLanguagesService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 언어 Sync w/ LanguageSkills (기존정보 사라짐)
+  //? 언어 Sync w/ Fluencys (기존정보 사라짐)
   //? ----------------------------------------------------------------------- //
 
   async syncLanguagesWithEntities(
     userId: number,
-    entities: LanguageSkillWithoutId[],
-  ): Promise<LanguageSkill[]> {
-    await this._wipeOutLanguageSkills(userId);
+    entities: FluencyWithoutId[],
+  ): Promise<Fluency[]> {
+    await this._wipeOutFluencys(userId);
     await this.languageSkillRepository.upsert(entities, [
       `userId`,
       `languageId`,
@@ -109,7 +109,7 @@ export class UserLanguagesService {
     userId: number,
     slug: string,
     skill: number,
-  ): Promise<LanguageSkill[]> {
+  ): Promise<Fluency[]> {
     try {
       const language = await this.languageRepository.findOneBy({
         slug: slug,
@@ -139,7 +139,7 @@ export class UserLanguagesService {
   async removeLanguages(
     userId: number,
     ids: number[],
-  ): Promise<Array<LanguageSkill>> {
+  ): Promise<Array<Fluency>> {
     const { affectedRows } = await this.languageRepository.manager.query(
       'DELETE FROM `language_skill` WHERE userId = ? AND languageId IN (?)',
       [userId, ids],
@@ -152,7 +152,7 @@ export class UserLanguagesService {
   //? privates
   //? ----------------------------------------------------------------------- //
 
-  async _wipeOutLanguageSkills(userId: number): Promise<void> {
+  async _wipeOutFluencys(userId: number): Promise<void> {
     await this.languageRepository.manager.query(
       'DELETE FROM `language_skill` WHERE userId = ?',
       [userId],

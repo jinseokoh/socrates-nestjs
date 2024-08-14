@@ -5,14 +5,15 @@ import { User } from 'src/domain/users/entities/user.entity';
 import {
   Entity,
   ManyToOne,
-  JoinColumn,
   Column,
-  UpdateDateColumn,
   CreateDateColumn,
+  UpdateDateColumn,
   PrimaryColumn,
+  Unique,
 } from 'typeorm';
 
 @Entity()
+@Unique('user_id_room_id_key', ['userId', 'roomId'])
 export class Participant {
   @PrimaryColumn({ type: 'int', unsigned: true })
   public userId: number; // to make it available to Repository.
@@ -21,11 +22,11 @@ export class Participant {
   public roomId: number; // to make it available to Repository.
 
   @ManyToOne(() => User, (user) => user.participants)
-  @JoinColumn({ name: 'userId' })
+  // @JoinColumn({ name: 'userId' })
   user: User;
 
   @ManyToOne(() => Room, (room) => room.participants)
-  @JoinColumn({ name: 'roomId' })
+  // @JoinColumn({ name: 'roomId' })
   room: Room;
 
   @Column({ type: 'enum', enum: PartyType, default: PartyType.HOST })

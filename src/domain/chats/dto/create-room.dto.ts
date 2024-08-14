@@ -8,9 +8,9 @@ import {
 } from 'class-validator';
 import { RoomStatus } from 'src/common/enums';
 export class CreateRoomDto {
-  @ApiProperty({ description: '제목', required: true })
+  @ApiProperty({ description: 'slug prefix', required: true })
   @IsString()
-  slug: string;
+  prefix: string;
 
   @ApiProperty({ description: 'cost', default: 0 })
   @IsNumber()
@@ -18,7 +18,7 @@ export class CreateRoomDto {
 
   @ApiProperty({ description: '참여자 userIds', default: false })
   @IsArray()
-  participantIds: number[];
+  ids: number[];
 
   @ApiProperty({
     description: 'room status',

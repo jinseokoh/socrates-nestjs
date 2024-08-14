@@ -10,15 +10,17 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
+@Unique(['slug']) // 이 필드를 유니크하게 설정
 export class Room {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
-  @Column({ length: 16, nullable: false })
+  @Column({ length: 128, nullable: false })
   @ApiProperty({ description: 'slug' })
   slug: string;
 
@@ -63,7 +65,11 @@ export class Room {
   //? ----------------------------------------------------------------------- //
   //? 1-to-many hasMany
 
-  @OneToMany(() => Participant, (participant) => participant.room)
+  //! One-to-Many 관계에서 부모 엔티티와 함께 자식 엔티티를 한 번에 저장하거나 업데이트하려는 경우,
+  //! cascade: true 가 필요.
+  @OneToMany(() => Participant, (participant) => participant.room, {
+    cascade: true,
+  })
   participants: Participant[];
 
   //? ----------------------------------------------------------------------- //

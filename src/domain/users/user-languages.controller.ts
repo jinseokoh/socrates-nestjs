@@ -15,7 +15,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { SyncLanguageDto } from 'src/domain/users/dto/sync-language.dto';
-import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
+import { Fluency } from 'src/domain/languages/entities/fluency.entity';
 import { UserLanguagesService } from 'src/domain/users/user-languages.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -30,10 +30,10 @@ export class UserLanguagesController {
 
   @ApiOperation({ description: '나의 언어 리스트에 추가' })
   @Post(':userId/languages')
-  async syncLanguageSkills(
+  async syncFluencys(
     @Param('userId') userId: number,
     @Body() dto: SyncLanguageDto,
-  ): Promise<LanguageSkill[]> {
+  ): Promise<Fluency[]> {
     if (dto.ids) {
       try {
         return await this.userLanguagesService.syncLanguagesWithIds(
@@ -70,11 +70,11 @@ export class UserLanguagesController {
 
   @ApiOperation({ description: '나의 언어 리스트에 추가' })
   @Patch(':userId/languages/:slug')
-  async addLanguageSkill(
+  async addFluency(
     @Param('userId') userId: number,
     @Param('slug') slug: string,
     @Body('skill') skill: number | null,
-  ): Promise<LanguageSkill[]> {
+  ): Promise<Fluency[]> {
     return await this.userLanguagesService.upsertLanguageWithSkill(
       userId,
       slug,
@@ -90,7 +90,7 @@ export class UserLanguagesController {
   @Get(':userId/languages')
   async loadMyLanguages(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<LanguageSkill[]> {
+  ): Promise<Fluency[]> {
     return await this.userLanguagesService.loadMyLanguages(userId);
   }
 
@@ -104,7 +104,7 @@ export class UserLanguagesController {
   async delete(
     @Param('userId') userId: number,
     @Body('ids') ids: number[],
-  ): Promise<Array<LanguageSkill>> {
+  ): Promise<Array<Fluency>> {
     try {
       return await this.userLanguagesService.removeLanguages(userId, ids);
     } catch (e) {

@@ -1,4 +1,4 @@
-import { LanguageSkill } from 'src/domain/users/entities/language_skill.entity';
+import { Fluency } from 'src/domain/languages/entities/fluency.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -15,8 +15,8 @@ export class Language {
   //? ----------------------------------------------------------------------- //
   //* many-to-many belongsToMany using one-to-many
 
-  @OneToMany(() => LanguageSkill, (languageSkill) => languageSkill.language)
-  public usersSkilled: LanguageSkill[];
+  @OneToMany(() => Fluency, (languageSkill) => languageSkill.language)
+  public usersSkilled: Fluency[];
 
   //? ----------------------------------------------------------------------- //
   //? constructor

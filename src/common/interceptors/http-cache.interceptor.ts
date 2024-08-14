@@ -57,7 +57,7 @@ export class HttpCacheInterceptor extends CacheInterceptor {
     const requestUrl = httpAdapter.getRequestUrl(request);
 
     // caching 제외 처리 #1
-    const excludePaths = ['/v1/version', '/v1/counts'];
+    const excludePaths = ['/v1/version', '/v1/counts', '/v1/bust'];
     if (isGetRequest && excludePaths.includes(requestUrl)) {
       return undefined;
     }
