@@ -39,7 +39,7 @@ export class UserHatesController {
   async deleteUserHate(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
-  ): Promise<Hate> {
+  ): Promise<User> {
     return await this.userHatesService.deleteUserHate(userId, recipientId);
   }
 

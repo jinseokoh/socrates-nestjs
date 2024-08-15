@@ -98,14 +98,15 @@ export class UserFriendsService {
       if (dto.cost > 0) {
         const newBalance = user.profile?.balance - dto.cost;
         user.profile.balance = newBalance; // no data persistence happens here.
-        const ledger = new Ledger({
-          credit: dto.cost,
-          ledgerType: LedgerType.CREDIT_SPEND,
-          balance: newBalance,
-          note: `친구 신청료 (대상#${dto.recipientId})`,
-          userId: dto.userId,
-        });
-        await queryRunner.manager.save(ledger);
+        await queryRunner.manager.save(
+          new Ledger({
+            credit: dto.cost,
+            ledgerType: LedgerType.CREDIT_SPEND,
+            balance: newBalance,
+            note: `친구 신청료 (대상#${dto.recipientId})`,
+            userId: dto.userId,
+          }),
+        );
       }
 
       const friendship = await queryRunner.manager.save(

@@ -46,19 +46,19 @@ export class MessagesService {
   //? notice that records will be sorted by range key, which is id
   //? (in msg_xx_## format string; xx is milliseconds ## is userId).
   //?
-  async fetch(meetupId: number, lastKey: IMessageKey | null): Promise<any> {
+  async fetch(roomId: number, lastKey: IMessageKey | null): Promise<any> {
     try {
       return lastKey
         ? await this.model
-            .query('meetupId')
-            .eq(meetupId)
+            .query('roomId')
+            .eq(roomId)
             .sort(SortOrder.descending)
             .startAt(lastKey)
             .limit(LIMIT)
             .exec()
         : await this.model
-            .query('meetupId')
-            .eq(meetupId)
+            .query('roomId')
+            .eq(roomId)
             .sort(SortOrder.descending)
             .limit(LIMIT)
             .exec();

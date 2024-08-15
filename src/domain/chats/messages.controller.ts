@@ -37,16 +37,16 @@ export class MessagesController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Message 생성' })
-  @Post(':meetupId/messages')
+  @Post(':roomId/messages')
   async create(
     @CurrentUserId() userId: number,
-    @Param('meetupId', ParseIntPipe) meetupId: number,
+    @Param('roomId', ParseIntPipe) roomId: number,
     @Body() createMessageDto: CreateMessageDto,
   ): Promise<IMessage> {
     if (createMessageDto.messageType === MessageType.CUSTOM) {
       const dt = moment.parseZone(createMessageDto.appointment.dateTime);
       // await this.roomsService.update({
-      //   meetupId: meetupId,
+      //   roomId: roomId,
       //   userId: userId,
       //   appointedAt: dt.toDate(),
       // });
@@ -59,20 +59,20 @@ export class MessagesController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Message 리스트' })
-  @Get(':meetupId/messages')
+  @Get(':roomId/messages')
   async fetch(
-    @Param('meetupId', ParseIntPipe) meetupId: number,
+    @Param('roomId', ParseIntPipe) roomId: number,
     @Query('lastId') lastId: string | undefined,
   ): Promise<any> {
     const lastKey = lastId
       ? {
-          meetupId,
+          roomId,
           id: lastId,
         }
       : null;
 
     console.log(`lastId`, lastId, `lastKey`, lastKey); // todo. remove this log
-    const res = await this.messagesService.fetch(meetupId, lastKey);
+    const res = await this.messagesService.fetch(roomId, lastKey);
     console.log(`res`, res); // todo. remove this log
 
     return {
@@ -87,13 +87,13 @@ export class MessagesController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Message 삭제' })
-  @Delete(':meetupId/messages')
+  @Delete(':roomId/messages')
   async delete(
-    @Param('meetupId', ParseIntPipe) meetupId: number, // meetupId
+    @Param('roomId', ParseIntPipe) roomId: number, // roomId
     @Body('id') id: string,
   ): Promise<any> {
     const key = {
-      meetupId: meetupId,
+      roomId: roomId,
       id: id,
     } as IMessageKey;
 

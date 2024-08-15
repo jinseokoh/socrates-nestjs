@@ -27,7 +27,6 @@ export class CreateFriendshipDto {
   @ApiProperty({ description: '친구신청시 보내는 글' })
   @IsNotEmpty()
   @IsString()
-  @MinLength(5)
   message: string;
 
   @ApiProperty({ description: '친구신청 비용' })

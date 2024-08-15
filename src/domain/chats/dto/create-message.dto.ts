@@ -15,7 +15,7 @@ import {
 export class CreateMessageDto {
   @ApiProperty({ description: '모임 id', required: true })
   @IsNumber()
-  meetupId: number;
+  roomId: number;
 
   @ApiProperty({ description: '사용자 id', required: true })
   @IsNumber()

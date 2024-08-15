@@ -100,6 +100,7 @@ export class RoomsService {
 
       return room;
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       if (error.code === 'ER_DUP_ENTRY') {
         throw new UnprocessableEntityException(`entity exists`);
       } else {
@@ -125,11 +126,10 @@ export class RoomsService {
         'participant',
         'participant.roomId = room.id',
       )
-      .addSelect(['room.*'])
+      .leftJoinAndSelect('room.participants', 'allParticipants')
+      .leftJoinAndSelect('allParticipants.user', 'participantUser')
+      // .addSelect(['room.*'])
       .where('participant.userId = :userId', { userId });
-    // 아래처럼 모든 참여자의 정보를 추가할 수 있지만, simple solution 을 위해 생략함.
-    // .leftJoinAndSelect('room.participants', 'allParticipants')
-    // .leftJoinAndSelect('allParticipants.user', 'participantUser')
 
     const config: PaginateConfig<Room> = {
       sortableColumns: ['id', 'updatedAt'],

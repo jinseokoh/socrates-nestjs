@@ -1,7 +1,7 @@
 import { MessageType } from 'src/common/enums';
 
 export interface IMessageKey {
-  meetupId: number; // partition key
+  roomId: number; // partition key
   id: string | null; // sort key
 }
 

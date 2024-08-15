@@ -53,19 +53,22 @@ export class UserHatesService {
     }
   }
 
-  // 사용자 차단 삭제
-  async deleteUserHate(userId: number, recipientId: number): Promise<Hate> {
+  // 사용자 차단 취소 (다시 복구하기 위한 User 리턴)
+  async deleteUserHate(userId: number, recipientId: number): Promise<User> {
     try {
       // validation ----------------------------------------------------------//
-      const hate = await this.hateRepository.findOneByOrFail({
-        userId,
-        recipientId,
+      const hate = await this.hateRepository.findOneOrFail({
+        where: {
+          userId,
+          recipientId,
+        },
+        relations: ['recipient', 'recipient.profile'],
       });
       const { affectedRows } = await this.hateRepository.manager.query(
         'DELETE FROM `hate` WHERE userId = ? AND recipientId = ?',
         [userId, recipientId],
       );
-      return hate;
+      return hate.recipient;
     } catch (error) {
       if (error.name === 'EntityNotFoundError') {
         throw new NotFoundException(`user not found`);
