@@ -20,7 +20,7 @@ export class Room {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
-  @Column({ length: 128, nullable: false })
+  @Column({ length: 64, nullable: false })
   @ApiProperty({ description: 'slug' })
   slug: string;
 
@@ -34,7 +34,7 @@ export class Room {
 
   @Column({ type: 'tinyint', unsigned: true, default: 0 })
   @ApiProperty({ description: '참여자 수' })
-  participantCount: number;
+  total: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: '신고 횟수' })

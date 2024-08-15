@@ -34,10 +34,6 @@ export class Participant {
   partyType: PartyType;
 
   @Column({ default: false })
-  @ApiProperty({ description: 'is Paid?' })
-  isPaid: boolean;
-
-  @Column({ default: false })
   @ApiProperty({ description: 'is Banned?' })
   isBanned: boolean;
 

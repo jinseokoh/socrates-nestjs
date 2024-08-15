@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -15,7 +16,7 @@ import {
 import { Room } from 'src/domain/chats/entities/room.entity';
 import { CreateRoomDto } from 'src/domain/chats/dto/create-room.dto';
 import { UpdateRoomDto } from 'src/domain/chats/dto/update-room.dto';
-import { PartyType } from 'src/common/enums';
+import { LedgerType, PartyType } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
 import { DataSource, In, Repository } from 'typeorm';
@@ -40,42 +41,73 @@ export class RoomsService {
   //? ----------------------------------------------------------------------- //
 
   async create(dto: CreateRoomDto): Promise<Room> {
+    // create a new query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+
     const sortedIds = [...dto.ids].sort((a, b) => a - b);
     const slug = `${dto.prefix}-${sortedIds.join('-')}`;
-    const users = await this.userRepository.find({
-      where: {
-        id: In(dto.ids),
-      },
-    });
-    const no = dto.ids.length;
-    const room = await this.roomRepository.save(
-      this.roomRepository.create({
-        slug: slug,
-        title: `사용자 ${no}인: ${users.map((v) => v.username).join(',')}`,
-        participantCount: no,
-      }),
-    );
-    //   await Promise.all(
-    //     dto.ids.map(async (id: number) => {
-    //       await this.participantRepository.manager.query(
-    //         'INSERT IGNORE INTO `participant` (userId, roomId, partyType) VALUES (?, ?, ?) \
-    // ON DUPLICATE KEY UPDATE \
-    // userId = VALUES(`userId`), \
-    // roomId = VALUES(`roomId`), \
-    // partyType = VALUES(`partyType`)',
-    //         [id, room.id, dto.userId === id ? PartyType.HOST : PartyType.GUEST],
-    //       );
-    //     }),
-    //   );
-    room.participants = dto.ids.map((id: number) => {
-      return this.participantRepository.create({
-        userId: id,
-        roomId: room.id,
-        partyType: dto.userId === id ? PartyType.HOST : PartyType.GUEST,
+    const total = dto.ids.length;
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const users = await queryRunner.manager.find(User, {
+        where: {
+          id: In(dto.ids),
+        },
+        relations: ['profile'],
       });
-    });
-    await this.roomRepository.save(room);
-    return room;
+      if (total > users.length) {
+        throw new NotFoundException('user not found');
+      }
+
+      const balance = users.find((v) => v.id === dto.userId)?.profile?.balance;
+      if (balance === null || balance - dto.cost < 0) {
+        throw new BadRequestException(`insufficient balance`);
+      }
+
+      const room = await queryRunner.manager.save(
+        new Room({
+          slug: slug,
+          title: `사용자 ${total}인: ${users.map((v) => v.username).join(',')}`,
+          total: total,
+        }),
+      );
+      room.participants = dto.ids.map((id: number) => {
+        return new Participant({
+          userId: id,
+          roomId: room.id,
+          partyType: dto.userId === id ? PartyType.HOST : PartyType.GUEST,
+        });
+      });
+      await queryRunner.manager.save(room);
+
+      if (dto.cost > 0) {
+        const newBalance = balance - dto.cost;
+        await queryRunner.manager.save(
+          new Ledger({
+            credit: dto.cost,
+            ledgerType: LedgerType.CREDIT_SPEND,
+            balance: newBalance,
+            note: `대화방 생성 (room #${room.id})`,
+            userId: dto.userId,
+          }),
+        );
+      }
+      // commit transaction now:
+      await queryRunner.commitTransaction();
+
+      return room;
+    } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   //? ----------------------------------------------------------------------- //
@@ -147,67 +179,6 @@ export class RoomsService {
     }
     return await this.roomRepository.save(room);
   }
-
-  // //? Participant 의 isPaid 값 갱신
-  // //? 코인 비용 발생
-  // //! balance will automatically be updated w/ Ledger model event subscriber.
-  // //! do not try to update it manually. perform a transaction using query runner
-  // async payRoomFee(
-  //   userId: number,
-  //   roomId: number,
-  //   cost: number,
-  // ): Promise<Room> {
-  //   // create a new query runner
-  //   const queryRunner = this.dataSource.createQueryRunner();
-
-  //   try {
-  //     await queryRunner.connect();
-  //     await queryRunner.startTransaction();
-
-  //     const user = await queryRunner.manager.findOne(User, {
-  //       where: { id: userId },
-  //       relations: [`profile`],
-  //     });
-  //     const room = await queryRunner.manager.findOne(Room, {
-  //       where: {
-  //         id: roomId,
-  //       },
-  //     });
-  //     if (!user) {
-  //       throw new NotFoundException(`user not found`);
-  //     }
-  //     if (!room) {
-  //       throw new NotFoundException(`room not found`);
-  //     }
-  //     if (user.profile?.balance === null || user.profile?.balance - cost < 0) {
-  //       throw new BadRequestException(`insufficient balance`);
-  //     }
-
-  //     const newBalance = user.profile?.balance - cost;
-  //     user.profile.balance = newBalance;
-
-  //     const ledger = new Ledger({
-  //       credit: cost,
-  //       ledgerType: LedgerType.CREDIT_SPEND,
-  //       balance: newBalance,
-  //       note: `채팅방 입장료 (room #${roomId})`,
-  //       userId: userId,
-  //     });
-  //     await queryRunner.manager.save(ledger);
-  //     room.isPaid = true;
-  //     room.user = user;
-  //     await queryRunner.manager.save(room);
-  //     // commit transaction now:
-  //     await queryRunner.commitTransaction();
-
-  //     return room;
-  //   } catch (error) {
-  //     await queryRunner.rollbackTransaction();
-  //     throw error;
-  //   } finally {
-  //     await queryRunner.release();
-  //   }
-  // }
 
   //? ----------------------------------------------------------------------- //
   //? DELETE
