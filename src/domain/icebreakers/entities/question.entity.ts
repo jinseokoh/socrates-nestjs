@@ -15,8 +15,9 @@ export class Question {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   id: number;
 
-  @Column({ length: 16, nullable: false })
-  category: string;
+  @Column({ length: 16, nullable: true })
+  @ApiProperty({ description: 'slug' })
+  slug: string | null;
 
   @Column({ length: 255, nullable: false })
   @ApiProperty({ description: 'body' })

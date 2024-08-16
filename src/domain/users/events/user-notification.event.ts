@@ -6,6 +6,7 @@ export class UserNotificationEvent {
     | 'event'
     | 'feed'
     | 'friend'
+    | 'icebreaker'
     | 'inquiry'
     | 'meetup'
     | 'plea'

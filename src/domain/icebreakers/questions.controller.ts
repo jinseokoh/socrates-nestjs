@@ -65,11 +65,11 @@ export class QuestionsController {
 
   @Public()
   @ApiOperation({ description: 'load active questions by slug' })
-  @Get('active/:category')
+  @Get('slug/:slug')
   async loadAllByCategory(
-    @Param('category') category: string,
+    @Param('slug') slug: string,
   ): Promise<Array<Question>> {
-    return await this.questionsService.loadAllByCategory(category);
+    return await this.questionsService.loadAllBySlug(slug);
   }
 
   //? ----------------------------------------------------------------------- //

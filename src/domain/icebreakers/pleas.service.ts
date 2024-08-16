@@ -120,7 +120,7 @@ export class PleasService {
       event.userId = recipient.id;
       event.token = recipient.pushToken;
       event.options = recipient.profile?.options ?? {};
-      event.body = `${user.username}님이 나에게 발견글 작성 요청을 보냈습니다. ${dto.message}`;
+      event.body = `${user.username}님이 나에게 Icebreaker 작성 요청을 보냈습니다. ${dto.message}`;
       event.data = {
         page: `connections`,
         args: 'load:plea',
@@ -180,7 +180,7 @@ export class PleasService {
   //? ----------------------------------------------------------------------- //
 
   // API 호출 시나리오
-  // case 1) 요청받은 사용자가 [받은요청] > [프로필 > 발견] > [답변작성] 에서 완료시
+  // case 1) 요청받은 사용자가 [받은요청] > [프로필 > Icebreaker] > [답변작성] 에서 완료시
   //         status 가 init 에서 pending 으로 전환
   // case 2) 친구신청 받은 사용자가 [받은친구신청] 에서 친구 수락시
   //         status 가 pending 에서 accepted 로 전환
@@ -242,7 +242,7 @@ export class PleasService {
       event.userId = plea.userId;
       event.token = plea.user.pushToken;
       event.options = plea.user.profile?.options ?? {};
-      event.body = `${plea.recipient.username}님이 발견글 작성요청을 거절했습니다. (${plea.reward - 1}코인 환불처리완료)`;
+      event.body = `${plea.recipient.username}님이 Icebreaker 작성요청을 거절했습니다. (${plea.reward - 1}코인 환불처리완료)`;
       event.data = {
         page: `settings/coin`,
         args: '',
@@ -259,7 +259,7 @@ export class PleasService {
   }
 
   // todo. move it to the right directory
-  // // 발견요청 리스트에 추가
+  // // Icebreaker요청 리스트에 추가
   // async attachToPleaPivot(dto: CreatePleaDto): Promise<Plea> {
   //   const plea = await this.pleaRepository.save(
   //     this.pleaRepository.create(dto),

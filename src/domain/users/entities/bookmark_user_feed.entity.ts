@@ -1,10 +1,10 @@
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
-  Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Unique,
 } from 'typeorm';
 
@@ -14,19 +14,14 @@ import {
 @Entity()
 @Unique('user_id_feed_id_key', ['userId', 'feedId'])
 export class BookmarkUserFeed {
-  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
-  id: number;
-
-  //? unsigned int 로 사용하기 위해 명시적인 정의가 필요.
-  @Column({ type: 'int', unsigned: true })
+  @PrimaryColumn({ type: 'int', unsigned: true })
   userId: number;
 
-  //? unsigned int 로 사용하기 위해 명시적인 정의가 필요.
-  @Column({ type: 'int', unsigned: true })
+  @PrimaryColumn({ type: 'int', unsigned: true })
   feedId: number;
 
-  @Column({ length: 80, nullable: true })
-  message: string | null;
+  @CreateDateColumn()
+  createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.feedBookmarks, {
     nullable: false,

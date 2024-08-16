@@ -7,7 +7,6 @@ import { FeedsService } from 'src/domain/feeds/feeds.service';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Poll } from 'src/domain/icebreakers/entities/poll.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
 import { FeedCommentUsersController } from 'src/domain/feeds/feed_comment-users.controller';
 import { FeedCommentUsersService } from 'src/domain/feeds/feed_comment-users.service';
 import { FlagFeedService } from 'src/domain/users/flag_feed.service';
@@ -34,7 +33,6 @@ import { FeedUsersService } from 'src/domain/feeds/feed-users.service';
   ],
   // exports: [FeedsService],
   providers: [
-    BookmarkUserFeedService,
     FeedsService,
     FeedUsersService,
     FeedCommentUsersService,

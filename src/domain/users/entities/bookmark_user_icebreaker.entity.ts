@@ -1,4 +1,4 @@
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   CreateDateColumn,
@@ -8,39 +8,39 @@ import {
   Unique,
 } from 'typeorm';
 
-//? a user can bookmark Meetup
-//? 모델 사용을 위해, many-to-many 대신 one-to-many 선호
+//? a User can bookmark Icebreaker
+//? 모델사용을 위해, many-to-many 대신 one-to-many 선호
 //? https://github.com/typeorm/typeorm/issues/4653
 @Entity()
-@Unique('user_id_meetup_id_key', ['userId', 'meetupId'])
-export class BookmarkUserMeetup {
+@Unique('user_id_icebreaker_id_key', ['userId', 'icebreakerId'])
+export class BookmarkUserIcebreaker {
   @PrimaryColumn({ type: 'int', unsigned: true })
   userId: number;
 
   @PrimaryColumn({ type: 'int', unsigned: true })
-  meetupId: number;
+  icebreakerId: number;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => User, (user) => user.meetupBookmarks, {
+  @ManyToOne(() => User, (user) => user.icebreakerBookmarks, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
   public user: User;
 
-  @ManyToOne(() => Meetup, (meetup) => meetup.bookmarks, {
+  @ManyToOne(() => Icebreaker, (icebreaker) => icebreaker.bookmarks, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  public meetup: Meetup;
+  public icebreaker: Icebreaker;
 
   //? ----------------------------------------------------------------------- //
   //? constructor
 
-  constructor(partial: Partial<BookmarkUserMeetup>) {
+  constructor(partial: Partial<BookmarkUserIcebreaker>) {
     Object.assign(this, partial);
   }
 }

@@ -20,7 +20,6 @@ import { Provider } from 'src/domain/users/entities/provider.entity';
 import { Secret } from 'src/domain/users/entities/secret.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 
-import { BookmarkUserFeedService } from 'src/domain/users/bookmark_user_feed.service';
 import { FeedsService } from 'src/domain/feeds/feeds.service';
 import { FlagFeedService } from 'src/domain/users/flag_feed.service';
 import { FlagMeetupService } from 'src/domain/users/flag_meetup.service';
@@ -102,7 +101,6 @@ import { UserUsersService } from 'src/domain/users/user-users.service';
   ],
   exports: [UsersService, ProvidersService], // being used in auth.module.ts
   providers: [
-    BookmarkUserFeedService,
     FeedsService,
     FlagFeedService,
     FlagMeetupService,

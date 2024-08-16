@@ -8,9 +8,26 @@ import { Question } from 'src/domain/icebreakers/entities/question.entity';
 import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
 import { S3Module } from 'src/services/aws/s3.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
+import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
+import { IcebreakersService } from 'src/domain/icebreakers/icebreakers.service';
+import { IcebreakersController } from 'src/domain/icebreakers/icebreakers.controller';
 @Module({
-  imports: [TypeOrmModule.forFeature([Question, Plea]), S3Module, FcmModule],
-  providers: [QuestionsService, PleasService],
-  controllers: [QuestionsController, PleasController],
+  imports: [
+    TypeOrmModule.forFeature([Icebreaker, Question, Plea]),
+    S3Module,
+    FcmModule,
+  ],
+  providers: [
+    IcebreakersService,
+    // IcebreakerCommentUserService,
+    QuestionsService,
+    PleasService,
+  ],
+  controllers: [
+    IcebreakersController,
+    // IcebreakerCommentUserController,
+    QuestionsController,
+    PleasController,
+  ],
 })
 export class IcebreakersModule {}

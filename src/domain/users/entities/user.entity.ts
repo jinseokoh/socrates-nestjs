@@ -37,6 +37,9 @@ import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity
 import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
 import { Participant } from 'src/domain/chats/entities/participant.entity';
 import { Question } from 'src/domain/icebreakers/entities/question.entity';
+import { IcebreakerComment } from 'src/domain/icebreakers/entities/icebreaker_comment.entity';
+import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
+import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -148,6 +151,11 @@ export class User {
   })
   public polls: Poll[];
 
+  @OneToMany(() => Icebreaker, (icebreaker) => icebreaker.user, {
+    // cascade: ['insert', 'update'],
+  })
+  public icebreakers: Icebreaker[];
+
   @OneToMany(() => Meetup, (meetup) => meetup.user, {
     // cascade: ['insert', 'update'],
   })
@@ -167,6 +175,9 @@ export class User {
     // cascade: ['insert', 'update'],
   })
   public inquiries: Inquiry[];
+
+  @OneToMany(() => IcebreakerComment, (comment) => comment.user)
+  public icebreakerComments: IcebreakerComment[];
 
   @OneToMany(() => MeetupComment, (comment) => comment.user)
   public meetupComments: MeetupComment[];
@@ -219,11 +230,14 @@ export class User {
 
   // bookmarks -------------------------------------------------------------- //
 
-  @OneToMany(() => BookmarkUserFeed, (bookmark) => bookmark.user)
-  public feedBookmarks: BookmarkUserFeed[];
+  @OneToMany(() => BookmarkUserIcebreaker, (bookmark) => bookmark.user)
+  public icebreakerBookmarks: BookmarkUserIcebreaker[];
 
   @OneToMany(() => BookmarkUserMeetup, (bookmark) => bookmark.user)
   public meetupBookmarks: BookmarkUserMeetup[];
+
+  @OneToMany(() => BookmarkUserFeed, (bookmark) => bookmark.user)
+  public feedBookmarks: BookmarkUserFeed[];
 
   @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.user)
   public followings: BookmarkUserUser[];
