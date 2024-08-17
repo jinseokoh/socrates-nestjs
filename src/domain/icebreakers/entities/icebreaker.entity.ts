@@ -32,9 +32,9 @@ export class Icebreaker {
   @Column({ type: 'int', unsigned: true, nullable: true })
   questionId: number | null; // to make it available to Repository.
 
-  @Column({ type: 'text', nullable: true })
-  @ApiProperty({ description: '질문' })
-  body: string | null;
+  @Column({ length: 128 }) // from Auction
+  @ApiProperty({ description: '내용' })
+  body: string;
 
   @Column('json', { nullable: true })
   @ApiProperty({ description: '이미지들' })

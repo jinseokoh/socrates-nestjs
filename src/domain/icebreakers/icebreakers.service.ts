@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FilterOperator,
+  PaginateConfig,
   PaginateQuery,
   Paginated,
   paginate,
@@ -56,8 +57,13 @@ export class IcebreakersService {
   //? READ
   //?-------------------------------------------------------------------------//
   async findAll(query: PaginateQuery): Promise<Paginated<Icebreaker>> {
-    return await paginate(query, this.icebreakerRepository, {
-      relations: ['user'],
+    const queryBuilder =
+      this.icebreakerRepository.createQueryBuilder('icebreaker');
+
+    const config: PaginateConfig<Icebreaker> = {
+      relations: {
+        user: { profile: true },
+      },
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultSortBy: [['id', 'DESC']],
@@ -70,7 +76,8 @@ export class IcebreakersService {
         targetMaxAge: [FilterOperator.GTE],
         // 'icebreaker.slug': [FilterOperator.EQ, FilterOperator.IN],
       },
-    });
+    };
+    return await paginate(query, queryBuilder, config);
   }
 
   // Meetup 상세보기
