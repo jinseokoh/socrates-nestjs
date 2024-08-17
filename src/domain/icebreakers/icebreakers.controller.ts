@@ -48,7 +48,6 @@ export class IcebreakersController {
   //? READ
   //?-------------------------------------------------------------------------//
 
-  @Public()
   @ApiOperation({ description: 'Icebreaker 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get()
@@ -63,19 +62,10 @@ export class IcebreakersController {
   @Get(':id')
   async getIcebreakerById(@Param('id') id: number): Promise<Icebreaker> {
     return await this.icebreakersService.findById(id, [
-      'dot',
-      'remarks',
-      'remarks.user',
-      'remarks.user.profile',
-      'userReports',
-      'userReactions',
+      // 'question', not sure if it's
       'user',
-      'user.profile',
-      'user.icebreakers',
-      'user.icebreakers.dot',
-      'user.icebreakers.remarks',
-      'user.icebreakers.remarks.user',
-      // 'user.sentFriendships',
+      'comments',
+      'bookmarks',
     ]);
   }
 

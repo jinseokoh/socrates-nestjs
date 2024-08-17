@@ -118,6 +118,7 @@ export class Profile {
   @BeforeInsert()
   setDefaultOptions() {
     this.options = this.options || {
+      icebreaker: false,
       chat: false,
       event: false,
       feed: false,

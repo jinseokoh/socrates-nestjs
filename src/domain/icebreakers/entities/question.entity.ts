@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -6,6 +7,7 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -46,8 +48,8 @@ export class Question {
   //? ----------------------------------------------------------------------- //
   //? many-to-many (belongsToMany) using 1-to-many (hasMany)
 
-  // @OneToMany(() => Answer, (answer) => answer.question)
-  // public answers: Answer[];
+  @OneToMany(() => Icebreaker, (icebreaker) => icebreaker.question)
+  public icebreakers: Icebreaker[];
 
   //? ----------------------------------------------------------------------- //
   //? many-to-1 (belongsTo)

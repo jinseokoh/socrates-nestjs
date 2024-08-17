@@ -24,6 +24,7 @@ import { CreateIcebreakerCommentDto } from 'src/domain/icebreakers/dto/create-ic
 import { UpdateIcebreakerCommentDto } from 'src/domain/icebreakers/dto/update-icebreaker_comment.dto';
 import { S3Service } from 'src/services/aws/s3.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { truncate } from 'src/helpers/truncate';
 
 @Injectable()
 export class IcebreakerCommentUsersService {
@@ -63,7 +64,7 @@ export class IcebreakerCommentUsersService {
         event.userId = record.icebreaker.user.id;
         event.token = record.icebreaker.user.pushToken;
         event.options = record.icebreaker.user.profile?.options ?? {};
-        event.body = `${record.icebreaker.body} 모임에 새로운 댓글이 있습니다.`;
+        event.body = `${truncate(record.icebreaker.body, 9)} 질문에 새로운 댓글이 있습니다.`;
         event.data = {
           page: `icebreakers/${dto.icebreakerId}`,
         };
@@ -314,4 +315,8 @@ export class IcebreakerCommentUsersService {
       image: `https://cdn.mesoapp.kr/${path}`,
     };
   }
+
+  // ------------------------------------------------------------------------ //
+  // Privates
+  // ------------------------------------------------------------------------ //
 }

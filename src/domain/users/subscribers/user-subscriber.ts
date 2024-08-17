@@ -33,6 +33,7 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
         {
           userId: event.entity.id,
           options: {
+            icebreaker: false,
             chat: false,
             event: false,
             feed: false,

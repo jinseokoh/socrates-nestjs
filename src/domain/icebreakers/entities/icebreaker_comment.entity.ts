@@ -62,7 +62,9 @@ export class IcebreakerComment {
   //? ----------------------------------------------------------------------- //
   //? many-to-1 belongsTo
 
-  @ManyToOne(() => Icebreaker, (icebreaker) => icebreaker.comments, { cascade: true })
+  @ManyToOne(() => Icebreaker, (icebreaker) => icebreaker.comments, {
+    cascade: true,
+  })
   icebreaker: Icebreaker;
 
   //? ----------------------------------------------------------------------- //
@@ -70,9 +72,13 @@ export class IcebreakerComment {
   // data structure ref)
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
-  @ManyToOne(() => IcebreakerComment, (IcebreakerComment) => IcebreakerComment.children, {
-    onDelete: 'SET NULL',
-  })
+  @ManyToOne(
+    () => IcebreakerComment,
+    (IcebreakerComment) => IcebreakerComment.children,
+    {
+      onDelete: 'SET NULL',
+    },
+  )
   @JoinColumn({ name: 'parentId' })
   parent: IcebreakerComment;
 

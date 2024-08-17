@@ -2,11 +2,11 @@ import { IData } from 'src/common/interfaces';
 
 export class UserNotificationEvent {
   name:
+    | 'icebreaker'
     | 'chat'
     | 'event'
     | 'feed'
     | 'friend'
-    | 'icebreaker'
     | 'inquiry'
     | 'meetup'
     | 'plea'

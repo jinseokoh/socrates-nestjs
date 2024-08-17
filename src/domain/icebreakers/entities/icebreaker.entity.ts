@@ -16,6 +16,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { IcebreakerComment } from 'src/domain/icebreakers/entities/icebreaker_comment.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
+import { Question } from 'src/domain/icebreakers/entities/question.entity';
 
 @Entity()
 export class Icebreaker {
@@ -87,12 +88,11 @@ export class Icebreaker {
   //? ----------------------------------------------------------------------- //
   //? many-to-1 (belongsTo)
 
-  @ManyToOne(() => User, (user) => user.icebreakers, {
-    nullable: false,
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => User, (user) => user.icebreakers, { cascade: true })
   user?: User;
+
+  @ManyToOne(() => Question, (question) => question.icebreakers)
+  question?: Question;
 
   //? ----------------------------------------------------------------------- //
   //? many-to-many belongsToMany using one-to-many (hasMany)

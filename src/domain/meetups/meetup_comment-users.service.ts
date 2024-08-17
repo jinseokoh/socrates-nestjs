@@ -24,6 +24,7 @@ import { CreateMeetupCommentDto } from 'src/domain/meetups/dto/create-meetup_com
 import { UpdateMeetupCommentDto } from 'src/domain/meetups/dto/update-meetup_comment.dto';
 import { S3Service } from 'src/services/aws/s3.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { truncate } from 'src/helpers/truncate';
 
 @Injectable()
 export class MeetupCommentUsersService {
@@ -63,7 +64,7 @@ export class MeetupCommentUsersService {
         event.userId = record.meetup.user.id;
         event.token = record.meetup.user.pushToken;
         event.options = record.meetup.user.profile?.options ?? {};
-        event.body = `${record.meetup.title} 모임에 새로운 댓글이 있습니다.`;
+        event.body = `${truncate(record.meetup.title, 9)} 모임에 새로운 댓글이 있습니다.`;
         event.data = {
           page: `meetups/${dto.meetupId}`,
         };

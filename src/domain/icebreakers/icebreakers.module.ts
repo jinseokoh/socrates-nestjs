@@ -11,21 +11,37 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { IcebreakersService } from 'src/domain/icebreakers/icebreakers.service';
 import { IcebreakersController } from 'src/domain/icebreakers/icebreakers.controller';
+import { IcebreakerCommentUsersService } from 'src/domain/icebreakers/icebreaker_comment-users.service';
+import { IcebreakerCommentUsersController } from 'src/domain/icebreakers/icebreaker_comment-users.controller';
+import { IcebreakerComment } from 'src/domain/icebreakers/entities/icebreaker_comment.entity';
+import { IcebreakerUsersService } from 'src/domain/icebreakers/icebreaker-users.service';
+import { IcebreakerUsersController } from 'src/domain/icebreakers/icebreaker-users.controller';
+import { User } from 'src/domain/users/entities/user.entity';
+import { Flag } from 'src/domain/users/entities/flag.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Icebreaker, Question, Plea]),
+    TypeOrmModule.forFeature([
+      Icebreaker,
+      IcebreakerComment,
+      Question,
+      User,
+      Flag,
+      Plea,
+    ]),
     S3Module,
     FcmModule,
   ],
   providers: [
     IcebreakersService,
-    // IcebreakerCommentUserService,
+    IcebreakerUsersService,
+    IcebreakerCommentUsersService,
     QuestionsService,
     PleasService,
   ],
   controllers: [
     IcebreakersController,
-    // IcebreakerCommentUserController,
+    IcebreakerUsersController,
+    IcebreakerCommentUsersController,
     QuestionsController,
     PleasController,
   ],
