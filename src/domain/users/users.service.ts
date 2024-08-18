@@ -134,6 +134,7 @@ export class UsersService {
   // User 갱신
   async update(id: number, dto: UpdateUserDto): Promise<User> {
     const user = await this.repository.preload({ id, ...dto });
+    console.log(`dto ================================>`, dto);
     return await this.repository.save(user);
   }
 

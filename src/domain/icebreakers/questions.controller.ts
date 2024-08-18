@@ -57,19 +57,17 @@ export class QuestionsController {
   }
 
   @Public()
-  @ApiOperation({ description: 'load active questions' })
-  @Get('active')
+  @ApiOperation({ description: 'load all questions' })
+  @Get('all')
   async loadAll(): Promise<Array<Question>> {
     return await this.questionsService.loadAll();
   }
 
   @Public()
-  @ApiOperation({ description: 'load active questions by slug' })
-  @Get('slug/:slug')
-  async loadAllByCategory(
-    @Param('slug') slug: string,
-  ): Promise<Array<Question>> {
-    return await this.questionsService.loadAllBySlug(slug);
+  @ApiOperation({ description: 'load questions by slug' })
+  @Get('slugs/:slug')
+  async loadBySlug(@Param('slug') slug: string): Promise<Array<Question>> {
+    return await this.questionsService.loadBySlug(slug);
   }
 
   //? ----------------------------------------------------------------------- //

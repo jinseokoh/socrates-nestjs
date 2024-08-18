@@ -25,16 +25,8 @@ export class Question {
   @ApiProperty({ description: 'body' })
   body: string;
 
-  @Column({ default: false })
-  @ApiProperty({ description: 'is anonymous' })
-  isAnonymous: boolean;
-
   @Column({ type: 'int', unsigned: true, default: 0 })
-  answerCount: number;
-
-  @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'flag count' })
-  flagCount: number;
+  usageCount: number;
 
   @CreateDateColumn()
   createdAt: Date;

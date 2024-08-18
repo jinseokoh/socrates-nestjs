@@ -47,8 +47,8 @@ export class QuestionsService {
 
   async findAll(query: PaginateQuery): Promise<Paginated<Question>> {
     const config: PaginateConfig<Question> = {
-      relations: ['user', 'factions'],
-      sortableColumns: ['id', 'answerCount'],
+      relations: ['user'],
+      sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
@@ -61,18 +61,19 @@ export class QuestionsService {
   }
 
   // Question 리스트
-  async loadAll(): Promise<Array<Question>> {
+  async loadAll(): Promise<Question[]> {
     return await this.repository.find({
       relations: ['user'],
     });
   }
 
   // Question 리스트
-  async loadAllBySlug(slug: string): Promise<Array<Question>> {
+  async loadBySlug(slug: string): Promise<Question[]> {
     return await this.repository.find({
       where: {
         slug: slug,
       },
+      relations: ['user'],
     });
   }
 
@@ -225,87 +226,87 @@ export class QuestionsService {
 
       //! 경험담 ✅
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '지금까지 받은 선물들 중 가장 감동적이고 특별한 선물에 대해 말해줘',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '타인으로부터 받은 도움들 중 가장 감동적인 도움에 대해 말해줘.',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '내가 들었던 조언들 중 최악의 조언은 뭐야?',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '내가 다른 사람에게 베풀었던 최고의 선행에 대해 말해줄래?',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '가까운 지인으로부터 상처를 크게 받은 적이 있다면 말해줘. 그 일로 얻은 교훈이 있다면 같이 말해줘.',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '내가 가봤던 여행지 중에서, 누구에게나 추천하고 싶은 감동의 여행지는 어디야?',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '지금까지 보면서 가장 많이 울었던 영화는 뭐야?',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '나의 유년 시절은 다른 사람보다 행복했다고 생각해? 아니면 그 반대야?',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '지금 떠올리더라도 오싹한 기분이 드는 기이한 초자연현상이나 유사한 경험이 있어?',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '투자 등으로 경제적인 손해를 많이 본 경험이 있어? 있다면 그 일로 내 생활에 어떤 변화가 생겼어?',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '실수를 안하려고 스스로 정한 규칙이나 자기관리 방법이 있다면 말해줘',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '과거의 실수나 오류를 통해 얻은, 인생의 교훈이 있다면 말해줘',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '과거에 옳다고 믿던 일이, 지금은 정반대로 여겨지는 경험이 있다면 말해줘.',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '인생 최대의 트라우마라고 여겨질 만큼 안 좋은 경험을 하나만 꼽는다면?',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '화가 나거나 스트레스를 받을때, 진정시킬 수 있는 나만의 힐링법이 뭐야?',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '내가 우울하거나 무기력할 때, 그 슬럼프를 어떻게 극복하였는지 말해줘.',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '인생에서 가장 자랑하고 싶은 성취 경험이 무엇인지 궁금해.',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '안좋은 습관 중에서, 꾸준한 노력으로 고치거나 극복한 것이 있다면 말해줘.',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '스스로 결심한 목표를 달성해 본 적이 있어? 있다면, 그 경험에 대해 말해줘.',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '하지 않겠다고 결심했지만, 번번이 실패하는 일이나 버릇이 있어?',
       }),
       new Question({
-        slug: 'experience',
+        slug: 'history',
         body: '지금은 담담하게 말할 수 있는 흑역사 하나만 말한다면?',
       }),
 
