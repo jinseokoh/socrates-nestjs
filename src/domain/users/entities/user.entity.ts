@@ -1,4 +1,3 @@
-import { Room } from 'src/domain/chats/entities/room.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { Gender, Role } from 'src/common/enums';
@@ -40,6 +39,7 @@ import { Question } from 'src/domain/icebreakers/entities/question.entity';
 import { IcebreakerComment } from 'src/domain/icebreakers/entities/icebreaker_comment.entity';
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
+import { calcAge } from 'src/helpers/age-to-faction';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
@@ -267,9 +267,6 @@ export class User {
 
   @Expose()
   get age(): number | null {
-    if (this.dob === null) return null;
-    const today = new Date().getTime();
-    const birth = new Date(this.dob).getTime();
-    return Math.floor((today - birth) / 3.15576e10);
+    return calcAge(this.dob);
   }
 }

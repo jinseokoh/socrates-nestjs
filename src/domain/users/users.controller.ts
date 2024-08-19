@@ -44,8 +44,9 @@ import { SignedUrl, AnyData } from 'src/common/types';
 import { ChangeUsernameDto } from 'src/domain/users/dto/change-username.dto';
 import { initialUsername } from 'src/helpers/random-username';
 import { PurchaseCoinDto } from 'src/domain/users/dto/purchase-coin.dto';
+import { calcAge } from 'src/helpers/age-to-faction';
 
-//! to include excluded properties in the response
+//! when you want to hide sensitive info, use ClassSerializerInterceptor
 @SkipThrottle()
 @Controller('users')
 export class UsersController {
@@ -85,7 +86,7 @@ export class UsersController {
   @ApiOperation({ description: '본인 User 상세보기' })
   @Get('mine')
   async getMine(@CurrentUserId() id: number): Promise<User> {
-    return await this.usersService.findById(id, [
+    const user = await this.usersService.findById(id, [
       'profile',
       'categoriesInterested',
       'categoriesInterested.category',
@@ -95,6 +96,8 @@ export class UsersController {
       'receivedFriendships',
       'flags',
     ]);
+
+    return { ...user, age: calcAge(user.dob) };
   }
 
   @ApiOperation({ description: 'User 상세보기' })

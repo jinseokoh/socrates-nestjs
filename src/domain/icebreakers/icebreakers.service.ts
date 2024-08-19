@@ -13,7 +13,7 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
-import { DataSource, Repository } from 'typeorm';
+import { Brackets, DataSource, Repository } from 'typeorm';
 import { LoremIpsum } from 'lorem-ipsum';
 import { S3Service } from 'src/services/aws/s3.service';
 import { randomImageName } from 'src/helpers/random-filename';
@@ -24,6 +24,7 @@ import { UserNotificationEvent } from 'src/domain/users/events/user-notification
 import { Question } from 'src/domain/icebreakers/entities/question.entity';
 import { CreateIcebreakerDto } from 'src/domain/icebreakers/dto/create-icebreaker.dto';
 import { UpdateIcebreakerDto } from 'src/domain/icebreakers/dto/update-icebreaker.dto';
+import { User } from 'src/domain/users/entities/user.entity';
 
 @Injectable()
 export class IcebreakersService {
@@ -57,8 +58,51 @@ export class IcebreakersService {
   //? READ
   //?-------------------------------------------------------------------------//
   async findAll(query: PaginateQuery): Promise<Paginated<Icebreaker>> {
+    console.log(query.filter);
+    //! filterableColumns 의 key 값이 아닌 경우 무시하기 때문에, 필요한 쿼리 필터가 아닌 custom param 전달용으로 사용.
     const queryBuilder =
-      this.icebreakerRepository.createQueryBuilder('icebreaker');
+      query.filter.id && query.filter.gender && query.filter.age
+        ? this.icebreakerRepository
+            .createQueryBuilder('icebreaker')
+            .where('icebreaker.recipientId = :id', { id: query.filter.id })
+            .orWhere(
+              new Brackets((qb) => {
+                qb.where('icebreaker.recipientId IS NULL')
+                  .andWhere(
+                    new Brackets((qb2) => {
+                      qb2
+                        .where('icebreaker.targetGender = :gender', {
+                          gender: query.filter.gender,
+                        })
+                        .orWhere('icebreaker.targetGender = :all', {
+                          all: 'all',
+                        });
+                    }),
+                  )
+                  .andWhere('icebreaker.targetMinAge <= :age', {
+                    age: query.filter.age,
+                  })
+                  .andWhere('icebreaker.targetMaxAge >= :age', {
+                    age: query.filter.age,
+                  })
+                  .andWhere('icebreaker.userId <> :userId', {
+                    userId: query.filter.id,
+                  });
+              }),
+            )
+        : this.icebreakerRepository
+            .createQueryBuilder('icebreaker')
+            .where('icebreaker.recipientId = :id', { id: query.filter.id })
+            .orWhere(
+              new Brackets((qb) => {
+                qb.where('icebreaker.recipientId IS NULL')
+                  .andWhere('icebreaker.targetMinAge = :age', { age: 18 })
+                  .andWhere('icebreaker.targetMaxAge = :age', { age: 66 })
+                  .andWhere('icebreaker.userId <> :userId', {
+                    userId: query.filter.id,
+                  });
+              }),
+            );
 
     const config: PaginateConfig<Icebreaker> = {
       relations: {
@@ -70,7 +114,6 @@ export class IcebreakersService {
       filterableColumns: {
         userId: [FilterOperator.EQ, FilterOperator.IN],
         recipientId: [FilterOperator.EQ, FilterOperator.IN],
-        uneasyCount: [FilterOperator.LT, FilterOperator.GT],
         targetGender: [FilterOperator.EQ],
         targetMinAge: [FilterOperator.LTE],
         targetMaxAge: [FilterOperator.GTE],
