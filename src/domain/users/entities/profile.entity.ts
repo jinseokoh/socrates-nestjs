@@ -33,9 +33,13 @@ export class Profile {
   @ApiProperty({ description: 'height' })
   height: number;
 
-  @Column({ length: 64, nullable: true })
-  @ApiProperty({ description: '지역' })
+  @Column({ length: 16, nullable: true })
+  @ApiProperty({ description: '지역 (short form)' })
   region: string | null;
+
+  @Column({ length: 32, nullable: true })
+  @ApiProperty({ description: '지역 (long form)' })
+  address: string | null;
 
   @Column({ type: 'enum', enum: BaseCareer, nullable: true })
   @ApiProperty({ description: '직군' })

@@ -49,6 +49,9 @@ export const addressToRegion = (address: string): Region => {
   if (address.match(/^[충청남도|충남]/)) {
     return Region.SOUTHERN_CHUNGCHEONG;
   }
+  if (address.match(/^제주/)) {
+    return Region.JEJU;
+  }
 
-  return Region.JEJU;
+  return Region.OVERSEAS;
 };

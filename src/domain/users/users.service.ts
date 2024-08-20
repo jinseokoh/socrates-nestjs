@@ -83,6 +83,8 @@ export class UsersService {
       filterableColumns: {
         role: [FilterOperator.EQ, FilterOperator.IN],
         isActive: [FilterOperator.EQ],
+        dob: [FilterOperator.GTE, FilterOperator.LT, FilterOperator.BTW],
+        gender: [FilterOperator.EQ],
       },
     };
 
@@ -134,7 +136,7 @@ export class UsersService {
   // User 갱신
   async update(id: number, dto: UpdateUserDto): Promise<User> {
     const user = await this.repository.preload({ id, ...dto });
-    console.log(`dto ================================>`, dto);
+    console.log(`updateUserDto ===========>`, dto);
     return await this.repository.save(user);
   }
 

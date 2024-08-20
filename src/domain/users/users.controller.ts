@@ -74,11 +74,11 @@ export class UsersController {
 
   @ApiOperation({ description: 'User 리스트 (paginated)' })
   @UseInterceptors(AvatarInterceptor)
-  @UsePipes(new ValidationPipe({ transform: true }))
+  // @UsePipes(new ValidationPipe({ transform: true }))
   @PaginateQueryOptions()
   @Get()
   @UseInterceptors(ClassSerializerInterceptor)
-  async getUsers(@Paginate() query: PaginateQuery): Promise<Paginated<User>> {
+  async findAll(@Paginate() query: PaginateQuery): Promise<Paginated<User>> {
     return this.usersService.findAll(query);
   }
 
