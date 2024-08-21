@@ -75,7 +75,6 @@ export class Icebreaker {
 
   // ------------------------------------------------------------------------ //
 
-  @Index('created-at-index')
   @CreateDateColumn()
   createdAt: Date;
 

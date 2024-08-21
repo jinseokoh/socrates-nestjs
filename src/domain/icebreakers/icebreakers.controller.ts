@@ -38,12 +38,16 @@ export class IcebreakersController {
     @Body() dto: CreateIcebreakerDto,
   ): Promise<Icebreaker> {
     try {
-      // recipientId 이 없는 경우 0 으로 전달되므로, 이 부분은 개선의 여지가 있다.
+      // validation and transform.
+      // - recipientId -1 이나 0 이 전달 될 수 있다.
+      // - questionId -1 이나 0 이 전달 될 수 있다.
       return await this.icebreakersService.create({
         ...dto,
         userId: userId,
         recipientId:
           dto.recipientId && dto.recipientId > 0 ? dto.recipientId : null,
+        questionId:
+          dto.questionId && dto.questionId > 0 ? dto.questionId : null,
       });
     } catch (e) {
       throw new BadRequestException();

@@ -72,7 +72,7 @@ import { IcebreakersModule } from 'src/domain/icebreakers/icebreakers.module';
           subscribers: ['dist/**/*.subscriber{.ts,.js}'],
           entities: ['dist/**/*.entity{.ts,.js}'],
           synchronize: true,
-          timezone: 'local', // which is Asia/Seoul
+          timezone: 'Z', // UTC
           bigNumberStrings: true,
           supportBigNumbers: true,
           logging: nodeEnv === 'local',

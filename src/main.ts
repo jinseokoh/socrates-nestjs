@@ -84,11 +84,17 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
+  //! 안드로이드 폰 테스트를 위해 수정 '0.0.0.0' 을 추가
   const port = configService.get<number>('appPort');
-  //! 안드로이드 폰 테스트시 '0.0.0.0' 을 추가
   await app.listen(port, '0.0.0.0', () => {
     console.log(`running on ${port}`);
   });
+
+  // used to be the lines below
+  // const port = configService.get<number>('appPort');
+  // await app.listen(port, () => {
+  //   console.log(`running on ${port}`);
+  // });
 }
 
 bootstrap();
