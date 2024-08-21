@@ -71,11 +71,12 @@ export class UsersService {
 
   // User 리스트 (paginated)
   async findAll(query: PaginateQuery): Promise<Paginated<User>> {
-    const queryBuilder = this.repository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.profile', 'profile');
+    const queryBuilder = this.repository.createQueryBuilder('user');
 
     const config: PaginateConfig<User> = {
+      relations: {
+        profile: true,
+      },
       sortableColumns: ['id', 'username', 'updatedAt'],
       searchableColumns: ['email', 'username'],
       defaultLimit: 20,
@@ -85,6 +86,7 @@ export class UsersService {
         isActive: [FilterOperator.EQ],
         dob: [FilterOperator.GTE, FilterOperator.LT, FilterOperator.BTW],
         gender: [FilterOperator.EQ],
+        'profile.region': [FilterOperator.EQ, FilterOperator.IN],
       },
     };
 

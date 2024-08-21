@@ -8,6 +8,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -33,8 +34,9 @@ export class Profile {
   @ApiProperty({ description: 'height' })
   height: number;
 
+  @Index()
   @Column({ length: 16, nullable: true })
-  @ApiProperty({ description: '지역 (short form)' })
+  @ApiProperty({ description: '지역 (short form english slug)' })
   region: string | null;
 
   @Column({ length: 32, nullable: true })
@@ -122,11 +124,11 @@ export class Profile {
   @BeforeInsert()
   setDefaultOptions() {
     this.options = this.options || {
-      icebreaker: false,
       chat: false,
       event: false,
       feed: false,
       friend: false,
+      icebreaker: false,
       inquiry: false,
       meetup: false,
       plea: false,

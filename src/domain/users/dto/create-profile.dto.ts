@@ -18,15 +18,20 @@ export class CreateProfileDto {
   @IsOptional()
   bio?: string | null;
 
-  @ApiProperty({ description: 'height', required: false, default: 0 })
-  @IsNumber()
+  @ApiProperty({ description: '접속지역 slug', required: false })
+  @IsString()
   @IsOptional()
-  height: number;
+  region?: string | null;
 
   @ApiProperty({ description: '접속지역', required: false })
   @IsString()
   @IsOptional()
-  region?: string | null;
+  address?: string | null;
+
+  @ApiProperty({ description: 'height', required: false, default: 0 })
+  @IsNumber()
+  @IsOptional()
+  height: number;
 
   @ApiProperty({ description: '직업', required: false })
   @IsString()
