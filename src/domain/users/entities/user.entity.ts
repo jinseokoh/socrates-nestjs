@@ -40,6 +40,9 @@ import { IcebreakerComment } from 'src/domain/icebreakers/entities/icebreaker_co
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
 import { calcAge } from 'src/helpers/age-to-faction';
+
+//! keep in mind that assigning default value in any Entity property is a absolute bad idea.
+//! i.e) gender: Gender = 'male'; 이 지랄하면 안 됨.
 @Entity()
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
