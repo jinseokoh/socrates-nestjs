@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   Logger,
+  NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -45,6 +46,26 @@ export class IcebreakersService {
 
   async create(dto: CreateIcebreakerDto): Promise<Icebreaker> {
     try {
+      if (dto.recipientId && dto.userId) {
+        const count = await this.icebreakerRepository.count({
+          where: {
+            recipientId: dto.recipientId,
+            userId: dto.userId,
+            commentCount: 0,
+          },
+        });
+        if (count > 0) {
+          throw new NotAcceptableException('spamming');
+        }
+        const rawQuery = `SELECT COUNT(*) AS count FROM hate WHERE userId = ? AND recipientId = ?`;
+        const result = await this.icebreakerRepository.query(
+          rawQuery[(dto.recipientId, dto.userId)],
+        );
+        if (result.length > 0 && parseInt(result[0].count, 10) > 0) {
+          throw new NotAcceptableException('you are blocked');
+        }
+      }
+
       return await this.icebreakerRepository.save(
         this.icebreakerRepository.create(dto),
       );
