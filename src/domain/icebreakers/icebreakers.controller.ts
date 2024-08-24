@@ -37,21 +37,16 @@ export class IcebreakersController {
     @CurrentUserId() userId: number,
     @Body() dto: CreateIcebreakerDto,
   ): Promise<Icebreaker> {
-    try {
-      // validation and transform.
-      // - recipientId -1 이나 0 이 전달 될 수 있다.
-      // - questionId -1 이나 0 이 전달 될 수 있다.
-      return await this.icebreakersService.create({
-        ...dto,
-        userId: userId,
-        recipientId:
-          dto.recipientId && dto.recipientId > 0 ? dto.recipientId : null,
-        questionId:
-          dto.questionId && dto.questionId > 0 ? dto.questionId : null,
-      });
-    } catch (e) {
-      throw new BadRequestException();
-    }
+    // validation and transform.
+    // - recipientId -1 이나 0 이 전달 될 수 있다.
+    // - questionId -1 이나 0 이 전달 될 수 있다.
+    return await this.icebreakersService.create({
+      ...dto,
+      userId: userId,
+      recipientId:
+        dto.recipientId && dto.recipientId > 0 ? dto.recipientId : null,
+      questionId: dto.questionId && dto.questionId > 0 ? dto.questionId : null,
+    });
   }
 
   //?-------------------------------------------------------------------------//
