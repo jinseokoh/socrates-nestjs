@@ -13,7 +13,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from 'src/domain/users/entities/user.entity';
-import { IcebreakerComment } from 'src/domain/icebreakers/entities/icebreaker_comment.entity';
+import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
 import { Question } from 'src/domain/icebreakers/entities/question.entity';
@@ -96,8 +96,8 @@ export class Icebreaker {
   //? ----------------------------------------------------------------------- //
   //? many-to-many belongsToMany using one-to-many (hasMany)
 
-  @OneToMany(() => IcebreakerComment, (comment) => comment.icebreaker)
-  public comments: IcebreakerComment[];
+  @OneToMany(() => IcebreakerAnswer, (comment) => comment.icebreaker)
+  public comments: IcebreakerAnswer[];
 
   @OneToMany(() => BookmarkUserIcebreaker, (bookmark) => bookmark.icebreaker)
   public bookmarks: BookmarkUserIcebreaker[];

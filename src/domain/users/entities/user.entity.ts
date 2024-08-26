@@ -36,7 +36,7 @@ import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity
 import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
 import { Participant } from 'src/domain/chats/entities/participant.entity';
 import { Question } from 'src/domain/icebreakers/entities/question.entity';
-import { IcebreakerComment } from 'src/domain/icebreakers/entities/icebreaker_comment.entity';
+import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
 import { calcAge } from 'src/helpers/age-to-faction';
@@ -179,8 +179,8 @@ export class User {
   })
   public inquiries: Inquiry[];
 
-  @OneToMany(() => IcebreakerComment, (comment) => comment.user)
-  public icebreakerComments: IcebreakerComment[];
+  @OneToMany(() => IcebreakerAnswer, (comment) => comment.user)
+  public icebreakerComments: IcebreakerAnswer[];
 
   @OneToMany(() => MeetupComment, (comment) => comment.user)
   public meetupComments: MeetupComment[];

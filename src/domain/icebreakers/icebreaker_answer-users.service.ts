@@ -14,27 +14,27 @@ import {
 } from 'nestjs-paginate';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
-import { IcebreakerComment } from 'src/domain/icebreakers/entities/icebreaker_comment.entity';
+import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { randomImageName } from 'src/helpers/random-filename';
 import { DataSource, IsNull, Repository } from 'typeorm';
 import { SignedUrl } from 'src/common/types';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
-import { CreateIcebreakerCommentDto } from 'src/domain/icebreakers/dto/create-icebreaker_comment.dto';
-import { UpdateIcebreakerCommentDto } from 'src/domain/icebreakers/dto/update-icebreaker_comment.dto';
+import { CreateIcebreakerAnswerDto } from 'src/domain/icebreakers/dto/create-icebreaker_answer.dto';
+import { UpdateIcebreakerAnswerDto } from 'src/domain/icebreakers/dto/update-icebreaker_answer.dto';
 import { S3Service } from 'src/services/aws/s3.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { truncate } from 'src/helpers/truncate';
 
 @Injectable()
-export class IcebreakerCommentUsersService {
-  private readonly logger = new Logger(IcebreakerCommentUsersService.name);
+export class IcebreakerAnswerUsersService {
+  private readonly logger = new Logger(IcebreakerAnswerUsersService.name);
 
   constructor(
     @InjectRepository(Icebreaker)
     private readonly icebreakerRepository: Repository<Icebreaker>,
-    @InjectRepository(IcebreakerComment)
-    private readonly icebreakerCommentRepository: Repository<IcebreakerComment>,
+    @InjectRepository(IcebreakerAnswer)
+    private readonly icebreakerCommentRepository: Repository<IcebreakerAnswer>,
     private readonly s3Service: S3Service,
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
@@ -44,7 +44,7 @@ export class IcebreakerCommentUsersService {
   //? 모임 댓글 생성
   //? ----------------------------------------------------------------------- //
 
-  async create(dto: CreateIcebreakerCommentDto): Promise<IcebreakerComment> {
+  async create(dto: CreateIcebreakerAnswerDto): Promise<IcebreakerAnswer> {
     // creation
     const comment = await this.icebreakerCommentRepository.save(
       this.icebreakerCommentRepository.create(dto),
@@ -89,7 +89,7 @@ export class IcebreakerCommentUsersService {
   async findAllInTraditionalStyle(
     query: PaginateQuery,
     icebreakerId: number,
-  ): Promise<Paginated<IcebreakerComment>> {
+  ): Promise<Paginated<IcebreakerAnswer>> {
     return paginate(query, this.icebreakerCommentRepository, {
       where: {
         icebreakerId: icebreakerId,
@@ -107,7 +107,7 @@ export class IcebreakerCommentUsersService {
   async findAllInYoutubeStyle(
     query: PaginateQuery,
     icebreakerId: number,
-  ): Promise<Paginated<IcebreakerComment>> {
+  ): Promise<Paginated<IcebreakerAnswer>> {
     const queryBuilder = this.icebreakerCommentRepository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
@@ -115,7 +115,7 @@ export class IcebreakerCommentUsersService {
       .where('comment.parentId IS NULL')
       .andWhere('comment.icebreakerId = :icebreakerId', { icebreakerId });
 
-    const config: PaginateConfig<IcebreakerComment> = {
+    const config: PaginateConfig<IcebreakerAnswer> = {
       sortableColumns: ['id'],
       searchableColumns: ['body'],
       defaultLimit: 20,
@@ -126,7 +126,7 @@ export class IcebreakerCommentUsersService {
       },
     };
 
-    return await paginate<IcebreakerComment>(query, queryBuilder, config);
+    return await paginate<IcebreakerAnswer>(query, queryBuilder, config);
   }
 
   //? 답글 리스트, 최상단 부모는 리턴되지 않음.
@@ -134,7 +134,7 @@ export class IcebreakerCommentUsersService {
     query: PaginateQuery,
     icebreakerId: number,
     commentId: number,
-  ): Promise<Paginated<IcebreakerComment>> {
+  ): Promise<Paginated<IcebreakerAnswer>> {
     const queryBuilder = this.icebreakerCommentRepository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
@@ -142,7 +142,7 @@ export class IcebreakerCommentUsersService {
       .andWhere('comment.parentId = :commentId', { commentId })
       .andWhere('comment.deletedAt IS NULL');
 
-    const config: PaginateConfig<IcebreakerComment> = {
+    const config: PaginateConfig<IcebreakerAnswer> = {
       sortableColumns: ['id'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'ASC']],
@@ -151,14 +151,14 @@ export class IcebreakerCommentUsersService {
       },
     };
 
-    return await paginate<IcebreakerComment>(query, queryBuilder, config);
+    return await paginate<IcebreakerAnswer>(query, queryBuilder, config);
   }
 
   // required when checking if the comment exists
   async findById(
     id: number,
     relations: string[] = [],
-  ): Promise<IcebreakerComment> {
+  ): Promise<IcebreakerAnswer> {
     try {
       return relations.length > 0
         ? await this.icebreakerCommentRepository.findOneOrFail({
@@ -186,8 +186,8 @@ export class IcebreakerCommentUsersService {
 
   async update(
     commentId: number,
-    dto: UpdateIcebreakerCommentDto,
-  ): Promise<IcebreakerComment> {
+    dto: UpdateIcebreakerAnswerDto,
+  ): Promise<IcebreakerAnswer> {
     const comment = await this.icebreakerCommentRepository.preload({
       id: commentId,
       ...dto,
@@ -203,7 +203,7 @@ export class IcebreakerCommentUsersService {
   //? 모임 댓글 delete
   //? ----------------------------------------------------------------------- //
 
-  async softRemove(id: number): Promise<IcebreakerComment> {
+  async softRemove(id: number): Promise<IcebreakerAnswer> {
     try {
       const comment = await this.findById(id);
       await this.icebreakerCommentRepository.softRemove(comment);
@@ -219,7 +219,7 @@ export class IcebreakerCommentUsersService {
   }
 
   //! not being used.
-  async remove(id: number): Promise<IcebreakerComment> {
+  async remove(id: number): Promise<IcebreakerAnswer> {
     const comment = await this.findById(id);
     return await this.icebreakerCommentRepository.remove(comment);
   }
@@ -228,7 +228,7 @@ export class IcebreakerCommentUsersService {
   //? 모임 댓글 Flag
   //? ----------------------------------------------------------------------- //
 
-  async createIcebreakerCommentFlag(
+  async createIcebreakerAnswerFlag(
     userId: number,
     icebreakerId: number,
     commentId: number,
@@ -242,13 +242,13 @@ export class IcebreakerCommentUsersService {
       const flag = await queryRunner.manager.save(
         queryRunner.manager.getRepository(Flag).create({
           userId,
-          entityType: 'icebreaker_comment',
+          entityType: 'icebreaker_answer',
           entityId: commentId,
           message,
         }),
       );
       await queryRunner.manager.query(
-        'UPDATE `icebreaker_comment` SET flagCount = flagCount + 1 WHERE id = ?',
+        'UPDATE `icebreaker_answer` SET flagCount = flagCount + 1 WHERE id = ?',
         [commentId],
       );
       await queryRunner.commitTransaction();
@@ -265,7 +265,7 @@ export class IcebreakerCommentUsersService {
     }
   }
 
-  async deleteIcebreakerCommentFlag(
+  async deleteIcebreakerAnswerFlag(
     userId: number,
     commentId: number,
   ): Promise<any> {
@@ -276,11 +276,11 @@ export class IcebreakerCommentUsersService {
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
         'DELETE FROM `flag` where userId = ? AND entityType = ? AND entityId = ?',
-        [userId, `icebreaker_comment`, commentId],
+        [userId, `icebreaker_answer`, commentId],
       );
       if (affectedRows > 0) {
         await queryRunner.manager.query(
-          'UPDATE `icebreaker_comment` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
+          'UPDATE `icebreaker_answer` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
           [commentId],
         );
       }
@@ -307,7 +307,7 @@ export class IcebreakerCommentUsersService {
       dto.name ?? `icebreaker_${icebreakerId}_comment`,
       dto.mimeType,
     );
-    const path = `${process.env.NODE_ENV}/icebreaker_comments/${userId}/${fileUri}`;
+    const path = `${process.env.NODE_ENV}/icebreaker_answers/${userId}/${fileUri}`;
     const url = await this.s3Service.generateSignedUrl(path);
 
     return {

@@ -11,9 +11,9 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { IcebreakersService } from 'src/domain/icebreakers/icebreakers.service';
 import { IcebreakersController } from 'src/domain/icebreakers/icebreakers.controller';
-import { IcebreakerCommentUsersService } from 'src/domain/icebreakers/icebreaker_comment-users.service';
-import { IcebreakerCommentUsersController } from 'src/domain/icebreakers/icebreaker_comment-users.controller';
-import { IcebreakerComment } from 'src/domain/icebreakers/entities/icebreaker_comment.entity';
+import { IcebreakerAnswerUsersService } from 'src/domain/icebreakers/icebreaker_answer-users.service';
+import { IcebreakerAnswerUsersController } from 'src/domain/icebreakers/icebreaker_answer-users.controller';
+import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
 import { IcebreakerUsersService } from 'src/domain/icebreakers/icebreaker-users.service';
 import { IcebreakerUsersController } from 'src/domain/icebreakers/icebreaker-users.controller';
 import { User } from 'src/domain/users/entities/user.entity';
@@ -22,7 +22,7 @@ import { Flag } from 'src/domain/users/entities/flag.entity';
   imports: [
     TypeOrmModule.forFeature([
       Icebreaker,
-      IcebreakerComment,
+      IcebreakerAnswer,
       Question,
       User,
       Flag,
@@ -34,14 +34,14 @@ import { Flag } from 'src/domain/users/entities/flag.entity';
   providers: [
     IcebreakersService,
     IcebreakerUsersService,
-    IcebreakerCommentUsersService,
+    IcebreakerAnswerUsersService,
     QuestionsService,
     PleasService,
   ],
   controllers: [
     IcebreakersController,
     IcebreakerUsersController,
-    IcebreakerCommentUsersController,
+    IcebreakerAnswerUsersController,
     QuestionsController,
     PleasController,
   ],

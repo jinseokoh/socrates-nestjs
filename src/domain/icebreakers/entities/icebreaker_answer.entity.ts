@@ -15,7 +15,7 @@ import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 
 @Entity()
-export class IcebreakerComment {
+export class IcebreakerAnswer {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
 
@@ -73,22 +73,22 @@ export class IcebreakerComment {
   // https://stackoverflow.com/threads/67385016/getting-data-in-self-referencing-relation-with-typeorm
 
   @ManyToOne(
-    () => IcebreakerComment,
-    (IcebreakerComment) => IcebreakerComment.children,
+    () => IcebreakerAnswer,
+    (IcebreakerAnswer) => IcebreakerAnswer.children,
     {
       onDelete: 'SET NULL',
     },
   )
   @JoinColumn({ name: 'parentId' })
-  parent: IcebreakerComment;
+  parent: IcebreakerAnswer;
 
-  @OneToMany(() => IcebreakerComment, (thread) => thread.parent)
-  children: IcebreakerComment[];
+  @OneToMany(() => IcebreakerAnswer, (thread) => thread.parent)
+  children: IcebreakerAnswer[];
 
   //? ----------------------------------------------------------------------- //
   //? constructor
 
-  constructor(partial: Partial<IcebreakerComment>) {
+  constructor(partial: Partial<IcebreakerAnswer>) {
     Object.assign(this, partial);
   }
 }

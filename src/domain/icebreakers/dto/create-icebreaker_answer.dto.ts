@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateIcebreakerCommentDto {
+export class CreateIcebreakerAnswerDto {
   @ApiProperty({ description: '질문내용' })
   @IsString()
   body: string;

@@ -15,18 +15,18 @@ import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { SignedUrl } from 'src/common/types';
-import { CreateIcebreakerCommentDto } from 'src/domain/icebreakers/dto/create-icebreaker_comment.dto';
-import { UpdateIcebreakerCommentDto } from 'src/domain/icebreakers/dto/update-icebreaker_comment.dto';
-import { IcebreakerComment } from 'src/domain/icebreakers/entities/icebreaker_comment.entity';
-import { IcebreakerCommentUsersService } from 'src/domain/icebreakers/icebreaker_comment-users.service';
+import { CreateIcebreakerAnswerDto } from 'src/domain/icebreakers/dto/create-icebreaker_answer.dto';
+import { UpdateIcebreakerAnswerDto } from 'src/domain/icebreakers/dto/update-icebreaker_answer.dto';
+import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
+import { IcebreakerAnswerUsersService } from 'src/domain/icebreakers/icebreaker_answer-users.service';
 import { SignedUrlDto } from 'src/domain/users/dto/signed-url.dto';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('icebreakers')
-export class IcebreakerCommentUsersController {
+export class IcebreakerAnswerUsersController {
   constructor(
-    private readonly icebreakerCommentUsersService: IcebreakerCommentUsersService,
+    private readonly icebreakerCommentUsersService: IcebreakerAnswerUsersService,
   ) {}
 
   //? ----------------------------------------------------------------------- //
@@ -35,11 +35,11 @@ export class IcebreakerCommentUsersController {
 
   @ApiOperation({ description: '댓글 생성' })
   @Post(':icebreakerId/comments')
-  async createIcebreakerComment(
+  async createIcebreakerAnswer(
     @CurrentUserId() userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
-    @Body() dto: CreateIcebreakerCommentDto,
-  ): Promise<IcebreakerComment> {
+    @Body() dto: CreateIcebreakerAnswerDto,
+  ): Promise<IcebreakerAnswer> {
     let parentId = null;
     if (dto.commentId) {
       const comment = await this.icebreakerCommentUsersService.findById(
@@ -67,7 +67,7 @@ export class IcebreakerCommentUsersController {
   async findAllInTraditionalStyle(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<IcebreakerComment>> {
+  ): Promise<Paginated<IcebreakerAnswer>> {
     const result =
       await this.icebreakerCommentUsersService.findAllInTraditionalStyle(
         query,
@@ -79,7 +79,7 @@ export class IcebreakerCommentUsersController {
     // return {
     //   ...result,
     //   data: result.data.map((comment) =>
-    //     this.icebreakerCommentUsersService.buildIcebreakerCommentTree(comment),
+    //     this.icebreakerCommentUsersService.buildIcebreakerAnswerTree(comment),
     //   ),
     // };
   }
@@ -90,7 +90,7 @@ export class IcebreakerCommentUsersController {
   async findAllInYoutubeStyle(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<IcebreakerComment>> {
+  ): Promise<Paginated<IcebreakerAnswer>> {
     const result = await this.icebreakerCommentUsersService.findAllInYoutubeStyle(
       query,
       icebreakerId,
@@ -103,11 +103,11 @@ export class IcebreakerCommentUsersController {
   @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
   @Get(':icebreakerId/comments/:commentId')
-  async findIcebreakerCommentRepliesById(
+  async findIcebreakerAnswerRepliesById(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
     @Paginate() query: PaginateQuery,
-  ): Promise<Paginated<IcebreakerComment>> {
+  ): Promise<Paginated<IcebreakerAnswer>> {
     return await this.icebreakerCommentUsersService.findAllRepliesById(
       query,
       icebreakerId,
@@ -121,11 +121,11 @@ export class IcebreakerCommentUsersController {
 
   @ApiOperation({ description: '댓글 수정' })
   @Patch(':icebreakerId/comments/:commentId')
-  async updateIcebreakerComment(
+  async updateIcebreakerAnswer(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
-    @Body() dto: UpdateIcebreakerCommentDto,
-  ): Promise<IcebreakerComment> {
+    @Body() dto: UpdateIcebreakerAnswerDto,
+  ): Promise<IcebreakerAnswer> {
     return await this.icebreakerCommentUsersService.update(commentId, dto);
   }
 
@@ -135,11 +135,11 @@ export class IcebreakerCommentUsersController {
 
   @ApiOperation({ description: '댓글 soft 삭제' })
   @Delete(':icebreakerId/comments/:commentId')
-  async deleteIcebreakerComment(
+  async deleteIcebreakerAnswer(
     // @CurrentUserId() userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
-  ): Promise<IcebreakerComment> {
+  ): Promise<IcebreakerAnswer> {
     return await this.icebreakerCommentUsersService.softRemove(commentId);
   }
 
@@ -149,13 +149,13 @@ export class IcebreakerCommentUsersController {
 
   @ApiOperation({ description: 'add flag 댓글/답글' })
   @Post(':icebreakerId/comments/:commentId/flag')
-  async createIcebreakerCommentFlag(
+  async createIcebreakerAnswerFlag(
     @CurrentUserId() userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body('message') message: string,
   ): Promise<Flag> {
-    return await this.icebreakerCommentUsersService.createIcebreakerCommentFlag(
+    return await this.icebreakerCommentUsersService.createIcebreakerAnswerFlag(
       userId,
       icebreakerId,
       commentId,
@@ -165,12 +165,12 @@ export class IcebreakerCommentUsersController {
 
   @ApiOperation({ description: 'delete flag 댓글/답글' })
   @Delete(':icebreakerId/comments/:commentId/flag')
-  async deleteIcebreakerCommentFlag(
+  async deleteIcebreakerAnswerFlag(
     @CurrentUserId() userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
     @Param('commentId', ParseIntPipe) commentId: number,
   ): Promise<Flag> {
-    return await this.icebreakerCommentUsersService.deleteIcebreakerCommentFlag(
+    return await this.icebreakerCommentUsersService.deleteIcebreakerAnswerFlag(
       userId,
       commentId,
     );
