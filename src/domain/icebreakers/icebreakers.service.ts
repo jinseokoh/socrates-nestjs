@@ -50,7 +50,7 @@ export class IcebreakersService {
         where: {
           recipientId: dto.recipientId,
           userId: dto.userId,
-          commentCount: 0,
+          answerCount: 0,
         },
       });
       if (count > 0) {

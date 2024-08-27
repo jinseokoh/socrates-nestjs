@@ -8,13 +8,16 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { User } from 'src/domain/users/entities/user.entity';
+import { IsArray } from 'class-validator';
 
 @Entity()
+@Unique('user_id_icebreaker_id_key', ['userId', 'icebreakerId'])
 export class IcebreakerAnswer {
   @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
   id: number;
@@ -31,6 +34,11 @@ export class IcebreakerAnswer {
   @Column({ length: 255, nullable: false })
   @ApiProperty({ description: '제목' })
   body: string;
+
+  @Column('json', { nullable: true })
+  @ApiProperty({ description: '이미지들' })
+  @IsArray()
+  images: string[] | null;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'like count' })
@@ -62,7 +70,7 @@ export class IcebreakerAnswer {
   //? ----------------------------------------------------------------------- //
   //? many-to-1 belongsTo
 
-  @ManyToOne(() => Icebreaker, (icebreaker) => icebreaker.comments, {
+  @ManyToOne(() => Icebreaker, (icebreaker) => icebreaker.answers, {
     cascade: true,
   })
   icebreaker: Icebreaker;

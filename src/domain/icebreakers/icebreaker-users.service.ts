@@ -28,7 +28,7 @@ export class IcebreakerUsersService {
   //? 북마크 (BookmarkUserIcebreaker) 리스트
   //? ----------------------------------------------------------------------- //
 
-  // 이 모임을 북마크/찜한 모든 Users
+  // 이 아이스브레이커을 북마크/찜한 모든 Users
   async loadBookmarkers(icebreakerId: number): Promise<User[]> {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
     return await queryBuilder
@@ -44,7 +44,7 @@ export class IcebreakerUsersService {
       .getMany();
   }
 
-  // 이 모임을 북마크/찜한 모든 UserIds
+  // 이 아이스브레이커을 북마크/찜한 모든 UserIds
   async loadBookmarkerIds(icebreakerId: number): Promise<number[]> {
     const rows = await this.userRepository.manager.query(
       'SELECT userId FROM `bookmark_user_icebreaker` \
@@ -59,7 +59,7 @@ export class IcebreakerUsersService {
   //? 신고 (Flag) 리스트
   //? ----------------------------------------------------------------------- //
 
-  // 이 모임을 신고한 모든 Users (all)
+  // 이 아이스브레이커을 신고한 모든 Users (all)
   async loadIcebreakerFlaggingUsers(icebreakerId: number): Promise<User[]> {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
     return await queryBuilder
@@ -75,7 +75,7 @@ export class IcebreakerUsersService {
       .getMany();
   }
 
-  // 이 모임을 신고한 모든 UserIds (all)
+  // 이 아이스브레이커을 신고한 모든 UserIds (all)
   async loadIcebreakerFlaggingUserIds(icebreakerId: number): Promise<number[]> {
     const rows = await this.flagRepository.manager.query(
       'SELECT userId FROM `flag` \

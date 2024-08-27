@@ -34,18 +34,18 @@ export class IcebreakerAnswerUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '댓글 생성' })
-  @Post(':icebreakerId/comments')
+  @Post(':icebreakerId/answers')
   async createIcebreakerAnswer(
     @CurrentUserId() userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
     @Body() dto: CreateIcebreakerAnswerDto,
   ): Promise<IcebreakerAnswer> {
     let parentId = null;
-    if (dto.commentId) {
-      const comment = await this.icebreakerCommentUsersService.findById(
-        dto.commentId,
+    if (dto.answerId) {
+      const answer = await this.icebreakerCommentUsersService.findById(
+        dto.answerId,
       );
-      parentId = comment.parentId ? comment.parentId : dto.commentId;
+      parentId = answer.parentId ? answer.parentId : dto.answerId;
     }
 
     return await this.icebreakerCommentUsersService.create({
@@ -63,7 +63,7 @@ export class IcebreakerAnswerUsersController {
 
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':icebreakerId/comments')
+  @Get(':icebreakerId/answers')
   async findAllInTraditionalStyle(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
     @Paginate() query: PaginateQuery,
@@ -78,15 +78,15 @@ export class IcebreakerAnswerUsersController {
     // recursive tree 인 경우.
     // return {
     //   ...result,
-    //   data: result.data.map((comment) =>
-    //     this.icebreakerCommentUsersService.buildIcebreakerAnswerTree(comment),
+    //   data: result.data.map((answer) =>
+    //     this.icebreakerCommentUsersService.buildIcebreakerAnswerTree(answer),
     //   ),
     // };
   }
 
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':icebreakerId/comments_counts')
+  @Get(':icebreakerId/answers_counts')
   async findAllInYoutubeStyle(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
     @Paginate() query: PaginateQuery,
@@ -102,16 +102,16 @@ export class IcebreakerAnswerUsersController {
   //? 답글 리스트, 최상단 부모는 리턴되지 않음.
   @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get(':icebreakerId/comments/:commentId')
+  @Get(':icebreakerId/answers/:answerId')
   async findIcebreakerAnswerRepliesById(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
-    @Param('commentId', ParseIntPipe) commentId: number,
+    @Param('answerId', ParseIntPipe) answerId: number,
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<IcebreakerAnswer>> {
     return await this.icebreakerCommentUsersService.findAllRepliesById(
       query,
       icebreakerId,
-      commentId,
+      answerId,
     );
   }
 
@@ -120,13 +120,13 @@ export class IcebreakerAnswerUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '댓글 수정' })
-  @Patch(':icebreakerId/comments/:commentId')
+  @Patch(':icebreakerId/answers/:answerId')
   async updateIcebreakerAnswer(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
-    @Param('commentId', ParseIntPipe) commentId: number,
+    @Param('answerId', ParseIntPipe) answerId: number,
     @Body() dto: UpdateIcebreakerAnswerDto,
   ): Promise<IcebreakerAnswer> {
-    return await this.icebreakerCommentUsersService.update(commentId, dto);
+    return await this.icebreakerCommentUsersService.update(answerId, dto);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -134,13 +134,13 @@ export class IcebreakerAnswerUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '댓글 soft 삭제' })
-  @Delete(':icebreakerId/comments/:commentId')
+  @Delete(':icebreakerId/answers/:answerId')
   async deleteIcebreakerAnswer(
     // @CurrentUserId() userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
-    @Param('commentId', ParseIntPipe) commentId: number,
+    @Param('answerId', ParseIntPipe) answerId: number,
   ): Promise<IcebreakerAnswer> {
-    return await this.icebreakerCommentUsersService.softRemove(commentId);
+    return await this.icebreakerCommentUsersService.softRemove(answerId);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -148,31 +148,31 @@ export class IcebreakerAnswerUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'add flag 댓글/답글' })
-  @Post(':icebreakerId/comments/:commentId/flag')
+  @Post(':icebreakerId/answers/:answerId/flag')
   async createIcebreakerAnswerFlag(
     @CurrentUserId() userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
-    @Param('commentId', ParseIntPipe) commentId: number,
+    @Param('answerId', ParseIntPipe) answerId: number,
     @Body('message') message: string,
   ): Promise<Flag> {
     return await this.icebreakerCommentUsersService.createIcebreakerAnswerFlag(
       userId,
       icebreakerId,
-      commentId,
+      answerId,
       message,
     );
   }
 
   @ApiOperation({ description: 'delete flag 댓글/답글' })
-  @Delete(':icebreakerId/comments/:commentId/flag')
+  @Delete(':icebreakerId/answers/:answerId/flag')
   async deleteIcebreakerAnswerFlag(
     @CurrentUserId() userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
-    @Param('commentId', ParseIntPipe) commentId: number,
+    @Param('answerId', ParseIntPipe) answerId: number,
   ): Promise<Flag> {
     return await this.icebreakerCommentUsersService.deleteIcebreakerAnswerFlag(
       userId,
-      commentId,
+      answerId,
     );
   }
 
@@ -181,7 +181,7 @@ export class IcebreakerAnswerUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
-  @Post(':icebreakerId/comments/upload-url')
+  @Post(':icebreakerId/answers/upload-url')
   async getSignedUrl(
     @CurrentUserId() userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsDate,
   IsNumber,
@@ -12,6 +13,11 @@ export class CreateIcebreakerAnswerDto {
   @ApiProperty({ description: '질문내용' })
   @IsString()
   body: string;
+
+  @ApiProperty({ description: '이미지들 (string[])' })
+  @IsArray()
+  @IsOptional()
+  images: string[] | null;
 
   @ApiProperty({ description: 'like count' })
   @IsNumber()
@@ -39,10 +45,10 @@ export class CreateIcebreakerAnswerDto {
   @IsOptional()
   icebreakerId: number | null;
 
-  @ApiProperty({ description: 'icebreaker comment 아이디' })
+  @ApiProperty({ description: 'icebreaker answer 아이디' })
   @IsNumber()
   @IsOptional()
-  commentId: number | null;
+  answerId: number | null;
 
   @ApiProperty({ description: '상위 댓글 아이디', required: false })
   @IsNumber()

@@ -41,17 +41,17 @@ export class IcebreakerAnswerUsersService {
   ) {}
 
   //? ----------------------------------------------------------------------- //
-  //? 모임 댓글 생성
+  //? 아이스브레이커 답변 생성
   //? ----------------------------------------------------------------------- //
 
   async create(dto: CreateIcebreakerAnswerDto): Promise<IcebreakerAnswer> {
     // creation
-    const comment = await this.icebreakerCommentRepository.save(
+    const answer = await this.icebreakerCommentRepository.save(
       this.icebreakerCommentRepository.create(dto),
     );
     if (dto.sendNotification) {
       //? notify with event listener
-      const record = await this.findById(comment.id, [
+      const record = await this.findById(answer.id, [
         'user',
         'icebreaker',
         'icebreaker.user',
@@ -74,15 +74,15 @@ export class IcebreakerAnswerUsersService {
 
     this.icebreakerRepository.increment(
       { id: dto.icebreakerId },
-      `commentCount`,
+      `answerCount`,
       1,
     );
 
-    return comment;
+    return answer;
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 모임 댓글 리스트
+  //? 아이스브레이커 답변 리스트
   //? ----------------------------------------------------------------------- //
 
   //? 댓글 리스트 w/ Pagination (children)
@@ -103,17 +103,17 @@ export class IcebreakerAnswerUsersService {
     // return await paginate<FeedComment>(query, queryBuilder, config);
   }
 
-  //? 댓글 리스트 w/ Pagination
+  //? 아이스브레이커 답변 리스트 w/ Pagination
   async findAllInYoutubeStyle(
     query: PaginateQuery,
     icebreakerId: number,
   ): Promise<Paginated<IcebreakerAnswer>> {
     const queryBuilder = this.icebreakerCommentRepository
-      .createQueryBuilder('comment')
-      .innerJoinAndSelect('comment.user', 'user')
-      .loadRelationCountAndMap('comment.replyCount', 'comment.children')
-      .where('comment.parentId IS NULL')
-      .andWhere('comment.icebreakerId = :icebreakerId', { icebreakerId });
+      .createQueryBuilder('answer')
+      .innerJoinAndSelect('answer.user', 'user')
+      .loadRelationCountAndMap('answer.replyCount', 'answer.children')
+      .where('answer.parentId IS NULL')
+      .andWhere('answer.icebreakerId = :icebreakerId', { icebreakerId });
 
     const config: PaginateConfig<IcebreakerAnswer> = {
       sortableColumns: ['id'],
@@ -129,18 +129,18 @@ export class IcebreakerAnswerUsersService {
     return await paginate<IcebreakerAnswer>(query, queryBuilder, config);
   }
 
-  //? 답글 리스트, 최상단 부모는 리턴되지 않음.
+  //? 아이스브레이커 답변 리스트, 최상단 부모는 리턴되지 않음.
   async findAllRepliesById(
     query: PaginateQuery,
     icebreakerId: number,
-    commentId: number,
+    answerId: number,
   ): Promise<Paginated<IcebreakerAnswer>> {
     const queryBuilder = this.icebreakerCommentRepository
-      .createQueryBuilder('comment')
-      .innerJoinAndSelect('comment.user', 'user')
-      .where('comment.icebreakerId = :icebreakerId', { icebreakerId })
-      .andWhere('comment.parentId = :commentId', { commentId })
-      .andWhere('comment.deletedAt IS NULL');
+      .createQueryBuilder('answer')
+      .innerJoinAndSelect('answer.user', 'user')
+      .where('answer.icebreakerId = :icebreakerId', { icebreakerId })
+      .andWhere('answer.parentId = :answerId', { answerId })
+      .andWhere('answer.deletedAt IS NULL');
 
     const config: PaginateConfig<IcebreakerAnswer> = {
       sortableColumns: ['id'],
@@ -154,7 +154,7 @@ export class IcebreakerAnswerUsersService {
     return await paginate<IcebreakerAnswer>(query, queryBuilder, config);
   }
 
-  // required when checking if the comment exists
+  // required when checking if the answer exists
   async findById(
     id: number,
     relations: string[] = [],
@@ -181,37 +181,37 @@ export class IcebreakerAnswerUsersService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 모임 댓글 update
+  //? 아이스브레이커 답변 update
   //? ----------------------------------------------------------------------- //
 
   async update(
-    commentId: number,
+    answerId: number,
     dto: UpdateIcebreakerAnswerDto,
   ): Promise<IcebreakerAnswer> {
-    const comment = await this.icebreakerCommentRepository.preload({
-      id: commentId,
+    const answer = await this.icebreakerCommentRepository.preload({
+      id: answerId,
       ...dto,
     });
     // user validation here might be a good option to be added
-    if (!comment) {
+    if (!answer) {
       throw new NotFoundException(`entity not found`);
     }
-    return await this.icebreakerCommentRepository.save(comment);
+    return await this.icebreakerCommentRepository.save(answer);
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 모임 댓글 delete
+  //? 아이스브레이커 답변 delete
   //? ----------------------------------------------------------------------- //
 
   async softRemove(id: number): Promise<IcebreakerAnswer> {
     try {
-      const comment = await this.findById(id);
-      await this.icebreakerCommentRepository.softRemove(comment);
+      const answer = await this.findById(id);
+      await this.icebreakerCommentRepository.softRemove(answer);
       await this.icebreakerRepository.manager.query(
-        `UPDATE icebreaker SET commentCount = commentCount - 1 WHERE id = ? AND commentCount > 0`,
-        [comment.icebreakerId],
+        `UPDATE icebreaker SET answerCount = answerCount - 1 WHERE id = ? AND answerCount > 0`,
+        [answer.icebreakerId],
       );
-      return comment;
+      return answer;
     } catch (e) {
       this.logger.log(e);
       throw e;
@@ -220,18 +220,18 @@ export class IcebreakerAnswerUsersService {
 
   //! not being used.
   async remove(id: number): Promise<IcebreakerAnswer> {
-    const comment = await this.findById(id);
-    return await this.icebreakerCommentRepository.remove(comment);
+    const answer = await this.findById(id);
+    return await this.icebreakerCommentRepository.remove(answer);
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 모임 댓글 Flag
+  //? 아이스브레이커 답변 Flag
   //? ----------------------------------------------------------------------- //
 
   async createIcebreakerAnswerFlag(
     userId: number,
     icebreakerId: number,
-    commentId: number,
+    answerId: number,
     message: string,
   ): Promise<Flag> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -243,13 +243,13 @@ export class IcebreakerAnswerUsersService {
         queryRunner.manager.getRepository(Flag).create({
           userId,
           entityType: 'icebreaker_answer',
-          entityId: commentId,
+          entityId: answerId,
           message,
         }),
       );
       await queryRunner.manager.query(
         'UPDATE `icebreaker_answer` SET flagCount = flagCount + 1 WHERE id = ?',
-        [commentId],
+        [answerId],
       );
       await queryRunner.commitTransaction();
       return flag;
@@ -267,7 +267,7 @@ export class IcebreakerAnswerUsersService {
 
   async deleteIcebreakerAnswerFlag(
     userId: number,
-    commentId: number,
+    answerId: number,
   ): Promise<any> {
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -276,12 +276,12 @@ export class IcebreakerAnswerUsersService {
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
         'DELETE FROM `flag` where userId = ? AND entityType = ? AND entityId = ?',
-        [userId, `icebreaker_answer`, commentId],
+        [userId, `icebreaker_answer`, answerId],
       );
       if (affectedRows > 0) {
         await queryRunner.manager.query(
           'UPDATE `icebreaker_answer` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
-          [commentId],
+          [answerId],
         );
       }
       return { data: affectedRows };
@@ -304,7 +304,7 @@ export class IcebreakerAnswerUsersService {
     dto: SignedUrlDto,
   ): Promise<SignedUrl> {
     const fileUri = randomImageName(
-      dto.name ?? `icebreaker_${icebreakerId}_comment`,
+      dto.name ?? `icebreaker_${icebreakerId}_answer`,
       dto.mimeType,
     );
     const path = `${process.env.NODE_ENV}/icebreaker_answers/${userId}/${fileUri}`;

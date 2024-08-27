@@ -62,14 +62,14 @@ export class IcebreakersController {
     return await this.icebreakersService.findAll(query);
   }
 
-  //? the commenting out relations can be ignored to reduce the amount of response
+  //? the answering out relations can be ignored to reduce the amount of response
   @ApiOperation({ description: 'Icebreaker 상세보기' })
   @Get(':id')
   async getIcebreakerById(@Param('id') id: number): Promise<Icebreaker> {
     return await this.icebreakersService.findById(id, [
       // 'question', not sure if it's
       'user',
-      'comments',
+      'answers',
       'bookmarks',
     ]);
   }

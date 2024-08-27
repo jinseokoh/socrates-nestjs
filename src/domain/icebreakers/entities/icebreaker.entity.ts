@@ -6,7 +6,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -58,8 +57,8 @@ export class Icebreaker {
   viewCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
-  @ApiProperty({ description: 'comment count' })
-  commentCount: number;
+  @ApiProperty({ description: 'answer count' })
+  answerCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'likes' })
@@ -96,8 +95,8 @@ export class Icebreaker {
   //? ----------------------------------------------------------------------- //
   //? many-to-many belongsToMany using one-to-many (hasMany)
 
-  @OneToMany(() => IcebreakerAnswer, (comment) => comment.icebreaker)
-  public comments: IcebreakerAnswer[];
+  @OneToMany(() => IcebreakerAnswer, (answer) => answer.icebreaker)
+  public answers: IcebreakerAnswer[];
 
   @OneToMany(() => BookmarkUserIcebreaker, (bookmark) => bookmark.icebreaker)
   public bookmarks: BookmarkUserIcebreaker[];
