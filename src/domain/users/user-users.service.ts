@@ -20,6 +20,7 @@ import { UserNotificationEvent } from 'src/domain/users/events/user-notification
 import { User } from 'src/domain/users/entities/user.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Like } from 'src/domain/users/entities/like.entity';
 
 @Injectable()
 export class UserUsersService {
@@ -31,6 +32,8 @@ export class UserUsersService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(BookmarkUserUser)
     private readonly bookmarkUserUserRepository: Repository<BookmarkUserUser>,
+    @InjectRepository(Like)
+    private readonly likeRepository: Repository<Like>,
     @InjectRepository(Flag)
     private readonly flagRepository: Repository<Flag>,
     @Inject(ConfigService) private configService: ConfigService, // global
@@ -219,6 +222,135 @@ export class UserUsersService {
     );
 
     return rows.map((v: any) => v.userId);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? Likes
+  //? ----------------------------------------------------------------------- //
+
+  // User 신고 생성
+  // 가능하다면, user likeCount 증가
+  async createUserLike(
+    userId: number,
+    recipientId: number,
+    message: string | null,
+  ): Promise<Like> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const like = await queryRunner.manager.save(
+        queryRunner.manager.getRepository(Like).create({
+          userId,
+          entityType: 'user',
+          entityId: recipientId,
+          message,
+        }),
+      );
+      await queryRunner.manager.query(
+        'UPDATE `profile` SET likeCount = likeCount + 1 WHERE userId = ?',
+        [recipientId],
+      );
+      await queryRunner.commitTransaction();
+      return like;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // User 신고 제거
+  // 가능하다면, user likeCount 감소
+  async deleteUserLike(userId: number, recipientId: number): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const { affectedRows } = await queryRunner.manager.query(
+        'DELETE FROM `like` where userId = ? AND entityType = ? AND entityId = ?',
+        [userId, `user`, recipientId],
+      );
+      if (affectedRows > 0) {
+        await queryRunner.manager.query(
+          'UPDATE `profile` SET likeCount = likeCount - 1 WHERE userId = ? AND likeCount > 0',
+          [recipientId],
+        );
+      }
+      return { data: affectedRows };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // User 신고 여부
+  async isUserLikeged(userId: number, recipientId: number): Promise<boolean> {
+    const [row] = await this.likeRepository.manager.query(
+      'SELECT COUNT(*) AS count FROM `like` \
+      WHERE userId = ? AND entityType = ? AND entityId = ?',
+      [userId, `user`, recipientId],
+    );
+    const { count } = row;
+
+    return +count === 1;
+  }
+
+  // 내가 신고한 Users (paginated)
+  async findLikegedUsers(
+    query: PaginateQuery,
+    userId: number,
+  ): Promise<Paginated<User>> {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .innerJoin(Like, 'like', 'like.entityId = user.id')
+      .where('like.userId = :userId', { userId })
+      .andWhere('like.entityType = :entityType', { entityType: 'user' });
+
+    const config: PaginateConfig<User> = {
+      sortableColumns: ['id'],
+      searchableColumns: ['username'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내가 신고한 모든 Users
+  async loadLikegedUsers(userId: number): Promise<User[]> {
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    return await queryBuilder
+      .innerJoinAndSelect(
+        Like,
+        'like',
+        'like.entityId = user.id AND like.entityType = :entityType',
+        { entityType: 'user' },
+      )
+      .addSelect(['user.*'])
+      .where('like.userId = :userId', { userId })
+      .getMany();
+  }
+
+  // 내가 신고한 모든 UserIds
+  async loadLikegedUserIds(userId: number): Promise<number[]> {
+    const rows = await this.likeRepository.manager.query(
+      'SELECT entityId FROM `like` \
+      WHERE like.userId = ? AND like.entityType = ?',
+      [userId, 'user'],
+    );
+
+    return rows.map((v: any) => v.entityId);
   }
 
   //? ----------------------------------------------------------------------- //

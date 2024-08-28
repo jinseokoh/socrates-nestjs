@@ -1,17 +1,18 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
-import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
-import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Category } from 'src/domain/categories/entities/category.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Fluency } from 'src/domain/languages/entities/fluency.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
+import { Interest } from 'src/domain/users/entities/interest.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
-import { Fluency } from 'src/domain/languages/entities/fluency.entity';
+import { Language } from 'src/domain/languages/entities/language.entity';
 import { Ledger } from 'src/domain/ledgers/entities/ledger.entity';
+import { Like } from 'src/domain/users/entities/like.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
 import { Poll } from 'src/domain/icebreakers/entities/poll.entity';
@@ -36,6 +37,7 @@ import { UserLedgersService } from 'src/domain/users/user-ledgers.service';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 import { UserOtpsService } from 'src/domain/users/user-otps.service';
 import { UserPleasService } from 'src/domain/users/user-pleas.service';
+import { UserUsersService } from 'src/domain/users/user-users.service';
 import { UsersService } from 'src/domain/users/users.service';
 
 import { UserCategoriesController } from 'src/domain/users/user-categories.controller';
@@ -60,16 +62,11 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { FluencySubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
 import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
-import { Interest } from 'src/domain/users/entities/interest.entity';
-import { Language } from 'src/domain/languages/entities/language.entity';
-import { UserUsersService } from 'src/domain/users/user-users.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      BookmarkUserFeed,
-      BookmarkUserMeetup,
-      BookmarkUserUser,
+      Bookmark,
       Category,
       Feed,
       Flag,
@@ -78,6 +75,7 @@ import { UserUsersService } from 'src/domain/users/user-users.service';
       Interest,
       Join,
       Language,
+      Like,
       Fluency,
       Ledger,
       Meetup,

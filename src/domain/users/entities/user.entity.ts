@@ -40,6 +40,7 @@ import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_ans
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
 import { calcAge } from 'src/helpers/age-to-faction';
+import { Like } from 'src/domain/users/entities/like.entity';
 
 //! keep in mind that assigning default value in any Entity property is a absolute bad idea.
 //! i.e) gender: Gender = 'male'; 이 지랄하면 안 됨.
@@ -247,6 +248,9 @@ export class User {
 
   @OneToMany(() => BookmarkUserUser, (bookmark) => bookmark.recipient)
   public followers: BookmarkUserUser[];
+
+  @OneToMany(() => Like, (like) => like.user)
+  public likes: Like[];
 
   @OneToMany(() => Flag, (flag) => flag.user)
   public flags: Flag[];

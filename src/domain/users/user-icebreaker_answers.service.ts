@@ -13,24 +13,29 @@ import {
   paginate,
 } from 'nestjs-paginate';
 import { ConfigService } from '@nestjs/config';
-import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
-import { Flag } from 'src/domain/users/entities/flag.entity';
-import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
+import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { Repository } from 'typeorm/repository/Repository';
+import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
 import { DataSource } from 'typeorm';
+import { Flag } from 'src/domain/users/entities/flag.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Like } from 'src/domain/users/entities/like.entity';
+import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
+import { BookmarkUserIcebreakerAnswer } from 'src/domain/users/entities/bookmark_user_icebreaker_answer.entity';
 
 @Injectable()
-export class UserMeetupsService {
+export class UserIcebreakerAnswersService {
   private readonly env: any;
-  private readonly logger = new Logger(UserMeetupsService.name);
+  private readonly logger = new Logger(UserIcebreakerAnswersService.name);
 
   constructor(
-    @InjectRepository(Meetup)
-    private readonly meetupRepository: Repository<Meetup>,
-    @InjectRepository(Bookmark)
-    private readonly bookmarkRepository: Repository<Bookmark>,
+    @InjectRepository(IcebreakerAnswer)
+    private readonly icebreakerAnswerRepository: Repository<IcebreakerAnswer>,
+    @InjectRepository(BookmarkUserIcebreakerAnswer)
+    private readonly bookmarkUserIcebreakerAnswerRepository: Repository<BookmarkUserIcebreakerAnswer>,
+    @InjectRepository(Like)
+    private readonly likeRepository: Repository<Like>,
     @InjectRepository(Flag)
     private readonly flagRepository: Repository<Flag>,
     @Inject(ConfigService) private configService: ConfigService, // global
@@ -41,27 +46,27 @@ export class UserMeetupsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? My Meetups
+  //? My Icebreaker Answers
   //? ----------------------------------------------------------------------- //
 
   // 내가 만든 모임 리스트
-  async findMyMeetups(
+  async findMyIcebreakerAnswers(
     query: PaginateQuery,
     userId: number,
-  ): Promise<Paginated<Meetup>> {
-    const queryBuilder = this.meetupRepository
-      .createQueryBuilder('meetup')
-      .leftJoinAndSelect('meetup.venue', 'venue')
-      .leftJoinAndSelect('meetup.user', 'user')
-      .leftJoinAndSelect('meetup.room', 'room')
+  ): Promise<Paginated<IcebreakerAnswer>> {
+    const queryBuilder = this.icebreakerAnswerRepository
+      .createQueryBuilder('icebreaker')
+      .leftJoinAndSelect('icebreaker.venue', 'venue')
+      .leftJoinAndSelect('icebreaker.user', 'user')
+      .leftJoinAndSelect('icebreaker.room', 'room')
       .leftJoinAndSelect('room.participants', 'participants')
-      .where('meetup.userId = :userId', {
+      .where('icebreaker.userId = :userId', {
         userId,
       });
 
-    const config: PaginateConfig<Meetup> = {
+    const config: PaginateConfig<Icebreaker> = {
       sortableColumns: ['id'],
-      searchableColumns: ['title'],
+      searchableColumns: ['body'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
@@ -76,22 +81,22 @@ export class UserMeetupsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내가 만든 Meetup 리스트 (all)
-  async loadMyMeetups(userId: number): Promise<Meetup[]> {
-    return await this.meetupRepository
-      .createQueryBuilder('meetup')
-      .innerJoinAndSelect('meetup.venue', 'venue')
-      .innerJoinAndSelect('meetup.user', 'user')
+  // 내가 만든 Icebreaker 리스트 (all)
+  async loadMyIcebreakers(userId: number): Promise<Icebreaker[]> {
+    return await this.icebreakerRepository
+      .createQueryBuilder('icebreaker')
+      .innerJoinAndSelect('icebreaker.venue', 'venue')
+      .innerJoinAndSelect('icebreaker.user', 'user')
       .where({
         userId,
       })
       .getMany();
   }
 
-  // 내가 만든 Meetup Ids 리스트 (all)
-  async loadMyMeetupIds(userId: number): Promise<number[]> {
-    const items = await this.meetupRepository
-      .createQueryBuilder('meetup')
+  // 내가 만든 Icebreaker Ids 리스트 (all)
+  async loadMyIcebreakerIds(userId: number): Promise<number[]> {
+    const items = await this.icebreakerRepository
+      .createQueryBuilder('icebreaker')
       .where({
         userId,
       })
@@ -100,45 +105,43 @@ export class UserMeetupsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크/찜(Bookmark) 생성
+  //? 북마크/찜(BookmarkUserIcebreaker) 생성
   //? ----------------------------------------------------------------------- //
 
-  async createMeetupBookmark(
+  async createIcebreakerBookmark(
     userId: number,
-    meetupId: number,
-  ): Promise<Bookmark> {
+    icebreakerId: number,
+  ): Promise<BookmarkUserIcebreaker> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const bookmark = await queryRunner.manager.save(
-        queryRunner.manager.getRepository(Bookmark).create({
-          userId,
-          entityType: 'meetup',
-          entityId: meetupId,
-        }),
+        queryRunner.manager
+          .getRepository(BookmarkUserIcebreaker)
+          .create({ userId, icebreakerId }),
       );
       await queryRunner.manager.query(
-        'UPDATE `meetup` SET bookmarkCount = bookmarkCount + 1 WHERE id = ?',
-        [meetupId],
+        'UPDATE `icebreaker` SET bookmarkCount = bookmarkCount + 1 WHERE id = ?',
+        [icebreakerId],
       );
 
       if (false) {
         // notification with event listener ------------------------------------//
-        const meetup = await queryRunner.manager.findOneOrFail(Meetup, {
-          where: { id: meetupId },
+        const icebreaker = await queryRunner.manager.findOneOrFail(Icebreaker, {
+          where: { id: icebreakerId },
           relations: [`user`, `user.profile`],
         });
         // todo. fine tune notifying logic to dedup the same id
         const event = new UserNotificationEvent();
-        event.name = 'meetup';
-        event.userId = meetup.user.id;
-        event.token = meetup.user.pushToken;
-        event.options = meetup.user.profile?.options ?? {};
-        event.body = `${meetup.title} 모임에 누군가 찜을 했습니다.`;
+        event.name = 'icebreaker';
+        event.userId = icebreaker.user.id;
+        event.token = icebreaker.user.pushToken;
+        event.options = icebreaker.user.profile?.options ?? {};
+        event.body = `${icebreaker.body} 질문에 누군가 답변을 했습니다.`;
         event.data = {
-          page: `meetups/${meetupId}`,
+          page: `icebreakers/${icebreakerId}`,
           args: '',
         };
         this.eventEmitter.emit('user.notified', event);
@@ -158,20 +161,23 @@ export class UserMeetupsService {
     }
   }
 
-  async deleteMeetupBookmark(userId: number, meetupId: number): Promise<any> {
+  async deleteIcebreakerBookmark(
+    userId: number,
+    icebreakerId: number,
+  ): Promise<any> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
-        'DELETE FROM `bookmark` WHERE userId = ? AND entityType = ? AND entityId = ?',
-        [userId, `meetup`, meetupId],
+        'DELETE FROM `bookmark_user_icebreaker` WHERE userId = ? AND icebreakerId = ?',
+        [userId, icebreakerId],
       );
       if (affectedRows > 0) {
         await queryRunner.manager.query(
-          'UPDATE `meetup` SET bookmarkCount = bookmarkCount - 1 WHERE id = ? AND bookmarkCount > 0',
-          [meetupId],
+          'UPDATE `icebreaker` SET bookmarkCount = bookmarkCount - 1 WHERE id = ? AND bookmarkCount > 0',
+          [icebreakerId],
         );
       }
       await queryRunner.commitTransaction();
@@ -184,12 +190,15 @@ export class UserMeetupsService {
     }
   }
 
-  // Meetup 북마크 여부
-  async isMeetupBookmarked(userId: number, meetupId: number): Promise<boolean> {
-    const [row] = await this.bookmarkRepository.manager.query(
-      'SELECT COUNT(*) AS count FROM `bookmark` \
-      WHERE userId = ? AND entityType = ? AND meetupId = ?',
-      [userId, `meetup`, meetupId],
+  // Icebreaker 북마크 여부
+  async isIcebreakerBookmarked(
+    userId: number,
+    icebreakerId: number,
+  ): Promise<boolean> {
+    const [row] = await this.bookmarkUserIcebreakerRepository.manager.query(
+      'SELECT COUNT(*) AS count FROM `bookmark_user_icebreaker` \
+      WHERE userId = ? AND icebreakerId = ?',
+      [userId, icebreakerId],
     );
     const { count } = row;
 
@@ -197,23 +206,27 @@ export class UserMeetupsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 내가 북마크한 Meetups
+  //? 내가 북마크한 Icebreakers
   //? ----------------------------------------------------------------------- //
 
-  // 내가 북마크한 Meetups (paginated)
-  async listBookmarkedMeetups(
+  // 내가 북마크한 Icebreakers (paginated)
+  async listBookmarkedIcebreakers(
     query: PaginateQuery,
     userId: number,
-  ): Promise<Paginated<Meetup>> {
-    const queryBuilder = this.meetupRepository
-      .createQueryBuilder('meetup')
-      .innerJoin(Bookmark, 'bookmark', 'meetup.id = bookmark.entityId')
-      .where('bookmark.userId = :userId', { userId })
-      .andWhere('flag.entityType = :entityType', { entityType: 'meetup' });
+  ): Promise<Paginated<Icebreaker>> {
+    const queryBuilder = this.icebreakerRepository
+      .createQueryBuilder('icebreaker')
+      .innerJoinAndSelect(
+        BookmarkUserIcebreaker,
+        'bookmark_user_icebreaker',
+        'bookmark_user_icebreaker.icebreakerId = icebreaker.id',
+      )
+      .innerJoinAndSelect('icebreaker.user', 'user')
+      .where('bookmark_user_icebreaker.userId = :userId', { userId });
 
-    const config: PaginateConfig<Meetup> = {
+    const config: PaginateConfig<Icebreaker> = {
       sortableColumns: ['id'],
-      searchableColumns: ['title'],
+      searchableColumns: ['body'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {},
@@ -222,40 +235,40 @@ export class UserMeetupsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내가 북마크한 모든 Meetups
-  async loadBookmarkedMeetups(userId: number): Promise<Meetup[]> {
-    const queryBuilder = this.meetupRepository.createQueryBuilder('meetup');
+  // 내가 북마크한 모든 Icebreakers
+  async loadBookmarkedIcebreakers(userId: number): Promise<Icebreaker[]> {
+    const queryBuilder =
+      this.icebreakerRepository.createQueryBuilder('icebreaker');
     return await queryBuilder
       .innerJoinAndSelect(
-        Bookmark,
-        'bookmark',
-        'flag.entityId = meetup.id AND flag.entityType = :entityType',
-        { entityType: 'meetup' },
+        BookmarkUserIcebreaker,
+        'bookmark_user_icebreaker',
+        'bookmark_user_icebreaker.icebreakerId = icebreaker.id',
       )
-      .addSelect(['meetup.*'])
-      .where('bookmark.userId = :userId', { userId })
+      .addSelect(['icebreaker.*'])
+      .where('bookmark_user_icebreaker.userId = :userId', { userId })
       .getMany();
   }
 
-  // 내가 북마크한 모든 MeetupIds
-  async loadBookmarkedMeetupIds(userId: number): Promise<number[]> {
-    const rows = await this.bookmarkRepository.manager.query(
-      'SELECT meetupId FROM `bookmark` \
-      WHERE bookmark.entityType = ? AND bookmark.userId = ?',
-      [`meetup`, userId],
+  // 내가 북마크한 모든 IcebreakerIds
+  async loadBookmarkedIcebreakerIds(userId: number): Promise<number[]> {
+    const rows = await this.bookmarkUserIcebreakerRepository.manager.query(
+      'SELECT icebreakerId FROM `bookmark_user_icebreaker` \
+      WHERE bookmark_user_icebreaker.userId = ?',
+      [userId],
     );
 
-    return rows.map((v: any) => v.entityId);
+    return rows.map((v: any) => v.icebreakerId);
   }
 
   //? ----------------------------------------------------------------------- //
-  //? Meetup Flag 신고 생성
+  //? Icebreaker Flag 신고 생성
   //? ----------------------------------------------------------------------- //
 
-  // Meetup 신고 생성
-  async createMeetupFlag(
+  // Icebreaker 신고 생성
+  async createIcebreakerFlag(
     userId: number,
-    meetupId: number,
+    icebreakerId: number,
     message: string,
   ): Promise<Flag> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -266,14 +279,14 @@ export class UserMeetupsService {
       const flag = await queryRunner.manager.save(
         queryRunner.manager.getRepository(Flag).create({
           userId,
-          entityType: 'meetup',
-          entityId: meetupId,
+          entityType: 'icebreaker',
+          entityId: icebreakerId,
           message,
         }),
       );
       await queryRunner.manager.query(
-        'UPDATE `meetup` SET flagCount = flagCount + 1 WHERE id = ?',
-        [meetupId],
+        'UPDATE `icebreaker` SET flagCount = flagCount + 1 WHERE id = ?',
+        [icebreakerId],
       );
       await queryRunner.commitTransaction();
       return flag;
@@ -289,8 +302,11 @@ export class UserMeetupsService {
     }
   }
 
-  // Meetup 신고 제거
-  async deleteMeetupFlag(userId: number, meetupId: number): Promise<any> {
+  // Icebreaker 신고 제거
+  async deleteIcebreakerFlag(
+    userId: number,
+    icebreakerId: number,
+  ): Promise<any> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
@@ -298,15 +314,14 @@ export class UserMeetupsService {
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
         'DELETE FROM `flag` where userId = ? AND entityType = ? AND entityId = ?',
-        [userId, `meetup`, meetupId],
+        [userId, `icebreaker`, icebreakerId],
       );
       if (affectedRows > 0) {
         await queryRunner.manager.query(
-          'UPDATE `meetup` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
-          [meetupId],
+          'UPDATE `icebreaker` SET flagCount = flagCount - 1 WHERE id = ? AND flagCount > 0',
+          [icebreakerId],
         );
       }
-      await queryRunner.commitTransaction();
       return { data: affectedRows };
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -316,12 +331,15 @@ export class UserMeetupsService {
     }
   }
 
-  // Meetup 신고 여부
-  async isMeetupFlagged(userId: number, meetupId: number): Promise<boolean> {
+  // Icebreaker 신고 여부
+  async isIcebreakerFlagged(
+    userId: number,
+    icebreakerId: number,
+  ): Promise<boolean> {
     const [row] = await this.flagRepository.manager.query(
       'SELECT COUNT(*) AS count FROM `flag` \
       WHERE userId = ? AND entityType = ? AND entityId = ?',
-      [userId, `meetup`, meetupId],
+      [userId, `icebreaker`, icebreakerId],
     );
     const { count } = row;
 
@@ -329,23 +347,23 @@ export class UserMeetupsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 내가 신고한 Meetups
+  //? 내가 신고한 Icebreakers
   //? ----------------------------------------------------------------------- //
 
-  // 내가 신고한 Meetups (paginated)
-  async listFlaggedMeetups(
+  // 내가 신고한 Icebreakers (paginated)
+  async listFlaggedIcebreakers(
     query: PaginateQuery,
     userId: number,
-  ): Promise<Paginated<Meetup>> {
-    const queryBuilder = this.meetupRepository
-      .createQueryBuilder('meetup')
-      .innerJoin(Flag, 'flag', 'meetup.id = flag.entityId')
+  ): Promise<Paginated<Icebreaker>> {
+    const queryBuilder = this.icebreakerRepository
+      .createQueryBuilder('icebreaker')
+      .innerJoin(Flag, 'flag', 'icebreaker.id = flag.entityId')
       .where('flag.userId = :userId', { userId })
-      .andWhere('flag.entityType = :entityType', { entityType: 'meetup' });
+      .andWhere('flag.entityType = :entityType', { entityType: 'icebreaker' });
 
-    const config: PaginateConfig<Meetup> = {
+    const config: PaginateConfig<Icebreaker> = {
       sortableColumns: ['id'],
-      searchableColumns: ['title'],
+      searchableColumns: ['body'],
       defaultLimit: 20,
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {},
@@ -354,27 +372,28 @@ export class UserMeetupsService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내가 신고한 모든 Meetups
-  async loadFlaggedMeetups(userId: number): Promise<Meetup[]> {
-    const queryBuilder = this.meetupRepository.createQueryBuilder('meetup');
+  // 내가 신고한 모든 Icebreakers
+  async loadFlaggedIcebreakers(userId: number): Promise<Icebreaker[]> {
+    const queryBuilder =
+      this.icebreakerRepository.createQueryBuilder('icebreaker');
     return await queryBuilder
       .innerJoinAndSelect(
         Flag,
         'flag',
-        'flag.entityId = meetup.id AND flag.entityType = :entityType',
-        { entityType: 'meetup' },
+        'flag.entityId = icebreaker.id AND flag.entityType = :entityType',
+        { entityType: 'icebreaker' },
       )
-      .addSelect(['meetup.*'])
+      .addSelect(['icebreaker.*'])
       .where('flag.userId = :userId', { userId })
       .getMany();
   }
 
-  // 내가 신고한 모든 MeetupIds
-  async loadFlaggedMeetupIds(userId: number): Promise<number[]> {
+  // 내가 신고한 모든 IcebreakerIds
+  async loadFlaggedIcebreakerIds(userId: number): Promise<number[]> {
     const rows = await this.flagRepository.manager.query(
       'SELECT entityId FROM `flag` \
       WHERE flag.entityType = ? AND flag.userId = ?',
-      [`meetup`, userId],
+      [`icebreaker`, userId],
     );
 
     return rows.map((v: any) => v.entityId);
