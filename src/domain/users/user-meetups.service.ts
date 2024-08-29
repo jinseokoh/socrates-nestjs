@@ -127,26 +127,6 @@ export class UserMeetupsService {
         [meetupId],
       );
 
-      if (false) {
-        // notification with event listener ------------------------------------//
-        const meetup = await queryRunner.manager.findOneOrFail(Meetup, {
-          where: { id: meetupId },
-          relations: [`user`, `user.profile`],
-        });
-        // todo. fine tune notifying logic to dedup the same id
-        const event = new UserNotificationEvent();
-        event.name = 'meetup';
-        event.userId = meetup.user.id;
-        event.token = meetup.user.pushToken;
-        event.options = meetup.user.profile?.options ?? {};
-        event.body = `${meetup.title} 모임에 누군가 찜을 했습니다.`;
-        event.data = {
-          page: `meetups/${meetupId}`,
-          args: '',
-        };
-        this.eventEmitter.emit('user.notified', event);
-      }
-
       await queryRunner.commitTransaction();
       return bookmark;
     } catch (error) {
@@ -191,7 +171,7 @@ export class UserMeetupsService {
   async isMeetupBookmarked(userId: number, meetupId: number): Promise<boolean> {
     const [row] = await this.bookmarkRepository.manager.query(
       'SELECT COUNT(*) AS count FROM `bookmark` \
-      WHERE userId = ? AND entityType = ? AND meetupId = ?',
+      WHERE userId = ? AND entityType = ? AND entityId = ?',
       [userId, `meetup`, meetupId],
     );
     const { count } = row;
@@ -212,7 +192,7 @@ export class UserMeetupsService {
       .createQueryBuilder('meetup')
       .innerJoin(Bookmark, 'bookmark', 'bookmark.entityId = meetup.id')
       .where('bookmark.userId = :userId', { userId })
-      .andWhere('flag.entityType = :entityType', { entityType: 'meetup' });
+      .andWhere('bookmark.entityType = :entityType', { entityType: 'meetup' });
 
     const config: PaginateConfig<Meetup> = {
       sortableColumns: ['id'],
@@ -232,7 +212,7 @@ export class UserMeetupsService {
       .innerJoinAndSelect(
         Bookmark,
         'bookmark',
-        'flag.entityId = meetup.id AND flag.entityType = :entityType',
+        'bookmark.entityId = meetup.id AND bookmark.entityType = :entityType',
         { entityType: 'meetup' },
       )
       .addSelect(['meetup.*'])
@@ -243,7 +223,7 @@ export class UserMeetupsService {
   // 내가 북마크한 모든 MeetupIds
   async loadBookmarkedMeetupIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkRepository.manager.query(
-      'SELECT meetupId FROM `bookmark` \
+      'SELECT entityId FROM `bookmark` \
       WHERE bookmark.entityType = ? AND bookmark.userId = ?',
       [`meetup`, userId],
     );
@@ -256,11 +236,7 @@ export class UserMeetupsService {
   //? ----------------------------------------------------------------------- //
 
   // Meetup 좋아요 생성
-  async createMeetupLike(
-    userId: number,
-    meetupId: number,
-    message: string,
-  ): Promise<Like> {
+  async createMeetupLike(userId: number, meetupId: number): Promise<Like> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
@@ -271,7 +247,6 @@ export class UserMeetupsService {
           userId,
           entityType: 'meetup',
           entityId: meetupId,
-          message,
         }),
       );
       await queryRunner.manager.query(

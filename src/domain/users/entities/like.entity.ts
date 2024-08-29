@@ -27,12 +27,6 @@ export class Like {
   @PrimaryColumn({ type: 'int', unsigned: true })
   entityId: number;
 
-  @Column({ length: 80, nullable: true })
-  message: string | null;
-
-  @Column({ length: 80, nullable: true })
-  note: string | null;
-
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })
   createdAt: Date;

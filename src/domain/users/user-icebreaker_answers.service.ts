@@ -252,7 +252,6 @@ export class UserIcebreakerAnswersService {
   async createIcebreakerAnswerLike(
     userId: number,
     icebreakerId: number,
-    message: string,
   ): Promise<Like> {
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -264,7 +263,6 @@ export class UserIcebreakerAnswersService {
           userId,
           entityType: 'icebreaker_answer',
           entityId: icebreakerId,
-          message,
         }),
       );
       await queryRunner.manager.query(

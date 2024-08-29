@@ -17,6 +17,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
 import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Like } from 'src/domain/users/entities/like.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -59,7 +60,7 @@ export class UserMeetupsController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Meetup 북마크/찜 생성' })
-  @Post(':userId/bookmarkedmeetups/:meetupId')
+  @Post(':userId/meetups/:meetupId/bookmark')
   async createMeetupBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
@@ -68,7 +69,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: 'Meetup 북마크/찜 삭제' })
-  @Delete(':userId/bookmarkedmeetups/:meetupId')
+  @Delete(':userId/meetups/:meetupId/bookmark')
   async deleteMeetupBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
@@ -77,7 +78,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: 'Meetup 북마크/찜 여부' })
-  @Get(':userId/bookmarkedmeetups/:meetupId')
+  @Get(':userId/meetups/:meetupId/bookmark')
   async isMeetupBookmarked(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
@@ -109,7 +110,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '내가 북마크/찜한 MeetupIds' })
-  @Get(':userId/bookmarkedmeetupids')
+  @Get(':userId/bookmarkedmeetups/ids')
   async loadBookmarkedMeetupIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
@@ -117,11 +118,73 @@ export class UserMeetupsController {
   }
 
   //? ----------------------------------------------------------------------- //
+  //? Meetup Like 신고 생성
+  //? ----------------------------------------------------------------------- //
+
+  @ApiOperation({ description: 'Meetup 신고 생성' })
+  @Post(':userId/meetups/:meetupId/like')
+  async createMeetupLike(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+  ): Promise<Like> {
+    return await this.userMeetupsService.createMeetupLike(userId, meetupId);
+  }
+
+  @ApiOperation({ description: 'Meetup 신고 삭제' })
+  @Delete(':userId/meetups/:meetupId/like')
+  async deleteMeetupLike(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+  ): Promise<any> {
+    return await this.userMeetupsService.deleteMeetupLike(userId, meetupId);
+  }
+
+  @ApiOperation({ description: 'Meetup 신고 여부' })
+  @Get(':userId/meetups/:meetupId/like')
+  async isMeetupLiked(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('meetupId', ParseIntPipe) meetupId: number,
+  ): Promise<boolean> {
+    return await this.userMeetupsService.isMeetupLiked(userId, meetupId);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? 내가 신고한 Meetups
+  //? ----------------------------------------------------------------------- //
+
+  @ApiOperation({ description: '내가 신고한 Meetups (paginated)' })
+  @PaginateQueryOptions()
+  @Get(':userId/likedmeetups')
+  async listLikedMeetupsByUserId(
+    @Paginate() query: PaginateQuery,
+    @Param('userId') userId: number,
+  ): Promise<Paginated<Meetup>> {
+    return await this.userMeetupsService.listLikedMeetups(query, userId);
+  }
+
+  //! not working but, do we even need this anyway?
+  @ApiOperation({ description: '내가 신고한 모든 Meetups (all)' })
+  @Get(':userId/likedmeetups/all')
+  async loadLikedMeetups(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<Meetup[]> {
+    return await this.userMeetupsService.loadLikedMeetups(userId);
+  }
+
+  @ApiOperation({ description: '내가 신고한 모든 MeetupIds' })
+  @Get(':userId/likedmeetups/ids')
+  async loadLikedMeetupIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.userMeetupsService.loadLikedMeetupIds(userId);
+  }
+
+  //? ----------------------------------------------------------------------- //
   //? Meetup Flag 신고 생성
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Meetup 신고 생성' })
-  @Post(':userId/flaggedmeetups/:meetupId')
+  @Post(':userId/meetups/:meetupId/flag')
   async createMeetupFlag(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
@@ -135,7 +198,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: 'Meetup 신고 삭제' })
-  @Delete(':userId/flaggedmeetups/:meetupId')
+  @Delete(':userId/meetups/:meetupId/flag')
   async deleteMeetupFlag(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
@@ -144,7 +207,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: 'Meetup 신고 여부' })
-  @Get(':userId/flaggedmeetups/:meetupId')
+  @Get(':userId/meetups/:meetupId/flag')
   async isMeetupFlagged(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,

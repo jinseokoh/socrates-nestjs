@@ -203,11 +203,7 @@ export class UserUsersService {
   async loadBookmarkingUsers(userId: number): Promise<User[]> {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
     return await queryBuilder
-      .innerJoinAndSelect(
-        Bookmark,
-        'bookmark',
-        'bookmark.userId = user.id',
-      )
+      .innerJoinAndSelect(Bookmark, 'bookmark', 'bookmark.userId = user.id')
       .addSelect(['user.*'])
       .where('bookmark.recipientId = :userId', {
         userId,
@@ -232,11 +228,7 @@ export class UserUsersService {
 
   // User 신고 생성
   // 가능하다면, user likeCount 증가
-  async createUserLike(
-    userId: number,
-    recipientId: number,
-    message: string | null,
-  ): Promise<Like> {
+  async createUserLike(userId: number, recipientId: number): Promise<Like> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
@@ -247,7 +239,6 @@ export class UserUsersService {
           userId,
           entityType: 'user',
           entityId: recipientId,
-          message,
         }),
       );
       await queryRunner.manager.query(
