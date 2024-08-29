@@ -98,7 +98,7 @@ export class Icebreaker {
   @OneToMany(() => IcebreakerAnswer, (answer) => answer.icebreaker)
   public answers: IcebreakerAnswer[];
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.icebreaker)
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.entityId)
   public bookmarks: Bookmark[];
 
   @OneToMany(() => Flag, (flag) => flag.entityId)

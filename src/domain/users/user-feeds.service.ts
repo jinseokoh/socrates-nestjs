@@ -30,7 +30,7 @@ export class UserFeedsService {
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
     @InjectRepository(Bookmark)
-    private readonly bookmarkUserFeedRepository: Repository<Bookmark>,
+    private readonly bookmarkRepository: Repository<Bookmark>,
     @InjectRepository(Flag)
     private readonly flagRepository: Repository<Flag>,
     @Inject(ConfigService) private configService: ConfigService,
@@ -98,19 +98,18 @@ export class UserFeedsService {
   //? 북마크/찜(Bookmark) 생성
   //? ----------------------------------------------------------------------- //
 
-  async createFeedBookmark(
-    userId: number,
-    feedId: number,
-  ): Promise<Bookmark> {
+  async createFeedBookmark(userId: number, feedId: number): Promise<Bookmark> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const bookmark = await queryRunner.manager.save(
-        queryRunner.manager
-          .getRepository(Bookmark)
-          .create({ userId, feedId }),
+        queryRunner.manager.getRepository(Bookmark).create({
+          userId,
+          entityType: 'feed',
+          entityId: feedId,
+        }),
       );
       await queryRunner.manager.query(
         'UPDATE `feed` SET bookmarkCount = bookmarkCount + 1 WHERE id = ?',
@@ -179,7 +178,7 @@ export class UserFeedsService {
 
   // Feed 북마크 여부
   async isFeedBookmarked(userId: number, feedId: number): Promise<boolean> {
-    const [row] = await this.bookmarkUserFeedRepository.manager.query(
+    const [row] = await this.bookmarkRepository.manager.query(
       'SELECT COUNT(*) AS count FROM `bookmark` \
       WHERE userId = ? AND feedId = ?',
       [userId, feedId],
@@ -200,11 +199,7 @@ export class UserFeedsService {
   ): Promise<Paginated<Feed>> {
     const queryBuilder = this.feedRepository
       .createQueryBuilder('feed')
-      .innerJoinAndSelect(
-        Bookmark,
-        'bookmark',
-        'bookmark.feedId = feed.id',
-      )
+      .innerJoinAndSelect(Bookmark, 'bookmark', 'bookmark.feedId = feed.id')
       .innerJoinAndSelect('feed.user', 'user')
       .where('bookmark.userId = :userId', { userId });
 
@@ -223,11 +218,7 @@ export class UserFeedsService {
   async loadBookmarkedFeeds(userId: number): Promise<Feed[]> {
     const queryBuilder = this.feedRepository.createQueryBuilder('feed');
     return await queryBuilder
-      .innerJoinAndSelect(
-        Bookmark,
-        'bookmark',
-        'bookmark.feedId = feed.id',
-      )
+      .innerJoinAndSelect(Bookmark, 'bookmark', 'bookmark.feedId = feed.id')
       .addSelect(['feed.*'])
       .where('bookmark.userId = :userId', { userId })
       .getMany();
@@ -235,7 +226,7 @@ export class UserFeedsService {
 
   // 내가 북마크한 모든 FeedIds
   async loadBookmarkedFeedIds(userId: number): Promise<number[]> {
-    const rows = await this.bookmarkUserFeedRepository.manager.query(
+    const rows = await this.bookmarkRepository.manager.query(
       'SELECT feedId FROM `bookmark` \
       WHERE bookmark.userId = ?',
       [userId],

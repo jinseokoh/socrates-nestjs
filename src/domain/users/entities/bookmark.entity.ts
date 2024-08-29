@@ -1,17 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
-  Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryColumn,
-  PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 
-//? a User can bookmark Icebreaker
 //? 모델사용을 위해, many-to-many 대신 one-to-many 선호
 //? https://github.com/typeorm/typeorm/issues/4653
 @Entity()
@@ -30,29 +27,17 @@ export class Bookmark {
   @PrimaryColumn({ type: 'int', unsigned: true })
   entityId: number;
 
-  @Column({ length: 80, nullable: true })
-  message: string | null;
-
-  @Column({ length: 80, nullable: true })
-  note: string | null;
-
   @CreateDateColumn()
   @ApiProperty({ description: 'createdAt' })
   createdAt: Date;
 
-  @ManyToOne(() => User, (user) => user.icebreakerBookmarks, {
+  @ManyToOne(() => User, (user) => user.bookmarks, {
     nullable: false,
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
-  public user: User;
-
-  @ManyToOne(() => Icebreaker, (icebreaker) => icebreaker.bookmarks, {
-    nullable: false,
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
-  })
-  public icebreaker: Icebreaker;
+  @JoinColumn({ name: 'userId' })
+  user?: User;
 
   //? ----------------------------------------------------------------------- //
   //? constructor

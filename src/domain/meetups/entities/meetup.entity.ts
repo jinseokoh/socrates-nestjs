@@ -206,7 +206,7 @@ export class Meetup {
   @OneToMany(() => MeetupComment, (comment) => comment.meetup)
   public comments: MeetupComment[];
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.meetup)
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.entityId)
   public bookmarks: Bookmark[];
 
   @OneToMany(() => Flag, (flag) => flag.entityId)

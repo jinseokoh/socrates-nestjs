@@ -31,7 +31,7 @@ export class UserUsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Bookmark)
-    private readonly bookmarkUserUserRepository: Repository<Bookmark>,
+    private readonly bookmarkRepository: Repository<Bookmark>,
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Flag)
@@ -111,7 +111,7 @@ export class UserUsersService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
-        'DELETE FROM `bookmark_user_user` WHERE userId = ? AND recipientId = ?',
+        'DELETE FROM `bookmark` WHERE userId = ? AND recipientId = ?',
         [userId, recipientId],
       );
       if (affectedRows > 0) {
@@ -135,9 +135,9 @@ export class UserUsersService {
     userId: number,
     recipientId: number,
   ): Promise<AnyData> {
-    const [row] = await this.bookmarkUserUserRepository.manager.query(
+    const [row] = await this.bookmarkRepository.manager.query(
       'SELECT COUNT(*) AS count \
-      FROM `bookmark_user_user` \
+      FROM `bookmark` \
       WHERE userId = ? AND recipientId = ?',
       [userId, recipientId],
     );
@@ -155,11 +155,11 @@ export class UserUsersService {
       .createQueryBuilder('user')
       .innerJoinAndSelect(
         Bookmark,
-        'bookmark_user_user',
-        'bookmark_user_user.recipientId = user.id',
+        'bookmark',
+        'bookmark.recipientId = user.id',
       )
       .leftJoinAndSelect('user.profile', 'profile')
-      .where('bookmark_user_user.userId = :userId', { userId });
+      .where('bookmark.userId = :userId', { userId });
 
     const config: PaginateConfig<User> = {
       sortableColumns: ['id'],
@@ -178,19 +178,19 @@ export class UserUsersService {
     return await queryBuilder
       .innerJoinAndSelect(
         Bookmark,
-        'bookmark_user_user',
-        'bookmark_user_user.recipientId = user.id',
+        'bookmark',
+        'bookmark.recipientId = user.id',
       )
       .addSelect(['user.*'])
-      .where('bookmark_user_user.userId = :userId', { userId })
+      .where('bookmark.userId = :userId', { userId })
       .getMany();
   }
 
   // 내가 북마크한 모든 userIds
   async loadBookmarkedUserIds(userId: number): Promise<number[]> {
-    const rows = await this.bookmarkUserUserRepository.manager.query(
-      'SELECT recipientId FROM `bookmark_user_user` \
-      WHERE bookmark_user_user.userId = ?',
+    const rows = await this.bookmarkRepository.manager.query(
+      'SELECT recipientId FROM `bookmark` \
+      WHERE bookmark.userId = ?',
       [userId],
     );
 
@@ -205,11 +205,11 @@ export class UserUsersService {
     return await queryBuilder
       .innerJoinAndSelect(
         Bookmark,
-        'bookmark_user_user',
-        'bookmark_user_user.userId = user.id',
+        'bookmark',
+        'bookmark.userId = user.id',
       )
       .addSelect(['user.*'])
-      .where('bookmark_user_user.recipientId = :userId', {
+      .where('bookmark.recipientId = :userId', {
         userId,
       })
       .getMany();
@@ -217,9 +217,9 @@ export class UserUsersService {
 
   // 나를 북마크/following하는 UserIds
   async loadBookmarkingUserIds(userId: number): Promise<number[]> {
-    const rows = await this.bookmarkUserUserRepository.manager.query(
-      'SELECT userId FROM `bookmark_user_user` \
-      WHERE bookmark_user_user.recipientId = ?',
+    const rows = await this.bookmarkRepository.manager.query(
+      'SELECT userId FROM `bookmark` \
+      WHERE bookmark.recipientId = ?',
       [userId],
     );
 

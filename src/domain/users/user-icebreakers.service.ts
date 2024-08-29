@@ -31,7 +31,7 @@ export class UserIcebreakersService {
     @InjectRepository(Icebreaker)
     private readonly icebreakerRepository: Repository<Icebreaker>,
     @InjectRepository(Bookmark)
-    private readonly bookmarkUserIcebreakerRepository: Repository<Bookmark>,
+    private readonly bookmarkRepository: Repository<Bookmark>,
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Flag)
@@ -192,7 +192,7 @@ export class UserIcebreakersService {
     userId: number,
     icebreakerId: number,
   ): Promise<boolean> {
-    const [row] = await this.bookmarkUserIcebreakerRepository.manager.query(
+    const [row] = await this.bookmarkRepository.manager.query(
       'SELECT COUNT(*) AS count FROM `bookmark` \
       WHERE userId = ? AND entityType = ? AND entityId = ?',
       [userId, `icebreaker`, icebreakerId],
@@ -216,10 +216,13 @@ export class UserIcebreakersService {
       .innerJoinAndSelect(
         Bookmark,
         'bookmark',
-        'bookmark.icebreakerId = icebreaker.id',
+        'bookmark.entityId = icebreaker.id',
       )
       .innerJoinAndSelect('icebreaker.user', 'user')
-      .where('bookmark.userId = :userId', { userId });
+      .where('bookmark.userId = :userId', { userId })
+      .andWhere('bookmark.entityType = :entityType', {
+        entityType: 'icebreaker_answer',
+      });
 
     const config: PaginateConfig<Icebreaker> = {
       sortableColumns: ['id'],
@@ -240,7 +243,8 @@ export class UserIcebreakersService {
       .innerJoinAndSelect(
         Bookmark,
         'bookmark',
-        'bookmark.icebreakerId = icebreaker.id',
+        'bookmark.entityId = icebreaker.id AND bookmark.entityType = :entityType',
+        { entityType: 'icebreaker_answer' },
       )
       .addSelect(['icebreaker.*'])
       .where('bookmark.userId = :userId', { userId })
@@ -249,10 +253,10 @@ export class UserIcebreakersService {
 
   // 내가 북마크한 모든 IcebreakerIds
   async loadBookmarkedIcebreakerIds(userId: number): Promise<number[]> {
-    const rows = await this.bookmarkUserIcebreakerRepository.manager.query(
+    const rows = await this.bookmarkRepository.manager.query(
       'SELECT icebreakerId FROM `bookmark` \
-      WHERE bookmark.userId = ?',
-      [userId],
+      WHERE bookmark.entityType = ? AND bookmark.userId = ?',
+      [`icebreaker`, userId],
     );
 
     return rows.map((v: any) => v.icebreakerId);

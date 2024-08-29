@@ -25,7 +25,7 @@ export class Feed {
   id: number;
 
   @Column({ type: 'int', unsigned: true })
-  public userId: number;
+  userId: number;
 
   @Column({ length: 16, nullable: false })
   @ApiProperty({ description: 'slug' })
@@ -102,7 +102,7 @@ export class Feed {
   @OneToMany(() => FeedComment, (comment) => comment.feed)
   public comments: FeedComment[];
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.feed)
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.entityId)
   public bookmarks: Bookmark[];
 
   //? ----------------------------------------------------------------------- //

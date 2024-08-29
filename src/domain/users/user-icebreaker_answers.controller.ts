@@ -50,7 +50,9 @@ export class UserIcebreakerAnswersController {
   async loadMyIcebreakers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<IcebreakerAnswer[]> {
-    return await this.userIcebreakerAnswersService.loadMyIcebreakerAnswers(userId);
+    return await this.userIcebreakerAnswersService.loadMyIcebreakerAnswers(
+      userId,
+    );
   }
 
   @ApiOperation({ description: '내가 만든 IcebreakerAnswerIds' })
@@ -58,7 +60,9 @@ export class UserIcebreakerAnswersController {
   async loadMyIcebreakerAnswerIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
-    return await this.userIcebreakerAnswersService.loadMyIcebreakerAnswerIds(userId);
+    return await this.userIcebreakerAnswersService.loadMyIcebreakerAnswerIds(
+      userId,
+    );
   }
 
   //? ----------------------------------------------------------------------- //
@@ -108,11 +112,11 @@ export class UserIcebreakerAnswersController {
   @ApiOperation({ description: '내가 북마크/찜한 Icebreakers (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/bookmarkedicebreakers')
-  async listBookmarkedIcebreakers(
+  async listBookmarkedIcebreakerAnswers(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
-  ): Promise<Paginated<Icebreaker>> {
-    return await this.userIcebreakerAnswersService.listBookmarkedIcebreakers(
+  ): Promise<Paginated<IcebreakerAnswer>> {
+    return await this.userIcebreakerAnswersService.listBookmarkedIcebreakerAnswers(
       query,
       userId,
     );
@@ -121,18 +125,20 @@ export class UserIcebreakerAnswersController {
   //! not working but, do we even need this anyway?
   @ApiOperation({ description: '내가 북마크/찜한 Icebreakers (all)' })
   @Get(':userId/bookmarkedicebreakers/all')
-  async loadBookmarkedIcebreakers(
+  async loadBookmarkedIcebreakerAnswers(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<Icebreaker[]> {
-    return await this.userIcebreakerAnswersService.loadBookmarkedIcebreakers(userId);
+  ): Promise<IcebreakerAnswer[]> {
+    return await this.userIcebreakerAnswersService.loadBookmarkedIcebreakerAnswers(
+      userId,
+    );
   }
 
   @ApiOperation({ description: '내가 북마크/찜한 IcebreakerIds' })
   @Get(':userId/bookmarkedicebreakerids')
-  async loadBookmarkedIcebreakerIds(
+  async loadBookmarkedIcebreakerAnswerIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
-    return await this.userIcebreakerAnswersService.loadBookmarkedIcebreakerIds(
+    return await this.userIcebreakerAnswersService.loadBookmarkedIcebreakerAnswerIds(
       userId,
     );
   }
@@ -148,7 +154,7 @@ export class UserIcebreakerAnswersController {
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
     @Body('message') message: string | null,
   ): Promise<Flag> {
-    return await this.userIcebreakerAnswersService.createIcebreakerFlag(
+    return await this.userIcebreakerAnswersService.createIcebreakerAnswerFlag(
       userId,
       icebreakerId,
       message,
@@ -161,7 +167,7 @@ export class UserIcebreakerAnswersController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<any> {
-    return await this.userIcebreakerAnswersService.deleteIcebreakerFlag(
+    return await this.userIcebreakerAnswersService.deleteIcebreakerAnswerFlag(
       userId,
       icebreakerId,
     );
@@ -173,7 +179,7 @@ export class UserIcebreakerAnswersController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<boolean> {
-    return await this.userIcebreakerAnswersService.isIcebreakerFlagged(
+    return await this.userIcebreakerAnswersService.isIcebreakerAnswerFlagged(
       userId,
       icebreakerId,
     );
@@ -189,8 +195,8 @@ export class UserIcebreakerAnswersController {
   async listFlaggedIcebreakersByUserId(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
-  ): Promise<Paginated<Icebreaker>> {
-    return await this.userIcebreakerAnswersService.listFlaggedIcebreakers(
+  ): Promise<Paginated<IcebreakerAnswer>> {
+    return await this.userIcebreakerAnswersService.listFlaggedIcebreakerAnswers(
       query,
       userId,
     );
@@ -201,8 +207,10 @@ export class UserIcebreakerAnswersController {
   @Get(':userId/flaggedicebreakers/all')
   async loadFlaggedIcebreakers(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<Icebreaker[]> {
-    return await this.userIcebreakerAnswersService.loadFlaggedIcebreakers(userId);
+  ): Promise<IcebreakerAnswer[]> {
+    return await this.userIcebreakerAnswersService.loadFlaggedIcebreakerAnswers(
+      userId,
+    );
   }
 
   @ApiOperation({ description: '내가 신고한 모든 IcebreakerIds' })
@@ -210,6 +218,8 @@ export class UserIcebreakerAnswersController {
   async loadFlaggedIcebreakerIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
-    return await this.userIcebreakerAnswersService.loadFlaggedIcebreakerIds(userId);
+    return await this.userIcebreakerAnswersService.loadFlaggedIcebreakerAnswerIds(
+      userId,
+    );
   }
 }

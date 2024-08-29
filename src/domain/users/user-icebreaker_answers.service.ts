@@ -186,7 +186,7 @@ export class UserIcebreakerAnswersService {
   //? ----------------------------------------------------------------------- //
 
   // 내가 북마크한 Icebreakers (paginated)
-  async listBookmarkedIcebreakers(
+  async listBookmarkedIcebreakerAnswers(
     query: PaginateQuery,
     userId: number,
   ): Promise<Paginated<IcebreakerAnswer>> {
@@ -214,7 +214,9 @@ export class UserIcebreakerAnswersService {
   }
 
   // 내가 북마크한 모든 Icebreakers
-  async loadBookmarkedIcebreakers(userId: number): Promise<IcebreakerAnswer[]> {
+  async loadBookmarkedIcebreakerAnswers(
+    userId: number,
+  ): Promise<IcebreakerAnswer[]> {
     const queryBuilder =
       this.icebreakerAnswerRepository.createQueryBuilder('icebreakerAnswer');
     return await queryBuilder
@@ -224,13 +226,13 @@ export class UserIcebreakerAnswersService {
         'bookmark.entityId = icebreaker.id AND bookmark.entityType = :entityType',
         { entityType: 'icebreaker_answer' },
       )
-      .addSelect(['icebreaker.*'])
+      .addSelect(['icebreaker_answer.*'])
       .where('bookmark.userId = :userId', { userId })
       .getMany();
   }
 
   // 내가 북마크한 모든 IcebreakerIds
-  async loadBookmarkedIcebreakerAnsewrIds(userId: number): Promise<number[]> {
+  async loadBookmarkedIcebreakerAnswerIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkRepository.manager.query(
       'SELECT icebreakerAnswerId FROM `bookmark` \
       WHERE bookmark.entityType = ? AND bookmark.userId = ?',

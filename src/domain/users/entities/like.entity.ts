@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryColumn,
   Unique,
@@ -44,6 +45,7 @@ export class Like {
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'userId' })
   user?: User;
 
   //? ----------------------------------------------------------------------- //

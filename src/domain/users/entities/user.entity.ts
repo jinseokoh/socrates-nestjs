@@ -30,15 +30,12 @@ import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
 import { Withdrawal } from 'src/domain/users/entities/widthdrawal.entity';
 import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
-import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
-import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
 import { ContentComment } from 'src/domain/contents/entities/content_comment.entity';
 import { Participant } from 'src/domain/chats/entities/participant.entity';
 import { Question } from 'src/domain/icebreakers/entities/question.entity';
 import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
-import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { calcAge } from 'src/helpers/age-to-faction';
 import { Like } from 'src/domain/users/entities/like.entity';
 
@@ -234,26 +231,14 @@ export class User {
 
   // bookmarks -------------------------------------------------------------- //
 
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
-  public icebreakerBookmarks: Bookmark[];
-
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
-  public meetupBookmarks: Bookmark[];
-
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
-  public feedBookmarks: Bookmark[];
-
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
-  public followings: Bookmark[];
-
-  @OneToMany(() => Bookmark, (bookmark) => bookmark.recipient)
-  public followers: Bookmark[];
-
   @OneToMany(() => Like, (like) => like.user)
   public likes: Like[];
 
   @OneToMany(() => Flag, (flag) => flag.user)
   public flags: Flag[];
+
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.user)
+  public bookmarks: Bookmark[];
 
   // @OneToMany(() => Flag, (flag) => flag.recipient)
   // public flaggedByUsers: Flag[];

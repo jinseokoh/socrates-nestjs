@@ -26,7 +26,7 @@ export class FeedUsersService {
     @InjectRepository(Flag)
     private readonly flagRepository: Repository<Flag>,
     @InjectRepository(Bookmark)
-    private readonly bookmarkUserFeedRepository: Repository<Bookmark>,
+    private readonly bookmarkRepository: Repository<Bookmark>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
@@ -38,19 +38,18 @@ export class FeedUsersService {
   //? 북마크/찜(Bookmark) 생성
   //? ----------------------------------------------------------------------- //
 
-  async createFeedBookmark(
-    userId: number,
-    feedId: number,
-  ): Promise<Bookmark> {
+  async createFeedBookmark(userId: number, feedId: number): Promise<Bookmark> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const bookmark = await queryRunner.manager.save(
-        queryRunner.manager
-          .getRepository(Bookmark)
-          .create({ userId, feedId }),
+        queryRunner.manager.getRepository(Bookmark).create({
+          userId,
+          entityType: 'feed',
+          entityId: feedId,
+        }),
       );
       await queryRunner.manager.query(
         'UPDATE `feed` SET bookmarkCount = bookmarkCount + 1 WHERE id = ?',
@@ -119,7 +118,7 @@ export class FeedUsersService {
 
   // Feed 북마크 여부
   async isFeedBookmarked(userId: number, feedId: number): Promise<boolean> {
-    const [row] = await this.bookmarkUserFeedRepository.manager.query(
+    const [row] = await this.bookmarkRepository.manager.query(
       'SELECT COUNT(*) AS count FROM `bookmark` \
       WHERE userId = ? AND feedId = ?',
       [userId, feedId],
@@ -137,11 +136,7 @@ export class FeedUsersService {
   async loadBookmarkingUsers(feedId: number): Promise<User[]> {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
     return await queryBuilder
-      .innerJoinAndSelect(
-        Bookmark,
-        'bookmark',
-        'bookmark.userId = user.id',
-      )
+      .innerJoinAndSelect(Bookmark, 'bookmark', 'bookmark.userId = user.id')
       .addSelect(['user.*'])
       .where('bookmark.feedId = :feedId', {
         feedId,
