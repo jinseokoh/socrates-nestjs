@@ -6,7 +6,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 
@@ -18,13 +18,17 @@ import {
   'entityId',
 ])
 export class Like {
-  @PrimaryColumn({ type: 'int', unsigned: true })
+  // without primary column, it overwrites existing one with no exception
+  @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
+  id: number;
+
+  @Column({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository
 
-  @PrimaryColumn({ length: 32, nullable: false })
+  @Column({ length: 32, nullable: false })
   entityType: string;
 
-  @PrimaryColumn({ type: 'int', unsigned: true })
+  @Column({ type: 'int', unsigned: true })
   entityId: number;
 
   @CreateDateColumn()

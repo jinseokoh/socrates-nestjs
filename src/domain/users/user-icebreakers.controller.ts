@@ -12,9 +12,8 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
-import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { SkipThrottle } from '@nestjs/throttler';
-
+import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { UserIcebreakersService } from 'src/domain/users/user-icebreakers.service';
@@ -50,7 +49,7 @@ export class UserIcebreakersController {
   }
 
   @ApiOperation({ description: '내가 만든 IcebreakerIds' })
-  @Get(':userId/icebreakerids')
+  @Get(':userId/icebreakers/ids')
   async loadMyIcebreakerIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {

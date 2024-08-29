@@ -12,13 +12,11 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
-import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { SkipThrottle } from '@nestjs/throttler';
-
+import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
 import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { UserIcebreakerAnswersService } from 'src/domain/users/user-icebreaker_answers.service';
-import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -29,7 +27,7 @@ export class UserIcebreakerAnswersController {
   ) {}
 
   //? ----------------------------------------------------------------------- //
-  //? 내가 만든 Icebreakers
+  //? 내가 만든 IcebreakerAnswers
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '내가 만든 IcebreakerAnswers (paginated)' })

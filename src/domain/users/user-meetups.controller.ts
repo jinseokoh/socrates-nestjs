@@ -48,7 +48,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '내가 만든 MeetupIds' })
-  @Get(':userId/meetupids')
+  @Get(':userId/meetups/ids')
   async loadMyMeetupIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {

@@ -62,6 +62,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { FluencySubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
 import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
+import { UserIcebreakersController } from 'src/domain/users/user-icebreakers.controller';
+import { UserIcebreakersService } from 'src/domain/users/user-icebreakers.service';
+import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 
 @Module({
   imports: [
@@ -72,6 +75,7 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
       Flag,
       Friendship,
       Hate,
+      Icebreaker,
       Interest,
       Join,
       Language,
@@ -108,6 +112,7 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
     UserFeedsService,
     UserFriendsService,
     UserHatesService,
+    UserIcebreakersService,
     UserImpressionsService,
     UserJoinsService,
     UserLanguagesService,
@@ -126,6 +131,7 @@ import { UserNotificationListener } from 'src/domain/users/listeners/user-notifi
     UserFeedsController,
     UserFriendshipController,
     UserHatesController,
+    UserIcebreakersController,
     UserImpressionsController,
     UserJoinsController,
     UserLanguagesController,
