@@ -13,7 +13,7 @@ import {
 //? https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 @Unique('user_id_meetup_id_key', ['userId', 'meetupId'])
-export class BookmarkUserMeetup {
+export class Bookmark {
   @PrimaryColumn({ type: 'int', unsigned: true })
   userId: number;
 
@@ -40,7 +40,7 @@ export class BookmarkUserMeetup {
   //? ----------------------------------------------------------------------- //
   //? constructor
 
-  constructor(partial: Partial<BookmarkUserMeetup>) {
+  constructor(partial: Partial<Bookmark>) {
     Object.assign(this, partial);
   }
 }

@@ -14,7 +14,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { IsArray } from 'class-validator';
-import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Poll } from 'src/domain/icebreakers/entities/poll.entity';
 
 // a user can like meetup
@@ -102,8 +102,8 @@ export class Feed {
   @OneToMany(() => FeedComment, (comment) => comment.feed)
   public comments: FeedComment[];
 
-  @OneToMany(() => BookmarkUserFeed, (bookmark) => bookmark.feed)
-  public bookmarks: BookmarkUserFeed[];
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.feed)
+  public bookmarks: Bookmark[];
 
   //? ----------------------------------------------------------------------- //
   //? many-to-many (belongsToMany)

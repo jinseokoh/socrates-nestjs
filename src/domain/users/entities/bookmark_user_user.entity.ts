@@ -12,7 +12,7 @@ import {
 //? https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 @Unique('user_id_recipient_id_key', ['userId', 'recipientId'])
-export class BookmarkUserUser {
+export class Bookmark {
   //? unsigned int 로 사용하기 위해 명시적인 정의가 필요.
   @PrimaryColumn({ type: 'int', unsigned: true })
   userId: number;
@@ -41,7 +41,7 @@ export class BookmarkUserUser {
   //? ----------------------------------------------------------------------- //
   //? constructor
 
-  constructor(partial: Partial<BookmarkUserUser>) {
+  constructor(partial: Partial<Bookmark>) {
     Object.assign(this, partial);
   }
 }

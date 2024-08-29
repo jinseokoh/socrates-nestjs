@@ -14,7 +14,7 @@ import {
 import { User } from 'src/domain/users/entities/user.entity';
 import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
-import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Question } from 'src/domain/icebreakers/entities/question.entity';
 
 @Entity()
@@ -98,8 +98,8 @@ export class Icebreaker {
   @OneToMany(() => IcebreakerAnswer, (answer) => answer.icebreaker)
   public answers: IcebreakerAnswer[];
 
-  @OneToMany(() => BookmarkUserIcebreaker, (bookmark) => bookmark.icebreaker)
-  public bookmarks: BookmarkUserIcebreaker[];
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.icebreaker)
+  public bookmarks: Bookmark[];
 
   @OneToMany(() => Flag, (flag) => flag.entityId)
   public flags: Flag[];

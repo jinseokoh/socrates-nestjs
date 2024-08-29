@@ -25,7 +25,7 @@ export class UserUsersController {
   constructor(private readonly userUsersService: UserUsersService) {}
 
   //? ----------------------------------------------------------------------- //
-  //? 내가 북마크(BookmarkUserUser)한 Users
+  //? 내가 북마크(Bookmark)한 Users
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'User 북마크 생성' })

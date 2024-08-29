@@ -5,7 +5,7 @@ import { Repository } from 'typeorm/repository/Repository';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { User } from 'src/domain/users/entities/user.entity';
-import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 
 @Injectable()
 export class IcebreakerUsersService {
@@ -25,7 +25,7 @@ export class IcebreakerUsersService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크 (BookmarkUserIcebreaker) 리스트
+  //? 북마크 (Bookmark) 리스트
   //? ----------------------------------------------------------------------- //
 
   // 이 아이스브레이커을 북마크/찜한 모든 Users
@@ -33,12 +33,12 @@ export class IcebreakerUsersService {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
     return await queryBuilder
       .innerJoinAndSelect(
-        BookmarkUserIcebreaker,
-        'bookmark_user_icebreaker',
-        'bookmark_user_icebreaker.userId = user.id',
+        Bookmark,
+        'bookmark',
+        'bookmark.userId = user.id',
       )
       .addSelect(['user.*'])
-      .where('bookmark_user_icebreaker.icebreakerId = :icebreakerId', {
+      .where('bookmark.icebreakerId = :icebreakerId', {
         icebreakerId,
       })
       .getMany();
@@ -47,8 +47,8 @@ export class IcebreakerUsersService {
   // 이 아이스브레이커을 북마크/찜한 모든 UserIds
   async loadBookmarkerIds(icebreakerId: number): Promise<number[]> {
     const rows = await this.userRepository.manager.query(
-      'SELECT userId FROM `bookmark_user_icebreaker` \
-      WHERE bookmark_user_icebreaker.icebreakerId = ?',
+      'SELECT userId FROM `bookmark` \
+      WHERE bookmark.icebreakerId = ?',
       [icebreakerId],
     );
 

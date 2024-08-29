@@ -13,7 +13,7 @@ import {
 //? https://github.com/typeorm/typeorm/issues/4653
 @Entity()
 @Unique('user_id_feed_id_key', ['userId', 'feedId'])
-export class BookmarkUserFeed {
+export class Bookmark {
   @PrimaryColumn({ type: 'int', unsigned: true })
   userId: number;
 
@@ -40,7 +40,7 @@ export class BookmarkUserFeed {
   //? ----------------------------------------------------------------------- //
   //? constructor
 
-  constructor(partial: Partial<BookmarkUserFeed>) {
+  constructor(partial: Partial<Bookmark>) {
     Object.assign(this, partial);
   }
 }

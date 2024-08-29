@@ -6,7 +6,7 @@ import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
-import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 
 @Injectable()
 export class MeetupUsersService {
@@ -61,7 +61,7 @@ export class MeetupUsersService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크 (BookmarkUserMeetup) 리스트
+  //? 북마크 (Bookmark) 리스트
   //? ----------------------------------------------------------------------- //
 
   // 이 모임을 북마크/찜한 모든 Users
@@ -69,12 +69,12 @@ export class MeetupUsersService {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
     return await queryBuilder
       .innerJoinAndSelect(
-        BookmarkUserMeetup,
-        'bookmark_user_meetup',
-        'bookmark_user_meetup.userId = user.id',
+        Bookmark,
+        'bookmark',
+        'bookmark.userId = user.id',
       )
       .addSelect(['user.*'])
-      .where('bookmark_user_meetup.meetupId = :meetupId', {
+      .where('bookmark.meetupId = :meetupId', {
         meetupId,
       })
       .getMany();
@@ -83,8 +83,8 @@ export class MeetupUsersService {
   // 이 모임을 북마크/찜한 모든 UserIds
   async loadBookmarkerIds(meetupId: number): Promise<number[]> {
     const rows = await this.userRepository.manager.query(
-      'SELECT userId FROM `bookmark_user_meetup` \
-      WHERE bookmark_user_meetup.meetupId = ?',
+      'SELECT userId FROM `bookmark` \
+      WHERE bookmark.meetupId = ?',
       [meetupId],
     );
 

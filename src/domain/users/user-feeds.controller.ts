@@ -15,7 +15,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { UserFeedsService } from 'src/domain/users/user-feeds.service';
-import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -55,7 +55,7 @@ export class UserFeedsController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크/찜(BookmarkUserFeed) 생성
+  //? 북마크/찜(Bookmark) 생성
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Feed 북마크/찜 생성' })
@@ -63,7 +63,7 @@ export class UserFeedsController {
   async createFeedBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('feedId', ParseIntPipe) feedId: number,
-  ): Promise<BookmarkUserFeed> {
+  ): Promise<Bookmark> {
     return await this.userFeedsService.createFeedBookmark(userId, feedId);
   }
 
@@ -86,7 +86,7 @@ export class UserFeedsController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 내가 북마크(BookmarkUserFeed)한 Feeds
+  //? 내가 북마크(Bookmark)한 Feeds
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '내가 북마크한 Feeds (paginated)' })

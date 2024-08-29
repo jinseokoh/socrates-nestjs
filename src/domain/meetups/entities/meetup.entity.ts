@@ -27,7 +27,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { Venue } from 'src/domain/meetups/entities/venue.entity';
 import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
 import { Room } from 'src/domain/chats/entities/room.entity';
-import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 
 @Entity()
@@ -206,8 +206,8 @@ export class Meetup {
   @OneToMany(() => MeetupComment, (comment) => comment.meetup)
   public comments: MeetupComment[];
 
-  @OneToMany(() => BookmarkUserMeetup, (bookmark) => bookmark.meetup)
-  public bookmarks: BookmarkUserMeetup[];
+  @OneToMany(() => Bookmark, (bookmark) => bookmark.meetup)
+  public bookmarks: Bookmark[];
 
   @OneToMany(() => Flag, (flag) => flag.entityId)
   public flags: Flag[];

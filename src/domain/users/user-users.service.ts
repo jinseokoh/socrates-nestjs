@@ -15,7 +15,7 @@ import { AnyData } from 'src/common/types';
 import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm/repository/Repository';
-import { BookmarkUserUser } from 'src/domain/users/entities/bookmark_user_user.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { User } from 'src/domain/users/entities/user.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -30,8 +30,8 @@ export class UserUsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(BookmarkUserUser)
-    private readonly bookmarkUserUserRepository: Repository<BookmarkUserUser>,
+    @InjectRepository(Bookmark)
+    private readonly bookmarkUserUserRepository: Repository<Bookmark>,
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Flag)
@@ -44,23 +44,25 @@ export class UserUsersService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? BookmarkUserUser Pivot
+  //? Bookmark Pivot
   //? ----------------------------------------------------------------------- //
 
   // User 북마크 생성
   async createUserBookmark(
     userId: number,
     recipientId: number,
-  ): Promise<BookmarkUserUser> {
+  ): Promise<Bookmark> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const bookmark = await queryRunner.manager.save(
-        queryRunner.manager
-          .getRepository(BookmarkUserUser)
-          .create({ userId, recipientId }),
+        queryRunner.manager.getRepository(Bookmark).create({
+          userId,
+          entityType: 'user',
+          entityId: recipientId,
+        }),
       );
       await queryRunner.manager.query(
         'UPDATE `profile` SET bookmarkCount = bookmarkCount + 1 WHERE userId = ?',
@@ -152,7 +154,7 @@ export class UserUsersService {
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
       .innerJoinAndSelect(
-        BookmarkUserUser,
+        Bookmark,
         'bookmark_user_user',
         'bookmark_user_user.recipientId = user.id',
       )
@@ -175,7 +177,7 @@ export class UserUsersService {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
     return await queryBuilder
       .innerJoinAndSelect(
-        BookmarkUserUser,
+        Bookmark,
         'bookmark_user_user',
         'bookmark_user_user.recipientId = user.id',
       )
@@ -202,7 +204,7 @@ export class UserUsersService {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
     return await queryBuilder
       .innerJoinAndSelect(
-        BookmarkUserUser,
+        Bookmark,
         'bookmark_user_user',
         'bookmark_user_user.userId = user.id',
       )
@@ -284,6 +286,7 @@ export class UserUsersService {
           [recipientId],
         );
       }
+      await queryRunner.commitTransaction();
       return { data: affectedRows };
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -413,6 +416,7 @@ export class UserUsersService {
           [recipientId],
         );
       }
+      await queryRunner.commitTransaction();
       return { data: affectedRows };
     } catch (error) {
       await queryRunner.rollbackTransaction();

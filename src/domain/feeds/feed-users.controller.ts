@@ -11,7 +11,7 @@ import {
 import { ApiOperation } from '@nestjs/swagger';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { FeedUsersService } from 'src/domain/feeds/feed-users.service';
-import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -20,7 +20,7 @@ export class FeedUsersController {
   constructor(private readonly feedUsersService: FeedUsersService) {}
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크/찜(BookmarkUserFeed) 생성
+  //? 북마크/찜(Bookmark) 생성
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Feed 북마크/찜 생성' })
@@ -28,7 +28,7 @@ export class FeedUsersController {
   async createFeedBookmark(
     @CurrentUserId() userId: number,
     @Param('feedId', ParseIntPipe) feedId: number,
-  ): Promise<BookmarkUserFeed> {
+  ): Promise<Bookmark> {
     return await this.feedUsersService.createFeedBookmark(userId, feedId);
   }
 
@@ -51,7 +51,7 @@ export class FeedUsersController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크 (BookmarkUserFeed) 리스트
+  //? 북마크 (Bookmark) 리스트
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '이 Feed 를 북마크한 모든 Users' })

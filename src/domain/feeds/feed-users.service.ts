@@ -13,7 +13,7 @@ import { User } from 'src/domain/users/entities/user.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 
 @Injectable()
 export class FeedUsersService {
@@ -25,8 +25,8 @@ export class FeedUsersService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Flag)
     private readonly flagRepository: Repository<Flag>,
-    @InjectRepository(BookmarkUserFeed)
-    private readonly bookmarkUserFeedRepository: Repository<BookmarkUserFeed>,
+    @InjectRepository(Bookmark)
+    private readonly bookmarkUserFeedRepository: Repository<Bookmark>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
@@ -35,13 +35,13 @@ export class FeedUsersService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크/찜(BookmarkUserFeed) 생성
+  //? 북마크/찜(Bookmark) 생성
   //? ----------------------------------------------------------------------- //
 
   async createFeedBookmark(
     userId: number,
     feedId: number,
-  ): Promise<BookmarkUserFeed> {
+  ): Promise<Bookmark> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
@@ -49,7 +49,7 @@ export class FeedUsersService {
       await queryRunner.startTransaction();
       const bookmark = await queryRunner.manager.save(
         queryRunner.manager
-          .getRepository(BookmarkUserFeed)
+          .getRepository(Bookmark)
           .create({ userId, feedId }),
       );
       await queryRunner.manager.query(
@@ -98,7 +98,7 @@ export class FeedUsersService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
-        'DELETE FROM `bookmark_user_feed` WHERE userId = ? AND feedId = ?',
+        'DELETE FROM `bookmark` WHERE userId = ? AND feedId = ?',
         [userId, feedId],
       );
       if (affectedRows > 0) {
@@ -120,7 +120,7 @@ export class FeedUsersService {
   // Feed 북마크 여부
   async isFeedBookmarked(userId: number, feedId: number): Promise<boolean> {
     const [row] = await this.bookmarkUserFeedRepository.manager.query(
-      'SELECT COUNT(*) AS count FROM `bookmark_user_feed` \
+      'SELECT COUNT(*) AS count FROM `bookmark` \
       WHERE userId = ? AND feedId = ?',
       [userId, feedId],
     );
@@ -130,7 +130,7 @@ export class FeedUsersService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크 (BookmarkUserMeetup) 리스트
+  //? 북마크 (Bookmark) 리스트
   //? ----------------------------------------------------------------------- //
 
   // 이 Feed를 북마크한 모든 Users
@@ -138,12 +138,12 @@ export class FeedUsersService {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
     return await queryBuilder
       .innerJoinAndSelect(
-        BookmarkUserFeed,
-        'bookmark_user_feed',
-        'bookmark_user_feed.userId = user.id',
+        Bookmark,
+        'bookmark',
+        'bookmark.userId = user.id',
       )
       .addSelect(['user.*'])
-      .where('bookmark_user_feed.feedId = :feedId', {
+      .where('bookmark.feedId = :feedId', {
         feedId,
       })
       .getMany();
@@ -152,8 +152,8 @@ export class FeedUsersService {
   // 이 Feed를 북마크한 모든 UserIds
   async loadBookmarkingUserIds(feedId: number): Promise<number[]> {
     const rows = await this.userRepository.manager.query(
-      'SELECT userId FROM `bookmark_user_feed` \
-      WHERE bookmark_user_feed.feedId = ?',
+      'SELECT userId FROM `bookmark` \
+      WHERE bookmark.feedId = ?',
       [feedId],
     );
 
@@ -220,6 +220,7 @@ export class FeedUsersService {
           [feedId],
         );
       }
+      await queryRunner.commitTransaction();
       return { data: affectedRows };
     } catch (error) {
       await queryRunner.rollbackTransaction();

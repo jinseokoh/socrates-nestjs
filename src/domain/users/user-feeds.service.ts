@@ -7,8 +7,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
-import { Repository } from 'typeorm/repository/Repository';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
+import { Repository } from 'typeorm/repository/Repository';
+import { DataSource } from 'typeorm';
 import {
   FilterOperator,
   paginate,
@@ -16,8 +18,6 @@ import {
   Paginated,
   PaginateQuery,
 } from 'nestjs-paginate';
-import { DataSource } from 'typeorm';
-import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -29,12 +29,12 @@ export class UserFeedsService {
   constructor(
     @InjectRepository(Feed)
     private readonly feedRepository: Repository<Feed>,
-    @InjectRepository(BookmarkUserFeed)
-    private readonly bookmarkUserFeedRepository: Repository<BookmarkUserFeed>,
+    @InjectRepository(Bookmark)
+    private readonly bookmarkUserFeedRepository: Repository<Bookmark>,
     @InjectRepository(Flag)
     private readonly flagRepository: Repository<Flag>,
     @Inject(ConfigService) private configService: ConfigService,
-    private eventEmitter: EventEmitter2,// global
+    private eventEmitter: EventEmitter2, // global
     private dataSource: DataSource, // for transaction
   ) {
     this.env = this.configService.get('nodeEnv');
@@ -95,13 +95,13 @@ export class UserFeedsService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크/찜(BookmarkUserFeed) 생성
+  //? 북마크/찜(Bookmark) 생성
   //? ----------------------------------------------------------------------- //
 
   async createFeedBookmark(
     userId: number,
     feedId: number,
-  ): Promise<BookmarkUserFeed> {
+  ): Promise<Bookmark> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
@@ -109,7 +109,7 @@ export class UserFeedsService {
       await queryRunner.startTransaction();
       const bookmark = await queryRunner.manager.save(
         queryRunner.manager
-          .getRepository(BookmarkUserFeed)
+          .getRepository(Bookmark)
           .create({ userId, feedId }),
       );
       await queryRunner.manager.query(
@@ -158,7 +158,7 @@ export class UserFeedsService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
-        'DELETE FROM `bookmark_user_feed` WHERE userId = ? AND feedId = ?',
+        'DELETE FROM `bookmark` WHERE userId = ? AND feedId = ?',
         [userId, feedId],
       );
       if (affectedRows > 0) {
@@ -180,7 +180,7 @@ export class UserFeedsService {
   // Feed 북마크 여부
   async isFeedBookmarked(userId: number, feedId: number): Promise<boolean> {
     const [row] = await this.bookmarkUserFeedRepository.manager.query(
-      'SELECT COUNT(*) AS count FROM `bookmark_user_feed` \
+      'SELECT COUNT(*) AS count FROM `bookmark` \
       WHERE userId = ? AND feedId = ?',
       [userId, feedId],
     );
@@ -201,12 +201,12 @@ export class UserFeedsService {
     const queryBuilder = this.feedRepository
       .createQueryBuilder('feed')
       .innerJoinAndSelect(
-        BookmarkUserFeed,
-        'bookmark_user_feed',
-        'bookmark_user_feed.feedId = feed.id',
+        Bookmark,
+        'bookmark',
+        'bookmark.feedId = feed.id',
       )
       .innerJoinAndSelect('feed.user', 'user')
-      .where('bookmark_user_feed.userId = :userId', { userId });
+      .where('bookmark.userId = :userId', { userId });
 
     const config: PaginateConfig<Feed> = {
       sortableColumns: ['id'],
@@ -224,20 +224,20 @@ export class UserFeedsService {
     const queryBuilder = this.feedRepository.createQueryBuilder('feed');
     return await queryBuilder
       .innerJoinAndSelect(
-        BookmarkUserFeed,
-        'bookmark_user_feed',
-        'bookmark_user_feed.feedId = feed.id',
+        Bookmark,
+        'bookmark',
+        'bookmark.feedId = feed.id',
       )
       .addSelect(['feed.*'])
-      .where('bookmark_user_feed.userId = :userId', { userId })
+      .where('bookmark.userId = :userId', { userId })
       .getMany();
   }
 
   // 내가 북마크한 모든 FeedIds
   async loadBookmarkedFeedIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkUserFeedRepository.manager.query(
-      'SELECT feedId FROM `bookmark_user_feed` \
-      WHERE bookmark_user_feed.userId = ?',
+      'SELECT feedId FROM `bookmark` \
+      WHERE bookmark.userId = ?',
       [userId],
     );
 
@@ -302,6 +302,7 @@ export class UserFeedsService {
           [feedId],
         );
       }
+      await queryRunner.commitTransaction();
       return { data: affectedRows };
     } catch (error) {
       await queryRunner.rollbackTransaction();

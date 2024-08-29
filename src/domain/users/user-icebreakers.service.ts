@@ -15,7 +15,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { Repository } from 'typeorm/repository/Repository';
-import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { DataSource } from 'typeorm';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
@@ -30,8 +30,8 @@ export class UserIcebreakersService {
   constructor(
     @InjectRepository(Icebreaker)
     private readonly icebreakerRepository: Repository<Icebreaker>,
-    @InjectRepository(BookmarkUserIcebreaker)
-    private readonly bookmarkUserIcebreakerRepository: Repository<BookmarkUserIcebreaker>,
+    @InjectRepository(Bookmark)
+    private readonly bookmarkUserIcebreakerRepository: Repository<Bookmark>,
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
     @InjectRepository(Flag)
@@ -103,13 +103,13 @@ export class UserIcebreakersService {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크/찜(BookmarkUserIcebreaker) 생성
+  //? 북마크/찜(Bookmark) 생성
   //? ----------------------------------------------------------------------- //
 
   async createIcebreakerBookmark(
     userId: number,
     icebreakerId: number,
-  ): Promise<BookmarkUserIcebreaker> {
+  ): Promise<Bookmark> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     try {
@@ -117,7 +117,7 @@ export class UserIcebreakersService {
       await queryRunner.startTransaction();
       const bookmark = await queryRunner.manager.save(
         queryRunner.manager
-          .getRepository(BookmarkUserIcebreaker)
+          .getRepository(Bookmark)
           .create({ userId, icebreakerId }),
       );
       await queryRunner.manager.query(
@@ -169,7 +169,7 @@ export class UserIcebreakersService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
-        'DELETE FROM `bookmark_user_icebreaker` WHERE userId = ? AND icebreakerId = ?',
+        'DELETE FROM `bookmark` WHERE userId = ? AND icebreakerId = ?',
         [userId, icebreakerId],
       );
       if (affectedRows > 0) {
@@ -194,7 +194,7 @@ export class UserIcebreakersService {
     icebreakerId: number,
   ): Promise<boolean> {
     const [row] = await this.bookmarkUserIcebreakerRepository.manager.query(
-      'SELECT COUNT(*) AS count FROM `bookmark_user_icebreaker` \
+      'SELECT COUNT(*) AS count FROM `bookmark` \
       WHERE userId = ? AND icebreakerId = ?',
       [userId, icebreakerId],
     );
@@ -215,12 +215,12 @@ export class UserIcebreakersService {
     const queryBuilder = this.icebreakerRepository
       .createQueryBuilder('icebreaker')
       .innerJoinAndSelect(
-        BookmarkUserIcebreaker,
-        'bookmark_user_icebreaker',
-        'bookmark_user_icebreaker.icebreakerId = icebreaker.id',
+        Bookmark,
+        'bookmark',
+        'bookmark.icebreakerId = icebreaker.id',
       )
       .innerJoinAndSelect('icebreaker.user', 'user')
-      .where('bookmark_user_icebreaker.userId = :userId', { userId });
+      .where('bookmark.userId = :userId', { userId });
 
     const config: PaginateConfig<Icebreaker> = {
       sortableColumns: ['id'],
@@ -239,20 +239,20 @@ export class UserIcebreakersService {
       this.icebreakerRepository.createQueryBuilder('icebreaker');
     return await queryBuilder
       .innerJoinAndSelect(
-        BookmarkUserIcebreaker,
-        'bookmark_user_icebreaker',
-        'bookmark_user_icebreaker.icebreakerId = icebreaker.id',
+        Bookmark,
+        'bookmark',
+        'bookmark.icebreakerId = icebreaker.id',
       )
       .addSelect(['icebreaker.*'])
-      .where('bookmark_user_icebreaker.userId = :userId', { userId })
+      .where('bookmark.userId = :userId', { userId })
       .getMany();
   }
 
   // 내가 북마크한 모든 IcebreakerIds
   async loadBookmarkedIcebreakerIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkUserIcebreakerRepository.manager.query(
-      'SELECT icebreakerId FROM `bookmark_user_icebreaker` \
-      WHERE bookmark_user_icebreaker.userId = ?',
+      'SELECT icebreakerId FROM `bookmark` \
+      WHERE bookmark.userId = ?',
       [userId],
     );
 
@@ -320,6 +320,7 @@ export class UserIcebreakersService {
           [icebreakerId],
         );
       }
+      await queryRunner.commitTransaction();
       return { data: affectedRows };
     } catch (error) {
       await queryRunner.rollbackTransaction();

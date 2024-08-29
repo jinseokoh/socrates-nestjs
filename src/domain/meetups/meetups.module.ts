@@ -10,7 +10,7 @@ import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { MeetupComment } from 'src/domain/meetups/entities/meetup_comment.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Venue } from 'src/domain/meetups/entities/venue.entity';
-import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { MeetupsService } from 'src/domain/meetups/meetups.service';
 import { MeetupUsersService } from 'src/domain/meetups/meetup-users.service';
 import { MeetupCommentUsersService } from 'src/domain/meetups/meetup_comment-users.service';
@@ -22,7 +22,7 @@ import { FcmModule } from 'src/services/fcm/fcm.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      BookmarkUserMeetup,
+      Bookmark,
       Career,
       Category,
       FeedComment,

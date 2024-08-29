@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BookmarkUserFeed } from 'src/domain/users/entities/bookmark_user_feed.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Feed } from 'src/domain/feeds/entities/feed.entity';
 import { FeedComment } from 'src/domain/feeds/entities/feed_comment.entity';
 import { FeedsService } from 'src/domain/feeds/feeds.service';
@@ -21,7 +21,7 @@ import { FeedUsersService } from 'src/domain/feeds/feed-users.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      BookmarkUserFeed,
+      Bookmark,
       FeedComment,
       Feed,
       Flag,

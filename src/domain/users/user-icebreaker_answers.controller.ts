@@ -15,7 +15,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 
-import { BookmarkUserIcebreaker } from 'src/domain/users/entities/bookmark_user_icebreaker.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { UserIcebreakerAnswersService } from 'src/domain/users/user-icebreaker_answers.service';
 import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
@@ -62,7 +62,7 @@ export class UserIcebreakerAnswersController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크/찜(BookmarkUserIcebreaker) 생성
+  //? 북마크/찜(Bookmark) 생성
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Icebreaker 북마크/찜 생성' })
@@ -70,7 +70,7 @@ export class UserIcebreakerAnswersController {
   async createIcebreakerBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
-  ): Promise<BookmarkUserIcebreaker> {
+  ): Promise<Bookmark> {
     return await this.userIcebreakerAnswersService.createIcebreakerBookmark(
       userId,
       icebreakerId,
@@ -102,7 +102,7 @@ export class UserIcebreakerAnswersController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 내가 북마크/찜(BookmarkUserIcebreaker)한 Icebreakers
+  //? 내가 북마크/찜(Bookmark)한 Icebreakers
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '내가 북마크/찜한 Icebreakers (paginated)' })

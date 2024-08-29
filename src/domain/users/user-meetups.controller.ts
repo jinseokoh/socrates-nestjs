@@ -15,7 +15,7 @@ import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { SkipThrottle } from '@nestjs/throttler';
 import { UserMeetupsService } from 'src/domain/users/user-meetups.service';
-import { BookmarkUserMeetup } from 'src/domain/users/entities/bookmark_user_meetup.entity';
+import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -55,7 +55,7 @@ export class UserMeetupsController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크/찜(BookmarkUserMeetup) 생성
+  //? 북마크/찜(Bookmark) 생성
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'Meetup 북마크/찜 생성' })
@@ -63,7 +63,7 @@ export class UserMeetupsController {
   async createMeetupBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('meetupId', ParseIntPipe) meetupId: number,
-  ): Promise<BookmarkUserMeetup> {
+  ): Promise<Bookmark> {
     return await this.userMeetupsService.createMeetupBookmark(userId, meetupId);
   }
 
@@ -86,7 +86,7 @@ export class UserMeetupsController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? 내가 북마크/찜(BookmarkUserMeetup)한 Meetups
+  //? 내가 북마크/찜(Bookmark)한 Meetups
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '내가 북마크/찜한 Meetups (paginated)' })

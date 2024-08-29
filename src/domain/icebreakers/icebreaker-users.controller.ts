@@ -18,7 +18,7 @@ export class IcebreakerUsersController {
   ) {}
 
   //? ----------------------------------------------------------------------- //
-  //? 북마크 (BookmarkUserIcebreaker) 리스트
+  //? 북마크 (Bookmark) 리스트
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '이 모임을 북마크/찜한 모든 Users' })

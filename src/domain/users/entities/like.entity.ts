@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Unique,
 } from 'typeorm';
 
@@ -17,16 +17,13 @@ import {
   'entityId',
 ])
 export class Like {
-  @PrimaryGeneratedColumn('increment', { type: 'int', unsigned: true })
-  id: number;
-
-  @Column({ type: 'int', unsigned: true })
+  @PrimaryColumn({ type: 'int', unsigned: true })
   userId: number; // to make it available to Repository
 
-  @Column({ length: 32, nullable: false })
+  @PrimaryColumn({ length: 32, nullable: false })
   entityType: string;
 
-  @Column({ type: 'int', unsigned: true })
+  @PrimaryColumn({ type: 'int', unsigned: true })
   entityId: number;
 
   @Column({ length: 80, nullable: true })

@@ -20,6 +20,7 @@ import { Repository } from 'typeorm/repository/Repository';
 import { DataSource } from 'typeorm';
 import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Like } from 'src/domain/users/entities/like.entity';
 
 @Injectable()
 export class UserMeetupsService {
@@ -33,6 +34,8 @@ export class UserMeetupsService {
     private readonly bookmarkRepository: Repository<Bookmark>,
     @InjectRepository(Flag)
     private readonly flagRepository: Repository<Flag>,
+    @InjectRepository(Like)
+    private readonly likeRepository: Repository<Like>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
@@ -339,7 +342,7 @@ export class UserMeetupsService {
   ): Promise<Paginated<Meetup>> {
     const queryBuilder = this.meetupRepository
       .createQueryBuilder('meetup')
-      .innerJoin(Flag, 'flag', 'meetup.id = flag.entityId')
+      .innerJoin(Flag, 'flag', 'flag.entityId = meetup.id')
       .where('flag.userId = :userId', { userId })
       .andWhere('flag.entityType = :entityType', { entityType: 'meetup' });
 
