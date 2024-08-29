@@ -32,10 +32,10 @@ export class UserIcebreakersService {
     private readonly icebreakerRepository: Repository<Icebreaker>,
     @InjectRepository(Bookmark)
     private readonly bookmarkRepository: Repository<Bookmark>,
-    @InjectRepository(Like)
-    private readonly likeRepository: Repository<Like>,
     @InjectRepository(Flag)
     private readonly flagRepository: Repository<Flag>,
+    @InjectRepository(Like)
+    private readonly likeRepository: Repository<Like>,
     @Inject(ConfigService) private configService: ConfigService, // global
     private eventEmitter: EventEmitter2,
     private dataSource: DataSource, // for transaction
@@ -115,7 +115,7 @@ export class UserIcebreakersService {
       const bookmark = await queryRunner.manager.save(
         queryRunner.manager.getRepository(Bookmark).create({
           userId,
-          entityType: 'icebreaker_answer',
+          entityType: 'icebreaker',
           entityId: icebreakerId,
         }),
       );
@@ -123,26 +123,6 @@ export class UserIcebreakersService {
         'UPDATE `icebreaker` SET bookmarkCount = bookmarkCount + 1 WHERE id = ?',
         [icebreakerId],
       );
-
-      if (false) {
-        // notification with event listener ------------------------------------//
-        const icebreaker = await queryRunner.manager.findOneOrFail(Icebreaker, {
-          where: { id: icebreakerId },
-          relations: [`user`, `user.profile`],
-        });
-        // todo. fine tune notifying logic to dedup the same id
-        const event = new UserNotificationEvent();
-        event.name = 'icebreaker';
-        event.userId = icebreaker.user.id;
-        event.token = icebreaker.user.pushToken;
-        event.options = icebreaker.user.profile?.options ?? {};
-        event.body = `${icebreaker.body} 질문에 누군가 답변을 했습니다.`;
-        event.data = {
-          page: `icebreakers/${icebreakerId}`,
-          args: '',
-        };
-        this.eventEmitter.emit('user.notified', event);
-      }
 
       await queryRunner.commitTransaction();
       return bookmark;
@@ -221,7 +201,7 @@ export class UserIcebreakersService {
       .innerJoinAndSelect('icebreaker.user', 'user')
       .where('bookmark.userId = :userId', { userId })
       .andWhere('bookmark.entityType = :entityType', {
-        entityType: 'icebreaker_answer',
+        entityType: 'icebreaker',
       });
 
     const config: PaginateConfig<Icebreaker> = {
@@ -244,7 +224,7 @@ export class UserIcebreakersService {
         Bookmark,
         'bookmark',
         'bookmark.entityId = icebreaker.id AND bookmark.entityType = :entityType',
-        { entityType: 'icebreaker_answer' },
+        { entityType: 'icebreaker' },
       )
       .addSelect(['icebreaker.*'])
       .where('bookmark.userId = :userId', { userId })
@@ -260,6 +240,145 @@ export class UserIcebreakersService {
     );
 
     return rows.map((v: any) => v.icebreakerId);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? Icebreaker Like 신고 생성
+  //? ----------------------------------------------------------------------- //
+
+  // Icebreaker 신고 생성
+  async createIcebreakerLike(
+    userId: number,
+    icebreakerId: number,
+    message: string,
+  ): Promise<Like> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const like = await queryRunner.manager.save(
+        queryRunner.manager.getRepository(Like).create({
+          userId,
+          entityType: 'icebreaker',
+          entityId: icebreakerId,
+          message,
+        }),
+      );
+      await queryRunner.manager.query(
+        'UPDATE `icebreaker` SET likeCount = likeCount + 1 WHERE id = ?',
+        [icebreakerId],
+      );
+      await queryRunner.commitTransaction();
+      return like;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // Icebreaker 신고 제거
+  async deleteIcebreakerLike(
+    userId: number,
+    icebreakerId: number,
+  ): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const { affectedRows } = await queryRunner.manager.query(
+        'DELETE FROM `like` where userId = ? AND entityType = ? AND entityId = ?',
+        [userId, `icebreaker`, icebreakerId],
+      );
+      if (affectedRows > 0) {
+        await queryRunner.manager.query(
+          'UPDATE `icebreaker` SET likeCount = likeCount - 1 WHERE id = ? AND likeCount > 0',
+          [icebreakerId],
+        );
+      }
+      await queryRunner.commitTransaction();
+      return { data: affectedRows };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // Icebreaker 신고 여부
+  async isIcebreakerLiked(
+    userId: number,
+    icebreakerId: number,
+  ): Promise<boolean> {
+    const [row] = await this.likeRepository.manager.query(
+      'SELECT COUNT(*) AS count FROM `like` \
+      WHERE userId = ? AND entityType = ? AND entityId = ?',
+      [userId, `icebreaker`, icebreakerId],
+    );
+    const { count } = row;
+
+    return +count === 1;
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? 내가 좋아요한 Icebreakers
+  //? ----------------------------------------------------------------------- //
+
+  // 내가 좋아요한 Icebreakers (paginated)
+  async listLikedIcebreakers(
+    query: PaginateQuery,
+    userId: number,
+  ): Promise<Paginated<Icebreaker>> {
+    const queryBuilder = this.icebreakerRepository
+      .createQueryBuilder('icebreaker')
+      .innerJoin(Like, 'like', 'like.entityId = icebreaker.id')
+      .where('like.userId = :userId', { userId })
+      .andWhere('like.entityType = :entityType', { entityType: 'icebreaker' });
+
+    const config: PaginateConfig<Icebreaker> = {
+      sortableColumns: ['id'],
+      searchableColumns: ['body'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내가 좋아요한 모든 Icebreakers
+  async loadLikedIcebreakers(userId: number): Promise<Icebreaker[]> {
+    const queryBuilder =
+      this.icebreakerRepository.createQueryBuilder('icebreaker');
+    return await queryBuilder
+      .innerJoinAndSelect(
+        Like,
+        'like',
+        'like.entityId = icebreaker.id AND like.entityType = :entityType',
+        { entityType: 'icebreaker' },
+      )
+      .addSelect(['icebreaker.*'])
+      .where('like.userId = :userId', { userId })
+      .getMany();
+  }
+
+  // 내가 좋아요한 모든 IcebreakerIds
+  async loadLikedIcebreakerIds(userId: number): Promise<number[]> {
+    const rows = await this.likeRepository.manager.query(
+      'SELECT entityId FROM `like` \
+      WHERE like.entityType = ? AND like.userId = ?',
+      [`icebreaker`, userId],
+    );
+
+    return rows.map((v: any) => v.entityId);
   }
 
   //? ----------------------------------------------------------------------- //

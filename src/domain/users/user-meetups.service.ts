@@ -210,7 +210,7 @@ export class UserMeetupsService {
   ): Promise<Paginated<Meetup>> {
     const queryBuilder = this.meetupRepository
       .createQueryBuilder('meetup')
-      .innerJoin(Bookmark, 'bookmark', 'meetup.id = bookmark.entityId')
+      .innerJoin(Bookmark, 'bookmark', 'bookmark.entityId = meetup.id')
       .where('bookmark.userId = :userId', { userId })
       .andWhere('flag.entityType = :entityType', { entityType: 'meetup' });
 
@@ -245,6 +245,138 @@ export class UserMeetupsService {
     const rows = await this.bookmarkRepository.manager.query(
       'SELECT meetupId FROM `bookmark` \
       WHERE bookmark.entityType = ? AND bookmark.userId = ?',
+      [`meetup`, userId],
+    );
+
+    return rows.map((v: any) => v.entityId);
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? Meetup Like 좋아요 생성
+  //? ----------------------------------------------------------------------- //
+
+  // Meetup 좋아요 생성
+  async createMeetupLike(
+    userId: number,
+    meetupId: number,
+    message: string,
+  ): Promise<Like> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const like = await queryRunner.manager.save(
+        queryRunner.manager.getRepository(Like).create({
+          userId,
+          entityType: 'meetup',
+          entityId: meetupId,
+          message,
+        }),
+      );
+      await queryRunner.manager.query(
+        'UPDATE `meetup` SET likeCount = likeCount + 1 WHERE id = ?',
+        [meetupId],
+      );
+      await queryRunner.commitTransaction();
+      return like;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new UnprocessableEntityException(`entity exists`);
+      } else {
+        throw error;
+      }
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // Meetup 좋아요 제거
+  async deleteMeetupLike(userId: number, meetupId: number): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const { affectedRows } = await queryRunner.manager.query(
+        'DELETE FROM `like` where userId = ? AND entityType = ? AND entityId = ?',
+        [userId, `meetup`, meetupId],
+      );
+      if (affectedRows > 0) {
+        await queryRunner.manager.query(
+          'UPDATE `meetup` SET likeCount = likeCount - 1 WHERE id = ? AND likeCount > 0',
+          [meetupId],
+        );
+      }
+      await queryRunner.commitTransaction();
+      return { data: affectedRows };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  // Meetup 좋아요 여부
+  async isMeetupLiked(userId: number, meetupId: number): Promise<boolean> {
+    const [row] = await this.likeRepository.manager.query(
+      'SELECT COUNT(*) AS count FROM `like` \
+      WHERE userId = ? AND entityType = ? AND entityId = ?',
+      [userId, `meetup`, meetupId],
+    );
+    const { count } = row;
+
+    return +count === 1;
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? 내가 좋아요한 Meetups
+  //? ----------------------------------------------------------------------- //
+
+  // 내가 좋아요한 Meetups (paginated)
+  async listLikedMeetups(
+    query: PaginateQuery,
+    userId: number,
+  ): Promise<Paginated<Meetup>> {
+    const queryBuilder = this.meetupRepository
+      .createQueryBuilder('meetup')
+      .innerJoin(Like, 'like', 'like.entityId = meetup.id')
+      .where('like.userId = :userId', { userId })
+      .andWhere('like.entityType = :entityType', { entityType: 'meetup' });
+
+    const config: PaginateConfig<Meetup> = {
+      sortableColumns: ['id'],
+      searchableColumns: ['title'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'DESC']],
+      filterableColumns: {},
+    };
+
+    return await paginate(query, queryBuilder, config);
+  }
+
+  // 내가 좋아요한 모든 Meetups
+  async loadLikedMeetups(userId: number): Promise<Meetup[]> {
+    const queryBuilder = this.meetupRepository.createQueryBuilder('meetup');
+    return await queryBuilder
+      .innerJoinAndSelect(
+        Like,
+        'like',
+        'like.entityId = meetup.id AND like.entityType = :entityType',
+        { entityType: 'meetup' },
+      )
+      .addSelect(['meetup.*'])
+      .where('like.userId = :userId', { userId })
+      .getMany();
+  }
+
+  // 내가 좋아요한 모든 MeetupIds
+  async loadLikedMeetupIds(userId: number): Promise<number[]> {
+    const rows = await this.likeRepository.manager.query(
+      'SELECT entityId FROM `like` \
+      WHERE like.entityType = ? AND like.userId = ?',
       [`meetup`, userId],
     );
 

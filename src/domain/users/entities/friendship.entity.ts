@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { FriendRequestType, FriendStatus } from 'src/common/enums';
-import { Plea } from 'src/domain/icebreakers/entities/plea.entity';
+import { FriendStatus } from 'src/common/enums';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -10,7 +9,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 
