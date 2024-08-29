@@ -32,9 +32,9 @@ export class UserIcebreakerAnswersController {
   //? 내가 만든 Icebreakers
   //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: '내가 만든 Icebreakers (paginated)' })
+  @ApiOperation({ description: '내가 만든 IcebreakerAnswers (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/icebreakers')
+  @Get(':userId/icebreakeranswers')
   async findMyIcebreakerAnswers(
     @Paginate() query: PaginateQuery,
     @Param('userId', ParseIntPipe) userId: number,
@@ -46,19 +46,19 @@ export class UserIcebreakerAnswersController {
   }
 
   @ApiOperation({ description: '내가 만든 Icebreakers (all)' })
-  @Get(':userId/icebreakers/all')
+  @Get(':userId/icebreakeranswers/all')
   async loadMyIcebreakers(
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<Icebreaker[]> {
-    return await this.userIcebreakerAnswersService.loadMyIcebreakers(userId);
+  ): Promise<IcebreakerAnswer[]> {
+    return await this.userIcebreakerAnswersService.loadMyIcebreakerAnswers(userId);
   }
 
-  @ApiOperation({ description: '내가 만든 IcebreakerIds' })
-  @Get(':userId/icebreakerids')
-  async loadMyIcebreakerIds(
+  @ApiOperation({ description: '내가 만든 IcebreakerAnswerIds' })
+  @Get(':userId/icebreakeranswerids')
+  async loadMyIcebreakerAnswerIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
-    return await this.userIcebreakerAnswersService.loadMyIcebreakerIds(userId);
+    return await this.userIcebreakerAnswersService.loadMyIcebreakerAnswerIds(userId);
   }
 
   //? ----------------------------------------------------------------------- //
@@ -67,11 +67,11 @@ export class UserIcebreakerAnswersController {
 
   @ApiOperation({ description: 'Icebreaker 북마크/찜 생성' })
   @Post(':userId/bookmarkedicebreakers/:icebreakerId')
-  async createIcebreakerBookmark(
+  async createIcebreakerAnswerBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<Bookmark> {
-    return await this.userIcebreakerAnswersService.createIcebreakerBookmark(
+    return await this.userIcebreakerAnswersService.createIcebreakerAnswerBookmark(
       userId,
       icebreakerId,
     );
@@ -79,11 +79,11 @@ export class UserIcebreakerAnswersController {
 
   @ApiOperation({ description: 'Icebreaker 북마크/찜 삭제' })
   @Delete(':userId/bookmarkedicebreakers/:icebreakerId')
-  async deleteIcebreakerBookmark(
+  async deleteIcebreakerAnswerBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<any> {
-    return await this.userIcebreakerAnswersService.deleteIcebreakerBookmark(
+    return await this.userIcebreakerAnswersService.deleteIcebreakerAnswerBookmark(
       userId,
       icebreakerId,
     );
@@ -91,11 +91,11 @@ export class UserIcebreakerAnswersController {
 
   @ApiOperation({ description: 'Icebreaker 북마크/찜 여부' })
   @Get(':userId/bookmarkedicebreakers/:icebreakerId')
-  async isIcebreakerBookmarked(
+  async isIcebreakerAnswerBookmarked(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<boolean> {
-    return await this.userIcebreakerAnswersService.isIcebreakerBookmarked(
+    return await this.userIcebreakerAnswersService.isIcebreakerAnswerBookmarked(
       userId,
       icebreakerId,
     );

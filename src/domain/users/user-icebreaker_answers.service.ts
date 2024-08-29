@@ -46,7 +46,7 @@ export class UserIcebreakerAnswersService {
   //? My Icebreaker Answers
   //? ----------------------------------------------------------------------- //
 
-  // 내가 만든 모임 리스트
+  // 내가 쓴 답변 리스트
   async findMyIcebreakerAnswers(
     query: PaginateQuery,
     userId: number,
@@ -55,7 +55,7 @@ export class UserIcebreakerAnswersService {
       .createQueryBuilder('icebreakerAnswer')
       .leftJoinAndSelect('icebreakerAnswer.icebreaker', 'icebreaker')
       .leftJoinAndSelect('icebreakerAnswer.user', 'user')
-      .where('icebreaker.userId = :userId', {
+      .where('icebreakerAnswer.userId = :userId', {
         userId,
       });
 
@@ -230,9 +230,9 @@ export class UserIcebreakerAnswersService {
   }
 
   // 내가 북마크한 모든 IcebreakerIds
-  async loadBookmarkedIcebreakerIds(userId: number): Promise<number[]> {
+  async loadBookmarkedIcebreakerAnsewrIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkRepository.manager.query(
-      'SELECT icebreakerId FROM `bookmark` \
+      'SELECT icebreakerAnswerId FROM `bookmark` \
       WHERE bookmark.entityType = ? AND bookmark.userId = ?',
       [`icebreaker_answer`, userId],
     );

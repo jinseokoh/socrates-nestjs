@@ -47,17 +47,15 @@ export class UserIcebreakersService {
   //? My Icebreakers
   //? ----------------------------------------------------------------------- //
 
-  // 내가 만든 모임 리스트
+  // 내가 쓴 질문 리스트
   async findMyIcebreakers(
     query: PaginateQuery,
     userId: number,
   ): Promise<Paginated<Icebreaker>> {
     const queryBuilder = this.icebreakerRepository
       .createQueryBuilder('icebreaker')
-      .leftJoinAndSelect('icebreaker.venue', 'venue')
+      .leftJoinAndSelect('icebreaker.answers', 'answers')
       .leftJoinAndSelect('icebreaker.user', 'user')
-      .leftJoinAndSelect('icebreaker.room', 'room')
-      .leftJoinAndSelect('room.participants', 'participants')
       .where('icebreaker.userId = :userId', {
         userId,
       });
@@ -83,7 +81,6 @@ export class UserIcebreakersService {
   async loadMyIcebreakers(userId: number): Promise<Icebreaker[]> {
     return await this.icebreakerRepository
       .createQueryBuilder('icebreaker')
-      .innerJoinAndSelect('icebreaker.venue', 'venue')
       .innerJoinAndSelect('icebreaker.user', 'user')
       .where({
         userId,
@@ -116,9 +113,11 @@ export class UserIcebreakersService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const bookmark = await queryRunner.manager.save(
-        queryRunner.manager
-          .getRepository(Bookmark)
-          .create({ userId, icebreakerId }),
+        queryRunner.manager.getRepository(Bookmark).create({
+          userId,
+          entityType: 'icebreaker_answer',
+          entityId: icebreakerId,
+        }),
       );
       await queryRunner.manager.query(
         'UPDATE `icebreaker` SET bookmarkCount = bookmarkCount + 1 WHERE id = ?',
@@ -169,8 +168,8 @@ export class UserIcebreakersService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
       const { affectedRows } = await queryRunner.manager.query(
-        'DELETE FROM `bookmark` WHERE userId = ? AND icebreakerId = ?',
-        [userId, icebreakerId],
+        'DELETE FROM `bookmark` WHERE userId = ? AND entityType = ? AND entityId = ?',
+        [userId, `icebreaker`, icebreakerId],
       );
       if (affectedRows > 0) {
         await queryRunner.manager.query(
@@ -195,8 +194,8 @@ export class UserIcebreakersService {
   ): Promise<boolean> {
     const [row] = await this.bookmarkUserIcebreakerRepository.manager.query(
       'SELECT COUNT(*) AS count FROM `bookmark` \
-      WHERE userId = ? AND icebreakerId = ?',
-      [userId, icebreakerId],
+      WHERE userId = ? AND entityType = ? AND entityId = ?',
+      [userId, `icebreaker`, icebreakerId],
     );
     const { count } = row;
 
