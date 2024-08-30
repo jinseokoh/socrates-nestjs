@@ -99,7 +99,7 @@ export class UserIcebreakersController {
 
   @ApiOperation({ description: '내가 북마크/찜한 Icebreakers (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/bookmarkedicebreakers')
+  @Get(':userId/bookmarked-icebreakers')
   async listBookmarkedIcebreakers(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
@@ -111,7 +111,7 @@ export class UserIcebreakersController {
   }
 
   @ApiOperation({ description: '내가 북마크/찜한 Icebreakers (all)' })
-  @Get(':userId/bookmarkedicebreakers/all')
+  @Get(':userId/bookmarked-icebreakers/all')
   async loadBookmarkedIcebreakers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Icebreaker[]> {
@@ -119,7 +119,7 @@ export class UserIcebreakersController {
   }
 
   @ApiOperation({ description: '내가 북마크/찜한 IcebreakerIds' })
-  @Get(':userId/bookmarkedicebreakers/ids')
+  @Get(':userId/bookmarked-icebreakers/ids')
   async loadBookmarkedIcebreakerIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
@@ -170,7 +170,7 @@ export class UserIcebreakersController {
 
   @ApiOperation({ description: '내가 좋아요한 Icebreakers (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/likedicebreakers')
+  @Get(':userId/liked-icebreakers')
   async listLikedIcebreakersByUserId(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
@@ -182,7 +182,7 @@ export class UserIcebreakersController {
   }
 
   @ApiOperation({ description: '내가 좋아요한 모든 Icebreakers (all)' })
-  @Get(':userId/likedicebreakers/all')
+  @Get(':userId/liked-icebreakers/all')
   async loadLikedIcebreakers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Icebreaker[]> {
@@ -190,7 +190,7 @@ export class UserIcebreakersController {
   }
 
   @ApiOperation({ description: '내가 좋아요한 모든 IcebreakerIds' })
-  @Get(':userId/likedicebreakers/ids')
+  @Get(':userId/liked-icebreakers/ids')
   async loadLikedIcebreakerIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
@@ -241,7 +241,7 @@ export class UserIcebreakersController {
 
   @ApiOperation({ description: '내가 신고한 Icebreakers (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/flaggedicebreakers')
+  @Get(':userId/flagged-icebreakers')
   async listFlaggedIcebreakersByUserId(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
@@ -253,7 +253,7 @@ export class UserIcebreakersController {
   }
 
   @ApiOperation({ description: '내가 신고한 모든 Icebreakers (all)' })
-  @Get(':userId/flaggedicebreakers/all')
+  @Get(':userId/flagged-icebreakers/all')
   async loadFlaggedIcebreakers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Icebreaker[]> {
@@ -261,7 +261,7 @@ export class UserIcebreakersController {
   }
 
   @ApiOperation({ description: '내가 신고한 모든 IcebreakerIds' })
-  @Get(':userId/flaggedicebreakers/ids')
+  @Get(':userId/flagged-icebreakers/ids')
   async loadFlaggedIcebreakerIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {

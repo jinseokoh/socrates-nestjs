@@ -29,7 +29,7 @@ export class UserUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'User 북마크 생성' })
-  @Post(':userId/userbookmarks/:recipientId')
+  @Post(':userId/users/:recipientId/bookmark')
   async createUserBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
@@ -38,7 +38,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: 'User 북마크 삭제' })
-  @Delete(':userId/userbookmarks/:recipientId')
+  @Delete(':userId/users/:recipientId/bookmark')
   async deleteUserBookmark(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
@@ -47,7 +47,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: 'User 북마크 여부' })
-  @Get(':userId/userbookmarks/:recipientId')
+  @Get(':userId/users/:recipientId/bookmark')
   async isUserBookmarked(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
@@ -56,7 +56,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '내가 북마크한/follow중인 Users (paginated)' })
-  @Get(':userId/bookmarkedusers')
+  @Get(':userId/bookmarked-users')
   async findBookmarkedUsers(
     @Param('userId', ParseIntPipe) userId: number,
     @Paginate() query: PaginateQuery,
@@ -65,7 +65,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '내가 북마크한/follow중인 Users (all)' })
-  @Get(':userId/bookmarkedusers/all')
+  @Get(':userId/bookmarked-users/all')
   async loadBookmarkedUsers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<User[]> {
@@ -73,7 +73,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '내가 북마크한/follow중인 UserIds (all)' })
-  @Get(':userId/bookmarkeduserids')
+  @Get(':userId/bookmarked-users/ids')
   async loadBookmarkedUserIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
@@ -85,7 +85,7 @@ export class UserUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 'User 신고 생성' })
-  @Post(':userId/userflags/:recipientId')
+  @Post(':userId/users/:recipientId/flag')
   async createUserFlag(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
@@ -99,7 +99,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: 'User 신고 삭제' })
-  @Delete(':userId/userflags/:recipientId')
+  @Delete(':userId/users/:recipientId/flag')
   async deleteUserFlag(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
@@ -108,7 +108,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: 'User 신고 여부' })
-  @Get(':userId/userflags/:recipientId')
+  @Get(':userId/users/:recipientId/flag')
   async isUserFlagged(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('recipientId', ParseIntPipe) recipientId: number,
@@ -120,7 +120,7 @@ export class UserUsersController {
 
   @ApiOperation({ description: '내가 신고한 Users (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/flaggedusers')
+  @Get(':userId/flagged-users')
   async findFlaggedUsersByUserId(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
@@ -129,7 +129,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '내가 신고한 모든 Users (all)' })
-  @Get(':userId/flaggedusers/all')
+  @Get(':userId/flagged-users/all')
   async loadFlaggedUsers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<User[]> {
@@ -137,15 +137,19 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '내가 신고한 모든 UserIds' })
-  @Get(':userId/flaggeduserids')
+  @Get(':userId/flagged-users/ids')
   async loadFlaggedUserIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
     return await this.userUsersService.loadFlaggedUserIds(userId);
   }
 
+  //? ----------------------------------------------------------------------- //
+  //? 신고 (Flag) 리스트
+  //? ----------------------------------------------------------------------- //
+
   @ApiOperation({ description: '나를 신고한 모든 Users (all)' })
-  @Get(':userId/flaggingusers/all')
+  @Get(':userId/flags/all')
   async loadFlaggingUsers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<User[]> {
@@ -153,7 +157,7 @@ export class UserUsersController {
   }
 
   @ApiOperation({ description: '나를 신고한 모든 UserIds' })
-  @Get(':userId/flagginguserids')
+  @Get(':userId/flags/ids')
   async loadFlaggingUserIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {

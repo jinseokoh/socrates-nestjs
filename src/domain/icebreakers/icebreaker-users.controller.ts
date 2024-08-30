@@ -22,7 +22,7 @@ export class IcebreakerUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '이 아이스브레이커를 북마크/찜한 모든 Users' })
-  @Get(':icebreakerId/bookmarks')
+  @Get(':icebreakerId/bookmarks/all')
   async loadBookmarkers(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<User[]> {
@@ -42,7 +42,7 @@ export class IcebreakerUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '이 아이스브레이커를 북마크/찜한 모든 Users' })
-  @Get(':icebreakerId/likes')
+  @Get(':icebreakerId/likes/all')
   async loadLikers(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<User[]> {
@@ -62,7 +62,7 @@ export class IcebreakerUsersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '이 아이스브레이커를 신고한 모든 Users (all)' })
-  @Get(':icebreakerId/flags')
+  @Get(':icebreakerId/flags/all')
   async loadFlaggingUsers(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<User[]> {

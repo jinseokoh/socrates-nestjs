@@ -88,7 +88,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 북마크/찜한 Meetups (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/bookmarkedmeetups')
+  @Get(':userId/bookmarked-meetups')
   async listBookmarkedMeetups(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
@@ -97,7 +97,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '내가 북마크/찜한 Meetups (all)' })
-  @Get(':userId/bookmarkedmeetups/all')
+  @Get(':userId/bookmarked-meetups/all')
   async loadBookmarkedMeetups(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Meetup[]> {
@@ -105,7 +105,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '내가 북마크/찜한 MeetupIds' })
-  @Get(':userId/bookmarkedmeetups/ids')
+  @Get(':userId/bookmarked-meetups/ids')
   async loadBookmarkedMeetupIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
@@ -145,7 +145,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 신고한 Meetups (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/likedmeetups')
+  @Get(':userId/liked-meetups')
   async listLikedMeetupsByUserId(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
@@ -154,7 +154,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '내가 신고한 모든 Meetups (all)' })
-  @Get(':userId/likedmeetups/all')
+  @Get(':userId/liked-meetups/all')
   async loadLikedMeetups(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Meetup[]> {
@@ -162,7 +162,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '내가 신고한 모든 MeetupIds' })
-  @Get(':userId/likedmeetups/ids')
+  @Get(':userId/liked-meetups/ids')
   async loadLikedMeetupIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
@@ -207,7 +207,7 @@ export class UserMeetupsController {
 
   @ApiOperation({ description: '내가 신고한 Meetups (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/flaggedmeetups')
+  @Get(':userId/flagged-meetups')
   async listFlaggedMeetupsByUserId(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
@@ -216,7 +216,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '내가 신고한 모든 Meetups (all)' })
-  @Get(':userId/flaggedmeetups/all')
+  @Get(':userId/flagged-meetups/all')
   async loadFlaggedMeetups(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<Meetup[]> {
@@ -224,7 +224,7 @@ export class UserMeetupsController {
   }
 
   @ApiOperation({ description: '내가 신고한 모든 MeetupIds' })
-  @Get(':userId/flaggedmeetupids')
+  @Get(':userId/flagged-meetups/ids')
   async loadFlaggedMeetupIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {

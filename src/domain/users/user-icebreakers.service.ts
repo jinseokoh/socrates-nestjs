@@ -47,7 +47,7 @@ export class UserIcebreakersService {
   //? My Icebreakers
   //? ----------------------------------------------------------------------- //
 
-  // 내가 쓴 질문 리스트
+  // 내가 작성한 질문 리스트
   async findMyIcebreakers(
     query: PaginateQuery,
     userId: number,
@@ -55,7 +55,6 @@ export class UserIcebreakersService {
     const queryBuilder = this.icebreakerRepository
       .createQueryBuilder('icebreaker')
       .leftJoinAndSelect('icebreaker.answers', 'answers')
-      .leftJoinAndSelect('icebreaker.user', 'user')
       .where('icebreaker.userId = :userId', {
         userId,
       });
@@ -77,26 +76,26 @@ export class UserIcebreakersService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내가 만든 Icebreaker 리스트 (all)
+  // 내가 작성한 Icebreaker 리스트 (all)
   async loadMyIcebreakers(userId: number): Promise<Icebreaker[]> {
     return await this.icebreakerRepository
       .createQueryBuilder('icebreaker')
-      .innerJoinAndSelect('icebreaker.user', 'user')
       .where({
         userId,
       })
       .getMany();
   }
 
-  // 내가 만든 Icebreaker Ids 리스트 (all)
+  // 내가 작성한 Icebreaker Ids 리스트 (all)
   async loadMyIcebreakerIds(userId: number): Promise<number[]> {
-    const items = await this.icebreakerRepository
+    const rows = await this.icebreakerRepository
       .createQueryBuilder('icebreaker')
       .where({
         userId,
       })
       .getMany();
-    return items.map((v) => v.id);
+
+    return rows.length > 0 ? rows.map((v: any) => v.id) : [];
   }
 
   //? ----------------------------------------------------------------------- //
@@ -182,10 +181,6 @@ export class UserIcebreakersService {
     return +count === 1;
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 북마크한 Icebreakers
-  //? ----------------------------------------------------------------------- //
-
   // 내가 북마크한 Icebreakers (paginated)
   async listBookmarkedIcebreakers(
     query: PaginateQuery,
@@ -198,7 +193,7 @@ export class UserIcebreakersService {
         'bookmark',
         'bookmark.entityId = icebreaker.id',
       )
-      .innerJoinAndSelect('icebreaker.user', 'user')
+      .leftJoinAndSelect('icebreaker.user', 'user')
       .where('bookmark.userId = :userId', { userId })
       .andWhere('bookmark.entityType = :entityType', {
         entityType: 'icebreaker',
@@ -239,14 +234,14 @@ export class UserIcebreakersService {
       [`icebreaker`, userId],
     );
 
-    return rows.map((v: any) => v.icebreakerId);
+    return rows.length > 0 ? rows.map((v: any) => v.entityId) : [];
   }
 
   //? ----------------------------------------------------------------------- //
-  //? Icebreaker Like 신고 생성
+  //? Icebreaker Like 좋아요 생성
   //? ----------------------------------------------------------------------- //
 
-  // Icebreaker 신고 생성
+  // Icebreaker 좋아요 생성
   async createIcebreakerLike(
     userId: number,
     icebreakerId: number,
@@ -281,7 +276,7 @@ export class UserIcebreakersService {
     }
   }
 
-  // Icebreaker 신고 제거
+  // Icebreaker 좋아요 제거
   async deleteIcebreakerLike(
     userId: number,
     icebreakerId: number,
@@ -311,7 +306,7 @@ export class UserIcebreakersService {
     }
   }
 
-  // Icebreaker 신고 여부
+  // Icebreaker 좋아요 여부
   async isIcebreakerLiked(
     userId: number,
     icebreakerId: number,
@@ -326,10 +321,6 @@ export class UserIcebreakersService {
     return +count === 1;
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 좋아요한 Icebreakers
-  //? ----------------------------------------------------------------------- //
-
   // 내가 좋아요한 Icebreakers (paginated)
   async listLikedIcebreakers(
     query: PaginateQuery,
@@ -338,6 +329,7 @@ export class UserIcebreakersService {
     const queryBuilder = this.icebreakerRepository
       .createQueryBuilder('icebreaker')
       .innerJoin(Like, 'like', 'like.entityId = icebreaker.id')
+      .leftJoinAndSelect('icebreaker.user', 'user')
       .where('like.userId = :userId', { userId })
       .andWhere('like.entityType = :entityType', { entityType: 'icebreaker' });
 
@@ -376,7 +368,7 @@ export class UserIcebreakersService {
       [`icebreaker`, userId],
     );
 
-    return rows.map((v: any) => v.entityId);
+    return rows.length > 0 ? rows.map((v: any) => v.entityId) : [];
   }
 
   //? ----------------------------------------------------------------------- //
@@ -465,10 +457,6 @@ export class UserIcebreakersService {
     return +count === 1;
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 신고한 Icebreakers
-  //? ----------------------------------------------------------------------- //
-
   // 내가 신고한 Icebreakers (paginated)
   async listFlaggedIcebreakers(
     query: PaginateQuery,
@@ -476,7 +464,13 @@ export class UserIcebreakersService {
   ): Promise<Paginated<Icebreaker>> {
     const queryBuilder = this.icebreakerRepository
       .createQueryBuilder('icebreaker')
-      .innerJoin(Flag, 'flag', 'flag.entityId = icebreaker.id')
+      .innerJoin(
+        Flag,
+        'flag',
+        'flag.entityId = icebreaker.id AND flag.entityType = :entityType',
+        { entityType: 'icebreaker' },
+      )
+      .leftJoinAndSelect('icebreaker.user', 'user')
       .where('flag.userId = :userId', { userId })
       .andWhere('flag.entityType = :entityType', { entityType: 'icebreaker' });
 
@@ -496,7 +490,7 @@ export class UserIcebreakersService {
     const queryBuilder =
       this.icebreakerRepository.createQueryBuilder('icebreaker');
     return await queryBuilder
-      .innerJoinAndSelect(
+      .innerJoin(
         Flag,
         'flag',
         'flag.entityId = icebreaker.id AND flag.entityType = :entityType',
@@ -515,6 +509,6 @@ export class UserIcebreakersService {
       [`icebreaker`, userId],
     );
 
-    return rows.map((v: any) => v.entityId);
+    return rows.length > 0 ? rows.map((v: any) => v.entityId) : [];
   }
 }

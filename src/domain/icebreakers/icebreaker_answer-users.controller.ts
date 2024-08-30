@@ -11,7 +11,7 @@ import { IcebreakerAnswerUsersService } from 'src/domain/icebreakers/icebreaker_
 import { User } from 'src/domain/users/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
-@Controller('icebreakeranswers')
+@Controller('icebreaker-answers')
 export class IcebreakerAnswerUsersController {
   constructor(
     private readonly icebreakerAnswerUsersService: IcebreakerAnswerUsersService,
@@ -24,24 +24,24 @@ export class IcebreakerAnswerUsersController {
   @ApiOperation({
     description: '이 아이스브레이커답변을 북마크/찜한 모든 Users',
   })
-  @Get(':icebreakerId/bookmarks')
+  @Get(':icebreakerAnswerId/bookmarks')
   async loadBookmarkers(
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
   ): Promise<User[]> {
     return await this.icebreakerAnswerUsersService.loadBookmarkers(
-      icebreakerId,
+      icebreakerAnswerId,
     );
   }
 
   @ApiOperation({
     description: '이 아이스브레이커답변을 북마크/찜한 모든 UserIds',
   })
-  @Get(':icebreakerId/bookmarks/ids')
+  @Get(':icebreakerAnswerId/bookmarks/ids')
   async loadBookmarkerIds(
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
   ): Promise<number[]> {
     return await this.icebreakerAnswerUsersService.loadBookmarkerIds(
-      icebreakerId,
+      icebreakerAnswerId,
     );
   }
 
@@ -52,21 +52,25 @@ export class IcebreakerAnswerUsersController {
   @ApiOperation({
     description: '이 아이스브레이커답변을 북마크/찜한 모든 Users',
   })
-  @Get(':icebreakerId/likes')
+  @Get(':icebreakerAnswerId/likes')
   async loadLikers(
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
   ): Promise<User[]> {
-    return await this.icebreakerAnswerUsersService.loadLikers(icebreakerId);
+    return await this.icebreakerAnswerUsersService.loadLikers(
+      icebreakerAnswerId,
+    );
   }
 
   @ApiOperation({
     description: '이 아이스브레이커답변을 북마크/찜한 모든 UserIds',
   })
-  @Get(':icebreakerId/likes/ids')
+  @Get(':icebreakerAnswerId/likes/ids')
   async loadLikerIds(
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
   ): Promise<number[]> {
-    return await this.icebreakerAnswerUsersService.loadLikerIds(icebreakerId);
+    return await this.icebreakerAnswerUsersService.loadLikerIds(
+      icebreakerAnswerId,
+    );
   }
 
   //? ----------------------------------------------------------------------- //
@@ -76,24 +80,24 @@ export class IcebreakerAnswerUsersController {
   @ApiOperation({
     description: '이 아이스브레이커답변을 신고한 모든 Users (all)',
   })
-  @Get(':icebreakerId/flags')
+  @Get(':icebreakerAnswerId/flags')
   async loadFlaggingUsers(
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
   ): Promise<User[]> {
     return await this.icebreakerAnswerUsersService.loadIcebreakerFlaggingUsers(
-      icebreakerId,
+      icebreakerAnswerId,
     );
   }
 
   @ApiOperation({
     description: '이 아이스브레이커답변을 신고한 모든 UserIds (all)',
   })
-  @Get(':icebreakerId/flags/ids')
+  @Get(':icebreakerAnswerId/flags/ids')
   async loadFlaggingUserIds(
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
   ): Promise<number[]> {
     return await this.icebreakerAnswerUsersService.loadIcebreakerFlaggingUserIds(
-      icebreakerId,
+      icebreakerAnswerId,
     );
   }
 }

@@ -18,7 +18,6 @@ import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Meetup } from 'src/domain/meetups/entities/meetup.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { DataSource } from 'typeorm';
-import { UserNotificationEvent } from 'src/domain/users/events/user-notification.event';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Like } from 'src/domain/users/entities/like.entity';
 
@@ -93,13 +92,14 @@ export class UserMeetupsService {
 
   // 내가 만든 Meetup Ids 리스트 (all)
   async loadMyMeetupIds(userId: number): Promise<number[]> {
-    const items = await this.meetupRepository
+    const rows = await this.meetupRepository
       .createQueryBuilder('meetup')
       .where({
         userId,
       })
       .getMany();
-    return items.map((v) => v.id);
+
+    return rows.length > 0 ? rows.map((v: any) => v.id) : [];
   }
 
   //? ----------------------------------------------------------------------- //
@@ -179,10 +179,6 @@ export class UserMeetupsService {
     return +count === 1;
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 북마크한 Meetups
-  //? ----------------------------------------------------------------------- //
-
   // 내가 북마크한 Meetups (paginated)
   async listBookmarkedMeetups(
     query: PaginateQuery,
@@ -228,7 +224,7 @@ export class UserMeetupsService {
       [`meetup`, userId],
     );
 
-    return rows.map((v: any) => v.entityId);
+    return rows.length > 0 ? rows.map((v: any) => v.entityId) : [];
   }
 
   //? ----------------------------------------------------------------------- //
@@ -306,10 +302,6 @@ export class UserMeetupsService {
     return +count === 1;
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 좋아요한 Meetups
-  //? ----------------------------------------------------------------------- //
-
   // 내가 좋아요한 Meetups (paginated)
   async listLikedMeetups(
     query: PaginateQuery,
@@ -355,7 +347,7 @@ export class UserMeetupsService {
       [`meetup`, userId],
     );
 
-    return rows.map((v: any) => v.entityId);
+    return rows.length > 0 ? rows.map((v: any) => v.entityId) : [];
   }
 
   //? ----------------------------------------------------------------------- //
@@ -438,10 +430,6 @@ export class UserMeetupsService {
     return +count === 1;
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 신고한 Meetups
-  //? ----------------------------------------------------------------------- //
-
   // 내가 신고한 Meetups (paginated)
   async listFlaggedMeetups(
     query: PaginateQuery,
@@ -487,6 +475,6 @@ export class UserMeetupsService {
       [`meetup`, userId],
     );
 
-    return rows.map((v: any) => v.entityId);
+    return rows.length > 0 ? rows.map((v: any) => v.entityId) : [];
   }
 }

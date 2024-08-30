@@ -54,7 +54,6 @@ export class UserIcebreakerAnswersService {
     const queryBuilder = this.icebreakerAnswerRepository
       .createQueryBuilder('icebreakerAnswer')
       .leftJoinAndSelect('icebreakerAnswer.icebreaker', 'icebreaker')
-      .leftJoinAndSelect('icebreakerAnswer.user', 'user')
       .where('icebreakerAnswer.userId = :userId', {
         userId,
       });
@@ -80,7 +79,6 @@ export class UserIcebreakerAnswersService {
   async loadMyIcebreakerAnswers(userId: number): Promise<IcebreakerAnswer[]> {
     return await this.icebreakerAnswerRepository
       .createQueryBuilder('icebreakerAnswer')
-      .innerJoinAndSelect('icebreakerAnswer.user', 'user')
       .innerJoinAndSelect('icebreakerAnswer.icebreaker', 'icebreaker')
       .where({
         userId,
@@ -90,13 +88,14 @@ export class UserIcebreakerAnswersService {
 
   // 내가 만든 Icebreaker Ids 리스트 (all)
   async loadMyIcebreakerAnswerIds(userId: number): Promise<number[]> {
-    const items = await this.icebreakerAnswerRepository
+    const rows = await this.icebreakerAnswerRepository
       .createQueryBuilder('icebreakerAnswer')
       .where({
         userId,
       })
       .getMany();
-    return items.map((v) => v.id);
+
+    return rows.length > 0 ? rows.map((v: any) => v.id) : [];
   }
 
   //? ----------------------------------------------------------------------- //
@@ -195,6 +194,7 @@ export class UserIcebreakerAnswersService {
         'bookmark.entityId = icebreakerAnswer.id',
       )
       .leftJoinAndSelect('icebreakerAnswer.user', 'user')
+      .leftJoinAndSelect('icebreakerAnswer.icebreaker', 'icebreaker')
       .where('bookmark.userId = :userId', { userId })
       .andWhere('bookmark.entityType = :entityType', {
         entityType: 'icebreaker_answer',
@@ -237,7 +237,7 @@ export class UserIcebreakerAnswersService {
       [`icebreaker_answer`, userId],
     );
 
-    return rows.length > 0 ? rows.map((v: any) => v.icebreakerId) : [];
+    return rows.length > 0 ? rows.map((v: any) => v.entityId) : [];
   }
 
   //? ----------------------------------------------------------------------- //
@@ -332,6 +332,8 @@ export class UserIcebreakerAnswersService {
     const queryBuilder = this.icebreakerAnswerRepository
       .createQueryBuilder('icebreakerAnswer')
       .innerJoin(Like, 'like', 'like.entityId = icebreakerAnswer.id')
+      .leftJoinAndSelect('icebreakerAnswer.user', 'user')
+      .leftJoinAndSelect('icebreakerAnswer.icebreaker', 'icebreaker')
       .where('like.userId = :userId', { userId })
       .andWhere('like.entityType = :entityType', {
         entityType: 'icebreaker_answer',
@@ -374,7 +376,7 @@ export class UserIcebreakerAnswersService {
       [`icebreaker_answer`, userId],
     );
 
-    return rows.map((v: any) => v.entityId);
+    return rows.length > 0 ? rows.map((v: any) => v.entityId) : [];
   }
 
   //? ----------------------------------------------------------------------- //
@@ -471,6 +473,8 @@ export class UserIcebreakerAnswersService {
     const queryBuilder = this.icebreakerAnswerRepository
       .createQueryBuilder('icebreakerAnswer')
       .innerJoin(Flag, 'flag', 'flag.entityId = icebreakerAnswer.id')
+      .leftJoinAndSelect('icebreakerAnswer.user', 'user')
+      .leftJoinAndSelect('icebreakerAnswer.icebreaker', 'icebreaker')
       .where('flag.userId = :userId', { userId })
       .andWhere('flag.entityType = :entityType', {
         entityType: 'icebreaker_answer',
@@ -497,10 +501,10 @@ export class UserIcebreakerAnswersService {
       .innerJoinAndSelect(
         Flag,
         'flag',
-        'flag.entityId = icebreaker.id AND flag.entityType = :entityType',
+        'flag.entityId = icebreakerAnswer.id AND flag.entityType = :entityType',
         { entityType: 'icebreaker_answer' },
       )
-      .addSelect(['icebreaker_answer.*'])
+      .addSelect(['icebreakerAnswer.*'])
       .where('flag.userId = :userId', { userId })
       .getMany();
   }
@@ -513,6 +517,6 @@ export class UserIcebreakerAnswersService {
       [`icebreaker_answer`, userId],
     );
 
-    return rows.map((v: any) => v.entityId);
+    return rows.length > 0 ? rows.map((v: any) => v.entityId) : [];
   }
 }

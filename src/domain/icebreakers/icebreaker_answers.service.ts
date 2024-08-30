@@ -79,6 +79,29 @@ export class IcebreakerAnswersService {
   //? 아이스브레이커 답변 리스트
   //? ----------------------------------------------------------------------- //
 
+  //? 아이스브레이커 답변 리스트, 최상단 부모는 리턴되지 않음.
+  async findAllById(
+    query: PaginateQuery,
+    icebreakerId: number,
+  ): Promise<Paginated<IcebreakerAnswer>> {
+    const queryBuilder = this.icebreakerAnswerRepository
+      .createQueryBuilder('icebreakerAnswer')
+      .innerJoinAndSelect('icebreakerAnswer.user', 'user')
+      .where('icebreakerAnswer.icebreakerId = :icebreakerId', { icebreakerId })
+      .andWhere('icebreakerAnswer.deletedAt IS NULL');
+
+    const config: PaginateConfig<IcebreakerAnswer> = {
+      sortableColumns: ['id'],
+      defaultLimit: 20,
+      defaultSortBy: [['id', 'ASC']],
+      filterableColumns: {
+        isFlagged: [FilterOperator.EQ],
+      },
+    };
+
+    return await paginate<IcebreakerAnswer>(query, queryBuilder, config);
+  }
+
   //? 댓글 리스트 w/ Pagination (children)
   async findAll(query: PaginateQuery): Promise<Paginated<IcebreakerAnswer>> {
     return paginate(

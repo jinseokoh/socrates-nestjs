@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 import { User } from 'src/domain/users/entities/user.entity';
 import {
   Column,
@@ -58,4 +59,7 @@ export class Flag {
   constructor(partial: Partial<Flag>) {
     Object.assign(this, partial);
   }
+
+  // virtual property for the polymorphic entity
+  icebreaker?: Icebreaker;
 }

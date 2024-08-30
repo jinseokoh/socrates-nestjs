@@ -60,9 +60,25 @@ export class IcebreakerAnswersController {
   //? READ
   //? ----------------------------------------------------------------------- //
 
+  //? 아이스브레이커 답글 리스트
+  @ApiOperation({ description: '아이스브레이커 답글 리스트 w/ Pagination' })
+  @PaginateQueryOptions()
+  @Get('icebreakers/:icebreakerId/answers')
+  async findAll(
+    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Paginate() query: PaginateQuery,
+  ): Promise<Paginated<IcebreakerAnswer>> {
+    const result = await this.icebreakerAnswersService.findAllById(
+      query,
+      icebreakerId,
+    );
+
+    return result;
+  }
+
   @ApiOperation({ description: '댓글 리스트 w/ Pagination' })
   @PaginateQueryOptions()
-  @Get('icebreakeranswers')
+  @Get('icebreaker-answers')
   async findAllInTraditionalStyle(
     @Paginate() query: PaginateQuery,
   ): Promise<Paginated<IcebreakerAnswer>> {
@@ -79,7 +95,7 @@ export class IcebreakerAnswersController {
   // //? 답글 리스트 with count
   // @ApiOperation({ description: '댓글 with count 리스트 w/ Pagination' })
   // @PaginateQueryOptions()
-  // @Get('icebreakeranswers/wc')
+  // @Get('icebreaker-answers/wc')
   // async findAllInYoutubeStyle(
   //   @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   //   @Paginate() query: PaginateQuery,
@@ -95,7 +111,7 @@ export class IcebreakerAnswersController {
   // //? 답글 리스트, 최상단 부모는 리턴되지 않음.
   // @ApiOperation({ description: '답글 리스트 w/ Pagination' })
   // @PaginateQueryOptions()
-  // @Get('icebreakeranswers/:answerId')
+  // @Get('icebreaker-answers/:answerId')
   // async findIcebreakerAnswerRepliesById(
   //   @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   //   @Param('answerId', ParseIntPipe) answerId: number,
@@ -110,7 +126,7 @@ export class IcebreakerAnswersController {
 
   //! 상세보기
   @ApiOperation({ description: 'IcebreakerAnswer 상세보기' })
-  @Get('icebreakeranswers/:answerid')
+  @Get('icebreaker-answers/:answerid')
   async findById(
     @Param('answerid') answerid: number,
   ): Promise<IcebreakerAnswer> {
@@ -126,7 +142,7 @@ export class IcebreakerAnswersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '댓글 수정' })
-  @Patch('icebreakeranswers/:answerId')
+  @Patch('icebreaker-answers/:answerId')
   async updateIcebreakerAnswer(
     @Param('answerId', ParseIntPipe) answerId: number,
     @Body() dto: UpdateIcebreakerAnswerDto,
@@ -139,7 +155,7 @@ export class IcebreakerAnswersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: '댓글 soft 삭제' })
-  @Delete('icebreakeranswers/:answerId')
+  @Delete('icebreaker-answers/:answerId')
   async deleteIcebreakerAnswer(
     // @CurrentUserId() userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
@@ -153,7 +169,7 @@ export class IcebreakerAnswersController {
   //? ----------------------------------------------------------------------- //
 
   @ApiOperation({ description: 's3 직접 업로드를 위한 signedUrl 리턴' })
-  @Post('icebreakeranswers/upload-url')
+  @Post('icebreaker-answers/upload-url')
   async getSignedUrl(
     @CurrentUserId() userId: number,
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
