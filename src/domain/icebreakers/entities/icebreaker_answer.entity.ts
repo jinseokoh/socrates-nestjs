@@ -41,16 +41,16 @@ export class IcebreakerAnswer {
   images: string[] | null;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
+  @ApiProperty({ description: 'bookmark count' })
+  bookmarkCount: number;
+
+  @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'like count' })
   likeCount: number;
 
   @Column({ type: 'int', unsigned: true, default: 0 })
   @ApiProperty({ description: 'flag count' })
   flagCount: number;
-
-  @Column({ type: 'datetime', nullable: true })
-  @ApiProperty({ description: '1달 동안만 사용가능' })
-  expiredAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -64,7 +64,7 @@ export class IcebreakerAnswer {
   //? ----------------------------------------------------------------------- //
   //? many-to-1 belongsTo
 
-  @ManyToOne(() => User, (user) => user.icebreakerComments, { cascade: true })
+  @ManyToOne(() => User, (user) => user.icebreakerAnswers, { cascade: true })
   user: User;
 
   //? ----------------------------------------------------------------------- //

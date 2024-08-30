@@ -246,7 +246,7 @@ export class MeetupsService {
   }
 
   // Meetup 상세보기
-  async getById(id: number, relations: string[] = []): Promise<Meetup> {
+  async findById(id: number, relations: string[] = []): Promise<Meetup> {
     try {
       await this.increaseViewCount(id);
       return relations.length > 0
@@ -303,12 +303,12 @@ export class MeetupsService {
   //? ----------------------------------------------------------------------- //
 
   async softRemove(id: number): Promise<Meetup> {
-    const meetup = await this.getById(id);
+    const meetup = await this.findById(id);
     return await this.meetupRepository.softRemove(meetup);
   }
 
   async remove(id: number): Promise<Meetup> {
-    const meetup = await this.getById(id);
+    const meetup = await this.findById(id);
     return await this.meetupRepository.remove(meetup);
   }
 

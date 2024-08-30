@@ -86,10 +86,6 @@ export class UserMeetupsController {
     return await this.userMeetupsService.isMeetupBookmarked(userId, meetupId);
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 북마크/찜(Bookmark)한 Meetups
-  //? ----------------------------------------------------------------------- //
-
   @ApiOperation({ description: '내가 북마크/찜한 Meetups (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/bookmarkedmeetups')
@@ -100,7 +96,6 @@ export class UserMeetupsController {
     return await this.userMeetupsService.listBookmarkedMeetups(query, userId);
   }
 
-  //! not working but, do we even need this anyway?
   @ApiOperation({ description: '내가 북마크/찜한 Meetups (all)' })
   @Get(':userId/bookmarkedmeetups/all')
   async loadBookmarkedMeetups(
@@ -148,10 +143,6 @@ export class UserMeetupsController {
     return await this.userMeetupsService.isMeetupLiked(userId, meetupId);
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 신고한 Meetups
-  //? ----------------------------------------------------------------------- //
-
   @ApiOperation({ description: '내가 신고한 Meetups (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/likedmeetups')
@@ -162,7 +153,6 @@ export class UserMeetupsController {
     return await this.userMeetupsService.listLikedMeetups(query, userId);
   }
 
-  //! not working but, do we even need this anyway?
   @ApiOperation({ description: '내가 신고한 모든 Meetups (all)' })
   @Get(':userId/likedmeetups/all')
   async loadLikedMeetups(
@@ -215,10 +205,6 @@ export class UserMeetupsController {
     return await this.userMeetupsService.isMeetupFlagged(userId, meetupId);
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 신고한 Meetups
-  //? ----------------------------------------------------------------------- //
-
   @ApiOperation({ description: '내가 신고한 Meetups (paginated)' })
   @PaginateQueryOptions()
   @Get(':userId/flaggedmeetups')
@@ -229,7 +215,6 @@ export class UserMeetupsController {
     return await this.userMeetupsService.listFlaggedMeetups(query, userId);
   }
 
-  //! not working but, do we even need this anyway?
   @ApiOperation({ description: '내가 신고한 모든 Meetups (all)' })
   @Get(':userId/flaggedmeetups/all')
   async loadFlaggedMeetups(

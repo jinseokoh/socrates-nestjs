@@ -3,6 +3,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -14,7 +15,6 @@ import { ApiOperation } from '@nestjs/swagger';
 import { Paginate, PaginateQuery, Paginated } from 'nestjs-paginate';
 import { CurrentUserId } from 'src/common/decorators/current-user-id.decorator';
 import { PaginateQueryOptions } from 'src/common/decorators/paginate-query-options.decorator';
-import { Public } from 'src/common/decorators/public.decorator';
 import { SignedUrl } from 'src/common/types';
 import { IcebreakersService } from 'src/domain/icebreakers/icebreakers.service';
 import { CreateIcebreakerDto } from 'src/domain/icebreakers/dto/create-icebreaker.dto';
@@ -28,7 +28,7 @@ export class IcebreakersController {
   constructor(private readonly icebreakersService: IcebreakersService) {}
 
   //?-------------------------------------------------------------------------//
-  //? Create
+  //? CREATE
   //?-------------------------------------------------------------------------//
 
   @ApiOperation({ description: 'Icebreaker 생성/수정' })
@@ -42,7 +42,7 @@ export class IcebreakersController {
     // - questionId -1 이나 0 이 전달 될 수 있다.
     return await this.icebreakersService.create({
       ...dto,
-      userId: userId,
+      userId: dto.userId ?? userId,
       recipientId:
         dto.recipientId && dto.recipientId > 0 ? dto.recipientId : null,
       questionId: dto.questionId && dto.questionId > 0 ? dto.questionId : null,
@@ -62,15 +62,13 @@ export class IcebreakersController {
     return await this.icebreakersService.findAll(query);
   }
 
-  //? the answering out relations can be ignored to reduce the amount of response
   @ApiOperation({ description: 'Icebreaker 상세보기' })
   @Get(':id')
-  async getIcebreakerById(@Param('id') id: number): Promise<Icebreaker> {
+  async findById(@Param('id') id: number): Promise<Icebreaker> {
     return await this.icebreakersService.findById(id, [
       // 'question', not sure if it's
       'user',
       'answers',
-      'bookmarks',
     ]);
   }
 
@@ -87,6 +85,16 @@ export class IcebreakersController {
     return await this.icebreakersService.update(id, dto);
   }
 
+  //? ----------------------------------------------------------------------- //
+  //? DELETE
+  //? ----------------------------------------------------------------------- //
+
+  @ApiOperation({ description: 'Icebreaker 삭제' })
+  @Delete(':id')
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<Icebreaker> {
+    return await this.icebreakersService.softRemove(id);
+  }
+
   //?-------------------------------------------------------------------------//
   //? UPLOAD
   //?-------------------------------------------------------------------------//
@@ -98,16 +106,5 @@ export class IcebreakersController {
     @Body() dto: SignedUrlDto,
   ): Promise<SignedUrl> {
     return await this.icebreakersService.getSignedUrl(userId, dto);
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? SEED
-  //?-------------------------------------------------------------------------//
-
-  // just for testing
-  @ApiOperation({ description: 'seed icebreakers' })
-  @Post('seed')
-  async seedIcebreakers(): Promise<void> {
-    return await this.icebreakersService.seedIcebreakers();
   }
 }

@@ -234,7 +234,7 @@ export class UserIcebreakersService {
   // 내가 북마크한 모든 IcebreakerIds
   async loadBookmarkedIcebreakerIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkRepository.manager.query(
-      'SELECT icebreakerId FROM `bookmark` \
+      'SELECT entityId FROM `bookmark` \
       WHERE bookmark.entityType = ? AND bookmark.userId = ?',
       [`icebreaker`, userId],
     );
@@ -476,7 +476,7 @@ export class UserIcebreakersService {
   ): Promise<Paginated<Icebreaker>> {
     const queryBuilder = this.icebreakerRepository
       .createQueryBuilder('icebreaker')
-      .innerJoin(Flag, 'flag', 'icebreaker.id = flag.entityId')
+      .innerJoin(Flag, 'flag', 'flag.entityId = icebreaker.id')
       .where('flag.userId = :userId', { userId })
       .andWhere('flag.entityType = :entityType', { entityType: 'icebreaker' });
 

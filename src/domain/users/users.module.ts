@@ -8,6 +8,8 @@ import { Flag } from 'src/domain/users/entities/flag.entity';
 import { Fluency } from 'src/domain/languages/entities/fluency.entity';
 import { Friendship } from 'src/domain/users/entities/friendship.entity';
 import { Hate } from 'src/domain/users/entities/hate.entity';
+import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
+import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_answer.entity';
 import { Interest } from 'src/domain/users/entities/interest.entity';
 import { Join } from 'src/domain/meetups/entities/join.entity';
 import { Language } from 'src/domain/languages/entities/language.entity';
@@ -30,6 +32,8 @@ import { UserCategoriesService } from 'src/domain/users/user-categories.service'
 import { UserFeedsService } from 'src/domain/users/user-feeds.service';
 import { UserFriendsService } from 'src/domain/users/user-friends.service';
 import { UserHatesService } from 'src/domain/users/user-hates.service';
+import { UserIcebreakersService } from 'src/domain/users/user-icebreakers.service';
+import { UserIcebreakerAnswersService } from 'src/domain/users/user-icebreaker_answers.service';
 import { UserImpressionsService } from 'src/domain/users/user-impressions.service';
 import { UserJoinsService } from 'src/domain/users/user-joins.service';
 import { UserLanguagesService } from 'src/domain/users/user-languages.service';
@@ -44,6 +48,8 @@ import { UserCategoriesController } from 'src/domain/users/user-categories.contr
 import { UserFeedsController } from 'src/domain/users/user-feeds.controller';
 import { UserFriendshipController } from 'src/domain/users/user-friends.controller';
 import { UserHatesController } from 'src/domain/users/user-hates.controller';
+import { UserIcebreakersController } from 'src/domain/users/user-icebreakers.controller';
+import { UserIcebreakerAnswersController } from 'src/domain/users/user-icebreaker_answers.controller';
 import { UserImpressionsController } from 'src/domain/users/user-impressions.controller';
 import { UserJoinsController } from 'src/domain/users/user-joins.controller';
 import { UserLanguagesController } from 'src/domain/users/user-languages.controller';
@@ -62,9 +68,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { UserSubscriber } from 'src/domain/users/subscribers/user-subscriber';
 import { FluencySubscriber } from 'src/domain/users/subscribers/language-skill-subscriber';
 import { UserNotificationListener } from 'src/domain/users/listeners/user-notification.listener';
-import { UserIcebreakersController } from 'src/domain/users/user-icebreakers.controller';
-import { UserIcebreakersService } from 'src/domain/users/user-icebreakers.service';
-import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
 
 @Module({
   imports: [
@@ -76,6 +79,7 @@ import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
       Friendship,
       Hate,
       Icebreaker,
+      IcebreakerAnswer,
       Interest,
       Join,
       Language,
@@ -113,6 +117,7 @@ import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
     UserFriendsService,
     UserHatesService,
     UserIcebreakersService,
+    UserIcebreakerAnswersService,
     UserImpressionsService,
     UserJoinsService,
     UserLanguagesService,
@@ -132,6 +137,7 @@ import { Icebreaker } from 'src/domain/icebreakers/entities/icebreaker.entity';
     UserFriendshipController,
     UserHatesController,
     UserIcebreakersController,
+    UserIcebreakerAnswersController,
     UserImpressionsController,
     UserJoinsController,
     UserLanguagesController,

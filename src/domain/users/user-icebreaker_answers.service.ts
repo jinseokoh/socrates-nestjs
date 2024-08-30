@@ -182,11 +182,7 @@ export class UserIcebreakerAnswersService {
     return +count === 1;
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 북마크한 IcebreakerAnswers
-  //? ----------------------------------------------------------------------- //
-
-  // 내가 북마크한 Icebreakers (paginated)
+  // 내가 북마크한 IcebreakerAnswers (paginated)
   async listBookmarkedIcebreakerAnswers(
     query: PaginateQuery,
     userId: number,
@@ -198,7 +194,7 @@ export class UserIcebreakerAnswersService {
         'bookmark',
         'bookmark.entityId = icebreakerAnswer.id',
       )
-      .innerJoinAndSelect('icebreakerAnswer.user', 'user')
+      .leftJoinAndSelect('icebreakerAnswer.user', 'user')
       .where('bookmark.userId = :userId', { userId })
       .andWhere('bookmark.entityType = :entityType', {
         entityType: 'icebreaker_answer',
@@ -215,7 +211,7 @@ export class UserIcebreakerAnswersService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // 내가 북마크한 모든 Icebreakers
+  // 내가 북마크한 모든 IcebreakerAnswers
   async loadBookmarkedIcebreakerAnswers(
     userId: number,
   ): Promise<IcebreakerAnswer[]> {
@@ -225,30 +221,30 @@ export class UserIcebreakerAnswersService {
       .innerJoinAndSelect(
         Bookmark,
         'bookmark',
-        'bookmark.entityId = icebreaker.id AND bookmark.entityType = :entityType',
+        'bookmark.entityId = icebreakerAnswer.id AND bookmark.entityType = :entityType',
         { entityType: 'icebreaker_answer' },
       )
-      .addSelect(['icebreaker_answer.*'])
+      .addSelect(['icebreakerAnswer.*'])
       .where('bookmark.userId = :userId', { userId })
       .getMany();
   }
 
-  // 내가 북마크한 모든 IcebreakerIds
+  // 내가 북마크한 모든 IcebreakerAnswerIds
   async loadBookmarkedIcebreakerAnswerIds(userId: number): Promise<number[]> {
     const rows = await this.bookmarkRepository.manager.query(
-      'SELECT icebreakerAnswerId FROM `bookmark` \
+      'SELECT entityId FROM `bookmark` \
       WHERE bookmark.entityType = ? AND bookmark.userId = ?',
       [`icebreaker_answer`, userId],
     );
 
-    return rows.map((v: any) => v.icebreakerId);
+    return rows.length > 0 ? rows.map((v: any) => v.icebreakerId) : [];
   }
 
   //? ----------------------------------------------------------------------- //
   //? IcebreakerAnswer Like 좋아요 생성
   //? ----------------------------------------------------------------------- //
 
-  // Icebreaker 좋아요 생성
+  // IcebreakerAnswer 좋아요 생성
   async createIcebreakerAnswerLike(
     userId: number,
     icebreakerId: number,
@@ -313,7 +309,7 @@ export class UserIcebreakerAnswersService {
     }
   }
 
-  // Icebreaker 좋아요 여부
+  // IcebreakerAnswer 좋아요 여부
   async isIcebreakerAnswerLiked(
     userId: number,
     icebreakerId: number,
@@ -327,10 +323,6 @@ export class UserIcebreakerAnswersService {
 
     return +count === 1;
   }
-
-  //? ----------------------------------------------------------------------- //
-  //? 내가 좋아요한 IcebreakerAnswers
-  //? ----------------------------------------------------------------------- //
 
   // 내가 좋아요한 IcebreakerAnswers (paginated)
   async listLikedIcebreakerAnswers(
@@ -366,15 +358,15 @@ export class UserIcebreakerAnswersService {
       .innerJoinAndSelect(
         Like,
         'like',
-        'like.entityId = icebreaker.id AND like.entityType = :entityType',
+        'like.entityId = icebreakerAnswer.id AND like.entityType = :entityType',
         { entityType: 'icebreaker_answer' },
       )
-      .addSelect(['icebreaker_answer.*'])
+      .addSelect(['icebreakerAnswer.*'])
       .where('like.userId = :userId', { userId })
       .getMany();
   }
 
-  // 내가 좋아요한 모든 IcebreakerIds
+  // 내가 좋아요한 모든 IcebreakerAnswerIds
   async loadLikedIcebreakerAnswerIds(userId: number): Promise<number[]> {
     const rows = await this.likeRepository.manager.query(
       'SELECT entityId FROM `like` \
@@ -389,7 +381,7 @@ export class UserIcebreakerAnswersService {
   //? IcebreakerAnswer Flag 신고 생성
   //? ----------------------------------------------------------------------- //
 
-  // Icebreaker 신고 생성
+  // IcebreakerAnswer 신고 생성
   async createIcebreakerAnswerFlag(
     userId: number,
     icebreakerId: number,
@@ -456,7 +448,7 @@ export class UserIcebreakerAnswersService {
     }
   }
 
-  // Icebreaker 신고 여부
+  // IcebreakerAnswer 신고 여부
   async isIcebreakerAnswerFlagged(
     userId: number,
     icebreakerId: number,
@@ -470,10 +462,6 @@ export class UserIcebreakerAnswersService {
 
     return +count === 1;
   }
-
-  //? ----------------------------------------------------------------------- //
-  //? 내가 신고한 IcebreakerAnswers
-  //? ----------------------------------------------------------------------- //
 
   // 내가 신고한 IcebreakerAnswers (paginated)
   async listFlaggedIcebreakerAnswers(

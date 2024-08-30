@@ -38,6 +38,7 @@ export class ContentsService {
     const config: PaginateConfig<Content> = {
       sortableColumns: ['id', 'title'],
       searchableColumns: ['title', 'body'],
+      defaultLimit: 20,
       defaultSortBy: [['id', 'DESC']],
       filterableColumns: {
         id: [FilterOperator.IN, FilterOperator.EQ],
@@ -63,7 +64,7 @@ export class ContentsService {
   }
 
   // 상세보기
-  async getById(id: number, relations: string[] = []): Promise<Content> {
+  async findById(id: number, relations: string[] = []): Promise<Content> {
     try {
       await this.increaseViewCount(id);
       return relations.length > 0
@@ -130,7 +131,7 @@ export class ContentsService {
   //? ----------------------------------------------------------------------- //
 
   async remove(id: number): Promise<Content> {
-    const content = await this.getById(id);
+    const content = await this.findById(id);
     await this.contentRepository.softRemove(content);
     return content;
   }

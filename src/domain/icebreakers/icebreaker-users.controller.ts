@@ -21,16 +21,16 @@ export class IcebreakerUsersController {
   //? 북마크 (Bookmark) 리스트
   //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: '이 모임을 북마크/찜한 모든 Users' })
-  @Get(':icebreakerId/bookmarkers')
+  @ApiOperation({ description: '이 아이스브레이커를 북마크/찜한 모든 Users' })
+  @Get(':icebreakerId/bookmarks')
   async loadBookmarkers(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<User[]> {
     return await this.icebreakerUsersService.loadBookmarkers(icebreakerId);
   }
 
-  @ApiOperation({ description: '이 모임을 북마크/찜한 모든 UserIds' })
-  @Get(':icebreakerId/bookmarkerids')
+  @ApiOperation({ description: '이 아이스브레이커를 북마크/찜한 모든 UserIds' })
+  @Get(':icebreakerId/bookmarks/ids')
   async loadBookmarkerIds(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<number[]> {
@@ -38,11 +38,31 @@ export class IcebreakerUsersController {
   }
 
   //? ----------------------------------------------------------------------- //
+  //? 좋아요 (Like) 리스트
+  //? ----------------------------------------------------------------------- //
+
+  @ApiOperation({ description: '이 아이스브레이커를 북마크/찜한 모든 Users' })
+  @Get(':icebreakerId/likes')
+  async loadLikers(
+    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+  ): Promise<User[]> {
+    return await this.icebreakerUsersService.loadLikers(icebreakerId);
+  }
+
+  @ApiOperation({ description: '이 아이스브레이커를 북마크/찜한 모든 UserIds' })
+  @Get(':icebreakerId/likes/ids')
+  async loadLikerIds(
+    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+  ): Promise<number[]> {
+    return await this.icebreakerUsersService.loadLikerIds(icebreakerId);
+  }
+
+  //? ----------------------------------------------------------------------- //
   //? 신고 (Flag) 리스트
   //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: '이 모임을 신고한 모든 Users (all)' })
-  @Get(':icebreakerId/flaggers')
+  @ApiOperation({ description: '이 아이스브레이커를 신고한 모든 Users (all)' })
+  @Get(':icebreakerId/flags')
   async loadFlaggingUsers(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<User[]> {
@@ -51,8 +71,10 @@ export class IcebreakerUsersController {
     );
   }
 
-  @ApiOperation({ description: '이 모임을 신고한 모든 UserIds (all)' })
-  @Get(':icebreakerId/flaggerids')
+  @ApiOperation({
+    description: '이 아이스브레이커를 신고한 모든 UserIds (all)',
+  })
+  @Get(':icebreakerId/flags/ids')
   async loadFlaggingUserIds(
     @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
   ): Promise<number[]> {

@@ -75,12 +75,11 @@ export class IcebreakersService {
   //? READ
   //?-------------------------------------------------------------------------//
   async findAll(query: PaginateQuery): Promise<Paginated<Icebreaker>> {
-    console.log(query.filter);
-    //! filterableColumns 의 key 값이 아닌 경우 무시하기 때문에, 필요한 쿼리 필터가 아닌 custom param 전달용으로 사용.
+    //! filterableColumns 의 key 값이 아닌 경우 무시하기 때문에, queryFilter 이 아닌 id, gender, age 전달용으로 사용.
     const queryBuilder =
       query.filter.id && query.filter.gender && query.filter.age
         ? this.icebreakerRepository
-            .createQueryBuilder('icebreaker')
+            .createQueryBuilder('icebreaker') // 필수정보 입력 사용자의 경우,
             .where('icebreaker.recipientId = :id', { id: query.filter.id })
             .orWhere(
               new Brackets((qb) => {
@@ -108,7 +107,7 @@ export class IcebreakersService {
               }),
             )
         : this.icebreakerRepository
-            .createQueryBuilder('icebreaker')
+            .createQueryBuilder('icebreaker') // 필수정보 미입력 사용자의 경우,
             .where('icebreaker.recipientId = :id', { id: query.filter.id })
             .orWhere(
               new Brackets((qb) => {
@@ -140,9 +139,9 @@ export class IcebreakersService {
     return await paginate(query, queryBuilder, config);
   }
 
-  // Meetup 상세보기
+  // Icebreaker 상세보기
   async findById(id: number, relations: string[] = []): Promise<Icebreaker> {
-    const icebreakerComments = relations.includes('icebreakerComments');
+    // const icebreakerAnswers = relations.includes('icebreakerAnswers');
     try {
       return relations.length > 0
         ? await this.icebreakerRepository.findOneOrFail({
@@ -179,6 +178,15 @@ export class IcebreakersService {
   }
 
   //?-------------------------------------------------------------------------//
+  //? DELETE
+  //?-------------------------------------------------------------------------//
+
+  async softRemove(id: number): Promise<Icebreaker> {
+    const icebreaker = await this.findById(id);
+    return await this.icebreakerRepository.softRemove(icebreaker);
+  }
+
+  //?-------------------------------------------------------------------------//
   //? UPLOAD
   //?-------------------------------------------------------------------------//
 
@@ -192,40 +200,5 @@ export class IcebreakersService {
       upload: url,
       image: `https://cdn.mesoapp.kr/${path}`,
     };
-  }
-
-  //?-------------------------------------------------------------------------//
-  //? SEED
-  //?-------------------------------------------------------------------------//
-
-  async seedIcebreakers(): Promise<void> {
-    const lorem = new LoremIpsum({
-      sentencesPerParagraph: {
-        max: 8,
-        min: 4,
-      },
-      wordsPerSentence: {
-        max: 16,
-        min: 4,
-      },
-    });
-    const randomInt = (min: number, max: number) =>
-      Math.floor(Math.random() * (max - min + 1) + min);
-
-    await Promise.all(
-      [...Array(240).keys()].map(async (v: number) => {
-        const questionId = (v % 120) + 1;
-        const userId = randomInt(1, 20);
-        const body = lorem.generateSentences(5);
-
-        const dto = new CreateIcebreakerDto();
-        dto.questionId = questionId;
-        dto.userId = userId;
-        dto.body = body;
-        await this.icebreakerRepository.save(
-          this.icebreakerRepository.create(dto),
-        );
-      }),
-    );
   }
 }

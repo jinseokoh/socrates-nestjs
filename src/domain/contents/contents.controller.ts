@@ -53,8 +53,8 @@ export class ContentsController {
 
   @ApiOperation({ description: '공지사항 상세보기' })
   @Get(':id')
-  async getById(@Param('id') id: number): Promise<Content> {
-    return await this.contentsService.getById(id);
+  async findById(@Param('id') id: number): Promise<Content> {
+    return await this.contentsService.findById(id);
   }
 
   //? ----------------------------------------------------------------------- //

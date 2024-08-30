@@ -73,8 +73,8 @@ export class MeetupsController {
 
   @ApiOperation({ description: 'Meetup 상세보기' })
   @Get(':id')
-  async getById(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
-    return await this.meetupsService.getById(id, [
+  async findById(@Param('id', ParseIntPipe) id: number): Promise<Meetup> {
+    return await this.meetupsService.findById(id, [
       'user',
       'user.profile',
       'venue',

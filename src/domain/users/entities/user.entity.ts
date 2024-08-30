@@ -152,11 +152,6 @@ export class User {
   })
   public polls: Poll[];
 
-  @OneToMany(() => Icebreaker, (icebreaker) => icebreaker.user, {
-    // cascade: ['insert', 'update'],
-  })
-  public icebreakers: Icebreaker[];
-
   @OneToMany(() => Meetup, (meetup) => meetup.user, {
     // cascade: ['insert', 'update'],
   })
@@ -177,8 +172,16 @@ export class User {
   })
   public inquiries: Inquiry[];
 
-  @OneToMany(() => IcebreakerAnswer, (comment) => comment.user)
-  public icebreakerComments: IcebreakerAnswer[];
+  @OneToMany(() => Icebreaker, (icebreaker) => icebreaker.user, {
+    // cascade: ['insert', 'update'],
+  })
+  public icebreakers: Icebreaker[];
+
+  @OneToMany(
+    () => IcebreakerAnswer,
+    (icebreakerAnswer) => icebreakerAnswer.user,
+  )
+  public icebreakerAnswers: IcebreakerAnswer[];
 
   @OneToMany(() => MeetupComment, (comment) => comment.user)
   public meetupComments: MeetupComment[];

@@ -17,6 +17,7 @@ import { IcebreakerAnswer } from 'src/domain/icebreakers/entities/icebreaker_ans
 import { Bookmark } from 'src/domain/users/entities/bookmark.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
 import { UserIcebreakerAnswersService } from 'src/domain/users/user-icebreaker_answers.service';
+import { Like } from 'src/domain/users/entities/like.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @SkipThrottle()
@@ -43,7 +44,7 @@ export class UserIcebreakerAnswersController {
     );
   }
 
-  @ApiOperation({ description: '내가 만든 Icebreakers (all)' })
+  @ApiOperation({ description: '내가 만든 IcebreakerAnswers (all)' })
   @Get(':userId/icebreakeranswers/all')
   async loadMyIcebreakers(
     @Param('userId', ParseIntPipe) userId: number,
@@ -54,7 +55,7 @@ export class UserIcebreakerAnswersController {
   }
 
   @ApiOperation({ description: '내가 만든 IcebreakerAnswerIds' })
-  @Get(':userId/icebreakeranswerids')
+  @Get(':userId/icebreakeranswers/ids')
   async loadMyIcebreakerAnswerIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
@@ -63,53 +64,51 @@ export class UserIcebreakerAnswersController {
     );
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 북마크/찜(Bookmark) 생성
-  //? ----------------------------------------------------------------------- //
+  //! ----------------------------------------------------------------------- //
+  //! 북마크/찜(Bookmark) 생성 (context 상 모호하지만 통일성을 중시해서 추가)
+  //! ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: 'Icebreaker 북마크/찜 생성' })
-  @Post(':userId/bookmarkedicebreakers/:icebreakerId')
+  @ApiOperation({ description: 'IcebreakerAnswer 북마크/찜 생성' })
+  @Post(':userId/icebreakeranswers/:icebreakerAnswerId/bookmark')
   async createIcebreakerAnswerBookmark(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
   ): Promise<Bookmark> {
     return await this.userIcebreakerAnswersService.createIcebreakerAnswerBookmark(
       userId,
-      icebreakerId,
+      icebreakerAnswerId,
     );
   }
 
-  @ApiOperation({ description: 'Icebreaker 북마크/찜 삭제' })
-  @Delete(':userId/bookmarkedicebreakers/:icebreakerId')
+  @ApiOperation({ description: 'IcebreakerAnswer 북마크/찜 삭제' })
+  @Delete(':userId/icebreakeranswers/:icebreakerAnswerId/bookmark')
   async deleteIcebreakerAnswerBookmark(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
   ): Promise<any> {
     return await this.userIcebreakerAnswersService.deleteIcebreakerAnswerBookmark(
       userId,
-      icebreakerId,
+      icebreakerAnswerId,
     );
   }
 
-  @ApiOperation({ description: 'Icebreaker 북마크/찜 여부' })
-  @Get(':userId/bookmarkedicebreakers/:icebreakerId')
+  @ApiOperation({ description: 'IcebreakerAnswer 북마크/찜 여부' })
+  @Get(':userId/icebreakeranswers/:icebreakerAnswerId/bookmark')
   async isIcebreakerAnswerBookmarked(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
   ): Promise<boolean> {
     return await this.userIcebreakerAnswersService.isIcebreakerAnswerBookmarked(
       userId,
-      icebreakerId,
+      icebreakerAnswerId,
     );
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 북마크/찜(Bookmark)한 Icebreakers
-  //? ----------------------------------------------------------------------- //
-
-  @ApiOperation({ description: '내가 북마크/찜한 Icebreakers (paginated)' })
+  @ApiOperation({
+    description: '내가 북마크/찜한 IcebreakerAnswers (paginated)',
+  })
   @PaginateQueryOptions()
-  @Get(':userId/bookmarkedicebreakers')
+  @Get(':userId/bookmarkedicebreakeranswers')
   async listBookmarkedIcebreakerAnswers(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
@@ -120,9 +119,8 @@ export class UserIcebreakerAnswersController {
     );
   }
 
-  //! not working but, do we even need this anyway?
-  @ApiOperation({ description: '내가 북마크/찜한 Icebreakers (all)' })
-  @Get(':userId/bookmarkedicebreakers/all')
+  @ApiOperation({ description: '내가 북마크/찜한 IcebreakerAnswers (all)' })
+  @Get(':userId/bookmarkedicebreakeranswers/all')
   async loadBookmarkedIcebreakerAnswers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<IcebreakerAnswer[]> {
@@ -132,7 +130,7 @@ export class UserIcebreakerAnswersController {
   }
 
   @ApiOperation({ description: '내가 북마크/찜한 IcebreakerIds' })
-  @Get(':userId/bookmarkedicebreakerids')
+  @Get(':userId/bookmarkedicebreakeranswers/ids')
   async loadBookmarkedIcebreakerAnswerIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {
@@ -142,54 +140,123 @@ export class UserIcebreakerAnswersController {
   }
 
   //? ----------------------------------------------------------------------- //
-  //? Icebreaker Flag 신고 생성
+  //? IcebreakerAnswer Like 좋아요 생성
   //? ----------------------------------------------------------------------- //
 
-  @ApiOperation({ description: 'Icebreaker 신고 생성' })
-  @Post(':userId/flaggedicebreakers/:icebreakerId')
-  async createIcebreakerFlag(
+  @ApiOperation({ description: 'IcebreakerAnswer 좋아요 생성' })
+  @Post(':userId/icebreakeranswers/:icebreakerAnswerId/like')
+  async createIcebreakerAnswerLike(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
+  ): Promise<Like> {
+    return await this.userIcebreakerAnswersService.createIcebreakerAnswerLike(
+      userId,
+      icebreakerAnswerId,
+    );
+  }
+
+  @ApiOperation({ description: 'IcebreakerAnswer 좋아요 삭제' })
+  @Delete(':userId/icebreakeranswers/:icebreakerAnswerId/like')
+  async deleteIcebreakerAnswerLike(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
+  ): Promise<any> {
+    return await this.userIcebreakerAnswersService.deleteIcebreakerAnswerLike(
+      userId,
+      icebreakerAnswerId,
+    );
+  }
+
+  @ApiOperation({ description: 'IcebreakerAnswer 좋아요 여부' })
+  @Get(':userId/icebreakeranswers/:icebreakerAnswerId/like')
+  async isIcebreakerAnswerLiked(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
+  ): Promise<boolean> {
+    return await this.userIcebreakerAnswersService.isIcebreakerAnswerLiked(
+      userId,
+      icebreakerAnswerId,
+    );
+  }
+
+  @ApiOperation({ description: '내가 좋아요한 IcebreakerAnswers (paginated)' })
+  @PaginateQueryOptions()
+  @Get(':userId/likedicebreakeranswers')
+  async listLikedIcebreakersByUserId(
+    @Paginate() query: PaginateQuery,
+    @Param('userId') userId: number,
+  ): Promise<Paginated<IcebreakerAnswer>> {
+    return await this.userIcebreakerAnswersService.listLikedIcebreakerAnswers(
+      query,
+      userId,
+    );
+  }
+
+  @ApiOperation({ description: '내가 좋아요한 모든 IcebreakerAnswers (all)' })
+  @Get(':userId/likedicebreakeranswers/all')
+  async loadLikedIcebreakers(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<IcebreakerAnswer[]> {
+    return await this.userIcebreakerAnswersService.loadLikedIcebreakerAnswers(
+      userId,
+    );
+  }
+
+  @ApiOperation({ description: '내가 좋아요한 모든 IcebreakerAnswerIds' })
+  @Get(':userId/likedicebreakeranswers/ids')
+  async loadLikedIcebreakerIds(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<number[]> {
+    return await this.userIcebreakerAnswersService.loadLikedIcebreakerAnswerIds(
+      userId,
+    );
+  }
+
+  //? ----------------------------------------------------------------------- //
+  //? IcebreakerAnswer Flag 신고 생성
+  //? ----------------------------------------------------------------------- //
+
+  @ApiOperation({ description: 'IcebreakerAnswer 신고 생성' })
+  @Post(':userId/icebreakeranswers/:icebreakerAnswerId/flag')
+  async createIcebreakerAnswerFlag(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
     @Body('message') message: string | null,
   ): Promise<Flag> {
     return await this.userIcebreakerAnswersService.createIcebreakerAnswerFlag(
       userId,
-      icebreakerId,
+      icebreakerAnswerId,
       message,
     );
   }
 
-  @ApiOperation({ description: 'Icebreaker 신고 삭제' })
-  @Delete(':userId/flaggedicebreakers/:icebreakerId')
-  async deleteIcebreakerFlag(
+  @ApiOperation({ description: 'IcebreakerAnswer 신고 삭제' })
+  @Delete(':userId/icebreakeranswers/:icebreakerAnswerId/flag')
+  async deleteIcebreakerAnswerFlag(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
   ): Promise<any> {
     return await this.userIcebreakerAnswersService.deleteIcebreakerAnswerFlag(
       userId,
-      icebreakerId,
+      icebreakerAnswerId,
     );
   }
 
-  @ApiOperation({ description: 'Icebreaker 신고 여부' })
-  @Get(':userId/flaggedicebreakers/:icebreakerId')
-  async isIcebreakerFlagged(
+  @ApiOperation({ description: 'IcebreakerAnswer 신고 여부' })
+  @Get(':userId/icebreakeranswers/:icebreakerAnswerId/flag')
+  async isIcebreakerAnswerFlagged(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('icebreakerId', ParseIntPipe) icebreakerId: number,
+    @Param('icebreakerAnswerId', ParseIntPipe) icebreakerAnswerId: number,
   ): Promise<boolean> {
     return await this.userIcebreakerAnswersService.isIcebreakerAnswerFlagged(
       userId,
-      icebreakerId,
+      icebreakerAnswerId,
     );
   }
 
-  //? ----------------------------------------------------------------------- //
-  //? 내가 신고한 Icebreakers
-  //? ----------------------------------------------------------------------- //
-
-  @ApiOperation({ description: '내가 신고한 Icebreakers (paginated)' })
+  @ApiOperation({ description: '내가 신고한 IcebreakerAnswers (paginated)' })
   @PaginateQueryOptions()
-  @Get(':userId/flaggedicebreakers')
+  @Get(':userId/flaggedicebreakeranswers')
   async listFlaggedIcebreakersByUserId(
     @Paginate() query: PaginateQuery,
     @Param('userId') userId: number,
@@ -200,9 +267,8 @@ export class UserIcebreakerAnswersController {
     );
   }
 
-  //! not working but, do we even need this anyway?
-  @ApiOperation({ description: '내가 신고한 모든 Icebreakers (all)' })
-  @Get(':userId/flaggedicebreakers/all')
+  @ApiOperation({ description: '내가 신고한 모든 IcebreakerAnswers (all)' })
+  @Get(':userId/flaggedicebreakeranswers/all')
   async loadFlaggedIcebreakers(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<IcebreakerAnswer[]> {
@@ -211,8 +277,8 @@ export class UserIcebreakerAnswersController {
     );
   }
 
-  @ApiOperation({ description: '내가 신고한 모든 IcebreakerIds' })
-  @Get(':userId/flaggedicebreakerids')
+  @ApiOperation({ description: '내가 신고한 모든 IcebreakerAnswerIds' })
+  @Get(':userId/flaggedicebreakeranswers/ids')
   async loadFlaggedIcebreakerIds(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<number[]> {

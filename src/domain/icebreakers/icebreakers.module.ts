@@ -18,6 +18,8 @@ import { IcebreakerUsersService } from 'src/domain/icebreakers/icebreaker-users.
 import { IcebreakerUsersController } from 'src/domain/icebreakers/icebreaker-users.controller';
 import { User } from 'src/domain/users/entities/user.entity';
 import { Flag } from 'src/domain/users/entities/flag.entity';
+import { IcebreakerAnswersController } from 'src/domain/icebreakers/icebreaker_answers.controller';
+import { IcebreakerAnswersService } from 'src/domain/icebreakers/icebreaker_answers.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -25,7 +27,6 @@ import { Flag } from 'src/domain/users/entities/flag.entity';
       IcebreakerAnswer,
       Question,
       User,
-      Flag,
       Plea,
     ]),
     S3Module,
@@ -33,6 +34,7 @@ import { Flag } from 'src/domain/users/entities/flag.entity';
   ],
   providers: [
     IcebreakersService,
+    IcebreakerAnswersService,
     IcebreakerUsersService,
     IcebreakerAnswerUsersService,
     QuestionsService,
@@ -40,6 +42,7 @@ import { Flag } from 'src/domain/users/entities/flag.entity';
   ],
   controllers: [
     IcebreakersController,
+    IcebreakerAnswersController,
     IcebreakerUsersController,
     IcebreakerAnswerUsersController,
     QuestionsController,
