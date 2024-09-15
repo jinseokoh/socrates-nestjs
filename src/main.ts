@@ -82,7 +82,12 @@ async function bootstrap() {
     .addTag('API written by GoK with lots of 💔')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: {
+      tagsSorter: 'alpha', // 태그를 알파벳 순으로 정렬
+      operationsSorter: 'alpha', // 엔드포인트를 알파벳 순으로 정렬
+    },
+  });
 
   //! 안드로이드 폰 테스트를 위해 수정 '0.0.0.0' 을 추가
   const port = configService.get<number>('appPort');

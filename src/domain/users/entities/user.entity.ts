@@ -60,8 +60,8 @@ export class User {
   @ApiProperty({ description: 'email' })
   email: string;
 
-  @Exclude()
   @Column({ length: 64, nullable: true })
+  @Exclude({ toPlainOnly: true })
   @ApiProperty({ description: 'password' })
   password: string | null;
 

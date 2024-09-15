@@ -82,7 +82,7 @@ export class UsersController {
     return this.usersService.findAll(query);
   }
 
-  // hey, controller is all about routing. method order matters here. do not change the order.
+  //! without ClassSerializerInterceptor, it will spit out all the user info including phone number.
   @ApiOperation({ description: '본인 User 상세보기' })
   @Get('mine')
   async getMine(@CurrentUserId() id: number): Promise<User> {
@@ -115,8 +115,8 @@ export class UsersController {
       'languageSkills.language',
       'sentFriendships',
       'receivedFriendships',
-      'followings',
-      'followers',
+      // 'followings',
+      // 'followers',
       'flags',
     ];
     return extra && extra.length > 0

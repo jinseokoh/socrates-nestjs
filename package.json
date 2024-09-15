@@ -64,6 +64,7 @@
     "cache-manager-ioredis": "^2.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "color-2-name": "^1.4.4",
     "cookie-parser": "^1.4.6",
     "dynamoose": "^3.3.0",
     "express": "^4.19.2",
