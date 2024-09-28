@@ -19,7 +19,7 @@ export class NaverService {
     });
   }
 
-  async sendSms(to: string, content: string): Promise<void> {
-    await this.smsClient.send({ to, content });
+  async sendSms(data: { to: string; content: string }): Promise<void> {
+    await this.smsClient.send(data);
   }
 }

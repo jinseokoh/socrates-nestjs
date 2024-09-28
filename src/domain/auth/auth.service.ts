@@ -19,9 +19,7 @@ import { UsersService } from 'src/domain/users/users.service';
 import { initialUsername } from 'src/helpers/random-username';
 import { Response as ExpressResponse } from 'express';
 import { SlackService } from 'nestjs-slack';
-
-const ONE_HOUR = 1000 * 60 * 60; // access token and cookie expiry window
-const THIRTY_DAYS = 1000 * 60 * 60 * 24 * 30; // refresh token expiry window
+import { ONE_HOUR, THIRTY_DAYS } from 'src/common/constants';
 
 @Injectable()
 export class AuthService {

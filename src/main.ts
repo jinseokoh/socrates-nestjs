@@ -33,8 +33,9 @@ async function bootstrap() {
     dsn: configService.get('sentry.dsn'),
   });
 
-  // 전역으로 ClassSerializerInterceptor 등록 (controller 에서 manually 설정중)
+  // 전역으로 ClassSerializerInterceptor 등록하려면, comment out
   // app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  // 현재는 controller 에서 manually 설정하는 중
 
   // 전역으로 ValidationPipe 등록
   app.useGlobalPipes(

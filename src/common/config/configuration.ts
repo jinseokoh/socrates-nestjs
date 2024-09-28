@@ -24,11 +24,8 @@ export const configuration = () => ({
     clientId: process.env.GOOGLE_CLIENT_ID,
     secret: process.env.GOOGLE_SECRET,
   },
-  firebase: {
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  },
+  firebase:
+    process.env.GOOGLE_APPLICATION_CREDENTIALS ?? './fb-admin.account-key.json',
   aws: {
     accessKey: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -53,15 +50,9 @@ export const configuration = () => ({
   sentry: {
     dsn: process.env.SENTRY_DSN,
   },
-  iamport: {
+  toss: {
     merchantId: process.env.IAMPORT_MERCHANT_ID,
     apiKey: process.env.IAMPORT_API_KEY,
     apiSecret: process.env.IAMPORT_API_SECRET,
-  },
-  rabbitmq: {
-    user: process.env.RABBITMQ_USER,
-    password: process.env.RABBITMQ_PASSWORD,
-    host: process.env.RABBITMQ_HOST,
-    queue: process.env.RABBITMQ_QUEUE,
   },
 });

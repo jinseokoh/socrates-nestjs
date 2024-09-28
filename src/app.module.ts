@@ -1,4 +1,3 @@
-import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
@@ -7,13 +6,17 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { configuration } from 'src/common/config/configuration';
-import { JwtAuthGuard } from 'src/domain/auth/guards/jwt-auth.guard';
-import { DataSource } from 'typeorm';
-import { IAwsConfig, IDatabaseConfig } from 'src/common/interfaces';
-import { getAwsDatabaseConfig } from 'src/common/config/aws-database';
 import { join } from 'path';
 import * as redisStore from 'cache-manager-ioredis';
+import { DataSource } from 'typeorm';
+import { SlackModule } from 'nestjs-slack';
+
+import { configuration } from 'src/common/config/configuration';
+import { DuplicateEntryErrorInterceptor } from 'src/common/interceptors/duplicate-entry-error.interceptor';
+import { getAwsDatabaseConfig } from 'src/common/config/aws-database';
+import { HttpCacheInterceptor } from 'src/common/interceptors/http-cache.interceptor';
+import { IAwsConfig, IDatabaseConfig } from 'src/common/interfaces';
+import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.filter';
 import { REDIS_PUBSUB_CLIENT } from 'src/common/constants';
 
 import { AlarmsModule } from 'src/domain/alarms/alarms.module';
@@ -24,22 +27,20 @@ import { CategoriesModule } from 'src/domain/categories/categories.module';
 import { ChatsModule } from 'src/domain/chats/chats.module';
 import { ContentsModule } from 'src/domain/contents/contents.module';
 import { FeedsModule } from 'src/domain/feeds/feeds.module';
+import { IcebreakersModule } from 'src/domain/icebreakers/icebreakers.module';
 import { InquiriesModule } from 'src/domain/inquiries/inquiries.module';
+import { JwtAuthGuard } from 'src/domain/auth/guards/jwt-auth.guard';
 import { LanguagesModule } from 'src/domain/languages/languages.module';
 import { LedgersModule } from 'src/domain/ledgers/ledgers.module';
 import { MeetupsModule } from 'src/domain/meetups/meetups.module';
 import { UsersModule } from 'src/domain/users/users.module';
 
-import { SlackModule } from 'nestjs-slack';
-import { RedisModule } from 'src/services/redis/redis.module';
 import { FcmModule } from 'src/services/fcm/fcm.module';
-import { SocketIoModule } from 'src/websockets/socketio.module';
 import { NaverModule } from 'src/services/naver/naver.module';
+import { RedisModule } from 'src/services/redis/redis.module';
+import { SocketIoModule } from 'src/websockets/socketio.module';
 import { AppController } from 'src/app.controller';
 import { AppService } from 'src/app.service';
-import { DuplicateEntryErrorInterceptor } from 'src/common/interceptors/duplicate-entry-error.interceptor';
-import { SentryErrorReportFilter } from 'src/common/filters/sentry-error-report.filter';
-import { IcebreakersModule } from 'src/domain/icebreakers/icebreakers.module';
 // import { CustomLogger } from 'src/helpers/custom-logger';
 @Module({
   imports: [
@@ -47,6 +48,9 @@ import { IcebreakersModule } from 'src/domain/icebreakers/icebreakers.module';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'static'), // for index.html
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -71,7 +75,7 @@ import { IcebreakersModule } from 'src/domain/icebreakers/icebreakers.module';
           database: databaseConfig.dbname,
           subscribers: ['dist/**/*.subscriber{.ts,.js}'],
           entities: ['dist/**/*.entity{.ts,.js}'],
-          synchronize: true,
+          synchronize: nodeEnv === 'local',
           timezone: 'Z', // UTC
           bigNumberStrings: true,
           supportBigNumbers: true,
@@ -89,6 +93,17 @@ import { IcebreakersModule } from 'src/domain/icebreakers/icebreakers.module';
         return dataSource;
       },
     }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        store: redisStore,
+        host: configService.get('redis.host'),
+        port: configService.get('redis.port'),
+        db: 0,
+        ttl: 60 * 5, // default to 5 mins
+      }),
+    }),
     DynamooseModule.forRoot({
       local: process.env.NODE_ENV === 'local',
       aws: {
@@ -101,17 +116,6 @@ import { IcebreakersModule } from 'src/domain/icebreakers/icebreakers.module';
         prefix: `${process.env.NODE_ENV}_`,
         suffix: '_table',
       },
-    }),
-    CacheModule.registerAsync({
-      isGlobal: true,
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        store: redisStore,
-        host: configService.get('redis.host'),
-        port: configService.get('redis.port'),
-        db: 0,
-        ttl: 60 * 5, // default to 5 mins
-      }),
     }),
     SlackModule.forRootAsync({
       isGlobal: true,
@@ -131,13 +135,10 @@ import { IcebreakersModule } from 'src/domain/icebreakers/icebreakers.module';
         ],
       }),
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'static'), // for index.html
-    }),
+    RedisModule.register({ name: REDIS_PUBSUB_CLIENT }),
     FcmModule,
     NaverModule,
     SocketIoModule,
-    RedisModule.register({ name: REDIS_PUBSUB_CLIENT }),
     // TypeORM Entities
     AlarmsModule,
     AppModule,
