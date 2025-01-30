@@ -1,3 +1,5 @@
+import './instrument'; // import this first!
+
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -5,17 +7,16 @@ import { Transport } from '@nestjs/microservices';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
+import * as cookieParser from 'cookie-parser';
 import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import helmet from 'helmet';
-import * as Sentry from '@sentry/node';
-import * as cookieParser from 'cookie-parser';
 import { AppModule } from 'src/app.module';
 import { RedisIoAdapter } from 'src/websockets/redis-io.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
   const configService = app.get<ConfigService>(ConfigService);
+
   app.connectMicroservice({
     transport: Transport.REDIS,
     options: {
@@ -29,13 +30,8 @@ async function bootstrap() {
   await redisIoAdapter.connectToRedis();
   app.useWebSocketAdapter(redisIoAdapter);
 
-  Sentry.init({
-    dsn: configService.get('sentry.dsn'),
-  });
-
   // 전역으로 ClassSerializerInterceptor 등록 (controller 에서 manually 설정중)
   // app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-
   // 전역으로 ValidationPipe 등록
   app.useGlobalPipes(
     new ValidationPipe({
@@ -58,7 +54,11 @@ async function bootstrap() {
     type: VersioningType.URI,
     defaultVersion: '1',
   });
-  app.enableCors();
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // 허용할 HTTP 메서드
+    credentials: true, // 쿠키를 포함한 요청을 허용하려면 true로 설정
+  });
   app.use(helmet());
   app.use(helmet.hidePoweredBy());
   app.use(cookieParser());
@@ -73,7 +73,7 @@ async function bootstrap() {
   // });
 
   //! see https://expressjs.com/en/guide/behind-proxies.html
-  // app.set('trust proxy', true);
+  app.set('trust proxy', true);
 
   const config = new DocumentBuilder()
     .setTitle('Socrates v1')
@@ -82,7 +82,12 @@ async function bootstrap() {
     .addTag('API written by GoK with lots of 💔')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: {
+      tagsSorter: 'alpha', // 태그를 알파벳 순으로 정렬
+      operationsSorter: 'alpha', // 엔드포인트를 알파벳 순으로 정렬
+    },
+  });
 
   const port = configService.get<number>('appPort');
   await app.listen(port, () => {
